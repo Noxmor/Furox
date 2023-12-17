@@ -1,6 +1,7 @@
 #ifndef FRX_TYPES_H
 #define FRX_TYPES_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define FRX_FALSE 0
