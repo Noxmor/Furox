@@ -3,6 +3,6 @@
 **/bin-int/
 
 # cbrew
-cbrew/**
-!cbrew/cbrew.c
-!cbrew/cbrew.h
+**/cbrew/**
+!**/cbrew/cbrew.c
+!**/cbrew/cbrew.h
