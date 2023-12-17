@@ -1,3 +1,8 @@
 # Binaries
 **/bin/
 **/bin-int/
+
+# cbrew
+cbrew/**
+!cbrew/cbrew.c
+!cbrew/cbrew.h
