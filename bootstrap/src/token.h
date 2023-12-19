@@ -1,0 +1,40 @@
+#ifndef FRX_TOKEN_H
+#define FRX_TOKEN_H
+
+enum
+{
+    FRX_TOKEN_TYPE_EOF = 0,
+    
+    FRX_TOKEN_TYPE_IDENTIFIER,
+
+    FRX_TOKEN_TYPE_PLUS,
+    FRX_TOKEN_TYPE_MINUS,
+    FRX_TOKEN_TYPE_STAR,
+    FRX_TOKEN_TYPE_SLASH,
+
+    FRX_TOKEN_TYPE_LEFT_PARANTHESIS,
+    FRX_TOKEN_TYPE_RIGHT_PARANTHESIS,
+
+    FRX_TOKEN_TYPE_LEFT_BRACKET,
+    FRX_TOKEN_TYPE_RIGHT_BRACKET,
+
+    FRX_TOKEN_TYPE_LEFT_BRACE,
+    FRX_TOKEN_TYPE_RIGHT_BRACE,
+
+    FRX_TOKEN_TYPE_COMMA,
+    FRX_TOKEN_TYPE_COLON,
+    FRX_TOKEN_TYPE_SEMICOLON,
+
+    FRX_TOKEN_TYPE_COUNT
+};
+
+typedef u8 TokenType;
+
+typedef struct Token
+{
+    TokenType type;
+} Token;
+
+const char* token_type_to_str(TokenType type);
+
+#endif
