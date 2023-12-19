@@ -30,9 +30,12 @@ enum
 
 typedef u8 TokenType;
 
+#define FRX_TOKEN_IDENTIFIER_CAPACITY 128
+
 typedef struct Token
 {
     TokenType type;
+    char identifier[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } Token;
 
 const char* token_type_to_str(TokenType type);
