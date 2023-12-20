@@ -11,7 +11,9 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_EOF: return "EOF";
         
         case FRX_TOKEN_TYPE_IDENTIFIER: return "Identifier";
-        
+
+        case FRX_TOKEN_TYPE_NUMBER: return "Number";
+
         case FRX_TOKEN_TYPE_PLUS: return "Plus";
         case FRX_TOKEN_TYPE_MINUS: return "Minus";
         case FRX_TOKEN_TYPE_STAR: return "Star";
