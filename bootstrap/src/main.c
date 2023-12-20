@@ -1,27 +1,22 @@
-#include <stdio.h>
-
-#include "core/memory.h"
+#include "lexer.h"
 
 int main(void)
 {
-    memory_print();
+    Lexer lexer;
+    lexer_init(&lexer, "input.txt"); 
 
-    void* mem0 = memory_alloc(512, FRX_MEMORY_CATEGORY_UNKNOWN);
+    Token* token = NULL;
+    while((token = lexer_peek(&lexer, 0))->type != FRX_TOKEN_TYPE_EOF)
+    {
+        if(token->type == FRX_TOKEN_TYPE_NUMBER)
+            printf("Token: Type: %s (%zu)\n", token_type_to_str(token->type), token->number);
+        else 
+            printf("Token: Type: %s (%s)\n", token_type_to_str(token->type), token->identifier);
 
-    void* mem1 = memory_alloc(256, FRX_MEMORY_CATEGORY_STRING);
-    
-    void* mem2 = memory_alloc(32, FRX_MEMORY_CATEGORY_UNKNOWN);
+        lexer_next_token(&lexer);
+    }
 
-    memory_print();
+    lexer_destroy(&lexer);
 
-    memory_free(mem0);
-    memory_free(mem1);
-    
-    memory_print();
-
-    mem2 = memory_realloc(mem2, 64, FRX_MEMORY_CATEGORY_STRING);
-
-    memory_print();
-
-    return 0;
+    return 0;    
 }

@@ -1,0 +1,20 @@
+//This is a comment and should be skipped.
+
+/*
+This is a comment block.
+/*
+These can even be nested!
+And still be skipped correctly.
+*/
+Now we are back in the outer comment block.
+This should all be skipped.
+*/
+
+//This is the main function.
+usize Main()
+{
+    //For now, just return 0
+    //because we are not capable of
+    //doing anything greater than that.
+    return 0;
+}
