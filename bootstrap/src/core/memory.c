@@ -1,6 +1,7 @@
 #include "memory.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "core/assert.h"
 
