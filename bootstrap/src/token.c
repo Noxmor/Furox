@@ -28,7 +28,7 @@ const char* token_type_to_str(TokenType type)
 
         case FRX_TOKEN_TYPE_COMMA: return "Comma";
         case FRX_TOKEN_TYPE_COLON: return "Colon";
-        case FRX_TOKEN_TYPE_SEMICLON: return "Semicolon";
+        case FRX_TOKEN_TYPE_SEMICOLON: return "Semicolon";
     }
 
     return "Unknown";
