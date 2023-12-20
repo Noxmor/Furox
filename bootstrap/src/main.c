@@ -1,22 +1,18 @@
-#include "lexer.h"
+#include "ast.h"
 
 int main(void)
 {
-    Lexer lexer;
-    lexer_init(&lexer, "input.txt"); 
+    AST root;
+    
+    ast_init(&root, FRX_AST_TYPE_COMPOUND);
+    
+    AST* func_def = ast_new_child(&root, FRX_AST_TYPE_FUNCTION_DEFINITION);
+    AST* param_list = ast_new_child(func_def, FRX_AST_TYPE_PARAMETER_LIST);
+    AST* foo = ast_new_child(param_list, FRX_AST_TYPE_NOOP);
+    AST* bar = ast_new_child(param_list, FRX_AST_TYPE_NOOP);
+    AST* number = ast_new_child(func_def, FRX_AST_TYPE_NUMBER);
 
-    Token* token = NULL;
-    while((token = lexer_peek(&lexer, 0))->type != FRX_TOKEN_TYPE_EOF)
-    {
-        if(token->type == FRX_TOKEN_TYPE_NUMBER)
-            printf("Token: Type: %s (%zu)\n", token_type_to_str(token->type), token->number);
-        else 
-            printf("Token: Type: %s (%s)\n", token_type_to_str(token->type), token->identifier);
-
-        lexer_next_token(&lexer);
-    }
-
-    lexer_destroy(&lexer);
+    ast_print(&root);
 
     return 0;    
 }
