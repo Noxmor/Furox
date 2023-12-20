@@ -31,6 +31,8 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_COMMA: return "Comma";
         case FRX_TOKEN_TYPE_COLON: return "Colon";
         case FRX_TOKEN_TYPE_SEMICOLON: return "Semicolon";
+
+        default: FRX_ASSERT(FRX_FALSE); break;
     }
 
     return "Unknown";
