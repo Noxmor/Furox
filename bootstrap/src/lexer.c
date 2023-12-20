@@ -123,6 +123,57 @@ static void lexer_skip_whitespaces(Lexer* lexer)
     }
 }
 
+static void lexer_skip_comment(Lexer* lexer)
+{
+    FRX_ASSERT(lexer != NULL);
+
+    while(lexer_peek_char(lexer, 0) != '\n')
+        lexer_advance(lexer);
+
+    lexer_advance(lexer);
+}
+
+static void lexer_skip_comment_block(Lexer* lexer)
+{
+    FRX_ASSERT(lexer != NULL);
+
+    usize line_start = lexer->line;
+    usize coloumn_start = lexer->coloumn;
+
+    usize comment_blocks_to_skip = 1;
+
+    while(comment_blocks_to_skip > 0)
+    {
+        lexer_advance(lexer);
+
+        char current = lexer_peek_char(lexer, 0);
+        char next = lexer_peek_char(lexer, 1);
+
+        if(current == '/' && next == '*')
+        {
+            line_start = lexer->line;
+            coloumn_start = lexer->coloumn;
+
+            ++comment_blocks_to_skip;
+
+            lexer_advance(lexer);
+            lexer_advance(lexer);
+        }
+        else if(current == '*' && next == '/')
+        {
+            --comment_blocks_to_skip;
+
+            lexer_advance(lexer);
+            lexer_advance(lexer);
+        }
+
+        if(lexer_peek_char(lexer, 0) == '\0')
+        {
+            //TODO: Throw error, because we reached end of file while trying to skip a comment block.
+        }
+    }
+}
+
 static void lexer_parse_identifier(Lexer* lexer, Token* token)
 {
     FRX_ASSERT(lexer != NULL);
@@ -241,8 +292,28 @@ static void lexer_read_token(Lexer* lexer, Token* token)
         case '+': token->type = FRX_TOKEN_TYPE_PLUS; break;
         case '-': token->type = FRX_TOKEN_TYPE_MINUS; break;
         case '*': token->type = FRX_TOKEN_TYPE_STAR; break;
-        case '/': token->type = FRX_TOKEN_TYPE_SLASH; break;
+        case '/':
+        {
+            if(lexer_peek_char(lexer, 1) == '/')
+            {
+                lexer_skip_comment(lexer);
+                lexer_read_token(lexer, token);
 
+                return;
+            }
+
+            if(lexer_peek_char(lexer, 1) == '*')
+            {
+                lexer_skip_comment_block(lexer);
+                lexer_read_token(lexer, token);
+
+                return;
+            }
+
+            token->type = FRX_TOKEN_TYPE_SLASH;
+
+            break;
+        }
         case '(': token->type = FRX_TOKEN_TYPE_LEFT_PARANTHESIS; break;   
         case ')': token->type = FRX_TOKEN_TYPE_RIGHT_PARANTHESIS; break;   
         
