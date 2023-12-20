@@ -1,0 +1,4 @@
+usize Main()
+{
+    return 0;
+}
