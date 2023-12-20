@@ -1,6 +1,8 @@
 #ifndef FRX_TOKEN_H
 #define FRX_TOKEN_H
 
+#include "core/types.h"
+
 enum
 {
     FRX_TOKEN_TYPE_EOF = 0,
