@@ -40,6 +40,7 @@ typedef struct Token
 {
     TokenType type;
     char identifier[FRX_TOKEN_IDENTIFIER_CAPACITY];
+    usize number;
 } Token;
 
 const char* token_type_to_str(TokenType type);
