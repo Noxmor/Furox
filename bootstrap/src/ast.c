@@ -19,6 +19,8 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_FUNCTION_DEFINITION: return "Function Definition";
         case FRX_AST_TYPE_FUNCTION_CALL: return "Function Call";
 
+        case FRX_AST_TYPE_SCOPE: return "Scope";
+
         default: FRX_ASSERT(FRX_FALSE);
     }
 

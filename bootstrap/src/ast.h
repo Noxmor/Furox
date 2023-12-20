@@ -15,6 +15,8 @@ enum
     FRX_AST_TYPE_FUNCTION_DEFINITION,
     FRX_AST_TYPE_FUNCTION_CALL,
 
+    FRX_AST_TYPE_SCOPE,
+
     FRX_AST_TYPE_COUNT
 };
 
@@ -24,7 +26,6 @@ typedef struct AST
 {
     ASTType type;
     
-    //NOTE: Currently unused
     void* data;
 
     usize children_size;
