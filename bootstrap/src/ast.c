@@ -45,7 +45,7 @@ AST* ast_new_child(AST* parent, ASTType child_type)
     if(parent->children_size >= parent->children_capacity)
     {
         parent->children_capacity = parent->children_capacity == 0 ? 1: parent->children_capacity * 2;
-        parent->children = memory_realloc(parent->children, parent->children_capacity * sizeof(AST), FRX_MEMORY_CATEGORY_UNKNOWN);
+        parent->children = memory_realloc(parent->children, parent->children_capacity * sizeof(AST), FRX_MEMORY_CATEGORY_AST);
     }
 
     AST* child = &parent->children[parent->children_size++];

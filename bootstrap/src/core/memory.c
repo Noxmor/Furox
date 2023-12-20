@@ -70,7 +70,8 @@ static void memory_tracer_trace_realloc(usize size, MemoryCategory category)
 static const char* memory_category_to_str[] =
 {
     "Unknown",
-    "String"
+    "String",
+    "Ast"
 };
 
 static void print_alloc_info(const AllocInfo* alloc_info, usize level)
