@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+#include "core/core.h"
 #include "core/types.h"
 
 #include "token.h"
@@ -13,6 +14,7 @@
 typedef struct Lexer
 {
     FILE* file;
+    const char* filepath;
 
     usize line;
     usize coloumn;
@@ -24,11 +26,11 @@ typedef struct Lexer
     usize tokens_count;
 } Lexer;
 
-void lexer_init(Lexer* lexer, const char* filepath);
+FRX_NO_DISCARD b8 lexer_init(Lexer* lexer, const char* filepath);
 
 Token* lexer_peek(Lexer* lexer, usize offset);
 
-void lexer_next_token(Lexer* lexer);
+FRX_NO_DISCARD b8 lexer_next_token(Lexer* lexer);
 
 void lexer_destroy(Lexer* lexer);
 

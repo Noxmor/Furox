@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 #include "core/assert.h"
+#include "core/log.h"
 
 typedef struct LexerInfo
 {
@@ -34,9 +35,9 @@ static void lexer_read(Lexer* lexer)
     lexer->buffer_index = 0;
 }
 
-static void lexer_read_token(Lexer* lexer, Token* token);
+static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token);
 
-void lexer_init(Lexer* lexer, const char* filepath)
+FRX_NO_DISCARD b8 lexer_init(Lexer* lexer, const char* filepath)
 {
     FRX_ASSERT(lexer != NULL);
 
@@ -44,15 +45,27 @@ void lexer_init(Lexer* lexer, const char* filepath)
 
     lexer->file = fopen(filepath, "r");
 
+    if(lexer->file == NULL)
+    {
+        FRX_ERROR("Failed to open file \"%s\"!", filepath);
+
+        return FRX_TRUE;
+    }
+
+    lexer->filepath = filepath;
+
     lexer->line = 1;
     lexer->coloumn = 0;
 
     //This will automatically trigger the first lexer_read().
     lexer->buffer_index = FRX_LEXER_BUFFER_CAPACITY;
 
-    lexer_read_token(lexer, &lexer->tokens[0]);
+    if(lexer_read_token(lexer, &lexer->tokens[0]))
+        return FRX_TRUE;
 
     lexer->tokens_count = 1;
+
+    return FRX_FALSE;
 }
 
 Token* lexer_peek(Lexer* lexer, usize offset)
@@ -61,6 +74,7 @@ Token* lexer_peek(Lexer* lexer, usize offset)
 
     for(usize i = lexer->tokens_count; i <= offset; ++i)
     {
+        //TODO: What to do when this fails?
         lexer_read_token(lexer, &lexer->tokens[i]);
         ++lexer->tokens_count;
     }
@@ -133,7 +147,7 @@ static void lexer_skip_comment(Lexer* lexer)
     lexer_advance(lexer);
 }
 
-static void lexer_skip_comment_block(Lexer* lexer)
+static b8 lexer_skip_comment_block(Lexer* lexer)
 {
     FRX_ASSERT(lexer != NULL);
 
@@ -169,9 +183,13 @@ static void lexer_skip_comment_block(Lexer* lexer)
 
         if(lexer_peek_char(lexer, 0) == '\0')
         {
-            //TODO: Throw error, because we reached end of file while trying to skip a comment block.
+            FRX_ERROR_FILE("Reached end of file while skipping a comment block!", lexer->filepath, line_start, coloumn_start);
+
+            return FRX_TRUE;
         }
     }
+
+    return FRX_FALSE;
 }
 
 static void lexer_parse_identifier(Lexer* lexer, Token* token)
@@ -257,7 +275,7 @@ static void lexer_parse_number(Lexer* lexer, Token* token)
     }
 }
 
-static void lexer_read_token(Lexer* lexer, Token* token)
+static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
 {
     FRX_ASSERT(lexer != NULL);
 
@@ -265,12 +283,15 @@ static void lexer_read_token(Lexer* lexer, Token* token)
     
     lexer_skip_whitespaces(lexer);
 
+    token->line = lexer->line;
+    token->coloumn = lexer->coloumn;
+
     char current = lexer_peek_char(lexer, 0);
 
     if(isalpha(current))
     {
         lexer_parse_identifier(lexer, token);
-        return;
+        return FRX_FALSE;
     }
 
     if(isdigit(current))
@@ -284,7 +305,7 @@ static void lexer_read_token(Lexer* lexer, Token* token)
         else
             lexer_parse_number(lexer, token);
         
-        return;
+        return FRX_FALSE;
     }
 
     switch(current)
@@ -297,17 +318,15 @@ static void lexer_read_token(Lexer* lexer, Token* token)
             if(lexer_peek_char(lexer, 1) == '/')
             {
                 lexer_skip_comment(lexer);
-                lexer_read_token(lexer, token);
 
-                return;
+                return lexer_read_token(lexer, token);
             }
 
             if(lexer_peek_char(lexer, 1) == '*')
             {
                 lexer_skip_comment_block(lexer);
-                lexer_read_token(lexer, token);
 
-                return;
+                return lexer_read_token(lexer, token);
             }
 
             token->type = FRX_TOKEN_TYPE_SLASH;
@@ -329,16 +348,23 @@ static void lexer_read_token(Lexer* lexer, Token* token)
 
         case '\0': token->type = FRX_TOKEN_TYPE_EOF; break;
 
-        default: break; //TODO: Throw error that the current character could not be processed!   
+        default:
+        {
+            FRX_ERROR_FILE("Could not process '%c'!", lexer->filepath, lexer->line, lexer->coloumn, current);
+
+            return FRX_TRUE;
+        }
     }
 
     token->identifier[0] = current;
     token->identifier[1] = '\0';
 
     lexer_advance(lexer);
+
+    return FRX_FALSE;
 }
 
-void lexer_next_token(Lexer* lexer)
+FRX_NO_DISCARD b8 lexer_next_token(Lexer* lexer)
 {
     FRX_ASSERT(lexer != NULL);
 
@@ -346,9 +372,11 @@ void lexer_next_token(Lexer* lexer)
         memcpy(&lexer->tokens[i - 1], &lexer->tokens[i], sizeof(Token));
 
     if(lexer->tokens_count == 1)
-        lexer_read_token(lexer, &lexer->tokens[0]);
-    else
-        --lexer->tokens_count;
+        return lexer_read_token(lexer, &lexer->tokens[0]);
+
+    --lexer->tokens_count;
+
+    return FRX_FALSE;
 }
 
 void lexer_destroy(Lexer* lexer)
