@@ -12,7 +12,7 @@ This should all be skipped.
 
 usize add(usize a, usize b)
 {
-    return a + b;
+    return 0;
 }
 
 //This is the main function.
