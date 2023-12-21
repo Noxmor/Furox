@@ -291,6 +291,7 @@ static FRX_NO_DISCARD b8 lexer_parse_char_literal(Lexer* lexer, Token* token)
 
     lexer_advance(lexer);
 
+    //TODO: Handle escaped char literals
     if(lexer_peek_char(lexer, 0) != '\'')
     {
         FRX_ERROR_FILE("Missing ' after char literal!", lexer->filepath, token->line, token->coloumn);
