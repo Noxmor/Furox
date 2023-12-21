@@ -11,7 +11,7 @@
 
 typedef struct AllocInfo
 {
-    void* memory;
+    const void* memory;
     usize size;
     MemoryCategory category;
     struct AllocInfo* next;
@@ -137,7 +137,7 @@ static AllocInfo* memory_table_find(const void* memory)
     return alloc_info;
 }
 
-static void memory_table_remove(void* memory)
+static void memory_table_remove(const void* memory)
 {
     u64 hash = memory_table_hash(memory);
 
