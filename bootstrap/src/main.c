@@ -1,18 +1,26 @@
-#include "ast.h"
+#include "parser.h"
+
+#include "core/memory.h"
 
 int main(void)
 {
-    AST root;
+    Parser parser;
     
-    ast_init(&root, FRX_AST_TYPE_COMPOUND);
-    
-    AST* func_def = ast_new_child(&root, FRX_AST_TYPE_FUNCTION_DEFINITION);
-    AST* param_list = ast_new_child(func_def, FRX_AST_TYPE_PARAMETER_LIST);
-    AST* foo = ast_new_child(param_list, FRX_AST_TYPE_NOOP);
-    AST* bar = ast_new_child(param_list, FRX_AST_TYPE_NOOP);
-    AST* number = ast_new_child(func_def, FRX_AST_TYPE_NUMBER);
+    if(parser_init(&parser, "input.txt"))
+    {
+        printf("parser_init() failed!\n");
+        return 1;
+    }
 
-    ast_print(&root);
+    if(parser_parse(&parser))
+    {
+        printf("parser_parse() failed!\n");
+        return 1;
+    }
+
+    ast_print(&parser.root);
+
+    memory_print();
 
     return 0;    
 }
