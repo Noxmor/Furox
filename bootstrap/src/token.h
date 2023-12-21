@@ -39,6 +39,10 @@ typedef u8 TokenType;
 typedef struct Token
 {
     TokenType type;
+
+    usize line;
+    usize coloumn;
+
     char identifier[FRX_TOKEN_IDENTIFIER_CAPACITY];
     usize number;
 } Token;
