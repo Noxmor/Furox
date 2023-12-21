@@ -74,8 +74,9 @@ Token* lexer_peek(Lexer* lexer, usize offset)
 
     for(usize i = lexer->tokens_count; i <= offset; ++i)
     {
-        //TODO: What to do when this fails?
-        lexer_read_token(lexer, &lexer->tokens[i]);
+        if(lexer_read_token(lexer, &lexer->tokens[i]))
+            return NULL;
+
         ++lexer->tokens_count;
     }
 
