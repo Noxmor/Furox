@@ -224,7 +224,7 @@ FRX_NO_DISCARD b8 parser_init(Parser* parser, const char* filepath)
 
     parser->current_token = lexer_peek(&parser->lexer, 0);
 
-    return FRX_FALSE;
+    return parser->current_token == NULL;
 }
 
 FRX_NO_DISCARD b8 parser_parse(Parser* parser)
