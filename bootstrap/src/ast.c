@@ -19,6 +19,8 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_VARIABLE_DEFINITION: return "Variable Definition";
         case FRX_AST_TYPE_VARIABLE: return "Variable";
 
+        case FRX_AST_TYPE_RETURN_STATEMENT: return "Return Statement";
+
         case FRX_AST_TYPE_PARAMETER_LIST: return "Parameter List";
         case FRX_AST_TYPE_FUNCTION_DEFINITION: return "Function Definition";
         case FRX_AST_TYPE_FUNCTION_CALL: return "Function Call";
