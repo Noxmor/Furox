@@ -30,6 +30,16 @@ typedef struct NumberData
     usize number;
 } NumberData;
 
+typedef struct CharLiteralData
+{
+    char literal;
+} CharLiteralData;
+
+typedef struct StringLiteralData
+{
+    char literal[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} StringLiteralData;
+
 static Token* parser_peek(Parser* parser, usize offset)
 {
     FRX_ASSERT(parser != NULL);
@@ -71,6 +81,57 @@ static FRX_NO_DISCARD b8 parser_parse_number(Parser* parser, AST* node)
     return parser_eat(parser, FRX_TOKEN_TYPE_NUMBER);
 }
 
+static FRX_NO_DISCARD b8 parser_parse_char_literal(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_CHAR_LITERAL;
+
+    CharLiteralData* data = memory_alloc(sizeof(CharLiteralData), FRX_MEMORY_CATEGORY_UNKNOWN);
+    node->data = data;
+
+    data->literal = parser->current_token->identifier[0];
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_CHAR_LITERAL);
+}
+
+static FRX_NO_DISCARD b8 parser_parse_string_literal(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_STRING_LITERAL;
+
+    StringLiteralData* data = memory_alloc(sizeof(StringLiteralData), FRX_MEMORY_CATEGORY_UNKNOWN);
+    node->data = data;
+
+    strcpy(data->literal, parser->current_token->identifier);
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_STRING_LITERAL);
+}
+
+static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    switch(parser->current_token->type)
+    {
+        case FRX_TOKEN_TYPE_NUMBER: return parser_parse_number(parser, node);
+
+        case FRX_TOKEN_TYPE_CHAR_LITERAL: return parser_parse_char_literal(parser, node);
+        case FRX_TOKEN_TYPE_STRING_LITERAL: return parser_parse_string_literal(parser, node);
+    }
+
+    FRX_ERROR_FILE("Could not parse token %s!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn, token_type_to_str(parser->current_token->type));
+
+    return FRX_TRUE;
+}
+
 static FRX_NO_DISCARD b8 parser_parse_return_statement(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -86,8 +147,7 @@ static FRX_NO_DISCARD b8 parser_parse_return_statement(Parser* parser, AST* node
     {
         AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
         
-        //TODO: Change from number to expression!
-        if(parser_parse_number(parser, child))
+        if(parser_parse_expression(parser, child))
             return FRX_TRUE;
     }
 

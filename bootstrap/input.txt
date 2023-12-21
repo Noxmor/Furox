@@ -15,6 +15,16 @@ usize add(usize a, usize b)
     return 0;
 }
 
+char getChar()
+{
+    return '#';
+}
+
+string getString()
+{
+    return "Furox";
+}
+
 //This is the main function.
 usize Main()
 {

@@ -276,6 +276,65 @@ static void lexer_parse_number(Lexer* lexer, Token* token)
     }
 }
 
+static FRX_NO_DISCARD b8 lexer_parse_char_literal(Lexer* lexer, Token* token)
+{
+    FRX_ASSERT(lexer != NULL);
+
+    FRX_ASSERT(token != NULL);
+
+    token->type = FRX_TOKEN_TYPE_CHAR_LITERAL;
+
+    lexer_advance(lexer);
+
+    token->identifier[0] = lexer_peek_char(lexer, 0);
+    token->identifier[1] = '\0';
+
+    lexer_advance(lexer);
+
+    //TODO: Handle escaped char literals
+    if(lexer_peek_char(lexer, 0) != '\'')
+    {
+        FRX_ERROR_FILE("Missing ' after char literal!", lexer->filepath, token->line, token->coloumn);
+
+        return FRX_TRUE;
+    }
+
+    lexer_advance(lexer);
+
+    return FRX_FALSE;
+}
+
+static FRX_NO_DISCARD b8 lexer_parse_string_literal(Lexer* lexer, Token* token)
+{
+    FRX_ASSERT(lexer != NULL);
+
+    FRX_ASSERT(token != NULL);
+
+    token->type = FRX_TOKEN_TYPE_STRING_LITERAL;
+
+    lexer_advance(lexer);
+
+    usize identifier_index = 0;
+    char current = '\0';
+    while((current = lexer_peek_char(lexer, 0)) != '"')
+    {
+        if(current == '\0')
+        {
+            FRX_ERROR_FILE("Reached end of file while parsing string literal!", lexer->filepath, token->line, token->coloumn);
+
+            return FRX_TRUE;
+        }
+
+        token->identifier[identifier_index++] = current;
+
+        lexer_advance(lexer);
+    }
+
+    lexer_advance(lexer);
+
+    return FRX_FALSE;
+}
+
 static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
 {
     FRX_ASSERT(lexer != NULL);
@@ -311,6 +370,9 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
 
     switch(current)
     {
+        case '\'': return lexer_parse_char_literal(lexer, token);
+        case '"': return lexer_parse_string_literal(lexer, token);
+
         case '+': token->type = FRX_TOKEN_TYPE_PLUS; break;
         case '-': token->type = FRX_TOKEN_TYPE_MINUS; break;
         case '*': token->type = FRX_TOKEN_TYPE_STAR; break;
