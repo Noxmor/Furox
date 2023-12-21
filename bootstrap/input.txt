@@ -10,6 +10,11 @@ Now we are back in the outer comment block.
 This should all be skipped.
 */
 
+usize add(usize a, usize b)
+{
+    return a + b;
+}
+
 //This is the main function.
 usize Main()
 {
