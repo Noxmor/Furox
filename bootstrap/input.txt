@@ -28,6 +28,14 @@ string getString()
 //This is the main function.
 usize Main()
 {
+    usize foo = 0b1000;
+    usize bar = 0xFFFFFF;
+    usize buzz;
+
+    usize value = 0;
+    char c = 'c';
+    string str = "Furox";
+
     //For now, just return 0
     //because we are not capable of
     //doing anything greater than that.
