@@ -396,6 +396,9 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
 
             break;
         }
+
+        case '=': token->type = FRX_TOKEN_TYPE_EQUALS; break;
+
         case '(': token->type = FRX_TOKEN_TYPE_LEFT_PARANTHESIS; break;   
         case ')': token->type = FRX_TOKEN_TYPE_RIGHT_PARANTHESIS; break;   
         
