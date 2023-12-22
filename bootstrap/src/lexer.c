@@ -222,6 +222,9 @@ static void lexer_parse_binary_number(Lexer* lexer, Token* token)
 
     token->type = FRX_TOKEN_TYPE_NUMBER;
 
+    lexer_advance(lexer);
+    lexer_advance(lexer);
+
     token->number = 0;
 
     char current = lexer_peek_char(lexer, 0);
@@ -240,6 +243,9 @@ static void lexer_parse_hex_number(Lexer* lexer, Token* token)
     FRX_ASSERT(token != NULL);
 
     token->type = FRX_TOKEN_TYPE_NUMBER;
+
+    lexer_advance(lexer);
+    lexer_advance(lexer);
 
     token->number = 0;
 
