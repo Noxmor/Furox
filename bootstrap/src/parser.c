@@ -6,6 +6,8 @@
 #include "core/log.h"
 #include "core/memory.h"
 
+#define FRX_PARSER_ABORT_ON_ERROR(expr) if(expr) return FRX_TRUE
+
 typedef struct ParserInfo
 {
     usize tokens_processed;
@@ -145,13 +147,11 @@ static FRX_NO_DISCARD b8 parser_parse_variable_declaration(Parser* parser, AST* 
 
     strcpy(data->type, parser->current_token->identifier);
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     strcpy(data->name, parser->current_token->identifier);
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
 }
@@ -169,21 +169,17 @@ static FRX_NO_DISCARD b8 parser_parse_variable_definition(Parser* parser, AST* n
 
     strcpy(data->type, parser->current_token->identifier);
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     strcpy(data->name, parser->current_token->identifier);
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_EQUALS))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_EQUALS));
 
     AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
 
-    if(parser_parse_expression(parser, child))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, child));
 
     return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
 }
@@ -196,15 +192,13 @@ static FRX_NO_DISCARD b8 parser_parse_return_statement(Parser* parser, AST* node
 
     node->type = FRX_AST_TYPE_RETURN_STATEMENT;
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     if(parser->current_token->type != FRX_TOKEN_TYPE_SEMICOLON)
     {
         AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
         
-        if(parser_parse_expression(parser, child))
-            return FRX_TRUE;
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, child));
     }
 
     return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
@@ -241,14 +235,12 @@ static FRX_NO_DISCARD b8 parser_parse_scope(Parser* parser, AST* node)
 
     FRX_ASSERT(node != NULL);
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACE))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACE));
     
     while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_BRACE)
     {
         AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
-        if(parser_parse_statement(parser, child))
-            return FRX_TRUE;
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_statement(parser, child));
     }
 
     return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE);
@@ -267,22 +259,18 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
 
     strcpy(data->return_type, parser->current_token->identifier);
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     strcpy(data->name, parser->current_token->identifier);
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     AST* parameter_list = ast_new_child(node, FRX_AST_TYPE_PARAMETER_LIST);
     
-    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
 
     while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
     {
-        //TODO: Parse parameters
         AST* parameter = ast_new_child(parameter_list, FRX_AST_TYPE_VARIABLE_DECLARATION);
 
         VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
@@ -290,23 +278,19 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
 
         strcpy(data->type, parser->current_token->identifier);
 
-        if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
-            return FRX_TRUE;
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
         strcpy(data->name, parser->current_token->identifier);
 
-        if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
-            return FRX_TRUE;
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
     
         if(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
         {
-            if(parser_eat(parser, FRX_TOKEN_TYPE_COMMA))
-                return FRX_TRUE;
+            FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_COMMA));
         }
     }
     
-    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS));
 
     AST* body = ast_new_child(node, FRX_AST_TYPE_SCOPE);
 
@@ -342,8 +326,7 @@ FRX_NO_DISCARD b8 parser_init(Parser* parser, const char* filepath)
 
     FRX_ASSERT(filepath != NULL);
 
-    if(lexer_init(&parser->lexer, filepath))
-        return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(lexer_init(&parser->lexer, filepath));
 
     parser->current_token = lexer_peek(&parser->lexer, 0);
 
@@ -360,8 +343,7 @@ FRX_NO_DISCARD b8 parser_parse(Parser* parser)
     {
         AST* child = ast_new_child(&parser->root, FRX_AST_TYPE_NOOP);
 
-        if(parser_parse_top_level(parser, child))
-            return FRX_TRUE;
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_top_level(parser, child));
     }
 
     return FRX_FALSE;
