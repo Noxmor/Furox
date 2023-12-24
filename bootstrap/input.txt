@@ -12,7 +12,7 @@ This should all be skipped.
 
 usize add(usize a, usize b)
 {
-    return 0;
+    return 1 + 2;
 }
 
 char getChar()
@@ -36,8 +36,7 @@ usize Main()
     char c = 'c';
     string str = "Furox";
 
-    //For now, just return 0
-    //because we are not capable of
-    //doing anything greater than that.
-    return 0;
+    usize test = 1 * 2 + 3;
+
+    return 1 + 2 * 3;
 }
