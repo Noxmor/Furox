@@ -115,7 +115,34 @@ static FRX_NO_DISCARD b8 parser_parse_string_literal(Parser* parser, AST* node)
     return parser_eat(parser, FRX_TOKEN_TYPE_STRING_LITERAL);
 }
 
-static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
+static usize parser_get_precedence(ASTType type)
+{
+    switch(type)
+    {
+        case FRX_AST_TYPE_ADDITION:
+        case FRX_AST_TYPE_SUBTRACTION: return 1;
+
+       case FRX_AST_TYPE_MULTIPLICATION:
+       case FRX_AST_TYPE_DIVISION: return 2;
+    }
+
+    return 1000000;
+}
+
+static b8 parser_next_token_is_binary_operator(const Parser* parser)
+{
+    switch(parser->current_token->type)
+    {
+        case FRX_TOKEN_TYPE_PLUS:
+        case FRX_TOKEN_TYPE_MINUS:
+        case FRX_TOKEN_TYPE_STAR:
+        case FRX_TOKEN_TYPE_SLASH: return FRX_TRUE;
+    }
+
+    return FRX_FALSE;
+}
+
+static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
 
@@ -132,6 +159,73 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
     FRX_ERROR_FILE("Could not parse token %s!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn, token_type_to_str(parser->current_token->type));
 
     return FRX_TRUE;
+}
+
+static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, node));
+
+    //TODO: Handle paranthesis
+
+    while(parser_next_token_is_binary_operator(parser))
+    {
+        AST new_node;
+
+        switch(parser->current_token->type)
+        {
+            case FRX_TOKEN_TYPE_PLUS: ast_init(&new_node, FRX_AST_TYPE_ADDITION); break;
+            case FRX_TOKEN_TYPE_MINUS: ast_init(&new_node, FRX_AST_TYPE_SUBTRACTION); break;
+            case FRX_TOKEN_TYPE_STAR: ast_init(&new_node, FRX_AST_TYPE_MULTIPLICATION); break;
+            case FRX_TOKEN_TYPE_SLASH: ast_init(&new_node, FRX_AST_TYPE_DIVISION); break;
+
+            default:
+            {
+                FRX_ASSERT(FRX_FALSE); //Since we only stay in the while loop as long as the next token is a binary operator,
+                                       //we should never end up in this default case.
+
+                break;
+            }
+        }
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, parser->current_token->type));
+
+        if(parser_get_precedence(new_node.type) > parser_get_precedence(node->type))
+        {
+            AST temp;
+
+            AST* right = &node->children[1];
+            memcpy(&temp, right, sizeof(AST));
+
+            memcpy(right, &new_node, sizeof(AST));
+
+            AST* new_left = ast_new_child(right, FRX_AST_TYPE_NOOP);
+            memcpy(new_left, &temp, sizeof(AST));
+
+            AST* new_right = ast_new_child(right, FRX_AST_TYPE_NOOP);
+
+            FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, new_right));
+        }
+        else
+        {
+            AST temp;
+            memcpy(&temp, node, sizeof(AST));
+
+            memcpy(node, &new_node, sizeof(AST));
+
+            AST* left = ast_new_child(node, FRX_AST_TYPE_NOOP);
+            memcpy(left, &temp, sizeof(AST));
+
+            AST* right = ast_new_child(node, FRX_AST_TYPE_NOOP);
+
+            FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, right));
+        }
+    }
+
+    return FRX_FALSE;
 }
 
 static FRX_NO_DISCARD b8 parser_parse_variable_declaration(Parser* parser, AST* node)
