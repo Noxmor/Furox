@@ -36,7 +36,9 @@ usize Main()
     char c = 'c';
     string str = "Furox";
 
-    usize test = 1 * 2 + 3;
+    usize test = 10 * 20 + 30;
+
+    usize otherTest = 1 * 2 + 3 * 4;
 
     return 1 + 2 * 3;
 }
