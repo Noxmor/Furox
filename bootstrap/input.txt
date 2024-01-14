@@ -37,8 +37,13 @@ usize Main()
     string str = "Furox";
 
     usize test = 10 * 20 + 30;
-
     usize otherTest = 1 * 2 + 3 * 4;
+
+    usize paranthesisTest = 3 + (7+8) * 9 + (11);
+    usize otherParanthesisTest = (3) + (1+2) * (((1 + 2) + 3) + 4);
+    usize multipleParanthesisTest = ((((69))));
+    usize anotherParanthesisTest = ((42 + 64) * 69);
+    usize anotherInterestingTest = (13 + (14 + 15) * 16);
 
     return 1 + 2 * 3;
 }
