@@ -336,6 +336,8 @@ static FRX_NO_DISCARD b8 lexer_parse_string_literal(Lexer* lexer, Token* token)
         lexer_advance(lexer);
     }
 
+    token->identifier[identifier_index] = '\0';
+
     lexer_advance(lexer);
 
     return FRX_FALSE;
