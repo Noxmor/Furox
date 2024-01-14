@@ -336,6 +336,8 @@ static FRX_NO_DISCARD b8 lexer_parse_string_literal(Lexer* lexer, Token* token)
         lexer_advance(lexer);
     }
 
+    token->identifier[identifier_index] = '\0';
+
     lexer_advance(lexer);
 
     return FRX_FALSE;
@@ -402,6 +404,8 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
 
             break;
         }
+
+        case '!': token->type = FRX_TOKEN_TYPE_EXCLAMATION_MARK; break;
 
         case '=': token->type = FRX_TOKEN_TYPE_EQUALS; break;
 

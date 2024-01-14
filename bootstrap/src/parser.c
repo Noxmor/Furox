@@ -15,33 +15,6 @@ typedef struct ParserInfo
 
 static ParserInfo parser_info;
 
-typedef struct FunctionDefinitionData
-{
-    char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-} FunctionDefinitionData;
-
-typedef struct VariableData
-{
-    char type[FRX_TOKEN_IDENTIFIER_CAPACITY];
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-} VariableData;
-
-typedef struct NumberData
-{
-    usize number;
-} NumberData;
-
-typedef struct CharLiteralData
-{
-    char literal;
-} CharLiteralData;
-
-typedef struct StringLiteralData
-{
-    char literal[FRX_TOKEN_IDENTIFIER_CAPACITY];
-} StringLiteralData;
-
 static Token* parser_peek(Parser* parser, usize offset)
 {
     FRX_ASSERT(parser != NULL);
@@ -129,6 +102,17 @@ static usize parser_get_precedence(ASTType type)
     return 1000000;
 }
 
+static b8 parser_next_token_is_unary_operator(const Parser* parser)
+{
+    switch(parser->current_token->type)
+    {
+        case FRX_TOKEN_TYPE_MINUS:
+        case FRX_TOKEN_TYPE_EXCLAMATION_MARK: return FRX_TRUE;
+    }
+
+    return FRX_FALSE;
+}
+
 static b8 parser_next_token_is_binary_operator(const Parser* parser)
 {
     switch(parser->current_token->type)
@@ -147,6 +131,38 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
     FRX_ASSERT(parser != NULL);
 
     FRX_ASSERT(node != NULL);
+
+    if(parser->current_token->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+    {
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, node));
+
+        return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS);
+    }
+
+    if(parser_next_token_is_unary_operator(parser))
+    {
+        switch(parser->current_token->type)
+        {
+            case FRX_TOKEN_TYPE_MINUS: ast_init(node, FRX_AST_TYPE_ARITHMETIC_NEGATION); break;
+            case FRX_TOKEN_TYPE_EXCLAMATION_MARK: ast_init(node, FRX_AST_TYPE_LOGICAL_NEGATION); break;
+
+            default:
+            {
+                FRX_ASSERT(FRX_FALSE); //Since all possible unary operators should be handled in a switch case,
+                                       //we should never end up in this default case.
+
+                break;
+            }
+        }
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, parser->current_token->type));
+
+        AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
+
+        return parser_parse_primary_expression(parser, child);
+    }
 
     switch(parser->current_token->type)
     {

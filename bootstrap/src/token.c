@@ -22,6 +22,8 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_STAR: return "Star";
         case FRX_TOKEN_TYPE_SLASH: return "Slash";
 
+        case FRX_TOKEN_TYPE_EXCLAMATION_MARK: return "Exclamation Mark";
+
         case FRX_TOKEN_TYPE_EQUALS: return "Equals";
 
         case FRX_TOKEN_TYPE_LEFT_PARANTHESIS: return "Left Paranthesis";

@@ -1,7 +1,7 @@
 #ifndef FRX_AST_H
 #define FRX_AST_H
 
-#include "core/types.h"
+#include "token.h"
 
 enum
 {
@@ -23,6 +23,9 @@ enum
     FRX_AST_TYPE_MULTIPLICATION,
     FRX_AST_TYPE_DIVISION,
 
+    FRX_AST_TYPE_ARITHMETIC_NEGATION,
+    FRX_AST_TYPE_LOGICAL_NEGATION,
+
     FRX_AST_TYPE_RETURN_STATEMENT,
 
     FRX_AST_TYPE_PARAMETER_LIST,
@@ -35,6 +38,33 @@ enum
 };
 
 typedef u8 ASTType;
+
+typedef struct FunctionDefinitionData
+{
+    char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} FunctionDefinitionData;
+
+typedef struct VariableData
+{
+    char type[FRX_TOKEN_IDENTIFIER_CAPACITY];
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} VariableData;
+
+typedef struct NumberData
+{
+    usize number;
+} NumberData;
+
+typedef struct CharLiteralData
+{
+    char literal;
+} CharLiteralData;
+
+typedef struct StringLiteralData
+{
+    char literal[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} StringLiteralData;
 
 typedef struct AST
 {
