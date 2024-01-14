@@ -23,4 +23,6 @@ void memory_free(void* memory);
 
 void memory_print(void);
 
+void memory_table_print(void);
+
 #endif
