@@ -15,33 +15,6 @@ typedef struct ParserInfo
 
 static ParserInfo parser_info;
 
-typedef struct FunctionDefinitionData
-{
-    char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-} FunctionDefinitionData;
-
-typedef struct VariableData
-{
-    char type[FRX_TOKEN_IDENTIFIER_CAPACITY];
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-} VariableData;
-
-typedef struct NumberData
-{
-    usize number;
-} NumberData;
-
-typedef struct CharLiteralData
-{
-    char literal;
-} CharLiteralData;
-
-typedef struct StringLiteralData
-{
-    char literal[FRX_TOKEN_IDENTIFIER_CAPACITY];
-} StringLiteralData;
-
 static Token* parser_peek(Parser* parser, usize offset)
 {
     FRX_ASSERT(parser != NULL);
