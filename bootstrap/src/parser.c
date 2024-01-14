@@ -167,9 +167,22 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
 
     FRX_ASSERT(node != NULL);
 
-    FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, node));
+   b8 node_had_paranthesis = FRX_FALSE;
 
-    //TODO: Handle paranthesis
+    if(parser->current_token->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+    {
+        node_had_paranthesis = FRX_TRUE;
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, node));
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS));
+    }
+    else
+    {
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, node));
+    }
 
     while(parser_next_token_is_binary_operator(parser))
     {
@@ -193,7 +206,7 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
 
         FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, parser->current_token->type));
 
-        if(parser_get_precedence(new_node.type) > parser_get_precedence(node->type))
+        if(parser_get_precedence(new_node.type) > parser_get_precedence(node->type) && !node_had_paranthesis)
         {
             AST temp;
 
@@ -207,7 +220,18 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
 
             AST* new_right = ast_new_child(right, FRX_AST_TYPE_NOOP);
 
-            FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, new_right));
+            if(parser->current_token->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+            {
+                FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
+
+                FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, new_right));
+
+                FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS));
+            }
+            else
+            {
+                FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, new_right));
+            }
         }
         else
         {
@@ -221,7 +245,18 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
 
             AST* right = ast_new_child(node, FRX_AST_TYPE_NOOP);
 
-            FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, right));
+            if(parser->current_token->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+            {
+                FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
+
+                FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, right));
+
+                FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS));
+            }
+            else
+            {
+                FRX_PARSER_ABORT_ON_ERROR(parser_parse_primary_expression(parser, right));
+            }
         }
     }
 
