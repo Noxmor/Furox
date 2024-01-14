@@ -88,7 +88,23 @@ static void ast_print_recursive(const AST* root, usize depth)
             printf("+---");
     }
 
-    printf("%s\n", ast_type_to_str(root->type));
+    printf("%s", ast_type_to_str(root->type));
+
+    switch(root->type)
+    {
+        case FRX_AST_TYPE_NUMBER: printf(" (%zu)", ((NumberData*)root->data)->number); break;
+
+        case FRX_AST_TYPE_CHAR_LITERAL: printf(" ('%c')", ((CharLiteralData*)root->data)->literal); break;
+        case FRX_AST_TYPE_STRING_LITERAL: printf(" (\"%s\")", ((StringLiteralData*)root->data)->literal); break;
+
+        case FRX_AST_TYPE_VARIABLE_DECLARATION:
+        case FRX_AST_TYPE_VARIABLE_DEFINITION:
+        case FRX_AST_TYPE_VARIABLE: printf(" (%s)", ((VariableData*)root->data)->name); break;
+
+        case FRX_AST_TYPE_FUNCTION_DEFINITION: printf(" (%s)", ((FunctionDefinitionData*)root->data)->name); break;
+    }
+
+    printf("\n");
 
     recursion_buffer[depth] = 1;
 
