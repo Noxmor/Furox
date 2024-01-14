@@ -20,7 +20,5 @@ int main(void)
 
     ast_print(&parser.root);
 
-    memory_print();
-
     return 0;    
 }
