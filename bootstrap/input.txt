@@ -47,7 +47,7 @@ usize Main()
 
     usize unaryTest = !42;
     usize otherUnaryTest = (!!1 + -1 * (!3));
-    isize negativeNumber = -4 * -3;
+    isize negativeNumber = -(-4 * -3);
 
     return 1 + 2 * 3;
 }
