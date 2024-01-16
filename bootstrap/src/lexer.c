@@ -407,6 +407,81 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
 
         case '!': token->type = FRX_TOKEN_TYPE_LOGICAL_NEGATION; break;
 
+        case '&':
+        {
+            if(lexer_peek_char(lexer, 1) == '&')
+            {
+                token->type = FRX_TOKEN_TYPE_LOGICAL_AND;
+                strcpy(token->identifier, "&&");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_BINARY_AND;
+
+            break;
+        }
+
+        case '|':
+        {
+            if(lexer_peek_char(lexer, 1) == '|')
+            {
+                token->type = FRX_TOKEN_TYPE_LOGICAL_OR;
+                strcpy(token->identifier, "||");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_BINARY_OR;
+
+            break;
+        }
+
+        case '^': token->type = FRX_TOKEN_TYPE_BINARY_XOR; break;
+        case '~': token->type = FRX_TOKEN_TYPE_BINARY_NEGATION; break;
+
+        case '<':
+        {
+            if(lexer_peek_char(lexer, 1) == '<')
+            {
+                token->type = FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT;
+                strcpy(token->identifier, "<<");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            FRX_ASSERT(FRX_FALSE); //TODO: Implement token type for less than operator
+
+            break;
+        }
+
+        case '>':
+        {
+            if(lexer_peek_char(lexer, 1) == '>')
+            {
+                token->type = FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT;
+                strcpy(token->identifier, ">>");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            FRX_ASSERT(FRX_FALSE); //TODO: Implement token type for greater than operator
+
+            break;
+        }
+
         case '=': token->type = FRX_TOKEN_TYPE_EQUALS; break;
 
         case '(': token->type = FRX_TOKEN_TYPE_LEFT_PARANTHESIS; break;   
