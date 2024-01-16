@@ -405,7 +405,7 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
             break;
         }
 
-        case '!': token->type = FRX_TOKEN_TYPE_EXCLAMATION_MARK; break;
+        case '!': token->type = FRX_TOKEN_TYPE_LOGICAL_NEGATION; break;
 
         case '=': token->type = FRX_TOKEN_TYPE_EQUALS; break;
 
