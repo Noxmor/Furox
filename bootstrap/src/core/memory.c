@@ -86,7 +86,7 @@ static void print_alloc_info(const AllocInfo* alloc_info, usize level)
         print_alloc_info(alloc_info->next, level + 1);
 }
 
-static void memory_table_print(void)
+void memory_table_print(void)
 {
     for(usize i = 0; i < FRX_MEMORY_TABLE_SIZE; ++i)
     {
@@ -224,8 +224,6 @@ void memory_free(void* memory)
 
 void memory_print(void)
 {
-    printf("----------\n");
-    
     printf("Total allocated: %zu\n", memory_tracer.global_info.total_allocated);
     printf("Total freed: %zu\n", memory_tracer.global_info.total_freed);
     printf("Total reallocated: %zu\n", memory_tracer.global_info.total_reallocated);
@@ -243,10 +241,6 @@ void memory_print(void)
         printf("%s: Total allocations: %zu, Total frees: %zu, Total reallocations: %zu\n", memory_category_to_str[i], info->total_allocations, info->total_frees, info->total_reallocations);
         printf("\n");
     }
-
-    memory_table_print();
-
-    printf("----------\n");
 }
 
 #else
@@ -273,6 +267,11 @@ void memory_free(void* memory)
 void memory_print(void)
 {
     
+}
+
+void memory_table_print(void)
+{
+
 }
 
 #endif

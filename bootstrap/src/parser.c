@@ -107,7 +107,7 @@ static b8 parser_next_token_is_unary_operator(const Parser* parser)
     switch(parser->current_token->type)
     {
         case FRX_TOKEN_TYPE_MINUS:
-        case FRX_TOKEN_TYPE_EXCLAMATION_MARK: return FRX_TRUE;
+        case FRX_TOKEN_TYPE_LOGICAL_NEGATION: return FRX_TRUE;
     }
 
     return FRX_FALSE;
@@ -146,7 +146,7 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
         switch(parser->current_token->type)
         {
             case FRX_TOKEN_TYPE_MINUS: ast_init(node, FRX_AST_TYPE_ARITHMETIC_NEGATION); break;
-            case FRX_TOKEN_TYPE_EXCLAMATION_MARK: ast_init(node, FRX_AST_TYPE_LOGICAL_NEGATION); break;
+            case FRX_TOKEN_TYPE_LOGICAL_NEGATION: ast_init(node, FRX_AST_TYPE_LOGICAL_NEGATION); break;
 
             default:
             {
