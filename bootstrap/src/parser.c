@@ -107,7 +107,8 @@ static b8 parser_next_token_is_unary_operator(const Parser* parser)
     switch(parser->current_token->type)
     {
         case FRX_TOKEN_TYPE_MINUS:
-        case FRX_TOKEN_TYPE_LOGICAL_NEGATION: return FRX_TRUE;
+        case FRX_TOKEN_TYPE_LOGICAL_NEGATION:
+        case FRX_TOKEN_TYPE_BINARY_NEGATION: return FRX_TRUE;
     }
 
     return FRX_FALSE;
@@ -120,7 +121,16 @@ static b8 parser_next_token_is_binary_operator(const Parser* parser)
         case FRX_TOKEN_TYPE_PLUS:
         case FRX_TOKEN_TYPE_MINUS:
         case FRX_TOKEN_TYPE_STAR:
-        case FRX_TOKEN_TYPE_SLASH: return FRX_TRUE;
+        case FRX_TOKEN_TYPE_SLASH:
+
+        case FRX_TOKEN_TYPE_LOGICAL_AND:
+        case FRX_TOKEN_TYPE_LOGICAL_OR:
+
+        case FRX_TOKEN_TYPE_BINARY_AND:
+        case FRX_TOKEN_TYPE_BINARY_OR:
+        case FRX_TOKEN_TYPE_BINARY_XOR:
+        case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT:
+        case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: return FRX_TRUE;
     }
 
     return FRX_FALSE;
@@ -149,6 +159,7 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
         {
             case FRX_TOKEN_TYPE_MINUS: ast_init(node, FRX_AST_TYPE_ARITHMETIC_NEGATION); break;
             case FRX_TOKEN_TYPE_LOGICAL_NEGATION: ast_init(node, FRX_AST_TYPE_LOGICAL_NEGATION); break;
+            case FRX_TOKEN_TYPE_BINARY_NEGATION: ast_init(node, FRX_AST_TYPE_BINARY_NEGATION); break;
 
             default:
             {
@@ -215,6 +226,15 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
             case FRX_TOKEN_TYPE_MINUS: ast_init(&new_node, FRX_AST_TYPE_SUBTRACTION); break;
             case FRX_TOKEN_TYPE_STAR: ast_init(&new_node, FRX_AST_TYPE_MULTIPLICATION); break;
             case FRX_TOKEN_TYPE_SLASH: ast_init(&new_node, FRX_AST_TYPE_DIVISION); break;
+
+            case FRX_TOKEN_TYPE_LOGICAL_AND: ast_init(&new_node, FRX_AST_TYPE_LOGICAL_AND); break;
+            case FRX_TOKEN_TYPE_LOGICAL_OR: ast_init(&new_node, FRX_AST_TYPE_LOGICAL_OR); break;
+
+            case FRX_TOKEN_TYPE_BINARY_AND: ast_init(&new_node, FRX_AST_TYPE_BINARY_AND); break;
+            case FRX_TOKEN_TYPE_BINARY_OR: ast_init(&new_node, FRX_AST_TYPE_BINARY_OR); break;
+            case FRX_TOKEN_TYPE_BINARY_XOR: ast_init(&new_node, FRX_AST_TYPE_BINARY_XOR); break;
+            case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT: ast_init(&new_node, FRX_AST_TYPE_BINARY_LEFT_SHIFT); break;
+            case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: ast_init(&new_node, FRX_AST_TYPE_BINARY_RIGHT_SHIFT); break;
 
             default:
             {

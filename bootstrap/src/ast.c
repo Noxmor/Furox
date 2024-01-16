@@ -28,7 +28,17 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_DIVISION: return "Division";
 
         case FRX_AST_TYPE_ARITHMETIC_NEGATION: return "Arithmetic Negation";
+
+        case FRX_AST_TYPE_LOGICAL_AND: return "Logical And";
+        case FRX_AST_TYPE_LOGICAL_OR: return "Logical Or";
         case FRX_AST_TYPE_LOGICAL_NEGATION: return "Logical Negation";
+
+        case FRX_AST_TYPE_BINARY_AND: return "Binary And";
+        case FRX_AST_TYPE_BINARY_OR: return "Binary Or";
+        case FRX_AST_TYPE_BINARY_XOR: return "Binary Xor";
+        case FRX_AST_TYPE_BINARY_NEGATION: return "Binary Negation";
+        case FRX_AST_TYPE_BINARY_LEFT_SHIFT: return "Binary Left Shift";
+        case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: return "Binary Right Shift";
 
         case FRX_AST_TYPE_RETURN_STATEMENT: return "Return Statement";
 
