@@ -126,6 +126,8 @@ static b8 parser_next_token_is_binary_operator(const Parser* parser)
     return FRX_FALSE;
 }
 
+static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node);
+
 static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -160,6 +162,9 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
         FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, parser->current_token->type));
 
         AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
+
+        if(parser->current_token->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+            return parser_parse_expression(parser, child);
 
         return parser_parse_primary_expression(parser, child);
     }
