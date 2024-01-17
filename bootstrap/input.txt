@@ -57,6 +57,8 @@ usize Main()
     usize otherBinaryTest = 0b111 & 0b100;
     usize anotherBinaryTest = 0b101 ^ 0b010;
 
+    usize comparisonTest = 0 == 1;
+
     usize functionCallTest = getChar() + getString();
 
     return 1 + 2 * 3;

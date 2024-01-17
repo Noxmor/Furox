@@ -127,6 +127,7 @@ static FRX_NO_DISCARD b8 parser_parse_function_call(Parser* parser, AST* node)
     return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS);
 }
 
+//TODO: Add precedence for missing operators!
 static usize parser_get_precedence(ASTType type)
 {
     switch(type)
@@ -173,7 +174,8 @@ static b8 parser_next_token_is_binary_operator(const Parser* parser)
         case FRX_TOKEN_TYPE_BINARY_OR:
         case FRX_TOKEN_TYPE_BINARY_XOR:
         case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT:
-        case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: return FRX_TRUE;
+        case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT:
+        case FRX_TOKEN_TYPE_COMPARISON: return FRX_TRUE;
     }
 
     return FRX_FALSE;
@@ -286,6 +288,8 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
             case FRX_TOKEN_TYPE_BINARY_XOR: ast_init(&new_node, FRX_AST_TYPE_BINARY_XOR); break;
             case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT: ast_init(&new_node, FRX_AST_TYPE_BINARY_LEFT_SHIFT); break;
             case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: ast_init(&new_node, FRX_AST_TYPE_BINARY_RIGHT_SHIFT); break;
+
+            case FRX_TOKEN_TYPE_COMPARISON: ast_init(&new_node, FRX_AST_TYPE_COMPARISON); break;
 
             default:
             {
