@@ -12,7 +12,7 @@ This should all be skipped.
 
 usize add(usize a, usize b)
 {
-    return 1 + 2;
+    return a + b;
 }
 
 char getChar()
@@ -56,6 +56,8 @@ usize Main()
     usize binaryTest = ~0b1001 | 0b1100;
     usize otherBinaryTest = 0b111 & 0b100;
     usize anotherBinaryTest = 0b101 ^ 0b010;
+
+    usize functionCallTest = getChar() + getString();
 
     return 1 + 2 * 3;
 }
