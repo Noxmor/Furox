@@ -40,6 +40,23 @@ static FRX_NO_DISCARD b8 parser_eat(Parser* parser, TokenType type)
     return lexer_next_token(&parser->lexer);
 }
 
+static FRX_NO_DISCARD b8 parser_parse_variable(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_VARIABLE;
+
+    VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
+    node->data = data;
+
+    strcpy(data->type, "");
+    strcpy(data->name, parser->current_token->identifier);
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER);
+}
+
 static FRX_NO_DISCARD b8 parser_parse_number(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -88,6 +105,28 @@ static FRX_NO_DISCARD b8 parser_parse_string_literal(Parser* parser, AST* node)
     return parser_eat(parser, FRX_TOKEN_TYPE_STRING_LITERAL);
 }
 
+static FRX_NO_DISCARD b8 parser_parse_function_call(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_FUNCTION_CALL;
+
+    FunctionCallData* data = memory_alloc(sizeof(FunctionCallData), FRX_MEMORY_CATEGORY_UNKNOWN);
+    node->data = data;
+
+    strcpy(data->name, parser->current_token->identifier);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
+
+    //TODO: Parse function arguments
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS);
+}
+
 static usize parser_get_precedence(ASTType type)
 {
     switch(type)
@@ -104,6 +143,8 @@ static usize parser_get_precedence(ASTType type)
 
 static b8 parser_next_token_is_unary_operator(const Parser* parser)
 {
+    FRX_ASSERT(parser != NULL);
+
     switch(parser->current_token->type)
     {
         case FRX_TOKEN_TYPE_MINUS:
@@ -116,6 +157,8 @@ static b8 parser_next_token_is_unary_operator(const Parser* parser)
 
 static b8 parser_next_token_is_binary_operator(const Parser* parser)
 {
+    FRX_ASSERT(parser != NULL);
+
     switch(parser->current_token->type)
     {
         case FRX_TOKEN_TYPE_PLUS:
@@ -182,6 +225,14 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
 
     switch(parser->current_token->type)
     {
+        case FRX_TOKEN_TYPE_IDENTIFIER:
+        {
+            if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+                return parser_parse_function_call(parser, node);
+
+            return parser_parse_variable(parser, node);
+        }
+
         case FRX_TOKEN_TYPE_NUMBER: return parser_parse_number(parser, node);
 
         case FRX_TOKEN_TYPE_CHAR_LITERAL: return parser_parse_char_literal(parser, node);
