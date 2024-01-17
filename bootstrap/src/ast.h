@@ -49,12 +49,6 @@ enum
 
 typedef u8 ASTType;
 
-typedef struct FunctionDefinitionData
-{
-    char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-} FunctionDefinitionData;
-
 typedef struct VariableData
 {
     char type[FRX_TOKEN_IDENTIFIER_CAPACITY];
@@ -75,6 +69,17 @@ typedef struct StringLiteralData
 {
     char literal[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } StringLiteralData;
+
+typedef struct FunctionDefinitionData
+{
+    char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} FunctionDefinitionData;
+
+typedef struct FunctionCallData
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} FunctionCallData;
 
 typedef struct AST
 {
