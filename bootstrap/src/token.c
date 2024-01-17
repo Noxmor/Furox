@@ -34,6 +34,7 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: return "Binary Right Shift";
 
         case FRX_TOKEN_TYPE_EQUALS: return "Equals";
+        case FRX_TOKEN_TYPE_COMPARISON: return "Comparison";
 
         case FRX_TOKEN_TYPE_LEFT_PARANTHESIS: return "Left Paranthesis";
         case FRX_TOKEN_TYPE_RIGHT_PARANTHESIS: return "Right Paranthesis";

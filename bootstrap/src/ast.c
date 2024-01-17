@@ -40,6 +40,8 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_BINARY_LEFT_SHIFT: return "Binary Left Shift";
         case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: return "Binary Right Shift";
 
+        case FRX_AST_TYPE_COMPARISON: return "Comparison";
+
         case FRX_AST_TYPE_RETURN_STATEMENT: return "Return Statement";
 
         case FRX_AST_TYPE_PARAMETER_LIST: return "Parameter List";

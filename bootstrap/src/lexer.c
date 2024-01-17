@@ -482,7 +482,23 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
             break;
         }
 
-        case '=': token->type = FRX_TOKEN_TYPE_EQUALS; break;
+        case '=':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = FRX_TOKEN_TYPE_COMPARISON;
+                strcpy(token->identifier, "==");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_EQUALS;
+
+            break;
+        }
 
         case '(': token->type = FRX_TOKEN_TYPE_LEFT_PARANTHESIS; break;   
         case ')': token->type = FRX_TOKEN_TYPE_RIGHT_PARANTHESIS; break;   
