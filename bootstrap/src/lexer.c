@@ -461,7 +461,18 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
                 return FRX_FALSE;
             }
 
-            FRX_ASSERT(FRX_FALSE); //TODO: Implement token type for less than operator
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = FRX_TOKEN_TYPE_LESS_THAN_EQUALS;
+                strcpy(token->identifier, "<=");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_LESS_THAN;
 
             break;
         }
@@ -479,7 +490,18 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
                 return FRX_FALSE;
             }
 
-            FRX_ASSERT(FRX_FALSE); //TODO: Implement token type for greater than operator
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = FRX_TOKEN_TYPE_GREATER_THAN_EQUALS;
+                strcpy(token->identifier, ">=");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_GREATER_THAN;
 
             break;
         }

@@ -60,6 +60,8 @@ usize Main()
     usize anotherBinaryTest = 0b101 ^ 0b010;
 
     usize comparisonTest = 0 == 1;
+    usize nextCompareTest = 2 < 3;
+    usize anotherCompareTest = (7 >= 9) < (4 > 2);
 
     usize functionCallTest = getChar() + getString();
 
