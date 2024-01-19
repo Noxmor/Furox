@@ -39,6 +39,8 @@ usize Main()
     usize test = 10 * 20 + 30;
     usize otherTest = 1 * 2 + 3 * 4;
 
+    usize moduloTest = 8 % 3;
+
     usize paranthesisTest = 3 + (7+8) * 9 + (11);
     usize otherParanthesisTest = (3) + (1+2) * (((1 + 2) + 3) + 4);
     usize multipleParanthesisTest = ((((69))));
@@ -61,5 +63,5 @@ usize Main()
 
     usize functionCallTest = getChar() + getString();
 
-    return 1 + 2 * 3;
+    return add(1, 2 * 3);
 }
