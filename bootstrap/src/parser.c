@@ -139,16 +139,34 @@ static FRX_NO_DISCARD b8 parser_parse_function_call(Parser* parser, AST* node)
     return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS);
 }
 
-//TODO: Add precedence for missing operators!
 static usize parser_get_precedence(ASTType type)
 {
     switch(type)
     {
-        case FRX_AST_TYPE_ADDITION:
-        case FRX_AST_TYPE_SUBTRACTION: return 1;
+        case FRX_AST_TYPE_LOGICAL_OR: return 0;
 
-       case FRX_AST_TYPE_MULTIPLICATION:
-       case FRX_AST_TYPE_DIVISION: return 2;
+        case FRX_AST_TYPE_LOGICAL_AND: return 1;
+
+        case FRX_AST_TYPE_BINARY_OR: return 2;
+
+        case FRX_AST_TYPE_BINARY_XOR: return 3;
+
+        case FRX_AST_TYPE_BINARY_AND: return 4;
+
+        case FRX_AST_TYPE_COMPARISON: return 5;
+
+        case FRX_AST_TYPE_BINARY_LEFT_SHIFT:
+        case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: return 6;
+
+        case FRX_AST_TYPE_ADDITION:
+        case FRX_AST_TYPE_SUBTRACTION: return 7;
+
+        case FRX_AST_TYPE_MULTIPLICATION:
+        case FRX_AST_TYPE_DIVISION: return 8;
+
+        case FRX_AST_TYPE_ARITHMETIC_NEGATION:
+        case FRX_AST_TYPE_LOGICAL_NEGATION:
+        case FRX_AST_TYPE_BINARY_NEGATION: return 9;
     }
 
     return 1000000;
