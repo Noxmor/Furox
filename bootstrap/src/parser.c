@@ -155,19 +155,24 @@ static usize parser_get_precedence(ASTType type)
 
         case FRX_AST_TYPE_COMPARISON: return 5;
 
+        case FRX_AST_TYPE_GREATER_THAN:
+        case FRX_AST_TYPE_GREATER_THAN_EQUALS:
+        case FRX_AST_TYPE_LESS_THAN:
+        case FRX_AST_TYPE_LESS_THAN_EQUALS: return 6;
+
         case FRX_AST_TYPE_BINARY_LEFT_SHIFT:
-        case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: return 6;
+        case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: return 7;
 
         case FRX_AST_TYPE_ADDITION:
-        case FRX_AST_TYPE_SUBTRACTION: return 7;
+        case FRX_AST_TYPE_SUBTRACTION: return 8;
 
         case FRX_AST_TYPE_MULTIPLICATION:
         case FRX_AST_TYPE_DIVISION:
-        case FRX_AST_TYPE_MODULO: return 8;
+        case FRX_AST_TYPE_MODULO: return 9;
 
         case FRX_AST_TYPE_ARITHMETIC_NEGATION:
         case FRX_AST_TYPE_LOGICAL_NEGATION:
-        case FRX_AST_TYPE_BINARY_NEGATION: return 9;
+        case FRX_AST_TYPE_BINARY_NEGATION: return 10;
     }
 
     return 1000000;
@@ -207,7 +212,14 @@ static b8 parser_next_token_is_binary_operator(const Parser* parser)
         case FRX_TOKEN_TYPE_BINARY_XOR:
         case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT:
         case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT:
-        case FRX_TOKEN_TYPE_COMPARISON: return FRX_TRUE;
+
+        case FRX_TOKEN_TYPE_COMPARISON:
+
+        case FRX_TOKEN_TYPE_GREATER_THAN:
+        case FRX_TOKEN_TYPE_GREATER_THAN_EQUALS:
+
+        case FRX_TOKEN_TYPE_LESS_THAN:
+        case FRX_TOKEN_TYPE_LESS_THAN_EQUALS: return FRX_TRUE;
     }
 
     return FRX_FALSE;
@@ -323,6 +335,11 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
             case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: ast_init(&new_node, FRX_AST_TYPE_BINARY_RIGHT_SHIFT); break;
 
             case FRX_TOKEN_TYPE_COMPARISON: ast_init(&new_node, FRX_AST_TYPE_COMPARISON); break;
+
+            case FRX_TOKEN_TYPE_GREATER_THAN: ast_init(&new_node, FRX_AST_TYPE_GREATER_THAN); break;
+            case FRX_TOKEN_TYPE_GREATER_THAN_EQUALS: ast_init(&new_node, FRX_AST_TYPE_GREATER_THAN_EQUALS); break;
+            case FRX_TOKEN_TYPE_LESS_THAN: ast_init(&new_node, FRX_AST_TYPE_LESS_THAN); break;
+            case FRX_TOKEN_TYPE_LESS_THAN_EQUALS: ast_init(&new_node, FRX_AST_TYPE_LESS_THAN_EQUALS); break;
 
             default:
             {

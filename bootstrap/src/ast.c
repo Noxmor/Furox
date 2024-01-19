@@ -43,6 +43,12 @@ const char* ast_type_to_str(ASTType type)
 
         case FRX_AST_TYPE_COMPARISON: return "Comparison";
 
+        case FRX_AST_TYPE_GREATER_THAN: return "Greater than";
+        case FRX_AST_TYPE_GREATER_THAN_EQUALS: return "Greater than or equals";
+
+        case FRX_AST_TYPE_LESS_THAN: return "Less than";
+        case FRX_AST_TYPE_LESS_THAN_EQUALS: return "Less than or equals";
+
         case FRX_AST_TYPE_RETURN_STATEMENT: return "Return Statement";
 
         case FRX_AST_TYPE_PARAMETER_LIST: return "Parameter List";
