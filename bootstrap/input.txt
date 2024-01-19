@@ -61,5 +61,5 @@ usize Main()
 
     usize functionCallTest = getChar() + getString();
 
-    return 1 + 2 * 3;
+    return add(1, 2 * 3);
 }
