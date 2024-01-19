@@ -26,6 +26,7 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_SUBTRACTION: return "Subtraction";
         case FRX_AST_TYPE_MULTIPLICATION: return "Multiplication";
         case FRX_AST_TYPE_DIVISION: return "Division";
+        case FRX_AST_TYPE_MODULO: return "Modulo";
 
         case FRX_AST_TYPE_ARITHMETIC_NEGATION: return "Arithmetic Negation";
 

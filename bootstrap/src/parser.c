@@ -162,7 +162,8 @@ static usize parser_get_precedence(ASTType type)
         case FRX_AST_TYPE_SUBTRACTION: return 7;
 
         case FRX_AST_TYPE_MULTIPLICATION:
-        case FRX_AST_TYPE_DIVISION: return 8;
+        case FRX_AST_TYPE_DIVISION:
+        case FRX_AST_TYPE_MODULO: return 8;
 
         case FRX_AST_TYPE_ARITHMETIC_NEGATION:
         case FRX_AST_TYPE_LOGICAL_NEGATION:
@@ -196,6 +197,7 @@ static b8 parser_next_token_is_binary_operator(const Parser* parser)
         case FRX_TOKEN_TYPE_MINUS:
         case FRX_TOKEN_TYPE_STAR:
         case FRX_TOKEN_TYPE_SLASH:
+        case FRX_TOKEN_TYPE_MODULO:
 
         case FRX_TOKEN_TYPE_LOGICAL_AND:
         case FRX_TOKEN_TYPE_LOGICAL_OR:
@@ -309,6 +311,7 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
             case FRX_TOKEN_TYPE_MINUS: ast_init(&new_node, FRX_AST_TYPE_SUBTRACTION); break;
             case FRX_TOKEN_TYPE_STAR: ast_init(&new_node, FRX_AST_TYPE_MULTIPLICATION); break;
             case FRX_TOKEN_TYPE_SLASH: ast_init(&new_node, FRX_AST_TYPE_DIVISION); break;
+            case FRX_TOKEN_TYPE_MODULO: ast_init(&new_node, FRX_AST_TYPE_MODULO); break;
 
             case FRX_TOKEN_TYPE_LOGICAL_AND: ast_init(&new_node, FRX_AST_TYPE_LOGICAL_AND); break;
             case FRX_TOKEN_TYPE_LOGICAL_OR: ast_init(&new_node, FRX_AST_TYPE_LOGICAL_OR); break;
