@@ -15,6 +15,8 @@ typedef struct ParserInfo
 
 static ParserInfo parser_info;
 
+static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node);
+
 static Token* parser_peek(Parser* parser, usize offset)
 {
     FRX_ASSERT(parser != NULL);
@@ -122,7 +124,17 @@ static FRX_NO_DISCARD b8 parser_parse_function_call(Parser* parser, AST* node)
 
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
 
-    //TODO: Parse function arguments
+    while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
+    {
+        AST* parameter = ast_new_child(node, FRX_AST_TYPE_NOOP);
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, parameter));
+
+        if(parser->current_token->type != FRX_TOKEN_TYPE_COMMA)
+            break;
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_COMMA));
+    }
 
     return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS);
 }
