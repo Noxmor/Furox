@@ -534,7 +534,25 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
         case '}': token->type = FRX_TOKEN_TYPE_RIGHT_BRACE; break;
 
         case ',': token->type = FRX_TOKEN_TYPE_COMMA; break;
-        case ':': token->type = FRX_TOKEN_TYPE_COLON; break;
+
+        case ':':
+        {
+            if(lexer_peek_char(lexer, 1) == ':')
+            {
+                token->type = FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION;
+                strcpy(token->identifier, "::");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_COLON;
+
+            break;
+        }
+
         case ';': token->type = FRX_TOKEN_TYPE_SEMICOLON; break;
 
         case '\0': token->type = FRX_TOKEN_TYPE_EOF; break;
