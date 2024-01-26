@@ -56,6 +56,8 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_COLON: return "Colon";
         case FRX_TOKEN_TYPE_SEMICOLON: return "Semicolon";
 
+        case FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION: return "Namespace Resolution";
+
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 
