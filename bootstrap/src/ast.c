@@ -57,6 +57,9 @@ const char* ast_type_to_str(ASTType type)
 
         case FRX_AST_TYPE_SCOPE: return "Scope";
 
+        case FRX_AST_TYPE_NAMESPACE: return "Namespace";
+        case FRX_AST_TYPE_NAMESPACE_REF: return "Namespace Reference";
+
         default: FRX_ASSERT(FRX_FALSE);
     }
 

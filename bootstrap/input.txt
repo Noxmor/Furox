@@ -10,9 +10,12 @@ Now we are back in the outer comment block.
 This should all be skipped.
 */
 
-usize add(usize a, usize b)
+namespace Math
 {
-    return a + b;
+    usize add(usize a, usize b)
+    {
+        return a + b;
+    }
 }
 
 char getChar()
@@ -65,5 +68,5 @@ usize Main()
 
     usize functionCallTest = getChar() + getString();
 
-    return add(1, 2 * 3);
+    return Math::add(1, 2 * 3);
 }

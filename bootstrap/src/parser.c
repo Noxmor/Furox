@@ -17,6 +17,10 @@ static ParserInfo parser_info;
 
 static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node);
 
+static FRX_NO_DISCARD b8 parser_parse_namespace_resolution(Parser* parser, AST* node);
+
+static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node);
+
 static Token* parser_peek(Parser* parser, usize offset)
 {
     FRX_ASSERT(parser != NULL);
@@ -273,6 +277,9 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
     {
         case FRX_TOKEN_TYPE_IDENTIFIER:
         {
+            if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
+                return parser_parse_namespace_resolution(parser, node);
+
             if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
                 return parser_parse_function_call(parser, node);
 
@@ -572,6 +579,51 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
     return parser_parse_scope(parser, body);
 }
 
+static FRX_NO_DISCARD b8 parser_parse_namespace_resolution(Parser* parser, AST* node)
+{
+    node->type = FRX_AST_TYPE_NAMESPACE_REF;
+
+    NamespaceData* data = memory_alloc(sizeof(NamespaceData), FRX_MEMORY_CATEGORY_UNKNOWN);
+    node->data = data;
+
+    strcpy(data->namespace, parser->current_token->identifier);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION));
+
+    AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
+
+    if(parser->current_token->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
+        return parser_parse_namespace_resolution(parser, child);
+
+    return parser_parse_function_call(parser, child);
+}
+
+static FRX_NO_DISCARD b8 parser_parse_namespace(Parser* parser, AST* node)
+{
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+
+    node->type = FRX_AST_TYPE_NAMESPACE;
+
+    NamespaceData* data = memory_alloc(sizeof(NamespaceData), FRX_MEMORY_CATEGORY_UNKNOWN);
+    node->data = data;
+
+    strcpy(data->namespace, parser->current_token->identifier);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACE));
+
+    while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_BRACE)
+    {
+        AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_top_level(parser, child));
+    }
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE);
+}
+
 static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -580,7 +632,8 @@ static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node)
 
     if(parser->current_token->type == FRX_TOKEN_TYPE_IDENTIFIER)
     {
-        //TODO: Handle namespaces
+        if(strcmp(parser->current_token->identifier, "namespace") == 0)
+            return parser_parse_namespace(parser, node);
 
         //TODO: Handle includes/imports
 
