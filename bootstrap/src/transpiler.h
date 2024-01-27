@@ -7,4 +7,6 @@
 
 FRX_NO_DISCARD b8 transpile_ast(const AST* root, const char* src_filepath);
 
+FRX_NO_DISCARD b8 generate_executable(void);
+
 #endif

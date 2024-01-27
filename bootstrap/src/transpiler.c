@@ -9,11 +9,31 @@
 #define FRX_TRANSPILER_ABORT_ON_ERROR(expr) if(expr) return FRX_TRUE
 #define FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(file, format, ...) if(fprintf(file, format, ##__VA_ARGS__) < 0) return FRX_TRUE
 
+typedef struct TranspilerInfo
+{
+    char** c_filepaths;
+    usize c_filepaths_size;
+    usize c_filepaths_capacity;
+} TranspilerInfo;
+
+static TranspilerInfo transpiler_info;
+
 typedef struct Namespace
 {
     const char* namespace;
     struct Namespace* next;
 } Namespace;
+
+static void store_c_filepath(const char* c_filepath)
+{
+    if(transpiler_info.c_filepaths_size >= transpiler_info.c_filepaths_capacity)
+    {
+        transpiler_info.c_filepaths_capacity = transpiler_info.c_filepaths_capacity == 0 ? 1 : transpiler_info.c_filepaths_capacity * 2;
+        transpiler_info.c_filepaths = memory_realloc(transpiler_info.c_filepaths, transpiler_info.c_filepaths_capacity * sizeof(char*), FRX_MEMORY_CATEGORY_STRING);
+    }
+
+    transpiler_info.c_filepaths[transpiler_info.c_filepaths_size++] = strdup(c_filepath);
+}
 
 static Namespace* current_namespace = NULL;
 
@@ -569,8 +589,10 @@ static FILE* create_c_file(const char* src_filepath)
     if(f == NULL)
         return NULL;
 
+    store_c_filepath(c_filepath);
+
     *extension = 'h';
-    if(fprintf(f, "#include \"%s\"\n", c_filepath) < 0)
+    if(fprintf(f, "#include \"Furox.h\"\n#include \"%s\"\n", c_filepath) < 0)
     {
         fclose(f);
 
@@ -638,4 +660,19 @@ FRX_NO_DISCARD b8 transpile_ast(const AST* root, const char* src_filepath)
     fclose(header_file);
 
     return FRX_FALSE;
+}
+
+FRX_NO_DISCARD b8 generate_executable(void)
+{
+    char command[4096];
+
+    strcpy(command, "gcc FuroxMain.c");
+
+    for(usize i = 0; i < transpiler_info.c_filepaths_size; ++i)
+    {
+        strcat(command, " ");
+        strcat(command, transpiler_info.c_filepaths[i]);
+    }
+
+    return system(command) == -1;
 }
