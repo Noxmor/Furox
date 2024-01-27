@@ -581,6 +581,8 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
 
 static FRX_NO_DISCARD b8 parser_parse_namespace_resolution(Parser* parser, AST* node)
 {
+    //TODO: Handle case where we just have a namespace resolution operator for referencing the global namespace.
+    
     node->type = FRX_AST_TYPE_NAMESPACE_REF;
 
     NamespaceData* data = memory_alloc(sizeof(NamespaceData), FRX_MEMORY_CATEGORY_UNKNOWN);

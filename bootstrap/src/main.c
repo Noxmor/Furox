@@ -1,6 +1,7 @@
-#include "parser.h"
-
 #include "core/memory.h"
+
+#include "parser.h"
+#include "transpiler.h"
 
 int main(void)
 {
@@ -19,6 +20,12 @@ int main(void)
     }
 
     ast_print(&parser.root);
+
+    if(transpile_ast(&parser.root, parser.lexer.filepath))
+    {
+        printf("transpile_ast() failed!\n");
+        return 1;
+    }
 
     return 0;    
 }
