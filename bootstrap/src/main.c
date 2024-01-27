@@ -27,5 +27,11 @@ int main(void)
         return 1;
     }
 
+    if(generate_executable())
+    {
+        printf("generate_executable() failed!\n");
+        return 1;
+    }
+
     return 0;    
 }
