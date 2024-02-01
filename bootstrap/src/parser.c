@@ -579,10 +579,43 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
     return parser_parse_scope(parser, body);
 }
 
+static FRX_NO_DISCARD b8 parser_parse_struct_definition(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_STRUCT_DEFINITION;
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+
+    StructDefinitionData* data = memory_alloc(sizeof(StructDefinitionData), FRX_MEMORY_CATEGORY_UNKNOWN);
+    node->data = data;
+
+    strcpy(data->name, parser->current_token->identifier);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACE));
+
+    while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_BRACE)
+    {
+        AST* field = ast_new_child(node, FRX_AST_TYPE_VARIABLE_DECLARATION);
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_variable_declaration(parser, field));
+    }
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE);
+}
+
 static FRX_NO_DISCARD b8 parser_parse_namespace_resolution(Parser* parser, AST* node)
 {
     //TODO: Handle case where we just have a namespace resolution operator for referencing the global namespace.
-    
+
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
     node->type = FRX_AST_TYPE_NAMESPACE_REF;
 
     NamespaceData* data = memory_alloc(sizeof(NamespaceData), FRX_MEMORY_CATEGORY_UNKNOWN);
@@ -603,6 +636,10 @@ static FRX_NO_DISCARD b8 parser_parse_namespace_resolution(Parser* parser, AST* 
 
 static FRX_NO_DISCARD b8 parser_parse_namespace(Parser* parser, AST* node)
 {
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     node->type = FRX_AST_TYPE_NAMESPACE;
@@ -640,6 +677,8 @@ static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node)
         //TODO: Handle includes/imports
 
         //TODO: Handle struct definitions
+        if(strcmp(parser->current_token->identifier, "struct") == 0)
+            return parser_parse_struct_definition(parser, node);
     
         return parser_parse_function_definition(parser, node);
     }

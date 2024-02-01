@@ -53,6 +53,8 @@ enum
 
     FRX_AST_TYPE_SCOPE,
 
+    FRX_AST_TYPE_STRUCT_DEFINITION,
+
     FRX_AST_TYPE_NAMESPACE,
     FRX_AST_TYPE_NAMESPACE_REF,
 
@@ -92,6 +94,11 @@ typedef struct FunctionCallData
 {
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } FunctionCallData;
+
+typedef struct StructDefinitionData
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} StructDefinitionData;
 
 typedef struct NamespaceData
 {

@@ -10,6 +10,14 @@ Now we are back in the outer comment block.
 This should all be skipped.
 */
 
+namespace std
+{
+    struct String
+    {
+        usize length;
+    }
+}
+
 namespace Math
 {
     usize add(usize a, usize b)
@@ -23,10 +31,10 @@ char getChar()
     return '#';
 }
 
-string getString()
+/*string getString()
 {
     return "Furox";
-}
+}*/
 
 //This is the main function.
 usize Main()
@@ -37,7 +45,7 @@ usize Main()
 
     usize value = 0;
     char c = 'c';
-    string str = "Furox";
+    //string str = "Furox";
 
     usize test = 10 * 20 + 30;
     usize otherTest = 1 * 2 + 3 * 4;
@@ -66,7 +74,7 @@ usize Main()
     usize nextCompareTest = 2 < 3;
     usize anotherCompareTest = (7 >= 9) < (4 > 2);
 
-    usize functionCallTest = getChar() + getString();
+    usize functionCallTest = getChar() + Math::add(5, 6);
 
     return Math::add(1, 2 * 3);
 }
