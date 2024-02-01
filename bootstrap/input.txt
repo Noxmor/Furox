@@ -10,6 +10,14 @@ Now we are back in the outer comment block.
 This should all be skipped.
 */
 
+namespace std
+{
+    struct String
+    {
+        usize length;
+    }
+}
+
 namespace Math
 {
     usize add(usize a, usize b)
