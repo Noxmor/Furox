@@ -492,6 +492,8 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
             break;
         }
 
+        case FRX_AST_TYPE_STRUCT_DEFINITION: break;
+
         case FRX_AST_TYPE_NAMESPACE:
         {
             NamespaceData* data = root->data;
@@ -566,6 +568,27 @@ static FRX_NO_DISCARD b8 transpile_header(const AST* root, FILE* f)
         }
 
         FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ");\n\n");
+    }
+    else if(root->type == FRX_AST_TYPE_STRUCT_DEFINITION)
+    {
+        StructDefinitionData* data = root->data;
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "typedef struct ");
+
+        FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s\n{\n", data->name);
+
+        for(usize i = 0; i < root->children_size; ++i)
+        {
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[i], f));
+        }
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "} ");
+
+        FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s;\n\n", data->name);
     }
     else
     {
