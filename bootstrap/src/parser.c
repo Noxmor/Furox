@@ -466,6 +466,25 @@ static FRX_NO_DISCARD b8 parser_parse_variable_definition(Parser* parser, AST* n
     return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
 }
 
+static FRX_NO_DISCARD b8 parser_parse_variable_assignment(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_VARIABLE_ASSIGNMENT;
+
+    AST* variable = ast_new_child(node, FRX_AST_TYPE_VARIABLE);
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_variable(parser, variable));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_EQUALS));
+
+    AST* expr = ast_new_child(node, FRX_AST_TYPE_NOOP);
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, expr));
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
+}
+
 static FRX_NO_DISCARD b8 parser_parse_return_statement(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -504,6 +523,9 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
 
             return parser_parse_variable_declaration(parser, node);
         }
+
+        if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS)
+            return parser_parse_variable_assignment(parser, node);
     }
 
     FRX_ERROR_FILE("Could not parse token %s!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn, token_type_to_str(parser->current_token->type));
