@@ -192,6 +192,22 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
             break;
         }
 
+        case FRX_AST_TYPE_VARIABLE_ASSIGNMENT:
+        {
+            AST* variable = &root->children[0];
+            AST* expr = &root->children[1];
+
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(variable, f));
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " = ");
+
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(expr, f));
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ";\n");
+
+            break;
+        }
+
         case FRX_AST_TYPE_VARIABLE:
         {
             VariableData* data = root->data;
