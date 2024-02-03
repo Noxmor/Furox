@@ -742,7 +742,6 @@ static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node)
 
         //TODO: Handle includes/imports
 
-        //TODO: Handle struct definitions
         if(strcmp(parser->current_token->identifier, "struct") == 0)
             return parser_parse_struct_definition(parser, node);
     
