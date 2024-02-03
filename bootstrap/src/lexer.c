@@ -204,7 +204,7 @@ static void lexer_parse_identifier(Lexer* lexer, Token* token)
     usize identifier_index = 0;
     char current = lexer_peek_char(lexer, 0);
     
-    while(isalpha(current))
+    while(isalnum(current) || current == '_')
     {
         token->identifier[identifier_index++] = current;
         lexer_advance(lexer);
@@ -297,7 +297,35 @@ static FRX_NO_DISCARD b8 lexer_parse_char_literal(Lexer* lexer, Token* token)
 
     lexer_advance(lexer);
 
-    //TODO: Handle escaped char literals
+    if(token->identifier[0] == '\\')
+    {
+        token->identifier[2] = '\0';
+
+        switch(lexer_peek_char(lexer, 0))
+        {
+            case '0':
+            case 'n':
+            case 't':
+            case 'v':
+            case 'b':
+            case 'r':
+            case 'f':
+            case 'a':
+            case '\\':
+            case '\'':
+            case '"': token->identifier[1] = lexer_peek_char(lexer, 0); break;
+
+            default:
+            {
+                FRX_ERROR_FILE("'\\%c' is not a valid escaped character!", lexer->filepath, token->line, token->coloumn, token->identifier[0]);
+
+                return FRX_TRUE;
+            }
+        }
+
+        lexer_advance(lexer);
+    }
+
     if(lexer_peek_char(lexer, 0) != '\'')
     {
         FRX_ERROR_FILE("Missing ' after char literal!", lexer->filepath, token->line, token->coloumn);
