@@ -80,7 +80,7 @@ typedef struct NumberData
 
 typedef struct CharLiteralData
 {
-    char literal;
+    char literal[3];
 } CharLiteralData;
 
 typedef struct StringLiteralData
