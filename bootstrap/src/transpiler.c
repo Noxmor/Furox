@@ -476,6 +476,33 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
             return transpile_c(&root->children[1], f);
         }
 
+        case FRX_AST_TYPE_FUNCTION_DECLARATION:
+        {
+            FunctionDeclarationData* data = root->data;
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s ", data->return_type);
+
+            FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s(", data->name);
+
+            AST* parameter_list = &root->children[0];
+
+            for(usize i = 0; i < parameter_list->children_size; ++i)
+            {
+                VariableData* parameter = parameter_list->children[i].data;
+
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s %s", parameter->type, parameter->name);
+
+                if(i != parameter_list->children_size - 1)
+                    FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
+            }
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ");\n");
+
+            break;
+        }
+
         case FRX_AST_TYPE_FUNCTION_CALL:
         {
             FunctionCallData* data = root->data;
@@ -538,6 +565,23 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s_", data->namespace);
 
             FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+
+            break;
+        }
+
+        case FRX_AST_TYPE_EXTERN_BLOCK:
+        {
+            for(usize i = 0; i < root->children_size; ++i)
+            {
+                AST* child = &root->children[i];
+
+                if(child->type == FRX_AST_TYPE_FUNCTION_DECLARATION)
+                {
+                    FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "extern ");
+
+                    FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(child, f));
+                }
+            }
 
             break;
         }

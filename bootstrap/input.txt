@@ -10,6 +10,12 @@ Now we are back in the outer comment block.
 This should all be skipped.
 */
 
+extern
+{
+    //NOTE: Technically not correc, but Furox cannot handle the correct types yet
+    usize putchar(char c);
+}
+
 namespace std
 {
     struct String
@@ -24,6 +30,23 @@ namespace Math
     {
         return a + b;
     }
+}
+
+usize PrintFurox()
+{
+    usize result = 0;
+
+    //Sadly, function calls cannot be statements yet.
+    result = putchar('F');
+    result = putchar('u');
+    result = putchar('r');
+    result = putchar('o');
+    result = putchar('x');
+
+    //Sadly, Furox cannot handle escaped characters at the moment.
+    result = putchar(10);
+
+    return 0;
 }
 
 char getChar()
@@ -82,6 +105,8 @@ usize Main()
     std::String str;
     str.length = 0;
     str.length = str.length + var;
+
+    var = PrintFurox();
 
     return Math::add(1, 2 * 3);
 }

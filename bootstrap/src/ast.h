@@ -50,6 +50,7 @@ enum
 
     FRX_AST_TYPE_PARAMETER_LIST,
     FRX_AST_TYPE_FUNCTION_DEFINITION,
+    FRX_AST_TYPE_FUNCTION_DECLARATION,
     FRX_AST_TYPE_FUNCTION_CALL,
 
     FRX_AST_TYPE_SCOPE,
@@ -58,6 +59,8 @@ enum
 
     FRX_AST_TYPE_NAMESPACE,
     FRX_AST_TYPE_NAMESPACE_REF,
+
+    FRX_AST_TYPE_EXTERN_BLOCK,
 
     FRX_AST_TYPE_COUNT
 };
@@ -90,6 +93,12 @@ typedef struct FunctionDefinitionData
     char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } FunctionDefinitionData;
+
+typedef struct FunctionDeclarationData
+{
+    char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} FunctionDeclarationData;
 
 typedef struct FunctionCallData
 {
