@@ -156,7 +156,7 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
         {
             CharLiteralData* data = root->data;
 
-            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "'%c'", data->literal);
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "'%s'", data->literal);
 
             break;
         }
