@@ -534,6 +534,7 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
         case '}': token->type = FRX_TOKEN_TYPE_RIGHT_BRACE; break;
 
         case ',': token->type = FRX_TOKEN_TYPE_COMMA; break;
+        case '.': token->type = FRX_TOKEN_TYPE_DOT; break;
 
         case ':':
         {
