@@ -13,7 +13,7 @@ This should all be skipped.
 extern
 {
     //NOTE: Technically not correc, but Furox cannot handle the correct types yet
-    usize putchar(char c);
+    i32 putchar(i32 c);
 }
 
 namespace std
@@ -43,8 +43,7 @@ usize PrintFurox()
     result = putchar('o');
     result = putchar('x');
 
-    //Sadly, Furox cannot handle escaped characters at the moment.
-    result = putchar(10);
+    result = putchar('\n');
 
     return 0;
 }
