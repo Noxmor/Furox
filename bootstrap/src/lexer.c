@@ -204,7 +204,7 @@ static void lexer_parse_identifier(Lexer* lexer, Token* token)
     usize identifier_index = 0;
     char current = lexer_peek_char(lexer, 0);
     
-    while(isalpha(current))
+    while(isalnum(current) || current == '_')
     {
         token->identifier[identifier_index++] = current;
         lexer_advance(lexer);
