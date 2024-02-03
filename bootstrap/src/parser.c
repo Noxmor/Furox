@@ -102,7 +102,7 @@ static FRX_NO_DISCARD b8 parser_parse_char_literal(Parser* parser, AST* node)
     CharLiteralData* data = memory_alloc(sizeof(CharLiteralData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
 
-    data->literal = parser->current_token->identifier[0];
+    strcpy(data->literal, parser->current_token->identifier);
 
     return parser_eat(parser, FRX_TOKEN_TYPE_CHAR_LITERAL);
 }
