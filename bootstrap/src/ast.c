@@ -54,6 +54,7 @@ const char* ast_type_to_str(ASTType type)
 
         case FRX_AST_TYPE_PARAMETER_LIST: return "Parameter List";
         case FRX_AST_TYPE_FUNCTION_DEFINITION: return "Function Definition";
+        case FRX_AST_TYPE_FUNCTION_DECLARATION: return "Function Declaration";
         case FRX_AST_TYPE_FUNCTION_CALL: return "Function Call";
 
         case FRX_AST_TYPE_SCOPE: return "Scope";
@@ -62,6 +63,8 @@ const char* ast_type_to_str(ASTType type)
 
         case FRX_AST_TYPE_NAMESPACE: return "Namespace";
         case FRX_AST_TYPE_NAMESPACE_REF: return "Namespace Reference";
+
+        case FRX_AST_TYPE_EXTERN_BLOCK: return "Extern Block";
 
         default: FRX_ASSERT(FRX_FALSE);
     }
