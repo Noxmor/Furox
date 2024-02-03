@@ -79,5 +79,9 @@ usize Main()
     usize var = 0;
     var = 1;
 
+    std::String str;
+    str.length = 0;
+    str.length = str.length + var;
+
     return Math::add(1, 2 * 3);
 }
