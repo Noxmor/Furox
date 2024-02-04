@@ -107,6 +107,8 @@ typedef struct FunctionDeclarationData
 typedef struct FunctionCallData
 {
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    b8 is_statement;
 } FunctionCallData;
 
 typedef struct StructDefinitionData
