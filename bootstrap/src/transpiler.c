@@ -549,6 +549,11 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
 
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ")");
 
+            if(data->is_statement)
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ";\n");
+            }
+
             break;
         }
 

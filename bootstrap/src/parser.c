@@ -122,7 +122,7 @@ static FRX_NO_DISCARD b8 parser_parse_string_literal(Parser* parser, AST* node)
     return parser_eat(parser, FRX_TOKEN_TYPE_STRING_LITERAL);
 }
 
-static FRX_NO_DISCARD b8 parser_parse_function_call(Parser* parser, AST* node)
+static FRX_NO_DISCARD b8 parser_parse_function_call(Parser* parser, AST* node, b8 is_statement)
 {
     FRX_ASSERT(parser != NULL);
 
@@ -132,6 +132,8 @@ static FRX_NO_DISCARD b8 parser_parse_function_call(Parser* parser, AST* node)
 
     FunctionCallData* data = memory_alloc(sizeof(FunctionCallData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
+
+    data->is_statement = is_statement;
 
     strcpy(data->name, parser->current_token->identifier);
 
@@ -296,11 +298,11 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
 
                 FRX_ASSERT(child != NULL);
 
-                return parser_parse_function_call(parser, child);
+                return parser_parse_function_call(parser, child, FRX_FALSE);
             }
 
             if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
-                return parser_parse_function_call(parser, node);
+                return parser_parse_function_call(parser, node, FRX_FALSE);
 
             return parser_parse_variable(parser, node);
         }
@@ -545,7 +547,7 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
 
             if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
             {
-                FRX_PARSER_ABORT_ON_ERROR(parser_parse_function_call(parser, child));
+                FRX_PARSER_ABORT_ON_ERROR(parser_parse_function_call(parser, child, FRX_TRUE));
 
                 return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
             }
@@ -554,6 +556,13 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
                 return parser_parse_variable_definition(parser, child);
 
             return parser_parse_variable_declaration(parser, child);
+        }
+
+        if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+        {
+            FRX_PARSER_ABORT_ON_ERROR(parser_parse_function_call(parser, node, FRX_TRUE));
+
+            return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
         }
 
         if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER)
