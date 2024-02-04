@@ -13,6 +13,7 @@ This should all be skipped.
 extern
 {
     i32 putchar(i32 c);
+    i32 printf(usize format, ...); //Ignore type conflicts for now
 }
 
 namespace std
@@ -31,22 +32,6 @@ namespace Math
     }
 }
 
-usize PrintFurox()
-{
-    usize result = 0;
-
-    //Sadly, function calls cannot be statements yet.
-    result = putchar('F');
-    result = putchar('u');
-    result = putchar('r');
-    result = putchar('o');
-    result = putchar('x');
-
-    result = putchar('\n');
-
-    return 0;
-}
-
 char getChar()
 {
     return '#';
@@ -56,6 +41,11 @@ char getChar()
 {
     return "Furox";
 }*/
+
+u8 VariadicFunc(usize x, ...)
+{
+    return 2;
+}
 
 //This is the main function.
 usize Main()
@@ -104,7 +94,7 @@ usize Main()
     str.length = 0;
     str.length = str.length + var;
 
-    var = PrintFurox();
+    var = printf("Hello, World!\n");
 
-    return Math::add(1, 2 * 3);
+    return Math::add(1, 2 * 3) * VariadicFunc(1, 2, 3, 'A', "Test");
 }
