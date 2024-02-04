@@ -562,7 +562,24 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
         case '}': token->type = FRX_TOKEN_TYPE_RIGHT_BRACE; break;
 
         case ',': token->type = FRX_TOKEN_TYPE_COMMA; break;
-        case '.': token->type = FRX_TOKEN_TYPE_DOT; break;
+        case '.':
+        {
+            if(lexer_peek_char(lexer, 1) == '.' && lexer_peek_char(lexer, 2) == '.')
+            {
+                token->type = FRX_TOKEN_TYPE_ELLIPSIS;
+                strcpy(token->identifier, "...");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_DOT;
+
+            break;
+        }
 
         case ':':
         {

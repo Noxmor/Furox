@@ -576,6 +576,8 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
     FunctionDefinitionData* data = memory_alloc(sizeof(FunctionDefinitionData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
 
+    data->is_variadic = FRX_FALSE;
+
     strcpy(data->return_type, parser->current_token->identifier);
 
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
@@ -590,6 +592,29 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
 
     while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
     {
+        if(parser->current_token->type == FRX_TOKEN_TYPE_ELLIPSIS)
+        {
+            if(parameter_list->children_size == 0)
+            {
+                FRX_ERROR_FILE("Variadic function arguments requiere at least one named argument!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
+
+               return FRX_TRUE;
+            }
+
+            FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_ELLIPSIS));
+
+            data->is_variadic = FRX_TRUE;
+
+            if(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
+            {
+                FRX_ERROR_FILE("Variadic function arguments must come last in function signature!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
+
+                return FRX_TRUE;
+            }
+
+            break;
+        }
+
         AST* parameter = ast_new_child(parameter_list, FRX_AST_TYPE_VARIABLE_DECLARATION);
 
         VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
@@ -627,6 +652,8 @@ static FRX_NO_DISCARD b8 parser_parse_function_declaration(Parser* parser, AST* 
     FunctionDeclarationData* data = memory_alloc(sizeof(FunctionDeclarationData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
 
+    data->is_variadic = FRX_FALSE;
+
     strcpy(data->return_type, parser->current_token->identifier);
 
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
@@ -641,6 +668,29 @@ static FRX_NO_DISCARD b8 parser_parse_function_declaration(Parser* parser, AST* 
 
     while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
     {
+        if(parser->current_token->type == FRX_TOKEN_TYPE_ELLIPSIS)
+        {
+            if(parameter_list->children_size == 0)
+            {
+                FRX_ERROR_FILE("Variadic function arguments requiere at least one named argument!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
+
+                return FRX_TRUE;
+            }
+
+            FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_ELLIPSIS));
+
+            data->is_variadic = FRX_TRUE;
+
+            if(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
+            {
+                FRX_ERROR_FILE("Variadic function arguments must come last in function signature!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
+
+                return FRX_TRUE;
+            }
+
+            break;
+        }
+
         AST* parameter = ast_new_child(parameter_list, FRX_AST_TYPE_VARIABLE_DECLARATION);
 
         VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);

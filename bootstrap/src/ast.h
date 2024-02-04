@@ -92,12 +92,16 @@ typedef struct FunctionDefinitionData
 {
     char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    b8 is_variadic;
 } FunctionDefinitionData;
 
 typedef struct FunctionDeclarationData
 {
     char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    b8 is_variadic;
 } FunctionDeclarationData;
 
 typedef struct FunctionCallData
