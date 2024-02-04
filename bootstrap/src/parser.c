@@ -565,6 +565,63 @@ static FRX_NO_DISCARD b8 parser_parse_scope(Parser* parser, AST* node)
     return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE);
 }
 
+static FRX_NO_DISCARD b8 parser_parse_function_parameter_list(Parser* parser, AST* node, b8* is_variadic)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_PARAMETER_LIST;
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
+
+    while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
+    {
+        if(parser->current_token->type == FRX_TOKEN_TYPE_ELLIPSIS)
+        {
+            if(node->children_size == 0)
+            {
+                FRX_ERROR_FILE("Variadic function arguments requiere at least one named argument!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
+
+               return FRX_TRUE;
+            }
+
+            FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_ELLIPSIS));
+
+            *is_variadic = FRX_TRUE;
+
+            if(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
+            {
+                FRX_ERROR_FILE("Variadic function arguments must come last in function signature!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
+
+                return FRX_TRUE;
+            }
+
+            break;
+        }
+
+        AST* parameter = ast_new_child(node, FRX_AST_TYPE_VARIABLE_DECLARATION);
+
+        VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
+        parameter->data = data;
+
+        strcpy(data->type, parser->current_token->identifier);
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+
+        strcpy(data->name, parser->current_token->identifier);
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+    
+        if(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
+        {
+            FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_COMMA));
+        }
+    }
+    
+    return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS);
+}
+
 static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -587,54 +644,8 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     AST* parameter_list = ast_new_child(node, FRX_AST_TYPE_PARAMETER_LIST);
-    
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
 
-    while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
-    {
-        if(parser->current_token->type == FRX_TOKEN_TYPE_ELLIPSIS)
-        {
-            if(parameter_list->children_size == 0)
-            {
-                FRX_ERROR_FILE("Variadic function arguments requiere at least one named argument!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
-
-               return FRX_TRUE;
-            }
-
-            FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_ELLIPSIS));
-
-            data->is_variadic = FRX_TRUE;
-
-            if(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
-            {
-                FRX_ERROR_FILE("Variadic function arguments must come last in function signature!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
-
-                return FRX_TRUE;
-            }
-
-            break;
-        }
-
-        AST* parameter = ast_new_child(parameter_list, FRX_AST_TYPE_VARIABLE_DECLARATION);
-
-        VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
-        parameter->data = data;
-
-        strcpy(data->type, parser->current_token->identifier);
-
-        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
-
-        strcpy(data->name, parser->current_token->identifier);
-
-        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
-    
-        if(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
-        {
-            FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_COMMA));
-        }
-    }
-    
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS));
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_function_parameter_list(parser, parameter_list, &data->is_variadic));    
 
     AST* body = ast_new_child(node, FRX_AST_TYPE_SCOPE);
 
@@ -664,53 +675,7 @@ static FRX_NO_DISCARD b8 parser_parse_function_declaration(Parser* parser, AST* 
 
     AST* parameter_list = ast_new_child(node, FRX_AST_TYPE_PARAMETER_LIST);
 
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
-
-    while(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
-    {
-        if(parser->current_token->type == FRX_TOKEN_TYPE_ELLIPSIS)
-        {
-            if(parameter_list->children_size == 0)
-            {
-                FRX_ERROR_FILE("Variadic function arguments requiere at least one named argument!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
-
-                return FRX_TRUE;
-            }
-
-            FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_ELLIPSIS));
-
-            data->is_variadic = FRX_TRUE;
-
-            if(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
-            {
-                FRX_ERROR_FILE("Variadic function arguments must come last in function signature!", parser->lexer.filepath, parser->current_token->line, parser->current_token->coloumn);
-
-                return FRX_TRUE;
-            }
-
-            break;
-        }
-
-        AST* parameter = ast_new_child(parameter_list, FRX_AST_TYPE_VARIABLE_DECLARATION);
-
-        VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
-        parameter->data = data;
-
-        strcpy(data->type, parser->current_token->identifier);
-
-        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
-
-        strcpy(data->name, parser->current_token->identifier);
-
-        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
-
-        if(parser->current_token->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
-        {
-            FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_COMMA));
-        }
-    }
-
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS));
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_function_parameter_list(parser, parameter_list, &data->is_variadic));
 
     return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
 }
