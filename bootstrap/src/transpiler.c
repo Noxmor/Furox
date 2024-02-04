@@ -470,7 +470,22 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
                 if(i != parameter_list->children_size - 1)
                     FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
             }
-            
+
+            if(parameter_list->children_size == 0 && !data->is_variadic)
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "void");
+            }
+
+            if(data->is_variadic)
+            {
+                if(parameter_list->children_size > 0)
+                {
+                    FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
+                }
+
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "...");
+            }
+
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ")\n");
 
             return transpile_c(&root->children[1], f);
@@ -496,6 +511,21 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
 
                 if(i != parameter_list->children_size - 1)
                     FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
+            }
+
+            if(parameter_list->children_size == 0 && !data->is_variadic)
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "void");
+            }
+
+            if(data->is_variadic)
+            {
+                if(parameter_list->children_size > 0)
+                {
+                    FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
+                }
+
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "...");
             }
 
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ");\n");
@@ -632,6 +662,21 @@ static FRX_NO_DISCARD b8 transpile_header(const AST* root, FILE* f)
 
             if(i != parameter_list->children_size - 1)
                 FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
+        }
+
+        if(parameter_list->children_size == 0 && !data->is_variadic)
+        {
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "void");
+        }
+
+        if(data->is_variadic)
+        {
+            if(parameter_list->children_size > 0)
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
+            }
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "...");
         }
 
         FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ");\n\n");
