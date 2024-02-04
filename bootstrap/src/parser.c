@@ -17,8 +17,7 @@ static ParserInfo parser_info;
 
 static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node);
 
-static FRX_NO_DISCARD b8 parser_parse_namespace_resolution_with_function_call(Parser* parser, AST* node);
-static FRX_NO_DISCARD b8 parser_parse_namespace_resolution_with_variable_definition_or_declaration(Parser* parser, AST* node);
+static FRX_NO_DISCARD b8 parser_parse_namespace_resolution(Parser* parser, AST* node, AST** last_namespace_child);
 
 static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node);
 
@@ -290,7 +289,15 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
         case FRX_TOKEN_TYPE_IDENTIFIER:
         {
             if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
-                return parser_parse_namespace_resolution_with_function_call(parser, node);
+            {
+                AST* child = NULL;
+
+                FRX_PARSER_ABORT_ON_ERROR(parser_parse_namespace_resolution(parser, node, &child));
+
+                FRX_ASSERT(child != NULL);
+
+                return parser_parse_function_call(parser, child);
+            }
 
             if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
                 return parser_parse_function_call(parser, node);
@@ -529,7 +536,25 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
             return parser_parse_return_statement(parser, node);
 
         if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
-            return parser_parse_namespace_resolution_with_variable_definition_or_declaration(parser, node);
+        {
+            AST* child = NULL;
+
+            FRX_PARSER_ABORT_ON_ERROR(parser_parse_namespace_resolution(parser, node, &child));
+
+            FRX_ASSERT(child != NULL);
+
+            if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+            {
+                FRX_PARSER_ABORT_ON_ERROR(parser_parse_function_call(parser, child));
+
+                return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
+            }
+
+            if(parser_peek(parser, 2)->type == FRX_TOKEN_TYPE_EQUALS)
+                return parser_parse_variable_definition(parser, child);
+
+            return parser_parse_variable_declaration(parser, child);
+        }
 
         if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER)
         {
@@ -709,7 +734,7 @@ static FRX_NO_DISCARD b8 parser_parse_struct_definition(Parser* parser, AST* nod
     return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE);
 }
 
-static FRX_NO_DISCARD b8 parser_parse_namespace_resolution_with_function_call(Parser* parser, AST* node)
+static FRX_NO_DISCARD b8 parser_parse_namespace_resolution(Parser* parser, AST* node, AST** last_namespace_child)
 {
     //TODO: Handle case where we just have a namespace resolution operator for referencing the global namespace.
 
@@ -730,38 +755,11 @@ static FRX_NO_DISCARD b8 parser_parse_namespace_resolution_with_function_call(Pa
     AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
 
     if(parser->current_token->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
-        return parser_parse_namespace_resolution_with_function_call(parser, child);
+        return parser_parse_namespace_resolution(parser, child, last_namespace_child);
 
-    return parser_parse_function_call(parser, child);
-}
+    *last_namespace_child = child;
 
-static FRX_NO_DISCARD b8 parser_parse_namespace_resolution_with_variable_definition_or_declaration(Parser* parser, AST* node)
-{
-    //TODO: Handle case where we just have a namespace resolution operator for referencing the global namespace.
-
-    FRX_ASSERT(parser != NULL);
-
-    FRX_ASSERT(node != NULL);
-
-    node->type = FRX_AST_TYPE_NAMESPACE_REF;
-
-    NamespaceData* data = memory_alloc(sizeof(NamespaceData), FRX_MEMORY_CATEGORY_UNKNOWN);
-    node->data = data;
-
-    strcpy(data->namespace, parser->current_token->identifier);
-
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION));
-
-    AST* child = ast_new_child(node, FRX_AST_TYPE_NOOP);
-
-    if(parser->current_token->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
-        return parser_parse_namespace_resolution_with_variable_definition_or_declaration(parser, child);
-
-    if(parser->current_token->type == FRX_TOKEN_TYPE_EQUALS)
-        return parser_parse_variable_definition(parser, child);
-
-    return parser_parse_variable_declaration(parser, child);
+    return FRX_FALSE;
 }
 
 static FRX_NO_DISCARD b8 parser_parse_namespace(Parser* parser, AST* node)
