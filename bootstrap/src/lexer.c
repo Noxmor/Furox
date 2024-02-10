@@ -54,8 +54,9 @@ FRX_NO_DISCARD b8 lexer_init(Lexer* lexer, const char* filepath)
 
     lexer->filepath = filepath;
 
-    lexer->line = 1;
-    lexer->coloumn = 0;
+    lexer->location.pos = 0;
+    lexer->location.line = 1;
+    lexer->location.coloumn = 0;
 
     //This will automatically trigger the first lexer_read().
     lexer->buffer_index = FRX_LEXER_BUFFER_CAPACITY;
@@ -112,15 +113,17 @@ static void lexer_advance(Lexer* lexer)
 
     if(current == '\n')
     {
-        ++lexer->line;
-        lexer->coloumn = 0;
+        ++lexer->location.line;
+        lexer->location.coloumn = 0;
 
         ++lexer_info.lines_processed;
     }
     else
-        ++lexer->coloumn;
+        ++lexer->location.coloumn;
 
     ++lexer->buffer_index;
+
+    ++lexer->location.pos;
 
     if(lexer->buffer_index >= FRX_LEXER_BUFFER_CAPACITY)
         lexer_read(lexer);
@@ -152,8 +155,8 @@ static b8 lexer_skip_comment_block(Lexer* lexer)
 {
     FRX_ASSERT(lexer != NULL);
 
-    usize line_start = lexer->line;
-    usize coloumn_start = lexer->coloumn;
+    usize line_start = lexer->location.line;
+    usize coloumn_start = lexer->location.coloumn;
 
     usize comment_blocks_to_skip = 1;
 
@@ -166,8 +169,8 @@ static b8 lexer_skip_comment_block(Lexer* lexer)
 
         if(current == '/' && next == '*')
         {
-            line_start = lexer->line;
-            coloumn_start = lexer->coloumn;
+            line_start = lexer->location.line;
+            coloumn_start = lexer->location.coloumn;
 
             ++comment_blocks_to_skip;
 
@@ -317,7 +320,7 @@ static FRX_NO_DISCARD b8 lexer_parse_char_literal(Lexer* lexer, Token* token)
 
             default:
             {
-                FRX_ERROR_FILE("'\\%c' is not a valid escaped character!", lexer->filepath, token->line, token->coloumn, token->identifier[0]);
+                FRX_ERROR_FILE("'\\%c' is not a valid escaped character!", lexer->filepath, token->location.line, token->location.coloumn, token->identifier[0]);
 
                 return FRX_TRUE;
             }
@@ -328,7 +331,7 @@ static FRX_NO_DISCARD b8 lexer_parse_char_literal(Lexer* lexer, Token* token)
 
     if(lexer_peek_char(lexer, 0) != '\'')
     {
-        FRX_ERROR_FILE("Missing ' after char literal!", lexer->filepath, token->line, token->coloumn);
+        FRX_ERROR_FILE("Missing ' after char literal!", lexer->filepath, token->location.line, token->location.coloumn);
 
         return FRX_TRUE;
     }
@@ -354,7 +357,7 @@ static FRX_NO_DISCARD b8 lexer_parse_string_literal(Lexer* lexer, Token* token)
     {
         if(current == '\0')
         {
-            FRX_ERROR_FILE("Reached end of file while parsing string literal!", lexer->filepath, token->line, token->coloumn);
+            FRX_ERROR_FILE("Reached end of file while parsing string literal!", lexer->filepath, token->location.line, token->location.coloumn);
 
             return FRX_TRUE;
         }
@@ -379,8 +382,7 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
     
     lexer_skip_whitespaces(lexer);
 
-    token->line = lexer->line;
-    token->coloumn = lexer->coloumn;
+    memcpy(&token->location, &lexer->location, sizeof(SourceLocation));
 
     char current = lexer_peek_char(lexer, 0);
 
@@ -605,7 +607,7 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
 
         default:
         {
-            FRX_ERROR_FILE("Could not process '%c'!", lexer->filepath, lexer->line, lexer->coloumn, current);
+            FRX_ERROR_FILE("Could not process '%c'!", lexer->filepath, lexer->location.line, lexer->location.coloumn, current);
 
             return FRX_TRUE;
         }
@@ -630,6 +632,29 @@ FRX_NO_DISCARD b8 lexer_next_token(Lexer* lexer)
         return lexer_read_token(lexer, &lexer->tokens[0]);
 
     --lexer->tokens_count;
+
+    return FRX_FALSE;
+}
+
+FRX_NO_DISCARD b8 lexer_recover(Lexer* lexer, SourceLocation* location)
+{
+    FRX_ASSERT(lexer != NULL);
+
+    FRX_ASSERT(location != NULL);
+
+    FRX_ASSERT(location->pos <= lexer->location.pos);
+
+    if(fseek(lexer->file, location->pos, SEEK_SET) != 0)
+        return FRX_TRUE;
+
+    memcpy(&lexer->location, location, sizeof(SourceLocation));
+
+    lexer->buffer_index = FRX_LEXER_BUFFER_CAPACITY;
+
+    if(lexer_read_token(lexer, &lexer->tokens[0]))
+        return FRX_TRUE;
+
+    lexer->tokens_count = 1;
 
     return FRX_FALSE;
 }

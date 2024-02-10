@@ -8,8 +8,6 @@ typedef struct Parser
 {
     Lexer lexer;
     AST root;
-
-    Token* current_token;
 } Parser;
 
 FRX_NO_DISCARD b8 parser_init(Parser* parser, const char* filepath);

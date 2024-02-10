@@ -136,7 +136,7 @@ const char* ast_type_to_str(ASTType type);
 
 void ast_init(AST* ast, ASTType type);
 
-AST* ast_new_child(AST* parent, ASTType child_type);
+AST* ast_new_child(AST* parent);
 
 void ast_print(const AST* root);
 

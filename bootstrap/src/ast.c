@@ -85,7 +85,7 @@ void ast_init(AST* ast, ASTType type)
     ast->children = NULL;
 }
 
-AST* ast_new_child(AST* parent, ASTType child_type)
+AST* ast_new_child(AST* parent)
 {
     FRX_ASSERT(parent != NULL);
 
@@ -97,7 +97,7 @@ AST* ast_new_child(AST* parent, ASTType child_type)
 
     AST* child = &parent->children[parent->children_size++];
 
-    ast_init(child, child_type);
+    ast_init(child, FRX_AST_TYPE_NOOP);
 
     return child;
 }
