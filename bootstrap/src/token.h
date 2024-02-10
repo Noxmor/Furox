@@ -63,14 +63,20 @@ enum
 
 typedef u8 TokenType;
 
+typedef struct SourceLocation
+{
+    usize pos;
+    usize line;
+    usize coloumn;
+} SourceLocation;
+
 #define FRX_TOKEN_IDENTIFIER_CAPACITY 128
 
 typedef struct Token
 {
     TokenType type;
 
-    usize line;
-    usize coloumn;
+    SourceLocation location;
 
     char identifier[FRX_TOKEN_IDENTIFIER_CAPACITY];
     usize number;
