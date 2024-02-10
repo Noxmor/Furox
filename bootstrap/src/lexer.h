@@ -16,8 +16,7 @@ typedef struct Lexer
     FILE* file;
     const char* filepath;
 
-    usize line;
-    usize coloumn;
+    SourceLocation location;
 
     char buffer[FRX_LEXER_BUFFER_CAPACITY];
     usize buffer_index;
@@ -31,6 +30,8 @@ FRX_NO_DISCARD b8 lexer_init(Lexer* lexer, const char* filepath);
 Token* lexer_peek(Lexer* lexer, usize offset);
 
 FRX_NO_DISCARD b8 lexer_next_token(Lexer* lexer);
+
+FRX_NO_DISCARD b8 lexer_recover(Lexer* lexer, SourceLocation* location);
 
 void lexer_destroy(Lexer* lexer);
 
