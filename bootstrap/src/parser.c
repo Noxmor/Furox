@@ -544,6 +544,9 @@ static FRX_NO_DISCARD b8 parser_parse_return_statement(Parser* parser, AST* node
 
     node->type = FRX_AST_TYPE_RETURN_STATEMENT;
 
+    if(strcmp(parser_current_token(parser)->identifier, "return") != 0)
+        return FRX_TRUE;
+
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     if(parser_current_token(parser)->type != FRX_TOKEN_TYPE_SEMICOLON)
@@ -757,6 +760,9 @@ static FRX_NO_DISCARD b8 parser_parse_struct_definition(Parser* parser, AST* nod
 
     node->type = FRX_AST_TYPE_STRUCT_DEFINITION;
 
+    if(strcmp(parser_current_token(parser)->identifier, "struct") != 0)
+        return FRX_TRUE;
+
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     StructDefinitionData* data = memory_alloc(sizeof(StructDefinitionData), FRX_MEMORY_CATEGORY_UNKNOWN);
@@ -812,6 +818,9 @@ static FRX_NO_DISCARD b8 parser_parse_namespace(Parser* parser, AST* node)
 
     FRX_ASSERT(node != NULL);
 
+    if(strcmp(parser_current_token(parser)->identifier, "namespace") != 0)
+        return FRX_TRUE;
+
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     node->type = FRX_AST_TYPE_NAMESPACE;
@@ -842,6 +851,9 @@ static FRX_NO_DISCARD b8 parser_parse_extern_block(Parser* parser, AST* node)
     FRX_ASSERT(node != NULL);
 
     node->type = FRX_AST_TYPE_EXTERN_BLOCK;
+
+    if(strcmp(parser_current_token(parser)->identifier, "extern") != 0)
+        return FRX_TRUE;
 
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
