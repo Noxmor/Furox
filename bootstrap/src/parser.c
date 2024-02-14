@@ -342,7 +342,8 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
         case FRX_TOKEN_TYPE_STRING_LITERAL: return parser_parse_string_literal(parser, node);
     }
 
-    FRX_ERROR_FILE("Could not parse token %s!", parser->lexer.filepath, parser_current_location(parser).line, parser_current_location(parser).coloumn, token_type_to_str(parser_current_token(parser)->type));
+    SourceLocation location = parser_current_location(parser);
+    FRX_ERROR_FILE("Could not parse token %s, expected namespace-resolution, function-call, variable, number, char-literal or string-literal!", parser->lexer.filepath, location.line, location.coloumn, token_type_to_str(parser_current_token(parser)->type));
 
     return FRX_TRUE;
 }
@@ -883,7 +884,8 @@ static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node)
         return parser_parse_function_definition(parser, node);
     }
 
-    FRX_ERROR_FILE("Could not process token %s!", parser->lexer.filepath, parser_current_location(parser).line, parser_current_location(parser).coloumn, token_type_to_str(parser_current_token(parser)->type));
+    SourceLocation location = parser_current_location(parser);
+    FRX_ERROR_FILE("Could not parse token %s, expected namespace, struct-definition, extern-block or function-definition!", parser->lexer.filepath, location.line, location.coloumn, token_type_to_str(parser_current_token(parser)->type));
 
     return FRX_TRUE;
 }
