@@ -18,6 +18,8 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_CHAR_LITERAL: return "Char Literal";
         case FRX_AST_TYPE_STRING_LITERAL: return "String Literal";
 
+        case FRX_AST_TYPE_TYPE: return "Type";
+
         case FRX_AST_TYPE_VARIABLE_DECLARATION: return "Variable Declaration";
         case FRX_AST_TYPE_VARIABLE_DEFINITION: return "Variable Definition";
         case FRX_AST_TYPE_VARIABLE_ASSIGNMENT: return "Variable Assignment";
