@@ -14,6 +14,8 @@ enum
     FRX_AST_TYPE_CHAR_LITERAL,
     FRX_AST_TYPE_STRING_LITERAL,
 
+    FRX_AST_TYPE_TYPE,
+
     FRX_AST_TYPE_VARIABLE_DECLARATION,
     FRX_AST_TYPE_VARIABLE_DEFINITION,
     FRX_AST_TYPE_VARIABLE_ASSIGNMENT,
@@ -67,9 +69,15 @@ enum
 
 typedef u8 ASTType;
 
+typedef struct TypeData
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    usize pointer_level;
+} TypeData;
+
 typedef struct VariableData
 {
-    char type[FRX_TOKEN_IDENTIFIER_CAPACITY];
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } VariableData;
 
@@ -90,7 +98,6 @@ typedef struct StringLiteralData
 
 typedef struct FunctionDefinitionData
 {
-    char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 is_variadic;
@@ -98,7 +105,6 @@ typedef struct FunctionDefinitionData
 
 typedef struct FunctionDeclarationData
 {
-    char return_type[FRX_TOKEN_IDENTIFIER_CAPACITY];
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 is_variadic;

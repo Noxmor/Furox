@@ -172,7 +172,6 @@ static FRX_NO_DISCARD b8 parser_parse_variable(Parser* parser, AST* node)
     VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
 
-    strcpy(data->type, "");
     strcpy(data->name, parser_current_token(parser)->identifier);
 
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
@@ -467,6 +466,39 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
     return FRX_FALSE;
 }
 
+static FRX_NO_DISCARD b8 parser_parse_type(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
+    {
+        AST* child = NULL;
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_namespace_resolution(parser, node, &child));
+
+        FRX_ASSERT(child != NULL);
+
+        return parser_parse_type(parser, child);
+    }
+
+    node->type = FRX_AST_TYPE_TYPE;
+
+    TypeData* data = memory_alloc(sizeof(TypeData), FRX_MEMORY_CATEGORY_UNKNOWN);
+    node->data = data;
+
+    strcpy(data->name, parser_current_token(parser)->identifier);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+
+    data->pointer_level = 0;
+
+    //TODO: Add logic for parsing pointers and arrays.
+
+    return FRX_FALSE;
+}
+
 static FRX_NO_DISCARD b8 parser_parse_variable_declaration(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -475,12 +507,12 @@ static FRX_NO_DISCARD b8 parser_parse_variable_declaration(Parser* parser, AST* 
 
     node->type = FRX_AST_TYPE_VARIABLE_DECLARATION;
 
+    AST* type = ast_new_child(node);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_type(parser, type));
+
     VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
-
-    strcpy(data->type, parser_current_token(parser)->identifier);
-
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     strcpy(data->name, parser_current_token(parser)->identifier);
 
@@ -500,9 +532,9 @@ static FRX_NO_DISCARD b8 parser_parse_variable_definition(Parser* parser, AST* n
     VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
 
-    strcpy(data->type, parser_current_token(parser)->identifier);
+    AST* type = ast_new_child(node);
 
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_type(parser, type));
 
     strcpy(data->name, parser_current_token(parser)->identifier);
 
@@ -574,6 +606,8 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
         {
             AST* child = NULL;
 
+            SourceLocation recover_location = parser_current_location(parser);
+
             FRX_PARSER_ABORT_ON_ERROR(parser_parse_namespace_resolution(parser, node, &child));
 
             FRX_ASSERT(child != NULL);
@@ -585,10 +619,19 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
                 return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
             }
 
+            //NOTE: The following lines are leaking memory, since we never delete any AST nodes from the namespace resolution parse.
             if(parser_peek(parser, 2)->type == FRX_TOKEN_TYPE_EQUALS)
-                return parser_parse_variable_definition(parser, child);
+            {
+                parser_recover(parser, &recover_location);
+                node->children_size = 0;
 
-            return parser_parse_variable_declaration(parser, child);
+                return parser_parse_variable_definition(parser, node);
+            }
+
+            parser_recover(parser, &recover_location);
+            node->children_size = 0;
+
+            return parser_parse_variable_declaration(parser, node);
         }
 
         if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
@@ -674,12 +717,12 @@ static FRX_NO_DISCARD b8 parser_parse_function_parameter_list(Parser* parser, AS
 
         AST* parameter = ast_new_child(node);
 
+        AST* parameter_type = ast_new_child(parameter);
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_type(parser, parameter_type));
+
         VariableData* data = memory_alloc(sizeof(VariableData), FRX_MEMORY_CATEGORY_UNKNOWN);
         parameter->data = data;
-
-        strcpy(data->type, parser_current_token(parser)->identifier);
-
-        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
         strcpy(data->name, parser_current_token(parser)->identifier);
 
@@ -702,14 +745,14 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
 
     node->type = FRX_AST_TYPE_FUNCTION_DEFINITION;
 
+    AST* type = ast_new_child(node);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_type(parser, type));
+
     FunctionDefinitionData* data = memory_alloc(sizeof(FunctionDefinitionData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
 
     data->is_variadic = FRX_FALSE;
-
-    strcpy(data->return_type, parser_current_token(parser)->identifier);
-
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     strcpy(data->name, parser_current_token(parser)->identifier);
 
@@ -732,14 +775,14 @@ static FRX_NO_DISCARD b8 parser_parse_function_declaration(Parser* parser, AST* 
 
     node->type = FRX_AST_TYPE_FUNCTION_DECLARATION;
 
+    AST* type = ast_new_child(node);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_type(parser, type));
+
     FunctionDeclarationData* data = memory_alloc(sizeof(FunctionDeclarationData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
 
     data->is_variadic = FRX_FALSE;
-
-    strcpy(data->return_type, parser_current_token(parser)->identifier);
-
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
     strcpy(data->name, parser_current_token(parser)->identifier);
 
