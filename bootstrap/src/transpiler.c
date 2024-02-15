@@ -170,11 +170,22 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
             break;
         }
 
+        case FRX_AST_TYPE_TYPE:
+        {
+            TypeData* data = root->data;
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s", data->name);
+
+            break;
+        }
+
         case FRX_AST_TYPE_VARIABLE_DECLARATION:
         {
             VariableData* data = root->data;
 
-            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s %s;\n", data->type, data->name);
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s;\n", data->name);
 
             break;
         }
@@ -183,9 +194,11 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
         {
             VariableData* data = root->data;
 
-            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s %s = ", data->type, data->name);
-
             FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s = ", data->name);
+
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[1], f));
 
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ";\n");
 
@@ -453,19 +466,25 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
         {
             FunctionDefinitionData* data = root->data;
 
-            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s ", data->return_type);
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " ");
 
             FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
 
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s(", data->name);
             
-            AST* parameter_list = &root->children[0];
+            AST* parameter_list = &root->children[1];
             
             for(usize i = 0; i < parameter_list->children_size; ++i)
             {
-                VariableData* parameter = parameter_list->children[i].data;
+                AST* parameter = &parameter_list->children[i];
 
-                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s %s", parameter->type, parameter->name);
+                VariableData* parameter_data = parameter->data;
+
+                FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&parameter->children[0], f));
+
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s", parameter_data->name);
 
                 if(i != parameter_list->children_size - 1)
                     FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
@@ -488,26 +507,32 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
 
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ")\n");
 
-            return transpile_c(&root->children[1], f);
+            return transpile_c(&root->children[2], f);
         }
 
         case FRX_AST_TYPE_FUNCTION_DECLARATION:
         {
             FunctionDeclarationData* data = root->data;
 
-            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s ", data->return_type);
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " ");
 
             FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
 
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s(", data->name);
 
-            AST* parameter_list = &root->children[0];
+            AST* parameter_list = &root->children[1];
 
             for(usize i = 0; i < parameter_list->children_size; ++i)
             {
-                VariableData* parameter = parameter_list->children[i].data;
+                AST* parameter = &parameter_list->children[i];
 
-                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s %s", parameter->type, parameter->name);
+                VariableData* parameter_data = parameter->data;
+
+                FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&parameter->children[0], f));
+
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s", parameter_data->name);
 
                 if(i != parameter_list->children_size - 1)
                     FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
@@ -651,19 +676,25 @@ static FRX_NO_DISCARD b8 transpile_header(const AST* root, FILE* f)
     {
         FunctionDefinitionData* data = root->data;
 
-        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s ", data->return_type);
-        
+        FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " ");
+
         FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
         
         FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s(", data->name);
         
-        AST* parameter_list = &root->children[0];
+        AST* parameter_list = &root->children[1];
 
         for(usize i = 0; i < parameter_list->children_size; ++i)
         {
-            VariableData* parameter = parameter_list->children[i].data;
+            AST* parameter = &parameter_list->children[i];
 
-            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s %s", parameter->type, parameter->name);
+            VariableData* parameter_data = parameter->data;
+
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&parameter->children[0], f));
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s", parameter_data->name);
 
             if(i != parameter_list->children_size - 1)
                 FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
