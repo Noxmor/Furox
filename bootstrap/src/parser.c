@@ -494,7 +494,14 @@ static FRX_NO_DISCARD b8 parser_parse_type(Parser* parser, AST* node)
 
     data->pointer_level = 0;
 
-    //TODO: Add logic for parsing pointers and arrays.
+    while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
+    {
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_STAR));
+
+        ++data->pointer_level;
+    }
+
+    //TODO: Add logic for parsing arrays.
 
     return FRX_FALSE;
 }

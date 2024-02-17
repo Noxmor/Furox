@@ -176,6 +176,11 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
 
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s", data->name);
 
+            for(usize i = 0; i < data->pointer_level; ++i)
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "*");
+            }
+
             break;
         }
 
