@@ -501,7 +501,16 @@ static FRX_NO_DISCARD b8 parser_parse_type(Parser* parser, AST* node)
         ++data->pointer_level;
     }
 
-    //TODO: Add logic for parsing arrays.
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_LEFT_BRACKET)
+    {
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACKET));
+
+        AST* expr = ast_new_child(node);
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, expr));
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACKET));
+    }
 
     return FRX_FALSE;
 }
@@ -626,8 +635,12 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
                 return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
             }
 
+            AST type;
+            ast_init(&type, FRX_AST_TYPE_NOOP);
+            FRX_PARSER_ABORT_ON_ERROR(parser_parse_type(parser, &type));
+
             //NOTE: The following lines are leaking memory, since we never delete any AST nodes from the namespace resolution parse.
-            if(parser_peek(parser, 2)->type == FRX_TOKEN_TYPE_EQUALS)
+            if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS)
             {
                 parser_recover(parser, &recover_location);
                 node->children_size = 0;
@@ -648,13 +661,23 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
             return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
         }
 
-        if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER)
-        {
-            if(parser_peek(parser, 2)->type == FRX_TOKEN_TYPE_EQUALS)
-                return parser_parse_variable_definition(parser, node);
+        SourceLocation recover_location = parser_current_location(parser);
 
+        AST type;
+        ast_init(&type, FRX_AST_TYPE_NOOP);
+        if(!parser_parse_type(parser, &type) && parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER)
+        {
+            if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS)
+            {
+                parser_recover(parser, &recover_location);
+                return parser_parse_variable_definition(parser, node);
+            }
+
+            parser_recover(parser, &recover_location);
             return parser_parse_variable_declaration(parser, node);
         }
+
+        parser_recover(parser, &recover_location);
 
         if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS || parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_DOT)
             return parser_parse_variable_assignment(parser, node);
