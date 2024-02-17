@@ -190,7 +190,24 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
 
             FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
 
-            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s;\n", data->name);
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s", data->name);
+
+            AST* type = &root->children[0];
+            while(type->type != FRX_AST_TYPE_TYPE)
+                type = &type->children[0];
+
+            if(type->children_size > 0)
+            {
+                AST* array_size_expr = &type->children[0];
+
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "[");
+                FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(array_size_expr, f));
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "];\n");
+            }
+            else
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ";\n");
+            }
 
             break;
         }
@@ -201,7 +218,24 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
 
             FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
 
-            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s = ", data->name);
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s", data->name);
+
+            AST* type = &root->children[0];
+            while(type->type != FRX_AST_TYPE_TYPE)
+                type = &type->children[0];
+
+            if(type->children_size > 0)
+            {
+                AST* array_size_expr = &type->children[0];
+
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "[");
+                FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(array_size_expr, f));
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "] = ");
+            }
+            else
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " = ");
+            }
 
             FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[1], f));
 
