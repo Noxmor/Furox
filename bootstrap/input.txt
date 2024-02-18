@@ -96,6 +96,8 @@ usize Main()
 
     char[16] buffer;
 
+    void* nonsense = *buffer + &buffer;
+    
     printf("Hello, World!\n");
 
     return Math::add(1, 2 * 3) * VariadicFunc(1, 2, 3, 'A', "Test");

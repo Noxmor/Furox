@@ -104,7 +104,10 @@ static usize parser_get_precedence(ASTType type)
 
         case FRX_AST_TYPE_ARITHMETIC_NEGATION:
         case FRX_AST_TYPE_LOGICAL_NEGATION:
-        case FRX_AST_TYPE_BINARY_NEGATION: return 10;
+        case FRX_AST_TYPE_BINARY_NEGATION:
+
+        case FRX_AST_TYPE_DEREFERENCE:
+        case FRX_AST_TYPE_ADDRESS_OF: return 10;
     }
 
     return 0xFFFFFFFFFFFFFFFF;
@@ -116,7 +119,10 @@ static b8 parser_next_token_is_unary_operator(Parser* parser)
     {
         case FRX_TOKEN_TYPE_MINUS:
         case FRX_TOKEN_TYPE_LOGICAL_NEGATION:
-        case FRX_TOKEN_TYPE_BINARY_NEGATION: return FRX_TRUE;
+        case FRX_TOKEN_TYPE_BINARY_NEGATION:
+
+        case FRX_TOKEN_TYPE_STAR:
+        case FRX_TOKEN_TYPE_BINARY_AND: return FRX_TRUE;
     }
 
     return FRX_FALSE;
@@ -294,6 +300,9 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
             case FRX_TOKEN_TYPE_MINUS: ast_init(node, FRX_AST_TYPE_ARITHMETIC_NEGATION); break;
             case FRX_TOKEN_TYPE_LOGICAL_NEGATION: ast_init(node, FRX_AST_TYPE_LOGICAL_NEGATION); break;
             case FRX_TOKEN_TYPE_BINARY_NEGATION: ast_init(node, FRX_AST_TYPE_BINARY_NEGATION); break;
+
+            case FRX_TOKEN_TYPE_STAR: ast_init(node, FRX_AST_TYPE_DEREFERENCE); break;
+            case FRX_TOKEN_TYPE_BINARY_AND: ast_init(node, FRX_AST_TYPE_ADDRESS_OF); break;
 
             default:
             {
