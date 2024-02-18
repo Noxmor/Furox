@@ -484,6 +484,24 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
             break;
         }
 
+        case FRX_AST_TYPE_DEREFERENCE:
+        {
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "*(");
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ")");
+
+            break;
+        }
+
+        case FRX_AST_TYPE_ADDRESS_OF:
+        {
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "&(");
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ")");
+
+            break;
+        }
+
         case FRX_AST_TYPE_RETURN_STATEMENT:
         {
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "return");
