@@ -266,11 +266,18 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
 
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s", data->name);
 
-            if(root->children_size > 0)
+            if(root->children[0].type != FRX_AST_TYPE_NOOP)
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "[");
+                FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0].children[0], f));
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "]");
+            }
+
+            if(root->children_size > 1)
             {
                 FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ".");
 
-                FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+                FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[1], f));
             }
 
             break;

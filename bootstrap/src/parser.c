@@ -182,6 +182,20 @@ static FRX_NO_DISCARD b8 parser_parse_variable(Parser* parser, AST* node)
 
     FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER));
 
+    AST* index = ast_new_child(node);
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_LEFT_BRACKET)
+    {
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACKET));
+
+        index->type = FRX_AST_TYPE_VARIABLE_ARRAY_ACCESS;
+        FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, ast_new_child(index)));
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACKET));
+    }
+    else
+        index->type = FRX_AST_TYPE_NOOP;
+
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_DOT)
     {
         FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_DOT));
