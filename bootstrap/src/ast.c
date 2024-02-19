@@ -24,6 +24,7 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_VARIABLE_DEFINITION: return "Variable Definition";
         case FRX_AST_TYPE_VARIABLE_ASSIGNMENT: return "Variable Assignment";
         case FRX_AST_TYPE_VARIABLE: return "Variable";
+        case FRX_AST_TYPE_VARIABLE_ARRAY_ACCESS: return "Variable Array Access";
 
         case FRX_AST_TYPE_ADDITION: return "Addition";
         case FRX_AST_TYPE_SUBTRACTION: return "Subtraction";
