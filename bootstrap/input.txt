@@ -96,7 +96,7 @@ usize Main()
 
     char[16] buffer;
 
-    void* nonsense = *buffer + &buffer;
+    void* nonsense = *buffer + &buffer + buffer[8];
     
     printf("Hello, World!\n");
 
