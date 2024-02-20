@@ -100,5 +100,9 @@ usize Main()
     
     printf("Hello, World!\n");
 
+    std::String* str_pointer = &str;
+    str_pointer->length = 15;
+    printf("String length: %zu\n", str.length);
+
     return Math::add(1, 2 * 3) * VariadicFunc(1, 2, 3, 'A', "Test");
 }
