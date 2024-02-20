@@ -83,6 +83,8 @@ typedef struct TypeData
 typedef struct VariableData
 {
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    b8 is_pointer;
 } VariableData;
 
 typedef struct NumberData
