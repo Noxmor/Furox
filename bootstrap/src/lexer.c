@@ -215,6 +215,31 @@ static void lexer_parse_identifier(Lexer* lexer, Token* token)
     }
 
     token->identifier[identifier_index] = '\0';
+
+    if(strcmp(token->identifier, "nullptr") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_NULLPTR;
+    else if(strcmp(token->identifier, "true") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_TRUE;
+    else if(strcmp(token->identifier, "false") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_FALSE;
+    else if(strcmp(token->identifier, "return") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_RETURN;
+    else if(strcmp(token->identifier, "namespace") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_NAMESPACE;
+    else if(strcmp(token->identifier, "extern") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_EXTERN;
+    else if(strcmp(token->identifier, "struct") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_STRUCT;
+    else if(strcmp(token->identifier, "if") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_IF;
+    else if(strcmp(token->identifier, "else") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_ELSE;
+    else if(strcmp(token->identifier, "for") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_FOR;
+    else if(strcmp(token->identifier, "while") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_WHILE;
+    else if(strcmp(token->identifier, "do") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_DO;
 }
 
 static void lexer_parse_binary_number(Lexer* lexer, Token* token)
