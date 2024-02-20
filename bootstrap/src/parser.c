@@ -221,6 +221,27 @@ static FRX_NO_DISCARD b8 parser_parse_number(Parser* parser, AST* node)
     NumberData* data = memory_alloc(sizeof(NumberData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
 
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_NULLPTR)
+    {
+        data->number = 0;
+
+        return parser_eat(parser, FRX_TOKEN_TYPE_KW_NULLPTR);
+    }
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_TRUE)
+    {
+        data->number = 1;
+
+        return parser_eat(parser, FRX_TOKEN_TYPE_KW_TRUE);
+    }
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_FALSE)
+    {
+        data->number = 0;
+
+        return parser_eat(parser, FRX_TOKEN_TYPE_KW_FALSE);
+    }
+
     data->number = parser_current_token(parser)->number;
 
     return parser_eat(parser, FRX_TOKEN_TYPE_NUMBER);
@@ -360,6 +381,9 @@ static FRX_NO_DISCARD b8 parser_parse_primary_expression(Parser* parser, AST* no
             return parser_parse_variable(parser, node);
         }
 
+        case FRX_TOKEN_TYPE_KW_NULLPTR:
+        case FRX_TOKEN_TYPE_KW_TRUE:
+        case FRX_TOKEN_TYPE_KW_FALSE:
         case FRX_TOKEN_TYPE_NUMBER: return parser_parse_number(parser, node);
 
         case FRX_TOKEN_TYPE_CHAR_LITERAL: return parser_parse_char_literal(parser, node);
