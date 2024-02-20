@@ -3,6 +3,9 @@
 #include <ctype.h>
 #include <string.h>
 
+#include <sys/errno.h>
+#include <sys/stat.h>
+
 #include "core/assert.h"
 #include "core/memory.h"
 
@@ -818,14 +821,43 @@ static FRX_NO_DISCARD b8 transpile_header(const AST* root, FILE* f)
     return FRX_FALSE;
 }
 
-static FILE* create_c_file(const char* src_filepath)
+static FRX_NO_DISCARD b8 create_furox_directory_from_source(const char* filepath, char* furox_filepath)
 {
-    FRX_ASSERT(src_filepath != NULL);
+    FRX_ASSERT(filepath != NULL);
 
-    char c_filepath[strlen(src_filepath) + strlen(".c") + 1];
-    strcpy(c_filepath, src_filepath);
-    char* extension = strrchr(c_filepath, '.');
-    strcpy(++extension, "c");
+    FRX_ASSERT(furox_filepath != NULL);
+
+    const char* last_slash = strrchr(filepath, '/');
+
+    if(last_slash == NULL)
+        strcpy(furox_filepath, "furox-c");
+    else
+    {
+        usize path_len = last_slash - filepath;
+
+        FRX_ASSERT(path_len < 1000);
+
+        sprintf(furox_filepath, "furox-c/%.*s", path_len, filepath);
+    }
+
+    return mkdir(furox_filepath, 0777) == -1 && errno != EEXIST;
+}
+
+static FILE* create_c_file(const char* furox_filepath, const char* filename)
+{
+    FRX_ASSERT(furox_filepath != NULL);
+
+    FRX_ASSERT(filename != NULL);
+
+    char c_filepath[strlen(furox_filepath) + strlen("/") + strlen(filename) + 1];
+
+    const char* extension = strrchr(filename, '.');
+    usize filename_len = extension - filename;
+
+    if(extension == NULL)
+        filename_len = strlen(filename);
+
+    sprintf(c_filepath, "%s/%.*s.c", furox_filepath, filename_len, filename);
 
     FILE* f = fopen(c_filepath, "w");
     if(f == NULL)
@@ -833,8 +865,7 @@ static FILE* create_c_file(const char* src_filepath)
 
     store_c_filepath(c_filepath);
 
-    *extension = 'h';
-    if(fprintf(f, "#include \"Furox.h\"\n#include \"%s\"\n", c_filepath) < 0)
+    if(fprintf(f, "#include \"Furox.h\"\n#include \"%.*s.h\"\n", filename_len, filename) < 0)
     {
         fclose(f);
 
@@ -844,14 +875,21 @@ static FILE* create_c_file(const char* src_filepath)
     return f;
 }
 
-static FILE* create_header_file(const char* src_filepath)
+static FILE* create_header_file(const char* furox_filepath, const char* filename)
 {
-    FRX_ASSERT(src_filepath != NULL);
+    FRX_ASSERT(furox_filepath != NULL);
 
-    char header_filepath[strlen(src_filepath) + strlen(".h") + 1];
-    strcpy(header_filepath, src_filepath);
-    char* extension = strrchr(header_filepath, '.');
-    strcpy(++extension, "h");
+    FRX_ASSERT(filename != NULL);
+
+    char header_filepath[strlen(furox_filepath) + strlen("/") + strlen(filename) + 1];
+
+    const char* extension = strrchr(filename, '.');
+    usize filename_len = extension - filename;
+
+    if(extension == NULL)
+        filename_len = strlen(filename);
+
+    sprintf(header_filepath, "%s/%.*s.h", furox_filepath, filename_len, filename);
 
     FILE* f = fopen(header_filepath, "w");
     if(f == NULL)
@@ -876,11 +914,20 @@ FRX_NO_DISCARD b8 transpile_ast(const AST* root, const char* src_filepath)
 
     FRX_ASSERT(src_filepath != NULL);
 
-    FILE* c_file = create_c_file(src_filepath);
+    char furox_filepath[strlen(src_filepath) + strlen("furox-c/") + 1];
+
+    const char* filename = strrchr(src_filepath, '/');
+    if(filename == NULL)
+        filename = src_filepath;
+
+    if(create_furox_directory_from_source(src_filepath, furox_filepath))
+        return FRX_TRUE;
+
+    FILE* c_file = create_c_file(furox_filepath, filename);
     if(c_file == NULL)
         return FRX_TRUE;
 
-    FILE* header_file = create_header_file(src_filepath);
+    FILE* header_file = create_header_file(furox_filepath, filename);
     if(header_file == NULL)
     {
         fclose(c_file);
@@ -904,11 +951,72 @@ FRX_NO_DISCARD b8 transpile_ast(const AST* root, const char* src_filepath)
     return FRX_FALSE;
 }
 
+static FRX_NO_DISCARD b8 generate_furox_main_c()
+{
+    FILE* f = fopen("furox-c/FuroxMain.c", "w");
+    if(f == NULL)
+        return FRX_TRUE;
+
+    static const char* furox_main_c = "#include \"Furox.h\"\n\n"
+                                      "int Main(void);\n\n"
+                                      "int main(int argc, char** argv)\n"
+                                      "{\n"
+                                      "    return Main();\n"
+                                      "}";
+
+    fprintf(f, "%s", furox_main_c);
+
+    fclose(f);
+
+    return FRX_FALSE;
+}
+
+static FRX_NO_DISCARD b8 generate_furox_header()
+{
+    FILE* f = fopen("furox-c/Furox.h", "w");
+    if(f == NULL)
+        return FRX_TRUE;
+
+    static const char* furox_header = "#ifndef FUROX_H\n"
+                                      "#define FUROX_H\n\n"
+                                      "#include <stddef.h>\n"
+                                      "#include <stdint.h>\n\n"
+                                      "typedef size_t usize;\n"
+                                      "typedef int64_t isize;\n\n"
+                                      "typedef int8_t i8;\n"
+                                      "typedef int16_t i16;\n"
+                                      "typedef int32_t i32;\n"
+                                      "typedef int64_t i64;\n\n"
+                                      "typedef uint8_t u8;\n"
+                                      "typedef uint16_t u16;\n"
+                                      "typedef uint32_t u32;\n"
+                                      "typedef uint64_t u64;\n\n"
+                                      "typedef u8 b8;\n"
+                                      "typedef u16 b16;\n"
+                                      "typedef u32 b32;\n"
+                                      "typedef u64 b64;\n\n"
+                                      "typedef float f32;\n"
+                                      "typedef double f64;\n\n"
+                                      "#endif";
+
+    fprintf(f, "%s", furox_header);
+
+    fclose(f);
+
+    return FRX_FALSE;
+}
+
 FRX_NO_DISCARD b8 generate_executable(void)
 {
     char command[4096];
 
-    strcpy(command, "gcc FuroxMain.c");
+    if(generate_furox_main_c())
+        return FRX_TRUE;
+
+    if(generate_furox_header())
+        return FRX_TRUE;
+
+    strcpy(command, "gcc furox-c/FuroxMain.c");
 
     for(usize i = 0; i < transpiler_info.c_filepaths_size; ++i)
     {
