@@ -10,6 +10,19 @@ const char* token_type_to_str(TokenType type)
     {
         case FRX_TOKEN_TYPE_EOF: return "EOF";
         
+        case FRX_TOKEN_TYPE_KW_NULLPTR: return "nullptr";
+        case FRX_TOKEN_TYPE_KW_TRUE: return "true";
+        case FRX_TOKEN_TYPE_KW_FALSE: return "false";
+        case FRX_TOKEN_TYPE_KW_RETURN: return "return";
+        case FRX_TOKEN_TYPE_KW_NAMESPACE: return "namespace";
+        case FRX_TOKEN_TYPE_KW_EXTERN: return "extern";
+        case FRX_TOKEN_TYPE_KW_STRUCT: return "struct";
+        case FRX_TOKEN_TYPE_KW_IF: return "if";
+        case FRX_TOKEN_TYPE_KW_ELSE: return "else";
+        case FRX_TOKEN_TYPE_KW_FOR: return "for";
+        case FRX_TOKEN_TYPE_KW_WHILE: return "while";
+        case FRX_TOKEN_TYPE_KW_DO: return "do";
+
         case FRX_TOKEN_TYPE_IDENTIFIER: return "Identifier";
 
         case FRX_TOKEN_TYPE_NUMBER: return "Number";
