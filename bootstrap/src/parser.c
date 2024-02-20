@@ -196,9 +196,11 @@ static FRX_NO_DISCARD b8 parser_parse_variable(Parser* parser, AST* node)
     else
         index->type = FRX_AST_TYPE_NOOP;
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_DOT)
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_DOT || parser_current_token(parser)->type == FRX_TOKEN_TYPE_ARROW)
     {
-        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_DOT));
+        data->is_pointer = parser_current_token(parser)->type == FRX_TOKEN_TYPE_ARROW;
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, parser_current_token(parser)->type));
 
         AST* child = ast_new_child(node);
 
@@ -702,7 +704,7 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
 
         parser_recover(parser, &recover_location);
 
-        if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS || parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_DOT)
+        if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS || parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_DOT || parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_ARROW)
             return parser_parse_variable_assignment(parser, node);
     }
 

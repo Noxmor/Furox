@@ -52,6 +52,8 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_LEFT_BRACE: return "Left Brace";
         case FRX_TOKEN_TYPE_RIGHT_BRACE: return "Right Brace";
 
+        case FRX_TOKEN_TYPE_ARROW: return "Arrow";
+
         case FRX_TOKEN_TYPE_COMMA: return "Comma";
         case FRX_TOKEN_TYPE_DOT: return "Dot";
         case FRX_TOKEN_TYPE_COLON: return "Colon";
