@@ -412,7 +412,25 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
         case '"': return lexer_parse_string_literal(lexer, token);
 
         case '+': token->type = FRX_TOKEN_TYPE_PLUS; break;
-        case '-': token->type = FRX_TOKEN_TYPE_MINUS; break;
+
+        case '-':
+        {
+            if(lexer_peek_char(lexer, 1) == '>')
+            {
+                token->type = FRX_TOKEN_TYPE_ARROW;
+                strcpy(token->identifier, "->");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_MINUS;
+
+            break;
+        }
+
         case '*': token->type = FRX_TOKEN_TYPE_STAR; break;
         case '/':
         {
