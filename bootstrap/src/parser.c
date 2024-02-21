@@ -167,6 +167,8 @@ static FRX_NO_DISCARD b8 parser_parse_namespace_resolution(Parser* parser, AST* 
 
 static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node);
 
+static FRX_NO_DISCARD b8 parser_parse_scope(Parser* parser, AST* node);
+
 static FRX_NO_DISCARD b8 parser_parse_variable(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -633,6 +635,64 @@ static FRX_NO_DISCARD b8 parser_parse_variable_assignment(Parser* parser, AST* n
     return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
 }
 
+static FRX_NO_DISCARD b8 parser_parse_if_statement(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_IF_STATEMENT;
+
+    //TODO: Implement
+    return FRX_TRUE;
+}
+
+static FRX_NO_DISCARD b8 parser_parse_for_loop(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_FOR_LOOP;
+
+    //TODO: Implement
+    return FRX_TRUE;
+}
+
+static FRX_NO_DISCARD b8 parser_parse_while_loop(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_WHILE_LOOP;
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_KW_WHILE));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
+
+    AST* expr = ast_new_child(node);
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, expr));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS));
+
+    AST* scope = ast_new_child(node);
+
+    return parser_parse_scope(parser, scope);
+}
+
+static FRX_NO_DISCARD b8 parser_parse_do_while_loop(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    node->type = FRX_AST_TYPE_DO_WHILE_LOOP;
+
+    //TODO: Implement
+    return FRX_TRUE;
+}
+
 static FRX_NO_DISCARD b8 parser_parse_return_statement(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -658,6 +718,18 @@ static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node)
     FRX_ASSERT(parser != NULL);
 
     FRX_ASSERT(node != NULL);
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IF)
+        return parser_parse_if_statement(parser, node);
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_FOR)
+        return parser_parse_for_loop(parser, node);
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_WHILE)
+        return parser_parse_while_loop(parser, node);
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_DO)
+        return parser_parse_do_while_loop(parser, node);
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_RETURN)
         return parser_parse_return_statement(parser, node);
