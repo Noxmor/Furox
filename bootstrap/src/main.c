@@ -1,37 +1,50 @@
+#include <stdlib.h>
+
 #include "core/memory.h"
 
 #include "parser.h"
 #include "transpiler.h"
 
-int main(void)
+static FRX_NO_DISCARD b8 compile(const char* filepath)
 {
     Parser parser;
-    
-    if(parser_init(&parser, "input.txt"))
+
+    if(parser_init(&parser, filepath))
     {
-        printf("parser_init() failed!\n");
-        return 1;
+        fprintf(stderr, "%s: parser_init() failed!\n", filepath);
+        return FRX_TRUE;
     }
 
     if(parser_parse(&parser))
     {
-        printf("parser_parse() failed!\n");
-        return 1;
+        fprintf(stderr, "%s: parser_parse() failed!\n", filepath);
+        return FRX_TRUE;
     }
 
     ast_print(&parser.root);
 
     if(transpile_ast(&parser.root, parser.lexer.filepath))
     {
-        printf("transpile_ast() failed!\n");
-        return 1;
+        fprintf(stderr, "%s: transpile_ast() failed!\n", filepath);
+        return FRX_TRUE;
+    }
+
+    return FRX_FALSE;
+}
+
+int main(int argc, char** argv)
+{
+    for(int i = 1; i < argc; ++i)
+    {
+        if(compile(argv[i]))
+            return EXIT_FAILURE;
     }
 
     if(generate_executable())
     {
-        printf("generate_executable() failed!\n");
+        fprintf(stderr, "generate_executable() failed!\n");
         return 1;
     }
 
-    return 0;    
+    return EXIT_SUCCESS;
 }
