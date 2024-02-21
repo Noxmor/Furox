@@ -113,5 +113,13 @@ usize Main()
         printf("%zu\n", i);
     }
 
+    i = 0;
+    do
+    {
+        i = i + 1;
+        printf("%zu\n", i);
+    }
+    while(i < 10);
+
     return Math::add(1, 2 * 3) * VariadicFunc(1, 2, 3, 'A', "Test");
 }
