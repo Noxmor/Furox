@@ -519,6 +519,34 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
             break;
         }
 
+        case FRX_AST_TYPE_IF_STATEMENT:
+        {
+            break;
+        }
+
+        case FRX_AST_TYPE_FOR_LOOP:
+        {
+            break;
+        }
+
+        case FRX_AST_TYPE_WHILE_LOOP:
+        {
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "while(");
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ")\n");
+
+            FRX_TRANSPILER_ABORT_ON_ERROR(print_indentation_level(f));
+
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[1], f));
+
+            break;
+        }
+
+        case FRX_AST_TYPE_DO_WHILE_LOOP:
+        {
+            break;
+        }
+
         case FRX_AST_TYPE_RETURN_STATEMENT:
         {
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "return");
