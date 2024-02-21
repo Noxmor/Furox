@@ -837,7 +837,7 @@ static FRX_NO_DISCARD b8 create_furox_directory_from_source(const char* filepath
 
         FRX_ASSERT(path_len < 1000);
 
-        sprintf(furox_filepath, "furox-c/%.*s", path_len, filepath);
+        sprintf(furox_filepath, "furox-c/%.*s", (int)path_len, filepath);
     }
 
     return mkdir(furox_filepath, 0777) == -1 && errno != EEXIST;
@@ -857,7 +857,7 @@ static FILE* create_c_file(const char* furox_filepath, const char* filename)
     if(extension == NULL)
         filename_len = strlen(filename);
 
-    sprintf(c_filepath, "%s/%.*s.c", furox_filepath, filename_len, filename);
+    sprintf(c_filepath, "%s/%.*s.c", furox_filepath, (int)filename_len, filename);
 
     FILE* f = fopen(c_filepath, "w");
     if(f == NULL)
@@ -865,7 +865,7 @@ static FILE* create_c_file(const char* furox_filepath, const char* filename)
 
     store_c_filepath(c_filepath);
 
-    if(fprintf(f, "#include \"Furox.h\"\n#include \"%.*s.h\"\n", filename_len, filename) < 0)
+    if(fprintf(f, "#include \"Furox.h\"\n#include \"%.*s.h\"\n", (int)filename_len, filename) < 0)
     {
         fclose(f);
 
@@ -889,7 +889,7 @@ static FILE* create_header_file(const char* furox_filepath, const char* filename
     if(extension == NULL)
         filename_len = strlen(filename);
 
-    sprintf(header_filepath, "%s/%.*s.h", furox_filepath, filename_len, filename);
+    sprintf(header_filepath, "%s/%.*s.h", furox_filepath, (int)filename_len, filename);
 
     FILE* f = fopen(header_filepath, "w");
     if(f == NULL)
