@@ -21,6 +21,10 @@ typedef struct TranspilerInfo
 
 static TranspilerInfo transpiler_info;
 
+// Hacky way of telling variable assignment
+// whether or not they should print a semicolon and new-line at the end.
+static b8 inside_for_loop_header;
+
 typedef struct Namespace
 {
     const char* namespace;
@@ -258,8 +262,10 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
 
             FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(expr, f));
 
-            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ";\n");
-
+            if(!inside_for_loop_header)
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ";\n");
+            }
             break;
         }
 
@@ -526,6 +532,21 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
 
         case FRX_AST_TYPE_FOR_LOOP:
         {
+            inside_for_loop_header = FRX_TRUE;
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "for(");
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "; ");
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[1], f));
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "; ");
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[2], f));
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ")\n");
+
+            inside_for_loop_header = FRX_FALSE;
+
+            FRX_TRANSPILER_ABORT_ON_ERROR(print_indentation_level(f));
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[3], f));
+
             break;
         }
 
@@ -551,7 +572,6 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "while(");
             FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[1], f));
             FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ");\n");
-            FRX_TRANSPILER_ABORT_ON_ERROR(print_indentation_level(f));
 
             break;
         }

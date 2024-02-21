@@ -75,39 +75,41 @@ static usize parser_get_precedence(ASTType type)
 {
     switch(type)
     {
-        case FRX_AST_TYPE_LOGICAL_OR: return 0;
+        case FRX_AST_TYPE_VARIABLE_ASSIGNMENT: return 0;
 
-        case FRX_AST_TYPE_LOGICAL_AND: return 1;
+        case FRX_AST_TYPE_LOGICAL_OR: return 1;
 
-        case FRX_AST_TYPE_BINARY_OR: return 2;
+        case FRX_AST_TYPE_LOGICAL_AND: return 2;
 
-        case FRX_AST_TYPE_BINARY_XOR: return 3;
+        case FRX_AST_TYPE_BINARY_OR: return 3;
 
-        case FRX_AST_TYPE_BINARY_AND: return 4;
+        case FRX_AST_TYPE_BINARY_XOR: return 4;
 
-        case FRX_AST_TYPE_COMPARISON: return 5;
+        case FRX_AST_TYPE_BINARY_AND: return 5;
+
+        case FRX_AST_TYPE_COMPARISON: return 6;
 
         case FRX_AST_TYPE_GREATER_THAN:
         case FRX_AST_TYPE_GREATER_THAN_EQUALS:
         case FRX_AST_TYPE_LESS_THAN:
-        case FRX_AST_TYPE_LESS_THAN_EQUALS: return 6;
+        case FRX_AST_TYPE_LESS_THAN_EQUALS: return 7;
 
         case FRX_AST_TYPE_BINARY_LEFT_SHIFT:
-        case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: return 7;
+        case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: return 8;
 
         case FRX_AST_TYPE_ADDITION:
-        case FRX_AST_TYPE_SUBTRACTION: return 8;
+        case FRX_AST_TYPE_SUBTRACTION: return 9;
 
         case FRX_AST_TYPE_MULTIPLICATION:
         case FRX_AST_TYPE_DIVISION:
-        case FRX_AST_TYPE_MODULO: return 9;
+        case FRX_AST_TYPE_MODULO: return 10;
 
         case FRX_AST_TYPE_ARITHMETIC_NEGATION:
         case FRX_AST_TYPE_LOGICAL_NEGATION:
         case FRX_AST_TYPE_BINARY_NEGATION:
 
         case FRX_AST_TYPE_DEREFERENCE:
-        case FRX_AST_TYPE_ADDRESS_OF: return 10;
+        case FRX_AST_TYPE_ADDRESS_OF: return 11;
     }
 
     return 0xFFFFFFFFFFFFFFFF;
@@ -134,6 +136,8 @@ static b8 parser_next_token_is_binary_operator(Parser* parser)
 
     switch(parser_current_token(parser)->type)
     {
+        case FRX_TOKEN_TYPE_EQUALS:
+
         case FRX_TOKEN_TYPE_PLUS:
         case FRX_TOKEN_TYPE_MINUS:
         case FRX_TOKEN_TYPE_STAR:
@@ -168,6 +172,8 @@ static FRX_NO_DISCARD b8 parser_parse_namespace_resolution(Parser* parser, AST* 
 static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node);
 
 static FRX_NO_DISCARD b8 parser_parse_scope(Parser* parser, AST* node);
+
+static FRX_NO_DISCARD b8 parser_parse_statement(Parser* parser, AST* node);
 
 static FRX_NO_DISCARD b8 parser_parse_variable(Parser* parser, AST* node)
 {
@@ -404,7 +410,7 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
 
     FRX_ASSERT(node != NULL);
 
-   b8 node_had_paranthesis = FRX_FALSE;
+    b8 node_had_paranthesis = FRX_FALSE;
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
     {
@@ -427,6 +433,8 @@ static FRX_NO_DISCARD b8 parser_parse_expression(Parser* parser, AST* node)
 
         switch(parser_current_token(parser)->type)
         {
+            case FRX_TOKEN_TYPE_EQUALS: ast_init(&new_node, FRX_AST_TYPE_VARIABLE_ASSIGNMENT); break;
+
             case FRX_TOKEN_TYPE_PLUS: ast_init(&new_node, FRX_AST_TYPE_ADDITION); break;
             case FRX_TOKEN_TYPE_MINUS: ast_init(&new_node, FRX_AST_TYPE_SUBTRACTION); break;
             case FRX_TOKEN_TYPE_STAR: ast_init(&new_node, FRX_AST_TYPE_MULTIPLICATION); break;
@@ -655,8 +663,24 @@ static FRX_NO_DISCARD b8 parser_parse_for_loop(Parser* parser, AST* node)
 
     node->type = FRX_AST_TYPE_FOR_LOOP;
 
-    //TODO: Implement
-    return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_KW_FOR));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
+
+    AST* expr = ast_new_child(node);
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, expr));
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON));
+
+    AST* condition = ast_new_child(node);
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, condition));
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON));
+
+    AST* increment = ast_new_child(node);
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, increment));
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS));
+    AST* scope = ast_new_child(node);
+
+    return parser_parse_scope(parser, scope);
 }
 
 static FRX_NO_DISCARD b8 parser_parse_while_loop(Parser* parser, AST* node)
