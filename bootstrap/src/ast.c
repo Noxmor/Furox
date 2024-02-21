@@ -56,6 +56,10 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_DEREFERENCE: return "Dereference";
         case FRX_AST_TYPE_ADDRESS_OF: return "Address of";
 
+        case FRX_AST_TYPE_IF_STATEMENT: return "If Statement";
+        case FRX_AST_TYPE_FOR_LOOP: return "For Loop";
+        case FRX_AST_TYPE_WHILE_LOOP: return "While Loop";
+        case FRX_AST_TYPE_DO_WHILE_LOOP: return "Do While Loop";
         case FRX_AST_TYPE_RETURN_STATEMENT: return "Return Statement";
 
         case FRX_AST_TYPE_PARAMETER_LIST: return "Parameter List";
