@@ -689,8 +689,21 @@ static FRX_NO_DISCARD b8 parser_parse_do_while_loop(Parser* parser, AST* node)
 
     node->type = FRX_AST_TYPE_DO_WHILE_LOOP;
 
-    //TODO: Implement
-    return FRX_TRUE;
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_KW_DO));
+
+    AST* scope = ast_new_child(node);
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_scope(parser, scope));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_KW_WHILE));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS));
+
+    AST* expr = ast_new_child(node);
+    FRX_PARSER_ABORT_ON_ERROR(parser_parse_expression(parser, expr));
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS));
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
 }
 
 static FRX_NO_DISCARD b8 parser_parse_return_statement(Parser* parser, AST* node)
