@@ -222,6 +222,8 @@ static void lexer_parse_identifier(Lexer* lexer, Token* token)
         token->type = FRX_TOKEN_TYPE_KW_TRUE;
     else if(strcmp(token->identifier, "false") == 0)
         token->type = FRX_TOKEN_TYPE_KW_FALSE;
+    else if(strcmp(token->identifier, "include") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_INCLUDE;
     else if(strcmp(token->identifier, "return") == 0)
         token->type = FRX_TOKEN_TYPE_KW_RETURN;
     else if(strcmp(token->identifier, "namespace") == 0)
