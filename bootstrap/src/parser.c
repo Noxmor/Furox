@@ -1093,6 +1093,21 @@ static FRX_NO_DISCARD b8 parser_parse_extern_block(Parser* parser, AST* node)
     return parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE);
 }
 
+static FRX_NO_DISCARD b8 parser_parse_include(Parser* parser, AST* node)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(node != NULL);
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_KW_INCLUDE));
+
+    //TODO: How to do the actual include?
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_STRING_LITERAL));
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON);
+}
+
 static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node)
 {
     FRX_ASSERT(parser != NULL);
@@ -1108,7 +1123,8 @@ static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node)
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXTERN)
         return parser_parse_extern_block(parser, node);
 
-    //TODO: Handle includes
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_INCLUDE)
+        return parser_parse_include(parser, node);
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER)
         return parser_parse_function_definition(parser, node);
