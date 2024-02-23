@@ -930,14 +930,20 @@ static FRX_NO_DISCARD b8 parser_parse_function_definition(Parser* parser, AST* n
 
     node->type = FRX_AST_TYPE_FUNCTION_DEFINITION;
 
+    FunctionDefinitionData* data = memory_alloc(sizeof(FunctionDefinitionData), FRX_MEMORY_CATEGORY_UNKNOWN);
+    node->data = data;
+    data->is_variadic = FRX_FALSE;
+    data->exported = FRX_FALSE;
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT)
+    {
+        data->exported = FRX_TRUE;
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_KW_EXPORT));
+    }
+
     AST* type = ast_new_child(node);
 
     FRX_PARSER_ABORT_ON_ERROR(parser_parse_type(parser, type));
-
-    FunctionDefinitionData* data = memory_alloc(sizeof(FunctionDefinitionData), FRX_MEMORY_CATEGORY_UNKNOWN);
-    node->data = data;
-
-    data->is_variadic = FRX_FALSE;
 
     strcpy(data->name, parser_current_token(parser)->identifier);
 
@@ -988,10 +994,18 @@ static FRX_NO_DISCARD b8 parser_parse_struct_definition(Parser* parser, AST* nod
 
     node->type = FRX_AST_TYPE_STRUCT_DEFINITION;
 
-    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_KW_STRUCT));
-
     StructDefinitionData* data = memory_alloc(sizeof(StructDefinitionData), FRX_MEMORY_CATEGORY_UNKNOWN);
     node->data = data;
+    data->exported = FRX_FALSE;
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT)
+    {
+        data->exported = FRX_TRUE;
+
+        FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_KW_EXPORT));
+    }
+
+    FRX_PARSER_ABORT_ON_ERROR(parser_eat(parser, FRX_TOKEN_TYPE_KW_STRUCT));
 
     strcpy(data->name, parser_current_token(parser)->identifier);
 
@@ -1117,7 +1131,7 @@ static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node)
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_NAMESPACE)
         return parser_parse_namespace(parser, node);
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_STRUCT)
+    if((parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_KW_STRUCT) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_STRUCT)
         return parser_parse_struct_definition(parser, node);
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXTERN)
@@ -1126,7 +1140,7 @@ static FRX_NO_DISCARD b8 parser_parse_top_level(Parser* parser, AST* node)
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_INCLUDE)
         return parser_parse_include(parser, node);
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER)
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT || parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER)
         return parser_parse_function_definition(parser, node);
 
     SourceLocation location = parser_current_location(parser);
