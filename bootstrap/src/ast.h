@@ -111,6 +111,7 @@ typedef struct FunctionDefinitionData
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 is_variadic;
+    b8 exported;
 } FunctionDefinitionData;
 
 typedef struct FunctionDeclarationData
@@ -130,6 +131,8 @@ typedef struct FunctionCallData
 typedef struct StructDefinitionData
 {
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    b8 exported;
 } StructDefinitionData;
 
 typedef struct NamespaceData

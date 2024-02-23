@@ -783,6 +783,136 @@ static FRX_NO_DISCARD b8 transpile_c(const AST* root, FILE* f)
     return FRX_FALSE;
 }
 
+static FRX_NO_DISCARD b8 transpile_c_struct_definitions(const AST* root, FILE* f)
+{
+    FRX_ASSERT(root != NULL);
+
+    FRX_ASSERT(f != NULL);
+
+    if(root->type == FRX_AST_TYPE_NAMESPACE)
+    {
+        NamespaceData* data = root->data;
+
+        append_namespace(data->namespace);
+
+        for(usize i = 0; i < root->children_size; ++i)
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c_struct_definitions(&root->children[i], f));
+
+        drop_namespace();
+
+        return FRX_FALSE;
+    }
+
+    if(root->type == FRX_AST_TYPE_STRUCT_DEFINITION)
+    {
+        StructDefinitionData* data = root->data;
+
+        if(data->exported)
+            return FRX_FALSE;
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "typedef struct ");
+
+        FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s\n{\n", data->name);
+
+        for(usize i = 0; i < root->children_size; ++i)
+        {
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[i], f));
+        }
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "} ");
+
+        FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s;\n\n", data->name);
+    }
+    else
+    {
+        for(usize i = 0; i < root->children_size; ++i)
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c_struct_definitions(&root->children[i], f));
+    }
+
+    return FRX_FALSE;
+}
+
+static FRX_NO_DISCARD b8 transpile_c_function_declarations(const AST* root, FILE* f)
+{
+    FRX_ASSERT(root != NULL);
+
+    FRX_ASSERT(f != NULL);
+
+    if(root->type == FRX_AST_TYPE_NAMESPACE)
+    {
+        NamespaceData* data = root->data;
+
+        append_namespace(data->namespace);
+
+        for(usize i = 0; i < root->children_size; ++i)
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c_function_declarations(&root->children[i], f));
+
+        drop_namespace();
+
+        return FRX_FALSE;
+    }
+
+    if(root->type == FRX_AST_TYPE_FUNCTION_DEFINITION)
+    {
+        FunctionDefinitionData* data = root->data;
+
+        if(data->exported)
+            return FRX_FALSE;
+
+        FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " ");
+
+        FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s(", data->name);
+
+        AST* parameter_list = &root->children[1];
+
+        for(usize i = 0; i < parameter_list->children_size; ++i)
+        {
+            AST* parameter = &parameter_list->children[i];
+
+            VariableData* parameter_data = parameter->data;
+
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&parameter->children[0], f));
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " %s", parameter_data->name);
+
+            if(i != parameter_list->children_size - 1)
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
+        }
+
+        if(parameter_list->children_size == 0 && !data->is_variadic)
+        {
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "void");
+        }
+
+        if(data->is_variadic)
+        {
+            if(parameter_list->children_size > 0)
+            {
+                FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ", ");
+            }
+
+            FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "...");
+        }
+
+        FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, ");\n\n");
+    }
+    else
+    {
+        for(usize i = 0; i < root->children_size; ++i)
+            FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c_function_declarations(&root->children[i], f));
+    }
+
+    return FRX_FALSE;
+}
+
 static FRX_NO_DISCARD b8 transpile_header(const AST* root, FILE* f)
 {
     FRX_ASSERT(root != NULL);
@@ -807,14 +937,17 @@ static FRX_NO_DISCARD b8 transpile_header(const AST* root, FILE* f)
     {
         FunctionDefinitionData* data = root->data;
 
+        if(!data->exported)
+            return FRX_FALSE;
+
         FRX_TRANSPILER_ABORT_ON_ERROR(transpile_c(&root->children[0], f));
 
         FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, " ");
 
         FRX_TRANSPILER_ABORT_ON_ERROR(write_current_namespace(f));
-        
+
         FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "%s(", data->name);
-        
+
         AST* parameter_list = &root->children[1];
 
         for(usize i = 0; i < parameter_list->children_size; ++i)
@@ -851,6 +984,9 @@ static FRX_NO_DISCARD b8 transpile_header(const AST* root, FILE* f)
     else if(root->type == FRX_AST_TYPE_STRUCT_DEFINITION)
     {
         StructDefinitionData* data = root->data;
+
+        if(!data->exported)
+            return FRX_FALSE;
 
         FRX_TRANSPILER_ABORT_ON_WRITE_ERROR(f, "typedef struct ");
 
@@ -992,7 +1128,7 @@ FRX_NO_DISCARD b8 transpile_ast(const AST* root, const char* src_filepath)
         return FRX_TRUE;
     }
 
-    if(transpile_c(root, c_file) || transpile_header(root, header_file))
+    if(transpile_c_struct_definitions(root, c_file) || transpile_c_function_declarations(root, c_file) || transpile_c(root, c_file) || transpile_header(root, header_file))
     {
         fclose(c_file);
         fclose(header_file);

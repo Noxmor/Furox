@@ -18,7 +18,7 @@ extern
 
 namespace std
 {
-    struct String
+    export struct String
     {
         usize length;
     }
