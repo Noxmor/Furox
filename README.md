@@ -31,9 +31,9 @@ The Furox Programming Language
 
 &lt;statement&gt; ::= <!-- TODO: Define this rule properly -->
 
-&lt;string-literal&gt; ::= '"' &lt;&gt; '"' <!-- TODO: Define this rule properly -->
+&lt;string-literal&gt; ::= '"' ((&lt;character&gt; - '"' - '\\') | '\\' ('\\' | ''' | '"' | '?' | 'a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '0'))* '"'
 
-&lt;char-literal&gt; ::= ''' &lt;&gt; ''' <!-- TODO: Define this rule properly -->
+&lt;char-literal&gt; ::= ''' ((&lt;ascii-character&gt; - ''' - '\\') | '\\' ('\\' | ''' | '?' | 'a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '0')) '''
 
 &lt;number&gt; ::= &lt;hex-number&gt; | &lt;octal-number&gt; | &lt;binary-number&gt; | &lt;decimal-number&gt;
 
@@ -58,5 +58,9 @@ The Furox Programming Language
 &lt;lower-case-character&gt; ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
 
 &lt;upper-case-character&gt; ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+
+&lt;ascii-character&gt; ::= any single-byte ASCII character
+
+&lt;character&gt; ::= any Unicode character
 
 *: The bootstrap compiler may not be compliant with the formal grammar specification.
