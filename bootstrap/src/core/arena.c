@@ -23,6 +23,8 @@ void* arena_alloc(Arena* arena, usize size)
 
     FRX_ASSERT(arena->buffer != NULL);
 
+    FRX_ASSERT(arena->pos + size <= arena->size);
+
     void* block = arena->buffer + arena->pos;
 
     arena->pos += size;
