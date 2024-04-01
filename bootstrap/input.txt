@@ -32,6 +32,11 @@ namespace Math
     }
 }
 
+export void exportedFunc()
+{
+
+}
+
 char getChar()
 {
     return '#';
@@ -121,7 +126,7 @@ usize Main()
     }
     while(i < 10);
 
-    for(i = 0; i < 10; i = i + 1)
+    for(i = 0; i < 10; i = (i + 1))
     {
         printf("%zu\n", i);
     }
