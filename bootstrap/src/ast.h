@@ -3,9 +3,13 @@
 
 #include "token.h"
 
+#include "containers/list.h"
+
 enum
 {
     FRX_AST_TYPE_NOOP = 0,
+
+    FRX_AST_TYPE_PROGRAM,
 
     FRX_AST_TYPE_COMPOUND,
 
@@ -21,6 +25,9 @@ enum
     FRX_AST_TYPE_VARIABLE_ASSIGNMENT,
     FRX_AST_TYPE_VARIABLE,
     FRX_AST_TYPE_VARIABLE_ARRAY_ACCESS,
+
+    FRX_AST_TYPE_UNARY_EXPRESSION,
+    FRX_AST_TYPE_BINARY_EXPRESSION,
 
     FRX_AST_TYPE_ADDITION,
     FRX_AST_TYPE_SUBTRACTION,
@@ -77,86 +84,254 @@ enum
 
 typedef u8 ASTType;
 
-typedef struct TypeData
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    usize pointer_level;
-} TypeData;
-
-typedef struct VariableData
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    b8 is_pointer;
-} VariableData;
-
-typedef struct NumberData
-{
-    usize number;
-} NumberData;
-
-typedef struct CharLiteralData
-{
-    char literal[3];
-} CharLiteralData;
-
-typedef struct StringLiteralData
-{
-    char literal[FRX_TOKEN_IDENTIFIER_CAPACITY];
-} StringLiteralData;
-
-typedef struct FunctionDefinitionData
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    b8 is_variadic;
-    b8 exported;
-} FunctionDefinitionData;
-
-typedef struct FunctionDeclarationData
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    b8 is_variadic;
-} FunctionDeclarationData;
-
-typedef struct FunctionCallData
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    b8 is_statement;
-} FunctionCallData;
-
-typedef struct StructDefinitionData
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    b8 exported;
-} StructDefinitionData;
-
-typedef struct NamespaceData
-{
-    char namespace[FRX_TOKEN_IDENTIFIER_CAPACITY];
-} NamespaceData;
+const char* ast_type_to_str(ASTType type);
 
 typedef struct AST
 {
     ASTType type;
-    
-    void* data;
 
-    usize children_size;
-    usize children_capacity;
-    struct AST* children; 
+    void* node;
 } AST;
 
-const char* ast_type_to_str(ASTType type);
+typedef struct ASTNamespaceRef ASTNamespaceRef;
+typedef struct ASTVariable ASTVariable;
+typedef struct ASTScope ASTScope;
 
-void ast_init(AST* ast, ASTType type);
+typedef struct ASTProgram
+{
+    List top_level_definitions;
+} ASTProgram;
 
-AST* ast_new_child(AST* parent);
+typedef struct ASTNumber
+{
+    usize number;
+} ASTNumber;
 
-void ast_print(const AST* root);
+typedef struct ASTCharLiteral
+{
+    char literal[3];
+} ASTCharLiteral;
+
+typedef struct ASTStringLiteral
+{
+    char literal[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} ASTStringLiteral;
+
+typedef struct ASTTypename
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    usize pointer_level;
+    AST* array_size;
+
+    ASTNamespaceRef* namespace_ref;
+} ASTTypename;
+
+typedef struct ASTVariableDeclaration
+{
+    ASTTypename* type;
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} ASTVariableDeclaration;
+
+typedef struct ASTVariableDefinition
+{
+    ASTTypename* type;
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    AST* value;
+} ASTVariableDefinition;
+
+typedef struct ASTVariableAssignment
+{
+    ASTVariable* variable;
+
+    AST* value;
+} ASTVariableAssignment;
+
+typedef struct ASTVariable
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    b8 is_pointer;
+
+    AST* array_index;
+
+    ASTVariable* next;
+} ASTVariable;
+
+typedef struct ASTVariableArrayAccess
+{
+    ASTVariable* variable;
+    AST* index;
+    AST* value;
+} ASTVariableArrayAccess;
+
+typedef struct ASTBinaryExpression
+{
+    ASTType type;
+    AST* left;
+    AST* right;
+} ASTBinaryExpression;
+
+typedef struct ASTUnaryExpression
+{
+    ASTType type;
+    AST* operand;
+} ASTUnaryExpression;
+
+typedef struct ASTIfStatement
+{
+    //TODO: Implement
+} ASTIfStatement;
+
+typedef struct ASTForLoop
+{
+    AST* expression;
+    AST* condition;
+    AST* increment;
+
+    ASTScope* scope;
+} ASTForLoop;
+
+typedef struct ASTWhileLoop
+{
+    AST* condition;
+    ASTScope* scope;
+} ASTWhileLoop;
+
+typedef struct ASTDoWhileLoop
+{
+    ASTScope* scope;
+    AST* condition;
+} ASTDoWhileLoop;
+
+typedef struct ASTReturnStatement
+{
+    AST* value;
+} ASTReturnStatement;
+
+typedef struct ASTParameterList
+{
+    b8 is_variadic;
+
+    List parameters;
+} ASTParameterList;
+
+typedef struct ASTFunctionDefinition
+{
+    ASTTypename* type;
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    b8 exported;
+
+    ASTParameterList* parameter_list;
+
+    ASTScope* scope;
+} ASTFunctionDefinition;
+
+typedef struct ASTFunctionDeclaration
+{
+    ASTTypename* type;
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    ASTParameterList* parameter_list;
+} ASTFunctionDeclaration;
+
+typedef struct ASTFunctionCall
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    ASTNamespaceRef* namespace_ref;
+
+    List arguments;
+} ASTFunctionCall;
+
+typedef struct ASTScope
+{
+    List statements;
+} ASTScope;
+
+typedef struct ASTStructDefinition
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    b8 exported;
+
+    List fields;
+} ASTStructDefinition;
+
+typedef struct ASTNamespace
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    List top_level_definitions;
+} ASTNamespace;
+
+typedef struct ASTNamespaceRef
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    ASTNamespaceRef* next;
+} ASTNamespaceRef;
+
+typedef struct ASTExternBlock
+{
+    List function_declarations;
+    List struct_definitions;
+} ASTExternBlock;
+
+void ast_print(const AST* ast, usize depth);
+
+void ast_print_program(const ASTProgram* program);
+
+void ast_print_number(const ASTNumber* number, usize depth);
+
+void ast_print_char_literal(const ASTCharLiteral* char_literal, usize depth);
+
+void ast_print_string_literal(const ASTStringLiteral* string_literal, usize depth);
+
+void ast_print_typename(const ASTTypename* type, usize depth);
+
+void ast_print_variable_declaration(const ASTVariableDeclaration* variable_declaration, usize depth);
+
+void ast_print_variable_definition(const ASTVariableDefinition* variable_definition, usize depth);
+
+void ast_print_variable_assignment(const ASTVariableAssignment* variable_assignment, usize depth);
+
+void ast_print_variable(const ASTVariable* variable, usize depth);
+
+void ast_print_variable_array_access(const ASTVariableArrayAccess* variable_array_access, usize depth);
+
+void ast_print_binary_expression(const ASTBinaryExpression* binary_expression, usize depth);
+
+void ast_print_unary_expression(const ASTUnaryExpression* unary_expression, usize depth);
+
+void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth);
+
+void ast_print_for_loop(const ASTForLoop* for_loop, usize depth);
+
+void ast_print_while_loop(const ASTWhileLoop* while_loop, usize depth);
+
+void ast_print_do_while_loop(const ASTDoWhileLoop* do_while_loop, usize depth);
+
+void ast_print_return_statement(const ASTReturnStatement* return_statement, usize depth);
+
+void ast_print_parameter_list(const ASTParameterList* parameter_list, usize depth);
+
+void ast_print_function_definition(const ASTFunctionDefinition* function_definition, usize depth);
+
+void ast_print_function_declaration(const ASTFunctionDeclaration* function_declaration, usize depth);
+
+void ast_print_function_call(const ASTFunctionCall* function_call, usize depth);
+
+void ast_print_scope(const ASTScope* scope, usize depth);
+
+void ast_print_struct_definition(const ASTStructDefinition* struct_definition, usize depth);
+
+void ast_print_namespace(const ASTNamespace* namespace, usize depth);
+
+void ast_print_namespace_ref(const ASTNamespaceRef* namespace_ref, usize depth);
+
+void ast_print_extern_block(const ASTExternBlock* extern_block, usize depth);
 
 #endif

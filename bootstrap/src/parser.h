@@ -4,10 +4,14 @@
 #include "lexer.h"
 #include "ast.h"
 
+#include "core/arena.h"
+
 typedef struct Parser
 {
     Lexer lexer;
-    AST root;
+    ASTProgram* program;
+
+    Arena arena;
 } Parser;
 
 FRX_NO_DISCARD b8 parser_init(Parser* parser, const char* filepath);
