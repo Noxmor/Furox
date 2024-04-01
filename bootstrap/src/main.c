@@ -21,11 +21,12 @@ static FRX_NO_DISCARD b8 compile(const char* filepath)
         return FRX_TRUE;
     }
 
-    ast_print(&parser.root);
+    ast_print_program(parser.program);
 
-    if(transpile_ast(&parser.root, parser.lexer.filepath))
+    Transpiler transpiler;
+    if(ast_transpile_program(&transpiler, parser.program, parser.lexer.filepath))
     {
-        fprintf(stderr, "%s: transpile_ast() failed!\n", filepath);
+        fprintf(stderr, "%s: ast_transpile_program() failed!\n", filepath);
         return FRX_TRUE;
     }
 
