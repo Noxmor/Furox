@@ -817,11 +817,53 @@ static FRX_NO_DISCARD ASTIfStatement* parser_parse_if_statement(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    //TODO: Implement
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_IF))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'if'!", parser->lexer.filepath, location.line, location.coloumn);
 
-    FRX_ASSERT(FRX_FALSE);
+        return NULL;
+    }
 
-    return NULL;
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '(' after keyword 'if'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    ASTIfStatement* if_statement = arena_alloc(&parser->arena, sizeof(ASTIfStatement));
+
+    if_statement->condition = parser_parse_expression(parser);
+    if(if_statement->condition == NULL)
+        return NULL;
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ')' after if-statement!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if_statement->if_block = parser_parse_scope(parser);
+    if(if_statement->if_block == NULL)
+        return NULL;
+
+    if(parser_current_token(parser)->type != FRX_TOKEN_TYPE_KW_ELSE)
+    {
+        if_statement->else_block = NULL;
+        return if_statement;
+    }
+
+    parser_skip(parser);
+
+    if_statement->else_block = parser_parse_scope(parser);
+    if(if_statement->else_block == NULL)
+        return NULL;
+
+    return if_statement;
 }
 
 static FRX_NO_DISCARD ASTForLoop* parser_parse_for_loop(Parser* parser)
