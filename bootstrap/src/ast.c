@@ -380,7 +380,32 @@ void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth)
 
     printf("if-statement\n");
 
-    //TODO: Implement
+    recursion_buffer[depth] = 1;
+
+    print_depth(depth);
+
+    ast_print(if_statement->condition, depth + 1);
+
+    if(if_statement->else_block != NULL)
+    {
+        print_depth(depth);
+
+        ast_print_scope(if_statement->if_block, depth + 1);
+
+        recursion_buffer[depth] = 0;
+
+        print_depth(depth);
+
+        ast_print_scope(if_statement->else_block, depth + 1);
+    }
+    else
+    {
+        recursion_buffer[depth] = 0;
+
+        print_depth(depth);
+
+        ast_print_scope(if_statement->if_block, depth + 1);
+    }
 }
 
 void ast_print_for_loop(const ASTForLoop* for_loop, usize depth)
