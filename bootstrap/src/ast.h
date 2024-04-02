@@ -181,7 +181,9 @@ typedef struct ASTUnaryExpression
 
 typedef struct ASTIfStatement
 {
-    //TODO: Implement
+    AST* condition;
+    ASTScope* if_block;
+    ASTScope* else_block;
 } ASTIfStatement;
 
 typedef struct ASTForLoop
