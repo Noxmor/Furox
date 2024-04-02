@@ -80,6 +80,10 @@ void ast_transpile_namespace(Transpiler* transpiler, const ASTNamespace* namespa
 
 void ast_transpile_namespace_ref(Transpiler* transpiler, const ASTNamespaceRef* namespace_ref);
 
+void ast_transpile_module_definition(Transpiler* transpiler, const ASTModuleDefinition* module_definition);
+
+void ast_transpile_module_implementation(Transpiler* transpiler, const ASTModuleImplementation* module_implementation);
+
 void ast_transpile_extern_block(Transpiler* transpiler, const ASTExternBlock* extern_block);
 
 FRX_NO_DISCARD b8 generate_executable(void);
