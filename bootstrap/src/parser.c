@@ -1589,6 +1589,120 @@ static FRX_NO_DISCARD ASTNamespace* parser_parse_namespace(Parser* parser)
     return namespace;
 }
 
+static FRX_NO_DISCARD ASTModuleDefinition* parser_parse_module_definition(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ASTModuleDefinition* module_definition = arena_alloc(&parser->arena, sizeof(ASTModuleDefinition));
+
+    list_init(&module_definition->function_declarations, FRX_MEMORY_CATEGORY_AST);
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT)
+    {
+        module_definition->exported = FRX_TRUE;
+        parser_skip(parser);
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_MODULE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'module'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    strcpy(module_definition->name, parser_current_token(parser)->identifier);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected identifier for the module-definition's name!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected token '{' to start module-definition!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    while(parser_current_token(parser)->type != FRX_TOKEN_TYPE_RIGHT_BRACE)
+    {
+        ASTFunctionDeclaration* function_declaration = parser_parse_function_declaration(parser);
+        if(function_declaration == NULL)
+            return NULL;
+
+        list_push(&module_definition->function_declarations, function_declaration);
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Missing '}' at the end of module-definition!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    return module_definition;
+}
+
+static FRX_NO_DISCARD ASTModuleImplementation* parser_parse_module_implementation(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ASTModuleImplementation* module_implementation = arena_alloc(&parser->arena, sizeof(ASTModuleImplementation));
+
+    list_init(&module_implementation->function_definitions, FRX_MEMORY_CATEGORY_AST);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_IMPL))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'impl'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    strcpy(module_implementation->name, parser_current_token(parser)->identifier);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected identifier for the module-implementation's name!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected token '{' to start module-implementation!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    while(parser_current_token(parser)->type != FRX_TOKEN_TYPE_RIGHT_BRACE)
+    {
+        ASTFunctionDefinition* function_definition = parser_parse_function_definition(parser);
+        if(function_definition == NULL)
+            return NULL;
+
+        list_push(&module_implementation->function_definitions, function_definition);
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Missing '}' at the end of module-implementation!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    return module_implementation;
+}
+
 static FRX_NO_DISCARD ASTExternBlock* parser_parse_extern_block(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1688,6 +1802,22 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_NAMESPACE;
         ast->node = parser_parse_namespace(parser);
+
+        return ast;
+    }
+
+    if((parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_KW_MODULE) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_MODULE)
+    {
+        ast->type = FRX_AST_TYPE_MODULE_DEFINITION;
+        ast->node = parser_parse_module_definition(parser);
+
+        return ast;
+    }
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IMPL)
+    {
+        ast->type = FRX_AST_TYPE_MODULE_IMPLEMENTATION;
+        ast->node = parser_parse_module_implementation(parser);
 
         return ast;
     }

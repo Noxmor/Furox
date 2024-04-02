@@ -289,6 +289,8 @@ void ast_transpile(Transpiler* transpiler, const AST* ast)
         case FRX_AST_TYPE_FUNCTION_CALL: ast_transpile_function_call(transpiler, ast->node); break;
         case FRX_AST_TYPE_STRUCT_DEFINITION: ast_transpile_struct_definition(transpiler, ast->node); break;
         case FRX_AST_TYPE_NAMESPACE: ast_transpile_namespace(transpiler, ast->node); break;
+        case FRX_AST_TYPE_MODULE_DEFINITION: ast_transpile_module_definition(transpiler, ast->node); break;
+        case FRX_AST_TYPE_MODULE_IMPLEMENTATION: ast_transpile_module_implementation(transpiler, ast->node); break;
         case FRX_AST_TYPE_EXTERN_BLOCK: ast_transpile_extern_block(transpiler, ast->node); break;
 
         default: FRX_ASSERT(FRX_FALSE); break;
@@ -636,9 +638,6 @@ void ast_transpile_function_declaration(Transpiler* transpiler, const ASTFunctio
 
     FRX_ASSERT(function_declaration != NULL);
 
-    if(transpiler->mode != FRX_TRANSPILER_MODE_SOURCE)
-        return;
-
     ast_transpile_typename(transpiler, function_declaration->type);
     FRX_TRANSPILER_WRITE(transpiler, " ");
     write_current_namespace(transpiler);
@@ -768,6 +767,51 @@ void ast_transpile_namespace_ref(Transpiler* transpiler, const ASTNamespaceRef* 
 
     if(namespace_ref->next != NULL)
         ast_transpile_namespace_ref(transpiler, namespace_ref->next);
+}
+
+void ast_transpile_module_definition(Transpiler* transpiler, const ASTModuleDefinition* module_definition)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(module_definition != NULL);
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && !module_definition->exported)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE && module_definition->exported)
+        return;
+
+    append_namespace(module_definition->name);
+
+    for(usize i = 0; i < list_size(&module_definition->function_declarations); ++i)
+    {
+        ASTFunctionDeclaration* function_declaration = list_get(&module_definition->function_declarations, i);
+
+        ast_transpile_function_declaration(transpiler, function_declaration);
+    }
+
+    drop_namespace();
+}
+
+void ast_transpile_module_implementation(Transpiler* transpiler, const ASTModuleImplementation* module_implementation)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(module_implementation != NULL);
+
+    if(transpiler->mode != FRX_TRANSPILER_MODE_SOURCE)
+        return;
+
+    append_namespace(module_implementation->name);
+
+    for(usize i = 0; i < list_size(&module_implementation->function_definitions); ++i)
+    {
+        ASTFunctionDefinition* function_definition = list_get(&module_implementation->function_definitions, i);
+
+        ast_transpile_function_definition(transpiler, function_definition);
+    }
+
+    drop_namespace();
 }
 
 void ast_transpile_extern_block(Transpiler* transpiler, const ASTExternBlock* extern_block)

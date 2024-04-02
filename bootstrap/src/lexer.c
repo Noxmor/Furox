@@ -228,6 +228,10 @@ static void lexer_parse_identifier(Lexer* lexer, Token* token)
         token->type = FRX_TOKEN_TYPE_KW_RETURN;
     else if(strcmp(token->identifier, "namespace") == 0)
         token->type = FRX_TOKEN_TYPE_KW_NAMESPACE;
+    else if(strcmp(token->identifier, "module") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_MODULE;
+    else if(strcmp(token->identifier, "impl") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_IMPL;
     else if(strcmp(token->identifier, "extern") == 0)
         token->type = FRX_TOKEN_TYPE_KW_EXTERN;
     else if(strcmp(token->identifier, "struct") == 0)
