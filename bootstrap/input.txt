@@ -30,6 +30,18 @@ namespace Math
     {
         return a + b;
     }
+
+    export b8 IsEven(usize n)
+    {
+        if(n % 2 == 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 }
 
 export void exportedFunc()
@@ -129,6 +141,16 @@ usize Main()
     for(i = 0; i < 10; i = (i + 1))
     {
         printf("%zu\n", i);
+    }
+
+    if(true)
+    {
+        printf("This should print!\n");
+    }
+
+    if(false)
+    {
+        printf("This should not print!\n");
     }
 
     return Math::add(1, 2 * 3) * VariadicFunc(1, 2, 3, 'A', "Test");

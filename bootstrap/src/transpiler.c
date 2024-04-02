@@ -491,7 +491,17 @@ void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if
 
     FRX_ASSERT(if_statement != NULL);
 
-    //TODO: Implement
+    FRX_TRANSPILER_WRITE(transpiler, "if(");
+    ast_transpile(transpiler, if_statement->condition);
+    FRX_TRANSPILER_WRITE(transpiler, ")\n");
+    ast_transpile_scope(transpiler, if_statement->if_block);
+
+    if(if_statement->else_block != NULL)
+    {
+        write_indentation_level(transpiler);
+        FRX_TRANSPILER_WRITE(transpiler, "else\n");
+        ast_transpile_scope(transpiler, if_statement->else_block);
+    }
 }
 
 void ast_transpile_for_loop(Transpiler* transpiler, const ASTForLoop* for_loop)
