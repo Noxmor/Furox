@@ -481,7 +481,7 @@ void ast_transpile_import_statement(Transpiler* transpiler, const ASTImportState
     if(transpiler->mode != FRX_TRANSPILER_MODE_HEADER)
         return;
 
-    FRX_TRANSPILER_WRITE(transpiler, "#include \"%s\"\n", import_statement->filepath);
+    FRX_TRANSPILER_WRITE(transpiler, "#include \"%s.h\"\n", import_statement->filepath);
 }
 
 void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if_statement)
