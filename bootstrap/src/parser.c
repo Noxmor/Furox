@@ -1436,6 +1436,92 @@ static FRX_NO_DISCARD ASTFunctionDeclaration* parser_parse_function_declaration(
     return function_declaration;
 }
 
+static FRX_NO_DISCARD ASTEnumDefinition* parser_parse_enum_definition(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ASTEnumDefinition* enum_definition = arena_alloc(&parser->arena, sizeof(ASTEnumDefinition));
+    enum_definition->exported = FRX_FALSE;
+
+    list_init(&enum_definition->constants, FRX_MEMORY_CATEGORY_AST);
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT)
+    {
+        enum_definition->exported = FRX_TRUE;
+        parser_skip(parser);
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_ENUM))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'enum'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    strcpy(enum_definition->name, parser_current_token(parser)->identifier);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected identifier for the enum's name!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_COLON))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected colon after enum's name!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    enum_definition->type = parser_parse_type(parser);
+    if(enum_definition->type == NULL)
+        return NULL;
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '{' to start the enum-definition!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    while(parser_current_token(parser)->type != FRX_TOKEN_TYPE_RIGHT_BRACE)
+    {
+        AST* constant = parser_parse_expression(parser);
+        if(constant == NULL)
+            return NULL;
+
+        if(constant->type != FRX_AST_TYPE_VARIABLE
+                && constant->type != FRX_AST_TYPE_VARIABLE_ASSIGNMENT)
+        {
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Missing '}' at the end of enum-definition!", parser->lexer.filepath, location.line, location.coloumn);
+
+            return NULL;
+        }
+
+        list_push(&enum_definition->constants, constant);
+
+        if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_COMMA
+                && parser_peek(parser, 1)->type != FRX_TOKEN_TYPE_RIGHT_BRACE)
+            parser_skip(parser);
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Missing '}' at the end of enum-definition!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    return enum_definition;
+}
+
 static FRX_NO_DISCARD ASTStructDefinition* parser_parse_struct_definition(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1594,6 +1680,7 @@ static FRX_NO_DISCARD ASTModuleDefinition* parser_parse_module_definition(Parser
     FRX_ASSERT(parser != NULL);
 
     ASTModuleDefinition* module_definition = arena_alloc(&parser->arena, sizeof(ASTModuleDefinition));
+    module_definition->exported = FRX_FALSE;
 
     list_init(&module_definition->function_declarations, FRX_MEMORY_CATEGORY_AST);
 
@@ -1820,6 +1907,14 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_MODULE_IMPLEMENTATION;
         ast->node = parser_parse_module_implementation(parser);
+
+        return ast;
+    }
+
+    if((parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_KW_ENUM) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_ENUM)
+    {
+        ast->type = FRX_AST_TYPE_ENUM_DEFINITION;
+        ast->node = parser_parse_enum_definition(parser);
 
         return ast;
     }

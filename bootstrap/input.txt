@@ -67,6 +67,17 @@ namespace Math
     }
 }
 
+enum Day : u8
+{
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY
+}
+
 export void exportedFunc()
 {
 
@@ -176,5 +187,7 @@ usize Main()
         printf("This should not print!\n");
     }
 
-    return Math::add(1, 2 * 3) * VariadicFunc(1, 2, 3, 'A', "Test");
+    Day day = FRIDAY;
+
+    return Math::add(1, 2 * 3) * VariadicFunc(1, 2, 3, 'A', "Test") + day;
 }

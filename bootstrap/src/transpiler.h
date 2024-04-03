@@ -76,6 +76,8 @@ void ast_transpile_function_call(Transpiler* transpiler, const ASTFunctionCall* 
 
 void ast_transpile_scope(Transpiler* transpiler, const ASTScope* scope);
 
+void ast_transpile_enum_definition(Transpiler* transpiler, const ASTEnumDefinition* enum_definition);
+
 void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefinition* struct_definition);
 
 void ast_transpile_namespace(Transpiler* transpiler, const ASTNamespace* namespace);

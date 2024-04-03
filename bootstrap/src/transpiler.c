@@ -272,6 +272,7 @@ void ast_transpile(Transpiler* transpiler, const AST* ast)
         case FRX_AST_TYPE_RETURN_STATEMENT: ast_transpile_return_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_FUNCTION_DEFINITION: ast_transpile_function_definition(transpiler, ast->node); break;
         case FRX_AST_TYPE_FUNCTION_CALL: ast_transpile_function_call(transpiler, ast->node); break;
+        case FRX_AST_TYPE_ENUM_DEFINITION: ast_transpile_enum_definition(transpiler, ast->node); break;
         case FRX_AST_TYPE_STRUCT_DEFINITION: ast_transpile_struct_definition(transpiler, ast->node); break;
         case FRX_AST_TYPE_NAMESPACE: ast_transpile_namespace(transpiler, ast->node); break;
         case FRX_AST_TYPE_MODULE_DEFINITION: ast_transpile_module_definition(transpiler, ast->node); break;
@@ -705,6 +706,46 @@ void ast_transpile_scope(Transpiler* transpiler, const ASTScope* scope)
     write_indentation_level(transpiler);
 
     FRX_TRANSPILER_WRITE(transpiler, "}\n");
+}
+
+void ast_transpile_enum_definition(Transpiler* transpiler, const ASTEnumDefinition* enum_definition)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(enum_definition != NULL);
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && !enum_definition->exported)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE && enum_definition->exported)
+        return;
+
+    FRX_TRANSPILER_WRITE(transpiler, "enum\n{\n");
+
+    push_indentation_level();
+
+    usize size = list_size(&enum_definition->constants);
+    for(usize i = 0; i < size; ++i)
+    {
+        AST* constant = list_get(&enum_definition->constants, i);
+
+        write_indentation_level(transpiler);
+
+        ast_transpile(transpiler, constant);
+
+        if(i != size - 1)
+            FRX_TRANSPILER_WRITE(transpiler, ",");
+
+        FRX_TRANSPILER_WRITE(transpiler, "\n");
+    }
+
+    drop_indentation_level();
+
+    FRX_TRANSPILER_WRITE(transpiler, "};\n\ntypedef ");
+
+    ast_transpile_typename(transpiler, enum_definition->type);
+
+    FRX_TRANSPILER_WRITE(transpiler, " %s;\n\n", enum_definition->name);
 }
 
 void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefinition* struct_definition)
