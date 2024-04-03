@@ -802,14 +802,6 @@ static FRX_NO_DISCARD ASTVariableAssignment* parser_parse_variable_assignment(Pa
     if(variable_assignment->value == NULL)
         return NULL;
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
-    {
-        SourceLocation location = parser_current_location(parser);
-        FRX_ERROR_FILE("Missing ';' after variable-assignment!", parser->lexer.filepath, location.line, location.coloumn);
-
-        return NULL;
-    }
-
     return variable_assignment;
 }
 
@@ -1233,6 +1225,14 @@ static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser)
             if(ast->node == NULL)
                 return NULL;
 
+            if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
+            {
+                SourceLocation location = parser_current_location(parser);
+                FRX_ERROR_FILE("Missing ';' after variable-assignment!", parser->lexer.filepath, location.line, location.coloumn);
+
+                return NULL;
+            }
+
             return ast;
         }
     }
@@ -1491,18 +1491,22 @@ static FRX_NO_DISCARD ASTEnumDefinition* parser_parse_enum_definition(Parser* pa
 
     while(parser_current_token(parser)->type != FRX_TOKEN_TYPE_RIGHT_BRACE)
     {
-        AST* constant = parser_parse_expression(parser);
-        if(constant == NULL)
-            return NULL;
+        AST* constant = arena_alloc(&parser->arena, sizeof(AST));
+        constant->node = NULL;
 
-        if(constant->type != FRX_AST_TYPE_VARIABLE
-                && constant->type != FRX_AST_TYPE_VARIABLE_ASSIGNMENT)
+        if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS)
         {
-            SourceLocation location = parser_current_location(parser);
-            FRX_ERROR_FILE("Missing '}' at the end of enum-definition!", parser->lexer.filepath, location.line, location.coloumn);
-
-            return NULL;
+            constant->type = FRX_AST_TYPE_VARIABLE_ASSIGNMENT;
+            constant->node = parser_parse_variable_assignment(parser);
         }
+        else
+        {
+            constant->type = FRX_AST_TYPE_VARIABLE;
+            constant->node = parser_parse_variable(parser);
+        }
+
+        if(constant->node == NULL)
+            return NULL;
 
         list_push(&enum_definition->constants, constant);
 
