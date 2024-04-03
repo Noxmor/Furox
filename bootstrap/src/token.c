@@ -13,7 +13,7 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_KW_NULLPTR: return "nullptr";
         case FRX_TOKEN_TYPE_KW_TRUE: return "true";
         case FRX_TOKEN_TYPE_KW_FALSE: return "false";
-        case FRX_TOKEN_TYPE_KW_INCLUDE: return "include";
+        case FRX_TOKEN_TYPE_KW_IMPORT: return "import";
         case FRX_TOKEN_TYPE_KW_RETURN: return "return";
         case FRX_TOKEN_TYPE_KW_NAMESPACE: return "namespace";
         case FRX_TOKEN_TYPE_KW_MODULE: return "module";

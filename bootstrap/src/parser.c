@@ -1759,37 +1759,39 @@ static FRX_NO_DISCARD ASTExternBlock* parser_parse_extern_block(Parser* parser)
     return extern_block;
 }
 
-static FRX_NO_DISCARD b8 parser_parse_include(Parser* parser)
+static ASTImportStatement* parser_parse_import_statement(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_INCLUDE))
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_IMPORT))
     {
         SourceLocation location = parser_current_location(parser);
-        FRX_ERROR_FILE("Expected keyword 'include'!", parser->lexer.filepath, location.line, location.coloumn);
+        FRX_ERROR_FILE("Expected keyword 'import'!", parser->lexer.filepath, location.line, location.coloumn);
 
-        return FRX_TRUE;
+        return NULL;
     }
 
-    //TODO: How to do the actual include?
+    ASTImportStatement* import_statement = arena_alloc(&parser->arena, sizeof(ASTImportStatement));
+
+    strcpy(import_statement->filepath, parser_current_token(parser)->identifier);
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_STRING_LITERAL))
     {
         SourceLocation location = parser_current_location(parser);
-        FRX_ERROR_FILE("Expected string-literal after include-statement!", parser->lexer.filepath, location.line, location.coloumn);
+        FRX_ERROR_FILE("Expected string-literal after import-statement!", parser->lexer.filepath, location.line, location.coloumn);
 
-        return FRX_TRUE;
+        return NULL;
     }
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
     {
         SourceLocation location = parser_current_location(parser);
-        FRX_ERROR_FILE("Missing semicolon after include-statement!", parser->lexer.filepath, location.line, location.coloumn);
+        FRX_ERROR_FILE("Missing semicolon after import-statement!", parser->lexer.filepath, location.line, location.coloumn);
 
-        return FRX_TRUE;
+        return NULL;
     }
 
-    return FRX_FALSE;
+    return import_statement;
 }
 
 static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
@@ -1838,13 +1840,10 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
         return ast;
     }
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_INCLUDE)
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IMPORT)
     {
-        if(parser_parse_include(parser))
-            return NULL;
-
-        ast->type = FRX_AST_TYPE_NOOP;
-        ast->node = NULL;
+        ast->type = FRX_AST_TYPE_IMPORT_STATEMENT;
+        ast->node = parser_parse_import_statement(parser);
 
         return ast;
     }

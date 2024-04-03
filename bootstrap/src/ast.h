@@ -59,6 +59,8 @@ enum
     FRX_AST_TYPE_DEREFERENCE,
     FRX_AST_TYPE_ADDRESS_OF,
 
+    FRX_AST_TYPE_IMPORT_STATEMENT,
+
     FRX_AST_TYPE_IF_STATEMENT,
     FRX_AST_TYPE_FOR_LOOP,
     FRX_AST_TYPE_WHILE_LOOP,
@@ -182,6 +184,11 @@ typedef struct ASTUnaryExpression
     AST* operand;
 } ASTUnaryExpression;
 
+typedef struct ASTImportStatement
+{
+    char filepath[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} ASTImportStatement;
+
 typedef struct ASTIfStatement
 {
     AST* condition;
@@ -303,6 +310,8 @@ typedef struct ASTExternBlock
 
 void ast_print(const AST* ast, usize depth);
 
+void ast_print_noop(usize depth);
+
 void ast_print_program(const ASTProgram* program);
 
 void ast_print_number(const ASTNumber* number, usize depth);
@@ -326,6 +335,8 @@ void ast_print_variable_array_access(const ASTVariableArrayAccess* variable_arra
 void ast_print_binary_expression(const ASTBinaryExpression* binary_expression, usize depth);
 
 void ast_print_unary_expression(const ASTUnaryExpression* unary_expression, usize depth);
+
+void ast_print_import_statement(const ASTImportStatement* import_statement, usize depth);
 
 void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth);
 

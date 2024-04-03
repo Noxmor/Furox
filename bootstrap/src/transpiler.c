@@ -280,6 +280,7 @@ void ast_transpile(Transpiler* transpiler, const AST* ast)
         case FRX_AST_TYPE_VARIABLE_ARRAY_ACCESS: ast_transpile_variable_array_access(transpiler, ast->node); break;
         case FRX_AST_TYPE_UNARY_EXPRESSION: ast_transpile_unary_expression(transpiler, ast->node); break;
         case FRX_AST_TYPE_BINARY_EXPRESSION: ast_transpile_binary_expression(transpiler, ast->node); break;
+        case FRX_AST_TYPE_IMPORT_STATEMENT: ast_transpile_import_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_IF_STATEMENT: ast_transpile_if_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_FOR_LOOP: ast_transpile_for_loop(transpiler, ast->node); break;
         case FRX_AST_TYPE_WHILE_LOOP: ast_transpile_while_loop(transpiler, ast->node); break;
@@ -485,6 +486,18 @@ void ast_transpile_unary_expression(Transpiler* transpiler, const ASTUnaryExpres
     ast_transpile(transpiler, unary_expression->operand);
 
     FRX_TRANSPILER_WRITE(transpiler, ")");
+}
+
+void ast_transpile_import_statement(Transpiler* transpiler, const ASTImportStatement* import_statement)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(import_statement != NULL);
+
+    if(transpiler->mode != FRX_TRANSPILER_MODE_HEADER)
+        return;
+
+    FRX_TRANSPILER_WRITE(transpiler, "#include \"%s\"\n", import_statement->filepath);
 }
 
 void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if_statement)
