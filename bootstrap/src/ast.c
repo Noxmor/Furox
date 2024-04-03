@@ -61,6 +61,8 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_DEREFERENCE: return "dereference";
         case FRX_AST_TYPE_ADDRESS_OF: return "address-of";
 
+        case FRX_AST_TYPE_IMPORT_STATEMENT: return "import-statement";
+
         case FRX_AST_TYPE_IF_STATEMENT: return "if-statement";
         case FRX_AST_TYPE_FOR_LOOP: return "for-loop";
         case FRX_AST_TYPE_WHILE_LOOP: return "while-loop";
@@ -124,6 +126,8 @@ void ast_print(const AST* ast, usize depth)
 
     switch(ast->type)
     {
+        case FRX_AST_TYPE_NOOP: ast_print_noop(depth); break;
+
         case FRX_AST_TYPE_NUMBER: ast_print_number(ast->node, depth); break;
         case FRX_AST_TYPE_CHAR_LITERAL: ast_print_char_literal(ast->node, depth); break;
         case FRX_AST_TYPE_STRING_LITERAL: ast_print_string_literal(ast->node, depth); break;
@@ -136,6 +140,8 @@ void ast_print(const AST* ast, usize depth)
 
         case FRX_AST_TYPE_BINARY_EXPRESSION: ast_print_binary_expression(ast->node, depth); break;
         case FRX_AST_TYPE_UNARY_EXPRESSION: ast_print_unary_expression(ast->node, depth); break;
+
+        case FRX_AST_TYPE_IMPORT_STATEMENT: ast_print_import_statement(ast->node, depth); break;
 
         case FRX_AST_TYPE_IF_STATEMENT: ast_print_if_statement(ast->node, depth); break;
         case FRX_AST_TYPE_FOR_LOOP: ast_print_for_loop(ast->node, depth); break;
@@ -154,6 +160,13 @@ void ast_print(const AST* ast, usize depth)
 
         default: FRX_ASSERT(FRX_FALSE); break;
     }
+}
+
+void ast_print_noop(usize depth)
+{
+    print_recursion_buffer(depth);
+
+    printf("noop\n");
 }
 
 void ast_print_program(const ASTProgram* program)
@@ -375,6 +388,15 @@ void ast_print_unary_expression(const ASTUnaryExpression* unary_expression, usiz
     print_depth(depth);
 
     ast_print(unary_expression->operand, depth + 1);
+}
+
+void ast_print_import_statement(const ASTImportStatement* import_statement, usize depth)
+{
+    FRX_ASSERT(import_statement != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("import-statement (\"%s\")\n", import_statement->filepath);
 }
 
 void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth)
