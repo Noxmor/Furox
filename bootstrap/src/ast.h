@@ -370,6 +370,8 @@ void ast_print_function_call(const ASTFunctionCall* function_call, usize depth);
 
 void ast_print_scope(const ASTScope* scope, usize depth);
 
+void ast_print_enum_definition(const ASTEnumDefinition* enum_definition, usize depth);
+
 void ast_print_struct_definition(const ASTStructDefinition* struct_definition, usize depth);
 
 void ast_print_namespace(const ASTNamespace* namespace, usize depth);
