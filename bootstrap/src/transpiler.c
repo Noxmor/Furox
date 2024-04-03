@@ -129,21 +129,15 @@ static FRX_NO_DISCARD b8 create_furox_directory_from_source(const char* filepath
     return mkdir(furox_filepath, 0777) == -1 && errno != EEXIST;
 }
 
-static FILE* create_c_file(const char* furox_filepath, const char* filename)
+static FILE* create_c_file(const char* furox_filepath, const char* filepath)
 {
     FRX_ASSERT(furox_filepath != NULL);
 
-    FRX_ASSERT(filename != NULL);
+    FRX_ASSERT(filepath != NULL);
 
-    char c_filepath[strlen(furox_filepath) + strlen("/") + strlen(filename) + 1];
+    char c_filepath[strlen(furox_filepath) + strlen("/") + strlen(filepath) + 1];
 
-    const char* extension = strrchr(filename, '.');
-    usize filename_len = extension - filename;
-
-    if(extension == NULL)
-        filename_len = strlen(filename);
-
-    sprintf(c_filepath, "%s/%.*s.c", furox_filepath, (int)filename_len, filename);
+    sprintf(c_filepath, "%s/%s.c", furox_filepath, filepath);
 
     FILE* f = fopen(c_filepath, "w");
     if(f == NULL)
@@ -151,7 +145,7 @@ static FILE* create_c_file(const char* furox_filepath, const char* filename)
 
     store_c_filepath(c_filepath);
 
-    if(fprintf(f, "#include \"Furox.h\"\n#include \"%.*s.h\"\n", (int)filename_len, filename) < 0)
+    if(fprintf(f, "#include \"Furox.h\"\n#include \"%s.h\"\n", filepath) < 0)
     {
         fclose(f);
 
@@ -161,21 +155,15 @@ static FILE* create_c_file(const char* furox_filepath, const char* filename)
     return f;
 }
 
-static FILE* create_header_file(const char* furox_filepath, const char* filename)
+static FILE* create_header_file(const char* furox_filepath, const char* filepath)
 {
     FRX_ASSERT(furox_filepath != NULL);
 
-    FRX_ASSERT(filename != NULL);
+    FRX_ASSERT(filepath != NULL);
 
-    char header_filepath[strlen(furox_filepath) + strlen("/") + strlen(filename) + 1];
+    char header_filepath[strlen(furox_filepath) + strlen("/") + strlen(filepath) + 1];
 
-    const char* extension = strrchr(filename, '.');
-    usize filename_len = extension - filename;
-
-    if(extension == NULL)
-        filename_len = strlen(filename);
-
-    sprintf(header_filepath, "%s/%.*s.h", furox_filepath, (int)filename_len, filename);
+    sprintf(header_filepath, "%s/%s.h", furox_filepath, filepath);
 
     FILE* f = fopen(header_filepath, "w");
     if(f == NULL)
@@ -230,14 +218,10 @@ FRX_NO_DISCARD b8 ast_transpile_program(Transpiler* transpiler, const ASTProgram
 
     char furox_filepath[strlen(src_filepath) + strlen("furox-c/") + 1];
 
-    const char* filename = strrchr(src_filepath, '/');
-    if(filename == NULL)
-        filename = src_filepath;
-
     if(create_furox_directory_from_source(src_filepath, furox_filepath))
         return FRX_TRUE;
 
-    transpiler->header = create_header_file(furox_filepath, filename);
+    transpiler->header = create_header_file(furox_filepath, src_filepath);
     if(transpiler->header == NULL)
         return FRX_TRUE;
 
@@ -249,7 +233,7 @@ FRX_NO_DISCARD b8 ast_transpile_program(Transpiler* transpiler, const ASTProgram
 
     fclose(transpiler->header);
 
-    transpiler->source = create_c_file(furox_filepath, filename);
+    transpiler->source = create_c_file(furox_filepath, src_filepath);
     if(transpiler->source == NULL)
         return FRX_TRUE;
 
