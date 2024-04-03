@@ -74,6 +74,7 @@ enum
 
     FRX_AST_TYPE_SCOPE,
 
+    FRX_AST_TYPE_ENUM_DEFINITION,
     FRX_AST_TYPE_STRUCT_DEFINITION,
 
     FRX_AST_TYPE_NAMESPACE,
@@ -262,6 +263,17 @@ typedef struct ASTScope
 {
     List statements;
 } ASTScope;
+
+typedef struct ASTEnumDefinition
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    ASTTypename* type;
+
+    b8 exported;
+
+    List constants;
+} ASTEnumDefinition;
 
 typedef struct ASTStructDefinition
 {

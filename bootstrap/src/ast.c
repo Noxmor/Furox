@@ -76,6 +76,7 @@ const char* ast_type_to_str(ASTType type)
 
         case FRX_AST_TYPE_SCOPE: return "scope";
 
+        case FRX_AST_TYPE_ENUM_DEFINITION: return "enum-definition";
         case FRX_AST_TYPE_STRUCT_DEFINITION: return "struct-definition";
 
         case FRX_AST_TYPE_NAMESPACE: return "namespace";
@@ -152,6 +153,7 @@ void ast_print(const AST* ast, usize depth)
 
         case FRX_AST_TYPE_FUNCTION_DEFINITION: ast_print_function_definition(ast->node, depth); break;
         case FRX_AST_TYPE_FUNCTION_CALL: ast_print_function_call(ast->node, depth); break;
+        case FRX_AST_TYPE_ENUM_DEFINITION: ast_print_enum_definition(ast->node, depth); break;
         case FRX_AST_TYPE_STRUCT_DEFINITION: ast_print_struct_definition(ast->node, depth); break;
         case FRX_AST_TYPE_NAMESPACE: ast_print_namespace(ast->node, depth); break;
         case FRX_AST_TYPE_MODULE_DEFINITION: ast_print_module_definition(ast->node, depth); break;
@@ -642,6 +644,30 @@ void ast_print_scope(const ASTScope* scope, usize depth)
         print_depth(depth);
 
         ast_print(list_get(&scope->statements, i), depth + 1);
+    }
+
+    recursion_buffer[depth] = 0;
+}
+
+void ast_print_enum_definition(const ASTEnumDefinition* enum_definition, usize depth)
+{
+    FRX_ASSERT(enum_definition != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("enum-definition (%s)\n", enum_definition->name);
+
+    recursion_buffer[depth] = 1;
+
+    usize size = list_size(&enum_definition->constants);
+    for(usize i = 0; i < size; ++i)
+    {
+        if(i == size - 1)
+            recursion_buffer[depth] = 0;
+
+        print_depth(depth);
+
+        ast_print(list_get(&enum_definition->constants, i), depth + 1);
     }
 
     recursion_buffer[depth] = 0;
