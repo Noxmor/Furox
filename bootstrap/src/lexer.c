@@ -234,6 +234,8 @@ static void lexer_parse_identifier(Lexer* lexer, Token* token)
         token->type = FRX_TOKEN_TYPE_KW_IMPL;
     else if(strcmp(token->identifier, "extern") == 0)
         token->type = FRX_TOKEN_TYPE_KW_EXTERN;
+    else if(strcmp(token->identifier, "enum") == 0)
+        token->type = FRX_TOKEN_TYPE_KW_ENUM;
     else if(strcmp(token->identifier, "struct") == 0)
         token->type = FRX_TOKEN_TYPE_KW_STRUCT;
     else if(strcmp(token->identifier, "export") == 0)
