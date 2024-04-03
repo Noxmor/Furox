@@ -10,6 +10,8 @@ Now we are back in the outer comment block.
 This should all be skipped.
 */
 
+//import "test.txt";
+
 extern
 {
     i32 putchar(i32 c);
