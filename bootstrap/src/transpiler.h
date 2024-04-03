@@ -54,6 +54,8 @@ void ast_transpile_binary_expression(Transpiler* transpiler, const ASTBinaryExpr
 
 void ast_transpile_unary_expression(Transpiler* transpiler, const ASTUnaryExpression* unary_expression);
 
+void ast_transpile_import_statement(Transpiler* transpiler, const ASTImportStatement* import_statement);
+
 void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if_statement);
 
 void ast_transpile_for_loop(Transpiler* transpiler, const ASTForLoop* for_loop);
