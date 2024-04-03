@@ -72,7 +72,7 @@ enum Day : u8
     MONDAY,
     TUESDAY,
     WEDNESDAY,
-    THURSDAY,
+    THURSDAY = 99,
     FRIDAY,
     SATURDAY,
     SUNDAY
