@@ -64,6 +64,43 @@ static FRX_NO_DISCARD b8 parser_eat(Parser* parser, TokenType type)
     return FRX_FALSE;
 }
 
+static void parser_skip(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ++parser_info.tokens_processed;
+
+    lexer_next_token(&parser->lexer);
+}
+
+static void parser_skip_optional_keywords(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    b8 parse_optional_keywords = FRX_TRUE;
+    while(parse_optional_keywords)
+    {
+        switch(parser_current_token(parser)->type)
+        {
+            case FRX_TOKEN_TYPE_KW_EXPORT: parser_skip(parser); break;
+
+            default: parse_optional_keywords = FRX_FALSE; break;
+        }
+    }
+}
+
+static void parser_skip_namespace_resolution(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
+            && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
+    {
+        parser_skip(parser);
+        parser_skip(parser);
+    }
+}
+
 static usize parser_get_precedence(ASTType type)
 {
     switch(type)
@@ -158,15 +195,6 @@ static b8 parser_next_token_is_binary_operator(Parser* parser)
     return FRX_FALSE;
 }
 
-static void parser_skip(Parser* parser)
-{
-    FRX_ASSERT(parser != NULL);
-
-    ++parser_info.tokens_processed;
-
-    lexer_next_token(&parser->lexer);
-}
-
 static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser);
 
 static FRX_NO_DISCARD ASTNamespaceRef* parser_parse_namespace_resolution(Parser* parser);
@@ -228,6 +256,21 @@ static FRX_NO_DISCARD ASTVariable* parser_parse_variable(Parser* parser)
     return variable;
 }
 
+static FRX_NO_DISCARD b8 is_number(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    switch(parser_current_token(parser)->type)
+    {
+        case FRX_TOKEN_TYPE_NUMBER:
+        case FRX_TOKEN_TYPE_KW_NULLPTR:
+        case FRX_TOKEN_TYPE_KW_FALSE:
+        case FRX_TOKEN_TYPE_KW_TRUE: return FRX_TRUE;
+    }
+
+    return FRX_FALSE;
+}
+
 static FRX_NO_DISCARD ASTNumber* parser_parse_number(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -274,6 +317,13 @@ static FRX_NO_DISCARD ASTNumber* parser_parse_number(Parser* parser)
     return number;
 }
 
+static FRX_NO_DISCARD b8 is_char_literal(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_CHAR_LITERAL;
+}
+
 static FRX_NO_DISCARD ASTCharLiteral* parser_parse_char_literal(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -293,6 +343,13 @@ static FRX_NO_DISCARD ASTCharLiteral* parser_parse_char_literal(Parser* parser)
     return char_literal;
 }
 
+static FRX_NO_DISCARD b8 is_string_literal(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_STRING_LITERAL;
+}
+
 static FRX_NO_DISCARD ASTStringLiteral* parser_parse_string_literal(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -310,6 +367,21 @@ static FRX_NO_DISCARD ASTStringLiteral* parser_parse_string_literal(Parser* pars
     }
 
     return string_literal;
+}
+
+static FRX_NO_DISCARD b8 is_function_call(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    SourceLocation location = parser_current_location(parser);
+
+    parser_skip_namespace_resolution(parser);
+
+    b8 result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS;
+
+    parser_recover(parser, &location);
+
+    return result;
 }
 
 static FRX_NO_DISCARD ASTFunctionCall* parser_parse_function_call(Parser* parser)
@@ -706,6 +778,43 @@ static FRX_NO_DISCARD ASTTypename* parser_parse_type(Parser* parser)
     return type;
 }
 
+static FRX_NO_DISCARD b8 is_variable_declaration(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    SourceLocation location = parser_current_location(parser);
+
+    parser_skip_namespace_resolution(parser);
+
+    b8 result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER
+        && parser_peek(parser, 2)->type == FRX_TOKEN_TYPE_SEMICOLON;
+
+    if(!result)
+    {
+        if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER)
+        {
+            parser_skip(parser);
+
+            while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
+                parser_skip(parser);
+
+            if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_LEFT_BRACKET)
+            {
+                while(parser_current_token(parser)->type != FRX_TOKEN_TYPE_RIGHT_BRACKET)
+                    parser_skip(parser);
+
+                parser_skip(parser);
+            }
+        }
+
+        result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_SEMICOLON;
+    }
+
+    parser_recover(parser, &location);
+
+    return result;
+}
+
 static FRX_NO_DISCARD ASTVariableDeclaration* parser_parse_variable_declaration(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -735,6 +844,43 @@ static FRX_NO_DISCARD ASTVariableDeclaration* parser_parse_variable_declaration(
     }
 
     return variable_declaration;
+}
+
+static FRX_NO_DISCARD b8 is_variable_definition(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    SourceLocation location = parser_current_location(parser);
+
+    parser_skip_namespace_resolution(parser);
+
+    b8 result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER
+        && parser_peek(parser, 2)->type == FRX_TOKEN_TYPE_EQUALS;
+
+    if(!result)
+    {
+        if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER)
+        {
+            parser_skip(parser);
+
+            while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
+                parser_skip(parser);
+
+            if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_LEFT_BRACKET)
+            {
+                while(parser_current_token(parser)->type != FRX_TOKEN_TYPE_RIGHT_BRACKET)
+                    parser_skip(parser);
+
+                parser_skip(parser);
+            }
+        }
+
+        result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS;
+    }
+
+    parser_recover(parser, &location);
+
+    return result;
 }
 
 static FRX_NO_DISCARD ASTVariableDefinition* parser_parse_variable_definition(Parser* parser)
@@ -780,6 +926,16 @@ static FRX_NO_DISCARD ASTVariableDefinition* parser_parse_variable_definition(Pa
     return variable_definition;
 }
 
+static FRX_NO_DISCARD b8 is_variable_assignment(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    TokenType next_type = parser_peek(parser, 1)->type;
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
+        && (next_type == FRX_TOKEN_TYPE_DOT || next_type == FRX_TOKEN_TYPE_ARROW || next_type == FRX_TOKEN_TYPE_EQUALS);
+}
+
 static FRX_NO_DISCARD ASTVariableAssignment* parser_parse_variable_assignment(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -803,6 +959,13 @@ static FRX_NO_DISCARD ASTVariableAssignment* parser_parse_variable_assignment(Pa
         return NULL;
 
     return variable_assignment;
+}
+
+static FRX_NO_DISCARD b8 is_if_statement(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IF;
 }
 
 static FRX_NO_DISCARD ASTIfStatement* parser_parse_if_statement(Parser* parser)
@@ -856,6 +1019,13 @@ static FRX_NO_DISCARD ASTIfStatement* parser_parse_if_statement(Parser* parser)
         return NULL;
 
     return if_statement;
+}
+
+static FRX_NO_DISCARD b8 is_for_loop(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_FOR;
 }
 
 static FRX_NO_DISCARD ASTForLoop* parser_parse_for_loop(Parser* parser)
@@ -923,6 +1093,13 @@ static FRX_NO_DISCARD ASTForLoop* parser_parse_for_loop(Parser* parser)
     return for_loop;
 }
 
+static FRX_NO_DISCARD b8 is_while_loop(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_WHILE;
+}
+
 static FRX_NO_DISCARD ASTWhileLoop* parser_parse_while_loop(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -962,6 +1139,13 @@ static FRX_NO_DISCARD ASTWhileLoop* parser_parse_while_loop(Parser* parser)
         return NULL;
 
     return while_loop;
+}
+
+static FRX_NO_DISCARD b8 is_do_while_loop(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_DO;
 }
 
 static FRX_NO_DISCARD ASTDoWhileLoop* parser_parse_do_while_loop(Parser* parser)
@@ -1019,6 +1203,13 @@ static FRX_NO_DISCARD ASTDoWhileLoop* parser_parse_do_while_loop(Parser* parser)
     }
 
     return do_while_loop;
+}
+
+static FRX_NO_DISCARD b8 is_return_statement(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_RETURN;
 }
 
 static FRX_NO_DISCARD ASTReturnStatement* parser_parse_return_statement(Parser* parser)
@@ -1090,6 +1281,7 @@ static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser)
 
         return ast;
     }
+
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_DO)
     {
         ast->type = FRX_AST_TYPE_DO_WHILE_LOOP;
@@ -1110,131 +1302,60 @@ static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser)
         return ast;
     }
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER)
+    if(is_function_call(parser))
     {
-        if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
+        ast->type = FRX_AST_TYPE_FUNCTION_CALL;
+        ast->node = parser_parse_function_call(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
         {
-            SourceLocation recover_location = parser_current_location(parser);
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Missing ';' at the end of function-call!", parser->lexer.filepath, location.line, location.coloumn);
 
-            if(parser_parse_namespace_resolution(parser) == NULL)
-            {
-                SourceLocation location = parser_current_location(parser);
-                FRX_ERROR_FILE("Expected namespace-reference!", parser->lexer.filepath, location.line, location.coloumn);
-
-                return NULL;
-            }
-
-            if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
-            {
-                parser_recover(parser, &recover_location);
-
-                ast->type = FRX_AST_TYPE_FUNCTION_CALL;
-                ast->node = parser_parse_function_call(parser);
-                if(ast->node == NULL)
-                    return NULL;
-
-                if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
-                {
-                    SourceLocation location = parser_current_location(parser);
-                    FRX_ERROR_FILE("Missing ';' at the end of function-call!", parser->lexer.filepath, location.line, location.coloumn);
-
-                    return NULL;
-                }
-
-                return ast;
-            }
-
-            if(parser_parse_type(parser) == NULL)
-            {
-                SourceLocation location = parser_current_location(parser);
-                FRX_ERROR_FILE("Expected type-specifier!", parser->lexer.filepath, location.line, location.coloumn);
-
-                return NULL;
-            }
-
-            if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS)
-            {
-                parser_recover(parser, &recover_location);
-
-                ast->type = FRX_AST_TYPE_VARIABLE_DEFINITION;
-                ast->node = parser_parse_variable_definition(parser);
-                if(ast->node == NULL)
-                    return NULL;
-
-                return ast;
-            }
-
-            parser_recover(parser, &recover_location);
-
-            ast->type = FRX_AST_TYPE_VARIABLE_DECLARATION;
-            ast->node = parser_parse_variable_declaration(parser);
-            if(ast->node == NULL)
-                return NULL;
-
-            return ast;
+            return NULL;
         }
 
-        if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+        return ast;
+    }
+
+    if(is_variable_declaration(parser))
+    {
+        ast->type = FRX_AST_TYPE_VARIABLE_DECLARATION;
+        ast->node = parser_parse_variable_declaration(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
+    if(is_variable_definition(parser))
+    {
+        ast->type = FRX_AST_TYPE_VARIABLE_DEFINITION;
+        ast->node = parser_parse_variable_definition(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
+    if(is_variable_assignment(parser))
+    {
+        ast->type = FRX_AST_TYPE_VARIABLE_ASSIGNMENT;
+        ast->node = parser_parse_variable_assignment(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
         {
-            ast->type = FRX_AST_TYPE_FUNCTION_CALL;
-            ast->node = parser_parse_function_call(parser);
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Missing ';' after variable-assignment!", parser->lexer.filepath, location.line, location.coloumn);
 
-            if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
-            {
-                SourceLocation location = parser_current_location(parser);
-                FRX_ERROR_FILE("Missing ';' at the end of function-call!", parser->lexer.filepath, location.line, location.coloumn);
-
-                return NULL;
-            }
-
-            return ast;
+            return NULL;
         }
 
-        SourceLocation recover_location = parser_current_location(parser);
-
-        if(parser_parse_type(parser) != NULL && parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER)
-        {
-            if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS)
-            {
-                parser_recover(parser, &recover_location);
-
-                ast->type = FRX_AST_TYPE_VARIABLE_DEFINITION;
-                ast->node = parser_parse_variable_definition(parser);
-                if(ast->node == NULL)
-                    return NULL;
-
-                return ast;
-            }
-
-            parser_recover(parser, &recover_location);
-
-            ast->type = FRX_AST_TYPE_VARIABLE_DECLARATION;
-            ast->node = parser_parse_variable_declaration(parser);
-            if(ast->node == NULL)
-                return NULL;
-
-            return ast;
-        }
-
-        parser_recover(parser, &recover_location);
-
-        if(parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_EQUALS || parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_DOT || parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_ARROW)
-        {
-            ast->type = FRX_AST_TYPE_VARIABLE_ASSIGNMENT;
-            ast->node = parser_parse_variable_assignment(parser);
-            if(ast->node == NULL)
-                return NULL;
-
-            if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
-            {
-                SourceLocation location = parser_current_location(parser);
-                FRX_ERROR_FILE("Missing ';' after variable-assignment!", parser->lexer.filepath, location.line, location.coloumn);
-
-                return NULL;
-            }
-
-            return ast;
-        }
+        return ast;
     }
 
     //TODO: If no rule applied so far, parse this as an assignment, where the lhs of the assignment is a complex expression.
@@ -1364,6 +1485,23 @@ static FRX_NO_DISCARD ASTParameterList* parser_parse_parameter_list(Parser* pars
     return parameter_list;
 }
 
+static FRX_NO_DISCARD b8 is_function_definition(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    SourceLocation location = parser_current_location(parser);
+
+    parser_skip_optional_keywords(parser);
+
+    parser_skip_namespace_resolution(parser);
+
+    b8 result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER;
+
+    parser_recover(parser, &location);
+
+    return result;
+}
+
 static FRX_NO_DISCARD ASTFunctionDefinition* parser_parse_function_definition(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1402,6 +1540,13 @@ static FRX_NO_DISCARD ASTFunctionDefinition* parser_parse_function_definition(Pa
     return function_definition;
 }
 
+static FRX_NO_DISCARD b8 is_function_declaration(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER;
+}
+
 static FRX_NO_DISCARD ASTFunctionDeclaration* parser_parse_function_declaration(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1434,6 +1579,21 @@ static FRX_NO_DISCARD ASTFunctionDeclaration* parser_parse_function_declaration(
     }
 
     return function_declaration;
+}
+
+static FRX_NO_DISCARD b8 is_enum_definition(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    SourceLocation location = parser_current_location(parser);
+
+    parser_skip_optional_keywords(parser);
+
+    b8 result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_ENUM;
+
+    parser_recover(parser, &location);
+
+    return result;
 }
 
 static FRX_NO_DISCARD ASTEnumDefinition* parser_parse_enum_definition(Parser* parser)
@@ -1526,6 +1686,21 @@ static FRX_NO_DISCARD ASTEnumDefinition* parser_parse_enum_definition(Parser* pa
     return enum_definition;
 }
 
+static FRX_NO_DISCARD b8 is_struct_definition(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    SourceLocation location = parser_current_location(parser);
+
+    parser_skip_optional_keywords(parser);
+
+    b8 result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_STRUCT;
+
+    parser_recover(parser, &location);
+
+    return result;
+}
+
 static FRX_NO_DISCARD ASTStructDefinition* parser_parse_struct_definition(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1587,6 +1762,13 @@ static FRX_NO_DISCARD ASTStructDefinition* parser_parse_struct_definition(Parser
     return struct_definition;
 }
 
+static FRX_NO_DISCARD b8 is_namespace_resolution(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION;
+}
+
 static FRX_NO_DISCARD ASTNamespaceRef* parser_parse_namespace_resolution(Parser* parser)
 {
     //TODO: Handle case where we just have a namespace resolution operator for referencing the global namespace.
@@ -1623,6 +1805,13 @@ static FRX_NO_DISCARD ASTNamespaceRef* parser_parse_namespace_resolution(Parser*
         namespace_ref->next = NULL;
 
     return namespace_ref;
+}
+
+static FRX_NO_DISCARD b8 is_namespace(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_NAMESPACE;
 }
 
 static FRX_NO_DISCARD ASTNamespace* parser_parse_namespace(Parser* parser)
@@ -1677,6 +1866,21 @@ static FRX_NO_DISCARD ASTNamespace* parser_parse_namespace(Parser* parser)
     }
 
     return namespace;
+}
+
+static FRX_NO_DISCARD b8 is_module_definition(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    SourceLocation location = parser_current_location(parser);
+
+    parser_skip_optional_keywords(parser);
+
+    b8 result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_MODULE;
+
+    parser_recover(parser, &location);
+
+    return result;
 }
 
 static FRX_NO_DISCARD ASTModuleDefinition* parser_parse_module_definition(Parser* parser)
@@ -1740,6 +1944,13 @@ static FRX_NO_DISCARD ASTModuleDefinition* parser_parse_module_definition(Parser
     return module_definition;
 }
 
+static FRX_NO_DISCARD b8 is_module_implementation(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IMPL;
+}
+
 static FRX_NO_DISCARD ASTModuleImplementation* parser_parse_module_implementation(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1792,6 +2003,13 @@ static FRX_NO_DISCARD ASTModuleImplementation* parser_parse_module_implementatio
     }
 
     return module_implementation;
+}
+
+static FRX_NO_DISCARD b8 is_extern_block(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXTERN;
 }
 
 static FRX_NO_DISCARD ASTExternBlock* parser_parse_extern_block(Parser* parser)
@@ -1850,6 +2068,13 @@ static FRX_NO_DISCARD ASTExternBlock* parser_parse_extern_block(Parser* parser)
     return extern_block;
 }
 
+static FRX_NO_DISCARD b8 is_import_statement(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IMPORT;
+}
+
 static ASTImportStatement* parser_parse_import_statement(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1891,7 +2116,7 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
 
     AST* ast = arena_alloc(&parser->arena, sizeof(AST));
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_NAMESPACE)
+    if(is_namespace(parser))
     {
         ast->type = FRX_AST_TYPE_NAMESPACE;
         ast->node = parser_parse_namespace(parser);
@@ -1899,7 +2124,7 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
         return ast;
     }
 
-    if((parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_KW_MODULE) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_MODULE)
+    if(is_module_definition(parser))
     {
         ast->type = FRX_AST_TYPE_MODULE_DEFINITION;
         ast->node = parser_parse_module_definition(parser);
@@ -1907,7 +2132,7 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
         return ast;
     }
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IMPL)
+    if(is_module_implementation(parser))
     {
         ast->type = FRX_AST_TYPE_MODULE_IMPLEMENTATION;
         ast->node = parser_parse_module_implementation(parser);
@@ -1915,7 +2140,7 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
         return ast;
     }
 
-    if((parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_KW_ENUM) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_ENUM)
+    if(is_enum_definition(parser))
     {
         ast->type = FRX_AST_TYPE_ENUM_DEFINITION;
         ast->node = parser_parse_enum_definition(parser);
@@ -1923,7 +2148,7 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
         return ast;
     }
 
-    if((parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_KW_STRUCT) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_STRUCT)
+    if(is_struct_definition(parser))
     {
         ast->type = FRX_AST_TYPE_STRUCT_DEFINITION;
         ast->node = parser_parse_struct_definition(parser);
@@ -1931,7 +2156,7 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
         return ast;
     }
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXTERN)
+    if(is_extern_block(parser))
     {
         ast->type = FRX_AST_TYPE_EXTERN_BLOCK;
         ast->node = parser_parse_extern_block(parser);
@@ -1939,7 +2164,7 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
         return ast;
     }
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IMPORT)
+    if(is_import_statement(parser))
     {
         ast->type = FRX_AST_TYPE_IMPORT_STATEMENT;
         ast->node = parser_parse_import_statement(parser);
@@ -1947,7 +2172,7 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
         return ast;
     }
 
-    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT || parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER)
+    if(is_function_definition(parser))
     {
         ast->type = FRX_AST_TYPE_FUNCTION_DEFINITION;
         ast->node = parser_parse_function_definition(parser);
