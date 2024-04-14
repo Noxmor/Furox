@@ -227,7 +227,11 @@ FRX_NO_DISCARD b8 ast_transpile_program(Transpiler* transpiler, const ASTProgram
 
     transpiler->mode = FRX_TRANSPILER_MODE_HEADER;
     for(usize i = 0; i < list_size(&program->top_level_definitions); ++i)
+    {
         ast_transpile(transpiler, list_get(&program->top_level_definitions, i));
+
+        FRX_TRANSPILER_WRITE(transpiler, "\n");
+    }
 
     FRX_TRANSPILER_WRITE_HEADER(transpiler, "#endif\n");
 
@@ -239,7 +243,11 @@ FRX_NO_DISCARD b8 ast_transpile_program(Transpiler* transpiler, const ASTProgram
 
     transpiler->mode = FRX_TRANSPILER_MODE_SOURCE;
     for(usize i = 0; i < list_size(&program->top_level_definitions); ++i)
+    {
         ast_transpile(transpiler, list_get(&program->top_level_definitions, i));
+
+        FRX_TRANSPILER_WRITE(transpiler, "\n");
+    }
 
     fclose(transpiler->source);
 
@@ -333,6 +341,9 @@ void ast_transpile_variable_declaration(Transpiler* transpiler, const ASTVariabl
 
     FRX_ASSERT(variable_declaration != NULL);
 
+    if(transpiler->mode != FRX_TRANSPILER_MODE_SOURCE)
+        return;
+
     ast_transpile_typename(transpiler, variable_declaration->type);
 
     FRX_TRANSPILER_WRITE(transpiler, " %s", variable_declaration->name);
@@ -343,6 +354,8 @@ void ast_transpile_variable_declaration(Transpiler* transpiler, const ASTVariabl
         ast_transpile(transpiler, variable_declaration->type->array_size);
         FRX_TRANSPILER_WRITE(transpiler, "]");
     }
+
+    FRX_TRANSPILER_WRITE(transpiler, ";");
 }
 
 void ast_transpile_variable_definition(Transpiler* transpiler, const ASTVariableDefinition* variable_definition)
@@ -351,11 +364,16 @@ void ast_transpile_variable_definition(Transpiler* transpiler, const ASTVariable
 
     FRX_ASSERT(variable_definition != NULL);
 
+    if(transpiler->mode != FRX_TRANSPILER_MODE_SOURCE)
+        return;
+
     ast_transpile_typename(transpiler, variable_definition->type);
 
     FRX_TRANSPILER_WRITE(transpiler, " %s = ", variable_definition->name);
 
     ast_transpile(transpiler, variable_definition->value);
+
+    FRX_TRANSPILER_WRITE(transpiler, ";");
 }
 
 void ast_transpile_variable_assignment(Transpiler* transpiler, const ASTVariableAssignment* variable_assignment)
@@ -641,7 +659,7 @@ void ast_transpile_function_declaration(Transpiler* transpiler, const ASTFunctio
     write_current_namespace(transpiler);
     FRX_TRANSPILER_WRITE(transpiler, "%s", function_declaration->name);
     ast_transpile_parameter_list(transpiler, function_declaration->parameter_list);
-    FRX_TRANSPILER_WRITE(transpiler, ";\n");
+    FRX_TRANSPILER_WRITE(transpiler, ";");
 }
 
 void ast_transpile_function_call(Transpiler* transpiler, const ASTFunctionCall* function_call)
@@ -693,7 +711,9 @@ void ast_transpile_scope(Transpiler* transpiler, const ASTScope* scope)
         if(statement->type != FRX_AST_TYPE_IF_STATEMENT
                 && statement->type != FRX_AST_TYPE_FOR_LOOP
                 && statement->type != FRX_AST_TYPE_WHILE_LOOP
-                && statement->type != FRX_AST_TYPE_DO_WHILE_LOOP)
+                && statement->type != FRX_AST_TYPE_DO_WHILE_LOOP
+                && statement->type != FRX_AST_TYPE_VARIABLE_DECLARATION
+                && statement->type != FRX_AST_TYPE_VARIABLE_DEFINITION)
         {
             FRX_TRANSPILER_WRITE(transpiler, ";");
         }
@@ -745,7 +765,7 @@ void ast_transpile_enum_definition(Transpiler* transpiler, const ASTEnumDefiniti
 
     ast_transpile_typename(transpiler, enum_definition->type);
 
-    FRX_TRANSPILER_WRITE(transpiler, " %s;\n\n", enum_definition->name);
+    FRX_TRANSPILER_WRITE(transpiler, " %s;\n", enum_definition->name);
 }
 
 void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefinition* struct_definition)
@@ -778,7 +798,7 @@ void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefi
 
     FRX_TRANSPILER_WRITE(transpiler, "} ");
     write_current_namespace(transpiler);
-    FRX_TRANSPILER_WRITE(transpiler, "%s;\n\n", struct_definition->name);
+    FRX_TRANSPILER_WRITE(transpiler, "%s;\n", struct_definition->name);
 }
 
 void ast_transpile_namespace(Transpiler* transpiler, const ASTNamespace* namespace)
@@ -790,7 +810,11 @@ void ast_transpile_namespace(Transpiler* transpiler, const ASTNamespace* namespa
     append_namespace(namespace->name);
 
     for(usize i = 0; i < list_size(&namespace->top_level_definitions); ++i)
+    {
         ast_transpile(transpiler, list_get(&namespace->top_level_definitions, i));
+
+        FRX_TRANSPILER_WRITE(transpiler, "\n");
+    }
 
     drop_namespace();
 }
