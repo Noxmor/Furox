@@ -1495,7 +1495,7 @@ static FRX_NO_DISCARD b8 is_function_definition(Parser* parser)
 
     parser_skip_namespace_resolution(parser);
 
-    b8 result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER;
+    b8 result = parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 2)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS;
 
     parser_recover(parser, &location);
 
@@ -2190,6 +2190,26 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_FUNCTION_DEFINITION;
         ast->node = parser_parse_function_definition(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
+    if(is_variable_declaration(parser))
+    {
+        ast->type = FRX_AST_TYPE_VARIABLE_DECLARATION;
+        ast->node = parser_parse_variable_declaration(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
+    if(is_variable_definition(parser))
+    {
+        ast->type = FRX_AST_TYPE_VARIABLE_DEFINITION;
+        ast->node = parser_parse_variable_definition(parser);
         if(ast->node == NULL)
             return NULL;
 
