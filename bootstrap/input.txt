@@ -18,6 +18,8 @@ extern
     i32 printf(char* format, ...);
 }
 
+i32 global_var;
+
 namespace std
 {
     export struct String
