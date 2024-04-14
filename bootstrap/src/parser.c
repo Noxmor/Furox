@@ -2120,6 +2120,8 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_NAMESPACE;
         ast->node = parser_parse_namespace(parser);
+        if(ast->node == NULL)
+            return NULL;
 
         return ast;
     }
@@ -2128,6 +2130,8 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_MODULE_DEFINITION;
         ast->node = parser_parse_module_definition(parser);
+        if(ast->node == NULL)
+            return NULL;
 
         return ast;
     }
@@ -2136,6 +2140,8 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_MODULE_IMPLEMENTATION;
         ast->node = parser_parse_module_implementation(parser);
+        if(ast->node == NULL)
+            return NULL;
 
         return ast;
     }
@@ -2144,6 +2150,8 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_ENUM_DEFINITION;
         ast->node = parser_parse_enum_definition(parser);
+        if(ast->node == NULL)
+            return NULL;
 
         return ast;
     }
@@ -2152,6 +2160,8 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_STRUCT_DEFINITION;
         ast->node = parser_parse_struct_definition(parser);
+        if(ast->node == NULL)
+            return NULL;
 
         return ast;
     }
@@ -2160,6 +2170,8 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_EXTERN_BLOCK;
         ast->node = parser_parse_extern_block(parser);
+        if(ast->node == NULL)
+            return NULL;
 
         return ast;
     }
@@ -2168,6 +2180,8 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_IMPORT_STATEMENT;
         ast->node = parser_parse_import_statement(parser);
+        if(ast->node == NULL)
+            return NULL;
 
         return ast;
     }
@@ -2176,6 +2190,8 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_FUNCTION_DEFINITION;
         ast->node = parser_parse_function_definition(parser);
+        if(ast->node == NULL)
+            return NULL;
 
         return ast;
     }
