@@ -22,11 +22,11 @@ typedef struct TranspilerInfo
 
 static TranspilerInfo transpiler_info;
 
-typedef struct Namespace
+typedef struct __Namespace
 {
     const char* namespace;
-    struct Namespace* next;
-} Namespace;
+    struct __Namespace* next;
+} __Namespace;
 
 static void store_c_filepath(const char* c_filepath)
 {
@@ -39,13 +39,13 @@ static void store_c_filepath(const char* c_filepath)
     transpiler_info.c_filepaths[transpiler_info.c_filepaths_size++] = strdup(c_filepath);
 }
 
-static Namespace* current_namespace = NULL;
+static __Namespace* current_namespace = NULL;
 
 static void write_current_namespace(Transpiler* transpiler)
 {
     FRX_ASSERT(transpiler != NULL);
 
-    Namespace* namespace = current_namespace;
+    __Namespace* namespace = current_namespace;
 
     while(namespace != NULL)
     {
@@ -54,9 +54,9 @@ static void write_current_namespace(Transpiler* transpiler)
     }
 }
 
-static Namespace* get_last_namespace(void)
+static __Namespace* get_last_namespace(void)
 {
-    Namespace* namespace = current_namespace;
+    __Namespace* namespace = current_namespace;
 
     if(namespace == NULL)
         return NULL;
@@ -69,9 +69,9 @@ static Namespace* get_last_namespace(void)
 
 static void append_namespace(const char* namespace)
 {
-    Namespace* last = get_last_namespace();
+    __Namespace* last = get_last_namespace();
 
-    Namespace* new = memory_alloc(sizeof(Namespace), FRX_MEMORY_CATEGORY_UNKNOWN);
+    __Namespace* new = memory_alloc(sizeof(__Namespace), FRX_MEMORY_CATEGORY_UNKNOWN);
     
     if(last == NULL)
         current_namespace = new;
@@ -95,7 +95,7 @@ static void drop_namespace(void)
         return;
     }
 
-    Namespace* namespace = current_namespace;
+    __Namespace* namespace = current_namespace;
 
     while(namespace->next != NULL && namespace->next->next != NULL)
     {
