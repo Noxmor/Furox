@@ -6,12 +6,77 @@
 #include "core/assert.h"
 #include "core/log.h"
 
+#include "symbols/hash.h"
+
 typedef struct LexerInfo
 {
     usize lines_processed;
 } LexerInfo;
 
 static LexerInfo lexer_info;
+
+typedef struct KeywordTableEntry
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    TokenType type;
+} KeywordTableEntry;
+
+#define FRX_KEYWORD_TABLE_SIZE 128
+
+typedef struct KeywordTable
+{
+    KeywordTableEntry entries[FRX_KEYWORD_TABLE_SIZE];
+} KeywordTable;
+
+static KeywordTable keyword_table;
+
+static void register_keyword(const char* name, TokenType type)
+{
+    FRX_ASSERT(name != NULL);
+
+    u64 index = hash_djb2(name) % FRX_KEYWORD_TABLE_SIZE;
+
+    KeywordTableEntry* entry = &keyword_table.entries[index];
+
+    printf("%s %s\n", entry->name, name);
+    FRX_ASSERT(strlen(entry->name) == 0);
+
+    strcpy(entry->name, name);
+    entry->type = type;
+}
+
+static KeywordTableEntry* keyword_table_find(const char* name)
+{
+    FRX_ASSERT(name != NULL);
+
+    u64 index = hash_djb2(name) % FRX_KEYWORD_TABLE_SIZE;
+
+    return &keyword_table.entries[index];
+}
+
+void lexer_init_keyword_table(void)
+{
+    memset(&keyword_table, 0, sizeof(KeywordTable));
+
+    register_keyword("nullptr", FRX_TOKEN_TYPE_KW_NULLPTR);
+    register_keyword("true", FRX_TOKEN_TYPE_KW_TRUE);
+    register_keyword("false", FRX_TOKEN_TYPE_KW_FALSE);
+    register_keyword("import", FRX_TOKEN_TYPE_KW_IMPORT);
+    register_keyword("export", FRX_TOKEN_TYPE_KW_EXPORT);
+    register_keyword("namespace", FRX_TOKEN_TYPE_KW_NAMESPACE);
+    register_keyword("module", FRX_TOKEN_TYPE_KW_MODULE);
+    register_keyword("impl", FRX_TOKEN_TYPE_KW_IMPL);
+    register_keyword("enum", FRX_TOKEN_TYPE_KW_ENUM);
+    register_keyword("struct", FRX_TOKEN_TYPE_KW_STRUCT);
+    register_keyword("extern", FRX_TOKEN_TYPE_KW_EXTERN);
+    register_keyword("return", FRX_TOKEN_TYPE_KW_RETURN);
+    register_keyword("if", FRX_TOKEN_TYPE_KW_IF);
+    register_keyword("else", FRX_TOKEN_TYPE_KW_ELSE);
+    register_keyword("for", FRX_TOKEN_TYPE_KW_FOR);
+    register_keyword("while", FRX_TOKEN_TYPE_KW_WHILE);
+    register_keyword("do", FRX_TOKEN_TYPE_KW_DO);
+}
 
 static void lexer_read(Lexer* lexer)
 {
@@ -199,14 +264,14 @@ static b8 lexer_skip_comment_block(Lexer* lexer)
 static void lexer_parse_identifier(Lexer* lexer, Token* token)
 {
     FRX_ASSERT(lexer != NULL);
-    
+
     FRX_ASSERT(token != NULL);
 
     token->type = FRX_TOKEN_TYPE_IDENTIFIER;
 
     usize identifier_index = 0;
     char current = lexer_peek_char(lexer, 0);
-    
+
     while(isalnum(current) || current == '_')
     {
         token->identifier[identifier_index++] = current;
@@ -216,40 +281,10 @@ static void lexer_parse_identifier(Lexer* lexer, Token* token)
 
     token->identifier[identifier_index] = '\0';
 
-    if(strcmp(token->identifier, "nullptr") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_NULLPTR;
-    else if(strcmp(token->identifier, "true") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_TRUE;
-    else if(strcmp(token->identifier, "false") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_FALSE;
-    else if(strcmp(token->identifier, "import") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_IMPORT;
-    else if(strcmp(token->identifier, "return") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_RETURN;
-    else if(strcmp(token->identifier, "namespace") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_NAMESPACE;
-    else if(strcmp(token->identifier, "module") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_MODULE;
-    else if(strcmp(token->identifier, "impl") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_IMPL;
-    else if(strcmp(token->identifier, "extern") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_EXTERN;
-    else if(strcmp(token->identifier, "enum") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_ENUM;
-    else if(strcmp(token->identifier, "struct") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_STRUCT;
-    else if(strcmp(token->identifier, "export") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_EXPORT;
-    else if(strcmp(token->identifier, "if") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_IF;
-    else if(strcmp(token->identifier, "else") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_ELSE;
-    else if(strcmp(token->identifier, "for") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_FOR;
-    else if(strcmp(token->identifier, "while") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_WHILE;
-    else if(strcmp(token->identifier, "do") == 0)
-        token->type = FRX_TOKEN_TYPE_KW_DO;
+    KeywordTableEntry* entry = keyword_table_find(token->identifier);
+
+    if(strcmp(entry->name, token->identifier) == 0)
+        token->type = entry->type;
 }
 
 static void lexer_parse_binary_number(Lexer* lexer, Token* token)
