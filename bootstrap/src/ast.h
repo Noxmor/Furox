@@ -5,6 +5,8 @@
 
 #include "containers/list.h"
 
+#include "symbols/variable_table.h"
+
 enum
 {
     FRX_AST_TYPE_NOOP = 0,
@@ -123,6 +125,7 @@ typedef struct ASTStringLiteral
     char literal[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } ASTStringLiteral;
 
+//NOTE: Deprecated
 typedef struct ASTTypename
 {
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
@@ -135,13 +138,17 @@ typedef struct ASTTypename
 
 typedef struct ASTVariableDeclaration
 {
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
+
+    VariableSymbol* variable_symbol;
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } ASTVariableDeclaration;
 
 typedef struct ASTVariableDefinition
 {
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
+
+    VariableSymbol* variable_symbol;
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     AST* value;
@@ -156,6 +163,8 @@ typedef struct ASTVariableAssignment
 
 typedef struct ASTVariable
 {
+    VariableSymbol* variable_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 is_pointer;
@@ -232,7 +241,8 @@ typedef struct ASTParameterList
 
 typedef struct ASTFunctionDefinition
 {
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 exported;
@@ -244,7 +254,8 @@ typedef struct ASTFunctionDefinition
 
 typedef struct ASTFunctionDeclaration
 {
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     ASTParameterList* parameter_list;
@@ -268,7 +279,7 @@ typedef struct ASTEnumDefinition
 {
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
 
     b8 exported;
 
@@ -277,6 +288,8 @@ typedef struct ASTEnumDefinition
 
 typedef struct ASTStructDefinition
 {
+    StructSymbol* struct_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 exported;
