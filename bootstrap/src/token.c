@@ -9,7 +9,22 @@ const char* token_type_to_str(TokenType type)
     switch(type)
     {
         case FRX_TOKEN_TYPE_EOF: return "EOF";
-        
+
+        case FRX_TOKEN_TYPE_KW_U8: return "u8";
+        case FRX_TOKEN_TYPE_KW_U16: return "u16";
+        case FRX_TOKEN_TYPE_KW_U32: return "u32";
+        case FRX_TOKEN_TYPE_KW_U64: return "u64";
+        case FRX_TOKEN_TYPE_KW_USIZE: return "usize";
+        case FRX_TOKEN_TYPE_KW_I8: return "i8";
+        case FRX_TOKEN_TYPE_KW_I16: return "i16";
+        case FRX_TOKEN_TYPE_KW_I32: return "i32";
+        case FRX_TOKEN_TYPE_KW_I64: return "i64";
+        case FRX_TOKEN_TYPE_KW_ISIZE: return "isize";
+        case FRX_TOKEN_TYPE_KW_CHAR: return "char";
+        case FRX_TOKEN_TYPE_KW_F32: return "f32";
+        case FRX_TOKEN_TYPE_KW_F64: return "f64";
+        case FRX_TOKEN_TYPE_KW_VOID: return "void";
+
         case FRX_TOKEN_TYPE_KW_NULLPTR: return "nullptr";
         case FRX_TOKEN_TYPE_KW_TRUE: return "true";
         case FRX_TOKEN_TYPE_KW_FALSE: return "false";
