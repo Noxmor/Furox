@@ -346,7 +346,9 @@ void ast_transpile_variable_declaration(Transpiler* transpiler, const ASTVariabl
 
     ast_transpile_typename(transpiler, variable_declaration->type);
 
-    FRX_TRANSPILER_WRITE(transpiler, " %s", variable_declaration->name);
+    VariableSymbol* symbol = variable_declaration->variable_symbol;
+
+    FRX_TRANSPILER_WRITE(transpiler, " %s", symbol->name);
 
     if(variable_declaration->type->array_size != NULL)
     {
@@ -369,7 +371,9 @@ void ast_transpile_variable_definition(Transpiler* transpiler, const ASTVariable
 
     ast_transpile_typename(transpiler, variable_definition->type);
 
-    FRX_TRANSPILER_WRITE(transpiler, " %s = ", variable_definition->name);
+    VariableSymbol* symbol = variable_definition->variable_symbol;
+
+    FRX_TRANSPILER_WRITE(transpiler, " %s = ", symbol->name);
 
     ast_transpile(transpiler, variable_definition->value);
 
@@ -778,9 +782,11 @@ void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefi
             || (!struct_definition->exported && transpiler->mode == FRX_TRANSPILER_MODE_HEADER))
         return;
 
+    StructSymbol* symbol = struct_definition->struct_symbol;
+
     FRX_TRANSPILER_WRITE(transpiler, "typedef struct ");
     write_current_namespace(transpiler);
-    FRX_TRANSPILER_WRITE(transpiler, "%s\n{\n", struct_definition->name);
+    FRX_TRANSPILER_WRITE(transpiler, "%s\n{\n", symbol->name);
 
     push_indentation_level();
 
@@ -798,7 +804,7 @@ void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefi
 
     FRX_TRANSPILER_WRITE(transpiler, "} ");
     write_current_namespace(transpiler);
-    FRX_TRANSPILER_WRITE(transpiler, "%s;\n", struct_definition->name);
+    FRX_TRANSPILER_WRITE(transpiler, "%s;\n", symbol->name);
 }
 
 void ast_transpile_namespace(Transpiler* transpiler, const ASTNamespace* namespace)
