@@ -22,7 +22,7 @@ typedef struct KeywordTableEntry
     TokenType type;
 } KeywordTableEntry;
 
-#define FRX_KEYWORD_TABLE_SIZE 128
+#define FRX_KEYWORD_TABLE_SIZE 256
 
 typedef struct KeywordTable
 {
@@ -39,7 +39,6 @@ static void register_keyword(const char* name, TokenType type)
 
     KeywordTableEntry* entry = &keyword_table.entries[index];
 
-    printf("%s %s\n", entry->name, name);
     FRX_ASSERT(strlen(entry->name) == 0);
 
     strcpy(entry->name, name);
@@ -58,6 +57,21 @@ static KeywordTableEntry* keyword_table_find(const char* name)
 void lexer_init_keyword_table(void)
 {
     memset(&keyword_table, 0, sizeof(KeywordTable));
+
+    register_keyword("u8", FRX_TOKEN_TYPE_KW_U8);
+    register_keyword("u16", FRX_TOKEN_TYPE_KW_U16);
+    register_keyword("u32", FRX_TOKEN_TYPE_KW_U32);
+    register_keyword("u64", FRX_TOKEN_TYPE_KW_U64);
+    register_keyword("usize", FRX_TOKEN_TYPE_KW_USIZE);
+    register_keyword("i8", FRX_TOKEN_TYPE_KW_I8);
+    register_keyword("i16", FRX_TOKEN_TYPE_KW_I16);
+    register_keyword("i32", FRX_TOKEN_TYPE_KW_I32);
+    register_keyword("i64", FRX_TOKEN_TYPE_KW_I64);
+    register_keyword("isize", FRX_TOKEN_TYPE_KW_ISIZE);
+    register_keyword("char", FRX_TOKEN_TYPE_KW_CHAR);
+    register_keyword("f32", FRX_TOKEN_TYPE_KW_F32);
+    register_keyword("f64", FRX_TOKEN_TYPE_KW_F64);
+    register_keyword("void", FRX_TOKEN_TYPE_KW_VOID);
 
     register_keyword("nullptr", FRX_TOKEN_TYPE_KW_NULLPTR);
     register_keyword("true", FRX_TOKEN_TYPE_KW_TRUE);
