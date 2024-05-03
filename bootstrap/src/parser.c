@@ -239,6 +239,10 @@ static FRX_NO_DISCARD ASTVariable* parser_parse_variable(Parser* parser)
 
     ASTVariable* variable = arena_alloc(&parser->arena, sizeof(ASTVariable));
 
+    variable->variable_symbol = variable_table_find(
+        &parser->symbol_table.variable_table,
+        parser_current_token(parser)->identifier, parser->current_namespace);
+
     strcpy(variable->name, parser_current_token(parser)->identifier);
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
@@ -982,11 +986,11 @@ static FRX_NO_DISCARD ASTVariableDeclaration* parser_parse_variable_declaration(
 {
     FRX_ASSERT(parser != NULL);
 
-    SourceLocation location = parser_current_location(parser);
-    parser_generate_variable_symbol(parser);
-    parser_recover(parser, &location);
-
     ASTVariableDeclaration* variable_declaration = arena_alloc(&parser->arena, sizeof(ASTVariableDeclaration));
+
+    SourceLocation location = parser_current_location(parser);
+    variable_declaration->variable_symbol = parser_generate_variable_symbol(parser);
+    parser_recover(parser, &location);
 
     variable_declaration->type = parser_parse_type(parser);
     if(variable_declaration->type == NULL)
@@ -1055,11 +1059,11 @@ static FRX_NO_DISCARD ASTVariableDefinition* parser_parse_variable_definition(Pa
 {
     FRX_ASSERT(parser != NULL);
 
-    SourceLocation location = parser_current_location(parser);
-    parser_generate_variable_symbol(parser);
-    parser_recover(parser, &location);
-
     ASTVariableDefinition* variable_definition = arena_alloc(&parser->arena, sizeof(ASTVariableDefinition));
+
+    SourceLocation location = parser_current_location(parser);
+    variable_definition->variable_symbol = parser_generate_variable_symbol(parser);
+    parser_recover(parser, &location);
 
     variable_definition->type = parser_parse_type(parser);
     if(variable_definition->type == NULL)
@@ -1631,7 +1635,7 @@ static FRX_NO_DISCARD ASTParameterList* parser_parse_parameter_list(Parser* pars
 
             return NULL;
         }
-    
+
         if(parser_current_token(parser)->type != FRX_TOKEN_TYPE_RIGHT_PARANTHESIS)
         {
             if(parser_eat(parser, FRX_TOKEN_TYPE_COMMA))
@@ -1931,12 +1935,12 @@ static FRX_NO_DISCARD ASTStructDefinition* parser_parse_struct_definition(Parser
 {
     FRX_ASSERT(parser != NULL);
 
-    SourceLocation location = parser_current_location(parser);
-    parser_generate_struct_symbol(parser);
-    parser_recover(parser, &location);
-
     ASTStructDefinition* struct_definition = arena_alloc(&parser->arena, sizeof(ASTStructDefinition));
     struct_definition->exported = FRX_FALSE;
+
+    SourceLocation location = parser_current_location(parser);
+    struct_definition->struct_symbol = parser_generate_struct_symbol(parser);
+    parser_recover(parser, &location);
 
     list_init(&struct_definition->fields, FRX_MEMORY_CATEGORY_AST);
 
