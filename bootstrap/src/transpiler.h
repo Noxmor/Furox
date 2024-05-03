@@ -7,6 +7,8 @@
 
 #include "ast.h"
 
+#include "symbols/symbol_table.h"
+
 enum
 {
     FRX_TRANSPILER_MODE_HEADER = 0,
@@ -23,6 +25,8 @@ typedef struct Transpiler
     FILE* header;
 
     TranspilerMode mode;
+
+    SymbolTable* symbol_table;
 
     b8 failed;
 
