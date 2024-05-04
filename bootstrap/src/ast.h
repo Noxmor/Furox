@@ -5,7 +5,7 @@
 
 #include "containers/list.h"
 
-#include "symbols/variable_table.h"
+#include "symbols/symbol_table.h"
 
 enum
 {
@@ -243,6 +243,8 @@ typedef struct ASTFunctionDefinition
 {
     ASTTypename* type; //NOTE: Deprecated
 
+    FunctionSymbol* function_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 exported;
@@ -256,6 +258,8 @@ typedef struct ASTFunctionDeclaration
 {
     ASTTypename* type; //NOTE: Deprecated
 
+    FunctionSymbol* function_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     ASTParameterList* parameter_list;
@@ -263,6 +267,8 @@ typedef struct ASTFunctionDeclaration
 
 typedef struct ASTFunctionCall
 {
+    FunctionSymbol* function_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     ASTNamespaceRef* namespace_ref;
