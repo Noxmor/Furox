@@ -1,27 +1,19 @@
 #ifndef FRX_VARIABLE_TABLE_H
 #define FRX_VARIABLE_TABLE_H
 
-#include "symbols/struct_table.h"
-
 #include "token.h"
 #include "namespace.h"
 
+#include "symbols/type_category.h"
+#include "symbols/struct_table.h"
+
 #define FRX_VARIABLE_TABLE_CAPACITY 1024
-
-enum
-{
-    FRX_VARIABLE_TYPE_PRIMITIVE,
-    FRX_VARIABLE_TYPE_STRUCT,
-    FRX_VARIABLE_TYPE_ENUM,
-
-    FRX_VARIABLE_TYPE_COUNT
-};
 
 typedef u8 VariableType;
 
 typedef struct VariableSymbol
 {
-    VariableType type;
+    TypeCategory type_category;
 
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
