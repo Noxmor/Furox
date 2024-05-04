@@ -10,6 +10,7 @@ void symbol_table_init(SymbolTable* table)
 
     variable_table_init(&table->variable_table);
     struct_table_init(&table->struct_table);
+    function_table_init(&table->function_table);
 }
 
 void symbol_table_delete(SymbolTable* table)
@@ -18,4 +19,5 @@ void symbol_table_delete(SymbolTable* table)
 
     variable_table_delete(&table->variable_table);
     struct_table_delete(&table->struct_table);
+    function_table_delete(&table->function_table);
 }
