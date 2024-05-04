@@ -426,10 +426,42 @@ static FRX_NO_DISCARD ASTFunctionCall* parser_parse_function_call(Parser* parser
 
     ASTFunctionCall* function_call = arena_alloc(&parser->arena, sizeof(ASTFunctionCall));
 
-    //TODO: Handle namespaces
-    function_call->function_symbol = function_table_find_or_insert(
-        &parser->symbol_table.function_table,
-        parser_current_token(parser)->identifier, NULL);
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
+        && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
+    {
+        SourceLocation location = parser_current_location(parser);
+
+        Namespace* namespace = namespace_create(parser_current_token(parser)->identifier);
+
+        parser_skip(parser);
+        parser_skip(parser);
+
+        while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
+            && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
+        {
+            namespace_append(namespace, parser_current_token(parser)->identifier);
+
+            parser_skip(parser);
+            parser_skip(parser);
+        }
+
+        function_call->function_symbol = function_table_find_or_insert(
+            &parser->symbol_table.function_table,
+            parser_current_token(parser)->identifier, namespace);
+
+        parser_recover(parser, &location);
+    }
+    else
+    {
+        //NOTE: For now we assume that a function-call without
+        // a namespace is always from the global namespace.
+
+        Namespace* namespace = namespace_create("");
+
+        function_call->function_symbol = function_table_find_or_insert(
+            &parser->symbol_table.function_table,
+            parser_current_token(parser)->identifier, namespace);
+    }
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_NAMESPACE_RESOLUTION)
     {
@@ -1687,6 +1719,21 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
         while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
             parser_skip(parser);
 
+        function_symbol = function_table_find(
+            &parser->symbol_table.function_table,
+            parser_current_token(parser)->identifier,
+            parser->current_namespace);
+
+        if(function_symbol != NULL && function_symbol->defined)
+        {
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Encountered redefinition of function '%s'!",
+                           parser->lexer.filepath, location.line,
+                           location.coloumn, function_symbol->name);
+
+            return NULL;
+        }
+
         function_symbol = function_table_insert(
             &parser->symbol_table.function_table,
             parser_current_token(parser)->identifier,
@@ -1837,14 +1884,21 @@ static FRX_NO_DISCARD b8 is_function_declaration(Parser* parser)
     return parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER;
 }
 
-static FRX_NO_DISCARD ASTFunctionDeclaration* parser_parse_function_declaration(Parser* parser)
+static FRX_NO_DISCARD
+ASTFunctionDeclaration* parser_parse_function_declaration(Parser* parser,
+                                                          b8 is_extern)
 {
     FRX_ASSERT(parser != NULL);
 
     ASTFunctionDeclaration* function_declaration = arena_alloc(&parser->arena, sizeof(ASTFunctionDeclaration));
 
     SourceLocation location = parser_current_location(parser);
-    function_declaration->function_symbol = parser_generate_function_symbol(parser);
+    function_declaration->function_symbol = parser_generate_function_symbol(
+        parser);
+
+    if(!is_extern)
+        function_declaration->function_symbol->defined = FRX_FALSE;
+
     parser_recover(parser, &location);
 
     function_declaration->type = parser_parse_type(parser);
@@ -2014,7 +2068,21 @@ static FRX_NO_DISCARD StructSymbol* parser_generate_struct_symbol(Parser* parser
     //TODO: Allow namespaces e.g. "struct std::foo::Bar"
     Namespace* namespace = namespace_duplicate(parser->current_namespace);
 
-    StructSymbol* struct_symbol = struct_table_insert(
+    StructSymbol* struct_symbol = struct_table_find(
+        &parser->symbol_table.struct_table,
+        parser_current_token(parser)->identifier, namespace);
+
+    if(struct_symbol != NULL && struct_symbol->defined)
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Encountered redefinition of struct '%s'!",
+                       parser->lexer.filepath, location.line, location.coloumn,
+                       struct_symbol->name);
+
+        return NULL;
+    }
+
+    struct_symbol = struct_table_insert(
         &parser->symbol_table.struct_table,
         parser_current_token(parser)->identifier, namespace);
 
@@ -2279,7 +2347,7 @@ static FRX_NO_DISCARD ASTModuleDefinition* parser_parse_module_definition(Parser
 
     while(parser_current_token(parser)->type != FRX_TOKEN_TYPE_RIGHT_BRACE)
     {
-        ASTFunctionDeclaration* function_declaration = parser_parse_function_declaration(parser);
+        ASTFunctionDeclaration* function_declaration = parser_parse_function_declaration(parser, FRX_FALSE);
         if(function_declaration == NULL)
             return NULL;
 
@@ -2402,7 +2470,7 @@ static FRX_NO_DISCARD ASTExternBlock* parser_parse_extern_block(Parser* parser)
         }
         else
         {
-            ASTFunctionDeclaration* function_declaration = parser_parse_function_declaration(parser);
+            ASTFunctionDeclaration* function_declaration = parser_parse_function_declaration(parser, FRX_TRUE);
             if(function_declaration == NULL)
                 return NULL;
 
