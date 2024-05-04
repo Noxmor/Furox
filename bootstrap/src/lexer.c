@@ -22,7 +22,7 @@ typedef struct KeywordTableEntry
     TokenType type;
 } KeywordTableEntry;
 
-#define FRX_KEYWORD_TABLE_SIZE 256
+#define FRX_KEYWORD_TABLE_SIZE 512
 
 typedef struct KeywordTable
 {
@@ -68,6 +68,10 @@ void lexer_init_keyword_table(void)
     register_keyword("i32", FRX_TOKEN_TYPE_KW_I32);
     register_keyword("i64", FRX_TOKEN_TYPE_KW_I64);
     register_keyword("isize", FRX_TOKEN_TYPE_KW_ISIZE);
+    register_keyword("b8", FRX_TOKEN_TYPE_KW_B8);
+    register_keyword("b16", FRX_TOKEN_TYPE_KW_B16);
+    register_keyword("b32", FRX_TOKEN_TYPE_KW_B32);
+    register_keyword("b64", FRX_TOKEN_TYPE_KW_B64);
     register_keyword("char", FRX_TOKEN_TYPE_KW_CHAR);
     register_keyword("f32", FRX_TOKEN_TYPE_KW_F32);
     register_keyword("f64", FRX_TOKEN_TYPE_KW_F64);
