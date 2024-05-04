@@ -627,6 +627,8 @@ void ast_transpile_function_definition(Transpiler* transpiler, const ASTFunction
 
     FRX_ASSERT(function_definition != NULL);
 
+    FunctionSymbol* symbol = function_definition->function_symbol;
+
     if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER)
     {
         if(!function_definition->exported)
@@ -635,7 +637,7 @@ void ast_transpile_function_definition(Transpiler* transpiler, const ASTFunction
         ast_transpile_typename(transpiler, function_definition->type);
         FRX_TRANSPILER_WRITE(transpiler, " ");
         write_current_namespace(transpiler);
-        FRX_TRANSPILER_WRITE(transpiler, "%s", function_definition->name);
+        FRX_TRANSPILER_WRITE(transpiler, "%s", symbol->name);
         ast_transpile_parameter_list(transpiler, function_definition->parameter_list);
         FRX_TRANSPILER_WRITE(transpiler, ";\n");
     }
@@ -644,7 +646,7 @@ void ast_transpile_function_definition(Transpiler* transpiler, const ASTFunction
         ast_transpile_typename(transpiler, function_definition->type);
         FRX_TRANSPILER_WRITE(transpiler, " ");
         write_current_namespace(transpiler);
-        FRX_TRANSPILER_WRITE(transpiler, "%s", function_definition->name);
+        FRX_TRANSPILER_WRITE(transpiler, "%s", symbol->name);
         ast_transpile_parameter_list(transpiler, function_definition->parameter_list);
         FRX_TRANSPILER_WRITE(transpiler, "\n");
 
@@ -658,10 +660,12 @@ void ast_transpile_function_declaration(Transpiler* transpiler, const ASTFunctio
 
     FRX_ASSERT(function_declaration != NULL);
 
+    FunctionSymbol* symbol = function_declaration->function_symbol;
+
     ast_transpile_typename(transpiler, function_declaration->type);
     FRX_TRANSPILER_WRITE(transpiler, " ");
     write_current_namespace(transpiler);
-    FRX_TRANSPILER_WRITE(transpiler, "%s", function_declaration->name);
+    FRX_TRANSPILER_WRITE(transpiler, "%s", symbol->name);
     ast_transpile_parameter_list(transpiler, function_declaration->parameter_list);
     FRX_TRANSPILER_WRITE(transpiler, ";");
 }
