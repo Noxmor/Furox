@@ -20,6 +20,10 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_KW_I32: return "i32";
         case FRX_TOKEN_TYPE_KW_I64: return "i64";
         case FRX_TOKEN_TYPE_KW_ISIZE: return "isize";
+        case FRX_TOKEN_TYPE_KW_B8: return "b8";
+        case FRX_TOKEN_TYPE_KW_B16: return "b16";
+        case FRX_TOKEN_TYPE_KW_B32: return "b32";
+        case FRX_TOKEN_TYPE_KW_B64: return "b64";
         case FRX_TOKEN_TYPE_KW_CHAR: return "char";
         case FRX_TOKEN_TYPE_KW_F32: return "f32";
         case FRX_TOKEN_TYPE_KW_F64: return "f64";
