@@ -8,6 +8,7 @@
 
 #include "core/assert.h"
 #include "core/memory.h"
+#include "symbols/type_category.h"
 
 #define FRX_TRANSPILER_WRITE(transpiler, format, ...) do { if(fprintf(transpiler->mode == FRX_TRANSPILER_MODE_HEADER ? transpiler->header : transpiler->source, format, ##__VA_ARGS__) < 0) transpiler->failed = FRX_TRUE; } while(FRX_FALSE)
 #define FRX_TRANSPILER_WRITE_HEADER(transpiler, format, ...) do { if(fprintf(transpiler->header, format, ##__VA_ARGS__) < 0) transpiler->failed = FRX_TRUE; } while(FRX_FALSE)
@@ -679,7 +680,9 @@ void ast_transpile_function_call(Transpiler* transpiler, const ASTFunctionCall* 
     if(function_call->namespace_ref != NULL)
         ast_transpile_namespace_ref(transpiler, function_call->namespace_ref);
 
-    FRX_TRANSPILER_WRITE(transpiler, "%s(", function_call->name);
+    FunctionSymbol* symbol = function_call->function_symbol;
+
+    FRX_TRANSPILER_WRITE(transpiler, "%s(", symbol->name);
 
     usize arg_count = list_size(&function_call->arguments);
     for(usize i = 0; i < arg_count; ++i)
