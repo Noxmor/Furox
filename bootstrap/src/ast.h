@@ -82,9 +82,6 @@ enum
     FRX_AST_TYPE_NAMESPACE,
     FRX_AST_TYPE_NAMESPACE_REF,
 
-    FRX_AST_TYPE_MODULE_DEFINITION,
-    FRX_AST_TYPE_MODULE_IMPLEMENTATION,
-
     FRX_AST_TYPE_EXTERN_BLOCK,
 
     FRX_AST_TYPE_COUNT
@@ -317,22 +314,6 @@ typedef struct ASTNamespaceRef
     ASTNamespaceRef* next;
 } ASTNamespaceRef;
 
-typedef struct ASTModuleDefinition
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    b8 exported;
-
-    List function_declarations;
-} ASTModuleDefinition;
-
-typedef struct ASTModuleImplementation
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    List function_definitions;
-} ASTModuleImplementation;
-
 typedef struct ASTExternBlock
 {
     List function_declarations;
@@ -396,10 +377,6 @@ void ast_print_struct_definition(const ASTStructDefinition* struct_definition, u
 void ast_print_namespace(const ASTNamespace* namespace, usize depth);
 
 void ast_print_namespace_ref(const ASTNamespaceRef* namespace_ref, usize depth);
-
-void ast_print_module_definition(const ASTModuleDefinition* module_definition, usize depth);
-
-void ast_print_module_implementation(const ASTModuleImplementation* module_implementation, usize depth);
 
 void ast_print_extern_block(const ASTExternBlock* extern_block, usize depth);
 

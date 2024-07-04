@@ -35,8 +35,6 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_KW_IMPORT: return "import";
         case FRX_TOKEN_TYPE_KW_RETURN: return "return";
         case FRX_TOKEN_TYPE_KW_NAMESPACE: return "namespace";
-        case FRX_TOKEN_TYPE_KW_MODULE: return "module";
-        case FRX_TOKEN_TYPE_KW_IMPL: return "impl";
         case FRX_TOKEN_TYPE_KW_EXTERN: return "extern";
         case FRX_TOKEN_TYPE_KW_ENUM: return "enum";
         case FRX_TOKEN_TYPE_KW_STRUCT: return "struct";

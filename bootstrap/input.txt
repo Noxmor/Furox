@@ -27,26 +27,6 @@ namespace std
         char* buffer;
         usize length;
     }
-
-    export module String
-    {
-        char* Buffer(std::String* str);
-
-        usize Length(std::String* str);
-    }
-
-    impl String
-    {
-        char* Buffer(std::String* str)
-        {
-            return str->buffer;
-        }
-
-        usize Length(std::String* str)
-        {
-            return str->length;
-        }
-    }
 }
 
 namespace Math

@@ -83,8 +83,6 @@ void lexer_init_keyword_table(void)
     register_keyword("import", FRX_TOKEN_TYPE_KW_IMPORT);
     register_keyword("export", FRX_TOKEN_TYPE_KW_EXPORT);
     register_keyword("namespace", FRX_TOKEN_TYPE_KW_NAMESPACE);
-    register_keyword("module", FRX_TOKEN_TYPE_KW_MODULE);
-    register_keyword("impl", FRX_TOKEN_TYPE_KW_IMPL);
     register_keyword("enum", FRX_TOKEN_TYPE_KW_ENUM);
     register_keyword("struct", FRX_TOKEN_TYPE_KW_STRUCT);
     register_keyword("extern", FRX_TOKEN_TYPE_KW_EXTERN);
