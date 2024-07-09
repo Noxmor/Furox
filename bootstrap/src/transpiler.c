@@ -375,9 +375,35 @@ void ast_transpile_variable_definition(Transpiler* transpiler, const ASTVariable
 
     VariableSymbol* symbol = variable_definition->variable_symbol;
 
-    FRX_TRANSPILER_WRITE(transpiler, " %s = ", symbol->name);
+    FRX_TRANSPILER_WRITE(transpiler, " %s", symbol->name);
 
-    ast_transpile(transpiler, variable_definition->value);
+    if(variable_definition->type->array_size != NULL)
+    {
+        FRX_TRANSPILER_WRITE(transpiler, "[");
+        ast_transpile(transpiler, variable_definition->type->array_size);
+        FRX_TRANSPILER_WRITE(transpiler, "]");
+    }
+
+    FRX_TRANSPILER_WRITE(transpiler, " = ");
+
+    if(variable_definition->value != NULL)
+        ast_transpile(transpiler, variable_definition->value);
+    else
+    {
+        FRX_TRANSPILER_WRITE(transpiler, "{\n");
+
+        for(usize i = 0; i < list_size(&variable_definition->array_initialization); ++i)
+        {
+            AST* array_entry = list_get(&variable_definition->array_initialization, i);
+
+            write_indentation_level(transpiler);
+            ast_transpile(transpiler, array_entry);
+            FRX_TRANSPILER_WRITE(transpiler, ",\n");
+        }
+
+        write_indentation_level(transpiler);
+        FRX_TRANSPILER_WRITE(transpiler, "}");
+    }
 
     FRX_TRANSPILER_WRITE(transpiler, ";");
 }

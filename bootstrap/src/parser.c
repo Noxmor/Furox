@@ -1131,9 +1131,39 @@ static FRX_NO_DISCARD ASTVariableDefinition* parser_parse_variable_definition(Pa
         return NULL;
     }
 
-    variable_definition->value = parser_parse_expression(parser);
-    if(variable_definition->value == NULL)
-        return NULL;
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_LEFT_BRACE)
+    {
+        parser_skip(parser);
+
+        variable_definition->value = NULL;
+
+        list_init(&variable_definition->array_initialization,
+                  FRX_MEMORY_CATEGORY_AST);
+
+        while(parser_current_token(parser)->type
+            != FRX_TOKEN_TYPE_RIGHT_BRACE)
+        {
+            AST* array_entry = parser_parse_expression(parser);
+            list_push(&variable_definition->array_initialization, array_entry);
+
+            if(parser_current_token(parser)->type != FRX_TOKEN_TYPE_RIGHT_BRACE
+                && parser_eat(parser, FRX_TOKEN_TYPE_COMMA))
+            {
+                SourceLocation location = parser_current_location(parser);
+                FRX_ERROR_FILE("Missing ',' after array-entry!", parser->lexer.filepath, location.line, location.coloumn);
+
+                return NULL;
+            }
+        }
+
+        parser_skip(parser);
+    }
+    else
+    {
+        variable_definition->value = parser_parse_expression(parser);
+        if(variable_definition->value == NULL)
+            return NULL;
+    }
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
     {

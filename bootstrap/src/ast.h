@@ -150,6 +150,8 @@ typedef struct ASTVariableDefinition
     VariableSymbol* variable_symbol;
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
+    List array_initialization;
+
     AST* value;
 } ASTVariableDefinition;
 

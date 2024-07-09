@@ -12,6 +12,11 @@ This should all be skipped.
 
 //import "test.txt";
 
+char*[2] my_str = {
+    "Hello",
+    "World"
+};
+
 extern
 {
     i32 putchar(i32 c);
