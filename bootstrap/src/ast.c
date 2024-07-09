@@ -281,7 +281,21 @@ void ast_print_variable_definition(const ASTVariableDefinition* variable_definit
 
     print_depth(depth);
 
-    ast_print(variable_definition->value, depth + 1);
+    if(variable_definition->value != NULL)
+        ast_print(variable_definition->value, depth + 1);
+    else
+    {
+        usize size = list_size(&variable_definition->array_initialization);
+
+        for(usize i = 0; i < size; ++i)
+        {
+            AST* array_entry = list_get(&variable_definition->array_initialization, i);
+            ast_print(array_entry, depth + 1);
+
+            if(i < size - 1)
+                print_depth(depth);
+        }
+    }
 }
 
 void ast_print_variable_assignment(const ASTVariableAssignment* variable_assignment, usize depth)
