@@ -876,7 +876,16 @@ void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefi
         ASTVariableDeclaration* var = list_get(&struct_definition->fields, i);
 
         ast_transpile_typename(transpiler, var->type);
-        FRX_TRANSPILER_WRITE(transpiler, " %s;\n", var->name);
+        FRX_TRANSPILER_WRITE(transpiler, " %s", var->name);
+
+        if(var->type->array_size != NULL)
+        {
+            FRX_TRANSPILER_WRITE(transpiler, "[");
+            ast_transpile(transpiler, var->type->array_size);
+            FRX_TRANSPILER_WRITE(transpiler, "]");
+        }
+
+        FRX_TRANSPILER_WRITE(transpiler, ";\n");
     }
 
     drop_indentation_level();
