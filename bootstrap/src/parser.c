@@ -2006,7 +2006,15 @@ static FRX_NO_DISCARD b8 is_function_definition(Parser* parser)
 
     parser_skip_namespace_resolution(parser);
 
-    b8 result = (is_primitive(parser_current_token(parser)->type) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER) && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 2)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS;
+    b8 result = is_primitive(parser_current_token(parser)->type) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER;
+
+    parser_skip(parser);
+
+    while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
+        parser_skip(parser);
+
+    result &= parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
+        && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS;
 
     parser_recover(parser, &location);
 
