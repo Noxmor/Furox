@@ -5,6 +5,8 @@
 
 #include "containers/list.h"
 
+#include "symbols/symbol_table.h"
+
 enum
 {
     FRX_AST_TYPE_NOOP = 0,
@@ -62,6 +64,8 @@ enum
     FRX_AST_TYPE_IMPORT_STATEMENT,
 
     FRX_AST_TYPE_IF_STATEMENT,
+    FRX_AST_TYPE_SWITCH_STATEMENT,
+    FRX_AST_TYPE_BREAK_STATEMENT,
     FRX_AST_TYPE_FOR_LOOP,
     FRX_AST_TYPE_WHILE_LOOP,
     FRX_AST_TYPE_DO_WHILE_LOOP,
@@ -79,9 +83,6 @@ enum
 
     FRX_AST_TYPE_NAMESPACE,
     FRX_AST_TYPE_NAMESPACE_REF,
-
-    FRX_AST_TYPE_MODULE_DEFINITION,
-    FRX_AST_TYPE_MODULE_IMPLEMENTATION,
 
     FRX_AST_TYPE_EXTERN_BLOCK,
 
@@ -123,6 +124,7 @@ typedef struct ASTStringLiteral
     char literal[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } ASTStringLiteral;
 
+//NOTE: Deprecated
 typedef struct ASTTypename
 {
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
@@ -135,13 +137,17 @@ typedef struct ASTTypename
 
 typedef struct ASTVariableDeclaration
 {
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
+
+    VariableSymbol* variable_symbol;
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } ASTVariableDeclaration;
 
 typedef struct ASTVariableDefinition
 {
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
+
+    VariableSymbol* variable_symbol;
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     AST* value;
@@ -156,6 +162,8 @@ typedef struct ASTVariableAssignment
 
 typedef struct ASTVariable
 {
+    VariableSymbol* variable_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 is_pointer;
@@ -197,6 +205,25 @@ typedef struct ASTIfStatement
     ASTScope* else_block;
 } ASTIfStatement;
 
+typedef struct ASTSwitchCase
+{
+    AST* case_expr;
+    ASTScope* scope;
+} ASTSwitchCase;
+
+typedef struct ASTSwitchStatement
+{
+    AST* switch_value;
+    List cases;
+    ASTScope* default_case;
+} ASTSwitchStatement;
+
+typedef struct ASTBreakStatement
+{
+    //NOTE: This struct should not be empty because of the arena allocator
+    u8 placeholder;
+} ASTBreakStatement;
+
 typedef struct ASTForLoop
 {
     AST* expression;
@@ -232,7 +259,10 @@ typedef struct ASTParameterList
 
 typedef struct ASTFunctionDefinition
 {
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
+
+    FunctionSymbol* function_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 exported;
@@ -244,7 +274,10 @@ typedef struct ASTFunctionDefinition
 
 typedef struct ASTFunctionDeclaration
 {
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
+
+    FunctionSymbol* function_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     ASTParameterList* parameter_list;
@@ -252,6 +285,8 @@ typedef struct ASTFunctionDeclaration
 
 typedef struct ASTFunctionCall
 {
+    FunctionSymbol* function_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     ASTNamespaceRef* namespace_ref;
@@ -268,7 +303,7 @@ typedef struct ASTEnumDefinition
 {
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
-    ASTTypename* type;
+    ASTTypename* type; //NOTE: Deprecated
 
     b8 exported;
 
@@ -277,6 +312,8 @@ typedef struct ASTEnumDefinition
 
 typedef struct ASTStructDefinition
 {
+    StructSymbol* struct_symbol;
+
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 exported;
@@ -297,22 +334,6 @@ typedef struct ASTNamespaceRef
 
     ASTNamespaceRef* next;
 } ASTNamespaceRef;
-
-typedef struct ASTModuleDefinition
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    b8 exported;
-
-    List function_declarations;
-} ASTModuleDefinition;
-
-typedef struct ASTModuleImplementation
-{
-    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
-
-    List function_definitions;
-} ASTModuleImplementation;
 
 typedef struct ASTExternBlock
 {
@@ -352,6 +373,10 @@ void ast_print_import_statement(const ASTImportStatement* import_statement, usiz
 
 void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth);
 
+void ast_print_switch_statement(const ASTSwitchStatement* switch_statement, usize depth);
+
+void ast_print_break_statement(const ASTBreakStatement* break_statement, usize depth);
+
 void ast_print_for_loop(const ASTForLoop* for_loop, usize depth);
 
 void ast_print_while_loop(const ASTWhileLoop* while_loop, usize depth);
@@ -377,10 +402,6 @@ void ast_print_struct_definition(const ASTStructDefinition* struct_definition, u
 void ast_print_namespace(const ASTNamespace* namespace, usize depth);
 
 void ast_print_namespace_ref(const ASTNamespaceRef* namespace_ref, usize depth);
-
-void ast_print_module_definition(const ASTModuleDefinition* module_definition, usize depth);
-
-void ast_print_module_implementation(const ASTModuleImplementation* module_implementation, usize depth);
 
 void ast_print_extern_block(const ASTExternBlock* extern_block, usize depth);
 

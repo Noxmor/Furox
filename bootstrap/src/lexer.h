@@ -8,6 +8,8 @@
 
 #include "token.h"
 
+void lexer_init_keyword_table(void);
+
 #define FRX_LEXER_BUFFER_CAPACITY 1024
 #define FRX_LEXER_TOKEN_CAPACITY 8
 

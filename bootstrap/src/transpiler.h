@@ -7,6 +7,8 @@
 
 #include "ast.h"
 
+#include "symbols/symbol_table.h"
+
 enum
 {
     FRX_TRANSPILER_MODE_HEADER = 0,
@@ -23,6 +25,8 @@ typedef struct Transpiler
     FILE* header;
 
     TranspilerMode mode;
+
+    SymbolTable* symbol_table;
 
     b8 failed;
 
@@ -58,6 +62,10 @@ void ast_transpile_import_statement(Transpiler* transpiler, const ASTImportState
 
 void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if_statement);
 
+void ast_transpile_switch_statement(Transpiler* transpiler, const ASTSwitchStatement* switch_statement);
+
+void ast_transpile_break_statement(Transpiler* transpiler, const ASTBreakStatement* break_statement);
+
 void ast_transpile_for_loop(Transpiler* transpiler, const ASTForLoop* for_loop);
 
 void ast_transpile_while_loop(Transpiler* transpiler, const ASTWhileLoop* while_loop);
@@ -83,10 +91,6 @@ void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefi
 void ast_transpile_namespace(Transpiler* transpiler, const ASTNamespace* namespace);
 
 void ast_transpile_namespace_ref(Transpiler* transpiler, const ASTNamespaceRef* namespace_ref);
-
-void ast_transpile_module_definition(Transpiler* transpiler, const ASTModuleDefinition* module_definition);
-
-void ast_transpile_module_implementation(Transpiler* transpiler, const ASTModuleImplementation* module_implementation);
 
 void ast_transpile_extern_block(Transpiler* transpiler, const ASTExternBlock* extern_block);
 

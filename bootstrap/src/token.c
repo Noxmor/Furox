@@ -9,21 +9,42 @@ const char* token_type_to_str(TokenType type)
     switch(type)
     {
         case FRX_TOKEN_TYPE_EOF: return "EOF";
-        
+
+        case FRX_TOKEN_TYPE_KW_U8: return "u8";
+        case FRX_TOKEN_TYPE_KW_U16: return "u16";
+        case FRX_TOKEN_TYPE_KW_U32: return "u32";
+        case FRX_TOKEN_TYPE_KW_U64: return "u64";
+        case FRX_TOKEN_TYPE_KW_USIZE: return "usize";
+        case FRX_TOKEN_TYPE_KW_I8: return "i8";
+        case FRX_TOKEN_TYPE_KW_I16: return "i16";
+        case FRX_TOKEN_TYPE_KW_I32: return "i32";
+        case FRX_TOKEN_TYPE_KW_I64: return "i64";
+        case FRX_TOKEN_TYPE_KW_ISIZE: return "isize";
+        case FRX_TOKEN_TYPE_KW_B8: return "b8";
+        case FRX_TOKEN_TYPE_KW_B16: return "b16";
+        case FRX_TOKEN_TYPE_KW_B32: return "b32";
+        case FRX_TOKEN_TYPE_KW_B64: return "b64";
+        case FRX_TOKEN_TYPE_KW_CHAR: return "char";
+        case FRX_TOKEN_TYPE_KW_F32: return "f32";
+        case FRX_TOKEN_TYPE_KW_F64: return "f64";
+        case FRX_TOKEN_TYPE_KW_VOID: return "void";
+
         case FRX_TOKEN_TYPE_KW_NULLPTR: return "nullptr";
         case FRX_TOKEN_TYPE_KW_TRUE: return "true";
         case FRX_TOKEN_TYPE_KW_FALSE: return "false";
         case FRX_TOKEN_TYPE_KW_IMPORT: return "import";
         case FRX_TOKEN_TYPE_KW_RETURN: return "return";
         case FRX_TOKEN_TYPE_KW_NAMESPACE: return "namespace";
-        case FRX_TOKEN_TYPE_KW_MODULE: return "module";
-        case FRX_TOKEN_TYPE_KW_IMPL: return "impl";
         case FRX_TOKEN_TYPE_KW_EXTERN: return "extern";
         case FRX_TOKEN_TYPE_KW_ENUM: return "enum";
         case FRX_TOKEN_TYPE_KW_STRUCT: return "struct";
         case FRX_TOKEN_TYPE_KW_EXPORT: return "export";
         case FRX_TOKEN_TYPE_KW_IF: return "if";
         case FRX_TOKEN_TYPE_KW_ELSE: return "else";
+        case FRX_TOKEN_TYPE_KW_SWITCH: return "switch";
+        case FRX_TOKEN_TYPE_KW_CASE: return "case";
+        case FRX_TOKEN_TYPE_KW_DEFAULT: return "default";
+        case FRX_TOKEN_TYPE_KW_BREAK: return "break";
         case FRX_TOKEN_TYPE_KW_FOR: return "for";
         case FRX_TOKEN_TYPE_KW_WHILE: return "while";
         case FRX_TOKEN_TYPE_KW_DO: return "do";
