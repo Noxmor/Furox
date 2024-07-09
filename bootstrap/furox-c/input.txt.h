@@ -9,8 +9,6 @@ typedef struct std_String
     usize length;
 } std_String;
 
-char* std_String_Buffer(std_String* str);usize std_String_Length(std_String* str);
-
 
 
 b8 Math_IsEven(usize n);

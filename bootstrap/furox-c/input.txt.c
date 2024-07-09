@@ -4,16 +4,6 @@ extern i32 putchar(i32 c);extern i32 printf(char* format, ...);
 i32 global_var;
 
 
-char* std_String_Buffer(std_String* str)
-{
-    return str->buffer;
-}
-usize std_String_Length(std_String* str)
-{
-    return str->length;
-}
-
-
 usize Math_add(usize a, usize b)
 {
     return (a + b);
@@ -131,6 +121,20 @@ usize Main(void)
     }
 
     Day day = FRIDAY;
+    switch(day)
+    {
+    case FRIDAY:
+    {
+        printf("The day is Friday!\n");
+        break;
+    }
+    default:
+    {
+        printf("The day is not Friday!\n");
+        break;
+    }
+    }
+;
     return ((Math_add(1, (2 * 3)) * VariadicFunc(1, 2, 3, 'A', "Test")) + day);
 }
 
