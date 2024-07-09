@@ -6,6 +6,7 @@
 #include <sys/errno.h>
 #include <sys/stat.h>
 
+#include "ast.h"
 #include "core/assert.h"
 #include "core/memory.h"
 #include "symbols/type_category.h"
@@ -275,6 +276,8 @@ void ast_transpile(Transpiler* transpiler, const AST* ast)
         case FRX_AST_TYPE_BINARY_EXPRESSION: ast_transpile_binary_expression(transpiler, ast->node); break;
         case FRX_AST_TYPE_IMPORT_STATEMENT: ast_transpile_import_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_IF_STATEMENT: ast_transpile_if_statement(transpiler, ast->node); break;
+        case FRX_AST_TYPE_SWITCH_STATEMENT: ast_transpile_switch_statement(transpiler, ast->node); break;
+        case FRX_AST_TYPE_BREAK_STATEMENT: ast_transpile_break_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_FOR_LOOP: ast_transpile_for_loop(transpiler, ast->node); break;
         case FRX_AST_TYPE_WHILE_LOOP: ast_transpile_while_loop(transpiler, ast->node); break;
         case FRX_AST_TYPE_DO_WHILE_LOOP: ast_transpile_do_while_loop(transpiler, ast->node); break;
@@ -523,6 +526,51 @@ void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if
         FRX_TRANSPILER_WRITE(transpiler, "else\n");
         ast_transpile_scope(transpiler, if_statement->else_block);
     }
+}
+
+void ast_transpile_switch_statement(Transpiler *transpiler, const ASTSwitchStatement *switch_statement)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(switch_statement != NULL);
+
+    FRX_TRANSPILER_WRITE(transpiler, "switch(");
+    ast_transpile(transpiler, switch_statement->switch_value);
+    FRX_TRANSPILER_WRITE(transpiler, ")\n");
+
+    write_indentation_level(transpiler);
+    FRX_TRANSPILER_WRITE(transpiler, "{\n");
+
+    for(usize i = 0; i < list_size(&switch_statement->cases); ++i)
+    {
+        ASTSwitchCase* switch_case = list_get(&switch_statement->cases, i);
+
+        write_indentation_level(transpiler);
+        FRX_TRANSPILER_WRITE(transpiler, "case ");
+        ast_transpile(transpiler, switch_case->case_expr);
+        FRX_TRANSPILER_WRITE(transpiler, ":\n");
+
+        ast_transpile_scope(transpiler, switch_case->scope);
+    }
+
+    if(switch_statement->default_case != NULL)
+    {
+        write_indentation_level(transpiler);
+        FRX_TRANSPILER_WRITE(transpiler, "default:\n");
+        ast_transpile_scope(transpiler, switch_statement->default_case);
+    }
+
+    write_indentation_level(transpiler);
+    FRX_TRANSPILER_WRITE(transpiler, "}\n");
+}
+
+void ast_transpile_break_statement(Transpiler* transpiler, const ASTBreakStatement* break_statement)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(break_statement != NULL);
+
+    FRX_TRANSPILER_WRITE(transpiler, "break");
 }
 
 void ast_transpile_for_loop(Transpiler* transpiler, const ASTForLoop* for_loop)

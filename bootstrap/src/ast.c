@@ -64,6 +64,7 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_IMPORT_STATEMENT: return "import-statement";
 
         case FRX_AST_TYPE_IF_STATEMENT: return "if-statement";
+        case FRX_AST_TYPE_SWITCH_STATEMENT: return "switch-statement";
         case FRX_AST_TYPE_FOR_LOOP: return "for-loop";
         case FRX_AST_TYPE_WHILE_LOOP: return "while-loop";
         case FRX_AST_TYPE_DO_WHILE_LOOP: return "do-while-loop";
@@ -109,6 +110,7 @@ static void print_recursion_buffer(usize depth)
 static void print_depth(usize depth)
 {
     FRX_ASSERT(depth < FRX_AST_PRINT_RECURSION_LIMIT);
+#define FRX_KEYWORD_TABLE_SIZE 512
 
     for(usize i = 0; i < depth; ++i)
     {
@@ -142,6 +144,8 @@ void ast_print(const AST* ast, usize depth)
         case FRX_AST_TYPE_IMPORT_STATEMENT: ast_print_import_statement(ast->node, depth); break;
 
         case FRX_AST_TYPE_IF_STATEMENT: ast_print_if_statement(ast->node, depth); break;
+        case FRX_AST_TYPE_SWITCH_STATEMENT: ast_print_switch_statement(ast->node, depth); break;
+        case FRX_AST_TYPE_BREAK_STATEMENT: ast_print_break_statement(ast->node, depth); break;
         case FRX_AST_TYPE_FOR_LOOP: ast_print_for_loop(ast->node, depth); break;
         case FRX_AST_TYPE_WHILE_LOOP: ast_print_while_loop(ast->node, depth); break;
         case FRX_AST_TYPE_DO_WHILE_LOOP: ast_print_do_while_loop(ast->node, depth); break;
@@ -430,6 +434,65 @@ void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth)
 
         ast_print_scope(if_statement->if_block, depth + 1);
     }
+}
+
+void ast_print_switch_statement(const ASTSwitchStatement* switch_statement,
+                                usize depth)
+{
+    FRX_ASSERT(switch_statement != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("switch-statement\n");
+
+    recursion_buffer[depth] = 1;
+
+    print_depth(depth);
+
+    ast_print(switch_statement->switch_value, depth + 1);
+
+    print_depth(depth);
+
+    for(usize i = 0; i < list_size(&switch_statement->cases); ++i)
+    {
+        ASTSwitchCase* switch_case = list_get(&switch_statement->cases, i);
+
+        ast_print(switch_case->case_expr, depth + 1);
+
+        print_depth(depth);
+
+        ast_print_scope(switch_case->scope, depth + 1);
+    }
+
+    print_depth(depth);
+
+    print_recursion_buffer(depth + 1);
+
+    if(switch_statement->default_case != NULL)
+    {
+        printf("default-case\n");
+
+        recursion_buffer[depth] = 0;
+
+        print_depth(depth);
+
+        ast_print_scope(switch_statement->default_case, depth + 1);
+    }
+    else
+    {
+        printf("default-case (none)\n");
+
+        recursion_buffer[depth] = 0;
+    }
+}
+
+void ast_print_break_statement(const ASTBreakStatement* break_statement, usize depth)
+{
+    FRX_ASSERT(break_statement != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("break-statement\n");
 }
 
 void ast_print_for_loop(const ASTForLoop* for_loop, usize depth)

@@ -64,6 +64,8 @@ enum
     FRX_AST_TYPE_IMPORT_STATEMENT,
 
     FRX_AST_TYPE_IF_STATEMENT,
+    FRX_AST_TYPE_SWITCH_STATEMENT,
+    FRX_AST_TYPE_BREAK_STATEMENT,
     FRX_AST_TYPE_FOR_LOOP,
     FRX_AST_TYPE_WHILE_LOOP,
     FRX_AST_TYPE_DO_WHILE_LOOP,
@@ -202,6 +204,25 @@ typedef struct ASTIfStatement
     ASTScope* if_block;
     ASTScope* else_block;
 } ASTIfStatement;
+
+typedef struct ASTSwitchCase
+{
+    AST* case_expr;
+    ASTScope* scope;
+} ASTSwitchCase;
+
+typedef struct ASTSwitchStatement
+{
+    AST* switch_value;
+    List cases;
+    ASTScope* default_case;
+} ASTSwitchStatement;
+
+typedef struct ASTBreakStatement
+{
+    //NOTE: This struct should not be empty because of the arena allocator
+    u8 placeholder;
+} ASTBreakStatement;
 
 typedef struct ASTForLoop
 {
@@ -351,6 +372,10 @@ void ast_print_unary_expression(const ASTUnaryExpression* unary_expression, usiz
 void ast_print_import_statement(const ASTImportStatement* import_statement, usize depth);
 
 void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth);
+
+void ast_print_switch_statement(const ASTSwitchStatement* switch_statement, usize depth);
+
+void ast_print_break_statement(const ASTBreakStatement* break_statement, usize depth);
 
 void ast_print_for_loop(const ASTForLoop* for_loop, usize depth);
 

@@ -2,7 +2,10 @@
 
 #include <string.h>
 
+#include "ast.h"
+#include "containers/list.h"
 #include "core/assert.h"
+#include "core/core.h"
 #include "core/log.h"
 #include "core/memory.h"
 #include "namespace.h"
@@ -1238,6 +1241,132 @@ static FRX_NO_DISCARD ASTIfStatement* parser_parse_if_statement(Parser* parser)
     return if_statement;
 }
 
+static FRX_NO_DISCARD ASTSwitchStatement* parser_parse_switch_statement(
+    Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_SWITCH))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'switch'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '(' after keyword 'switch'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    ASTSwitchStatement* switch_statement = arena_alloc(&parser->arena, sizeof(ASTSwitchStatement));
+
+    switch_statement->switch_value = parser_parse_expression(parser);
+    if(switch_statement->switch_value == NULL)
+        return NULL;
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ')' after expression!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_BRACE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '{' after switch-value!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    list_init(&switch_statement->cases, FRX_MEMORY_CATEGORY_AST);
+
+    while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_CASE)
+    {
+        parser_skip(parser);
+
+        ASTSwitchCase* switch_case = arena_alloc(&parser->arena, sizeof(ASTSwitchCase));
+        switch_case->case_expr = parser_parse_expression(parser);
+        if(switch_case->case_expr == NULL)
+            return NULL;
+
+        if(parser_eat(parser, FRX_TOKEN_TYPE_COLON))
+        {
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Expected ':' after switch-case-expression!", parser->lexer.filepath, location.line, location.coloumn);
+
+            return NULL;
+        }
+
+        switch_case->scope = parser_parse_scope(parser);
+        if(switch_case->scope == NULL)
+            return NULL;
+
+        list_push(&switch_statement->cases, switch_case);
+    }
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_DEFAULT)
+    {
+        parser_skip(parser);
+
+        if(parser_eat(parser, FRX_TOKEN_TYPE_COLON))
+        {
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Expected ':' after keyword 'default'!", parser->lexer.filepath, location.line, location.coloumn);
+
+            return NULL;
+        }
+
+        switch_statement->default_case = parser_parse_scope(parser);
+        if(switch_statement->default_case == NULL)
+            return NULL;
+    }
+    else
+    {
+        switch_statement->default_case = NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_BRACE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '}' at the end of switch-statement!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    return switch_statement;
+}
+
+static FRX_NO_DISCARD ASTBreakStatement* parser_parse_break_statement(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_BREAK))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'break'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ';' at the end of break-statement!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    ASTBreakStatement* break_statement = arena_alloc(&parser->arena, sizeof(ASTBreakStatement));
+
+    return break_statement;
+}
+
 static FRX_NO_DISCARD b8 is_for_loop(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1479,6 +1608,26 @@ static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser)
         return ast;
     }
 
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_SWITCH)
+    {
+        ast->type = FRX_AST_TYPE_SWITCH_STATEMENT;
+        ast->node = parser_parse_switch_statement(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_BREAK)
+    {
+        ast->type = FRX_AST_TYPE_BREAK_STATEMENT;
+        ast->node = parser_parse_break_statement(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_FOR)
     {
         ast->type = FRX_AST_TYPE_FOR_LOOP;
@@ -1594,7 +1743,7 @@ static FRX_NO_DISCARD ASTScope* parser_parse_scope(Parser* parser)
 
         return NULL;
     }
-    
+
     ASTScope* scope = arena_alloc(&parser->arena, sizeof(ASTScope));
 
     list_init(&scope->statements, FRX_MEMORY_CATEGORY_AST);

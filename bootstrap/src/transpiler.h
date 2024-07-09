@@ -62,6 +62,10 @@ void ast_transpile_import_statement(Transpiler* transpiler, const ASTImportState
 
 void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if_statement);
 
+void ast_transpile_switch_statement(Transpiler* transpiler, const ASTSwitchStatement* switch_statement);
+
+void ast_transpile_break_statement(Transpiler* transpiler, const ASTBreakStatement* break_statement);
+
 void ast_transpile_for_loop(Transpiler* transpiler, const ASTForLoop* for_loop);
 
 void ast_transpile_while_loop(Transpiler* transpiler, const ASTWhileLoop* while_loop);
