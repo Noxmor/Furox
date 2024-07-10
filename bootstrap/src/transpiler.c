@@ -488,6 +488,7 @@ void ast_transpile_binary_expression(Transpiler* transpiler, const ASTBinaryExpr
         case FRX_AST_TYPE_BINARY_XOR: FRX_TRANSPILER_WRITE(transpiler, " ^ "); break;
         case FRX_AST_TYPE_BINARY_LEFT_SHIFT: FRX_TRANSPILER_WRITE(transpiler, " << "); break;
         case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: FRX_TRANSPILER_WRITE(transpiler, " >> "); break;
+        case FRX_AST_TYPE_NEGATED_COMPARISON: FRX_TRANSPILER_WRITE(transpiler, " != "); break;
         case FRX_AST_TYPE_COMPARISON: FRX_TRANSPILER_WRITE(transpiler, " == "); break;
         case FRX_AST_TYPE_GREATER_THAN: FRX_TRANSPILER_WRITE(transpiler, " > "); break;
         case FRX_AST_TYPE_GREATER_THAN_EQUALS: FRX_TRANSPILER_WRITE(transpiler, " >= "); break;

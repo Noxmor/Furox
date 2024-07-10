@@ -152,6 +152,7 @@ static usize parser_get_precedence(ASTType type)
 
         case FRX_AST_TYPE_BINARY_AND: return 5;
 
+        case FRX_AST_TYPE_NEGATED_COMPARISON:
         case FRX_AST_TYPE_COMPARISON: return 6;
 
         case FRX_AST_TYPE_GREATER_THAN:
@@ -218,6 +219,7 @@ static b8 parser_next_token_is_binary_operator(Parser* parser)
         case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT:
         case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT:
 
+        case FRX_TOKEN_TYPE_NOT_EQUALS:
         case FRX_TOKEN_TYPE_COMPARISON:
 
         case FRX_TOKEN_TYPE_GREATER_THAN:
@@ -730,6 +732,7 @@ static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
             case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT: binary_expression->type = FRX_AST_TYPE_BINARY_LEFT_SHIFT; break;
             case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: binary_expression->type = FRX_AST_TYPE_BINARY_RIGHT_SHIFT; break;
 
+            case FRX_TOKEN_TYPE_NOT_EQUALS: binary_expression->type = FRX_AST_TYPE_NEGATED_COMPARISON; break;
             case FRX_TOKEN_TYPE_COMPARISON: binary_expression->type = FRX_AST_TYPE_COMPARISON; break;
 
             case FRX_TOKEN_TYPE_GREATER_THAN: binary_expression->type = FRX_AST_TYPE_GREATER_THAN; break;

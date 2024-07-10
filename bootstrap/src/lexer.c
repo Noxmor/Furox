@@ -7,6 +7,7 @@
 #include "core/log.h"
 
 #include "symbols/hash.h"
+#include "token.h"
 
 typedef struct LexerInfo
 {
@@ -547,7 +548,23 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
 
         case '%': token->type = FRX_TOKEN_TYPE_MODULO; break;
 
-        case '!': token->type = FRX_TOKEN_TYPE_LOGICAL_NEGATION; break;
+        case '!':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = FRX_TOKEN_TYPE_NOT_EQUALS;
+                strcpy(token->identifier, "!=");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_LOGICAL_NEGATION;
+
+            break;
+        }
 
         case '&':
         {

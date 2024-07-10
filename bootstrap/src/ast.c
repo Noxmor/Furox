@@ -50,6 +50,7 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_BINARY_LEFT_SHIFT: return "binary-left-shift";
         case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: return "binary-right-shift";
 
+        case FRX_AST_TYPE_NEGATED_COMPARISON: return "negated-comparison";
         case FRX_AST_TYPE_COMPARISON: return "comparison";
 
         case FRX_AST_TYPE_GREATER_THAN: return "greater-than";
