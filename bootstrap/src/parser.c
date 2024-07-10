@@ -1970,6 +1970,8 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
 
         function_symbol->type_category = FRX_TYPE_CATEGORY_STRUCT;
         function_symbol->struct_symbol_return_type = struct_symbol;
+
+        parser_skip(parser);
     }
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
@@ -2032,6 +2034,8 @@ static FRX_NO_DISCARD ASTFunctionDefinition* parser_parse_function_definition(Pa
     function_definition->function_symbol =
         parser_generate_function_symbol(parser);
     parser_recover(parser, &location);
+
+    FRX_ASSERT(function_definition->function_symbol != NULL);
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT)
     {
