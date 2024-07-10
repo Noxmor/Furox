@@ -2006,7 +2006,15 @@ static FRX_NO_DISCARD b8 is_function_definition(Parser* parser)
 
     parser_skip_namespace_resolution(parser);
 
-    b8 result = (is_primitive(parser_current_token(parser)->type) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER) && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_IDENTIFIER && parser_peek(parser, 2)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS;
+    b8 result = is_primitive(parser_current_token(parser)->type) || parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER;
+
+    parser_skip(parser);
+
+    while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
+        parser_skip(parser);
+
+    result &= parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
+        && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS;
 
     parser_recover(parser, &location);
 
@@ -2531,6 +2539,69 @@ static FRX_NO_DISCARD ASTExternBlock* parser_parse_extern_block(Parser* parser)
     return extern_block;
 }
 
+static FRX_NO_DISCARD b8 is_macro(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_MACRO
+        || (parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT
+        && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_KW_MACRO);
+}
+
+static FRX_NO_DISCARD ASTMacro* parser_parse_macro(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ASTMacro* macro = arena_alloc(&parser->arena, sizeof(ASTMacro));
+    macro->exported = FRX_FALSE;
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT)
+    {
+        macro->exported = FRX_TRUE;
+        parser_skip(parser);
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_MACRO))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'macro'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    strcpy(macro->name, parser_current_token(parser)->identifier);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected identifier for the macro's name!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_EQUALS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '=' after macro name!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    macro->value = parser_parse_expression(parser);
+    if(macro->value == NULL)
+        return NULL;
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ';' at the end of macro-constant!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    return macro;
+}
+
 static FRX_NO_DISCARD b8 is_import_statement(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -2613,6 +2684,16 @@ static FRX_NO_DISCARD AST* parser_parse_top_level_definition(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_EXTERN_BLOCK;
         ast->node = parser_parse_extern_block(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
+    if(is_macro(parser))
+    {
+        ast->type = FRX_AST_TYPE_MACRO;
+        ast->node = parser_parse_macro(parser);
         if(ast->node == NULL)
             return NULL;
 

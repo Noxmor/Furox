@@ -8,6 +8,7 @@
 
 #include "ast.h"
 #include "core/assert.h"
+#include "core/core.h"
 #include "core/memory.h"
 #include "symbols/type_category.h"
 
@@ -288,6 +289,7 @@ void ast_transpile(Transpiler* transpiler, const AST* ast)
         case FRX_AST_TYPE_STRUCT_DEFINITION: ast_transpile_struct_definition(transpiler, ast->node); break;
         case FRX_AST_TYPE_NAMESPACE: ast_transpile_namespace(transpiler, ast->node); break;
         case FRX_AST_TYPE_EXTERN_BLOCK: ast_transpile_extern_block(transpiler, ast->node); break;
+        case FRX_AST_TYPE_MACRO: ast_transpile_macro(transpiler, ast->node); break;
 
         default: FRX_ASSERT(FRX_FALSE); break;
     }
@@ -876,7 +878,16 @@ void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefi
         ASTVariableDeclaration* var = list_get(&struct_definition->fields, i);
 
         ast_transpile_typename(transpiler, var->type);
-        FRX_TRANSPILER_WRITE(transpiler, " %s;\n", var->name);
+        FRX_TRANSPILER_WRITE(transpiler, " %s", var->name);
+
+        if(var->type->array_size != NULL)
+        {
+            FRX_TRANSPILER_WRITE(transpiler, "[");
+            ast_transpile(transpiler, var->type->array_size);
+            FRX_TRANSPILER_WRITE(transpiler, "]");
+        }
+
+        FRX_TRANSPILER_WRITE(transpiler, ";\n");
     }
 
     drop_indentation_level();
@@ -942,6 +953,21 @@ void ast_transpile_extern_block(Transpiler* transpiler, const ASTExternBlock* ex
 
         ast_transpile_function_declaration(transpiler, function_declaration);
     }
+}
+
+void ast_transpile_macro(Transpiler *transpiler, const ASTMacro *macro)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(macro != NULL);
+
+    if(!(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE && !macro->exported)
+        && !(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && macro->exported))
+       return;
+
+    FRX_TRANSPILER_WRITE(transpiler, "#define %s (", macro->name);
+    ast_transpile(transpiler, macro->value);
+    FRX_TRANSPILER_WRITE(transpiler, ")\n");
 }
 
 static FRX_NO_DISCARD b8 generate_furox_main_c()

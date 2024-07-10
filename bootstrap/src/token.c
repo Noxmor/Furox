@@ -48,6 +48,7 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_KW_FOR: return "for";
         case FRX_TOKEN_TYPE_KW_WHILE: return "while";
         case FRX_TOKEN_TYPE_KW_DO: return "do";
+        case FRX_TOKEN_TYPE_KW_MACRO: return "macro";
 
         case FRX_TOKEN_TYPE_IDENTIFIER: return "Identifier";
 

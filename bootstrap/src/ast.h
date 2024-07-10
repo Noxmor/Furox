@@ -86,6 +86,8 @@ enum
 
     FRX_AST_TYPE_EXTERN_BLOCK,
 
+    FRX_AST_TYPE_MACRO,
+
     FRX_AST_TYPE_COUNT
 };
 
@@ -343,6 +345,15 @@ typedef struct ASTExternBlock
     List struct_definitions;
 } ASTExternBlock;
 
+typedef struct ASTMacro
+{
+    char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
+
+    AST* value;
+
+    b8 exported;
+} ASTMacro;
+
 void ast_print(const AST* ast, usize depth);
 
 void ast_print_noop(usize depth);
@@ -406,5 +417,7 @@ void ast_print_namespace(const ASTNamespace* namespace, usize depth);
 void ast_print_namespace_ref(const ASTNamespaceRef* namespace_ref, usize depth);
 
 void ast_print_extern_block(const ASTExternBlock* extern_block, usize depth);
+
+void ast_print_macro(const ASTMacro* macro, usize depth);
 
 #endif

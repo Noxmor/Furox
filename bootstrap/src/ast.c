@@ -85,6 +85,8 @@ const char* ast_type_to_str(ASTType type)
 
         case FRX_AST_TYPE_EXTERN_BLOCK: return "extern-block";
 
+        case FRX_AST_TYPE_MACRO: return "macro";
+
         default: FRX_ASSERT(FRX_FALSE);
     }
 
@@ -158,6 +160,7 @@ void ast_print(const AST* ast, usize depth)
         case FRX_AST_TYPE_STRUCT_DEFINITION: ast_print_struct_definition(ast->node, depth); break;
         case FRX_AST_TYPE_NAMESPACE: ast_print_namespace(ast->node, depth); break;
         case FRX_AST_TYPE_EXTERN_BLOCK: ast_print_extern_block(ast->node, depth); break;
+        case FRX_AST_TYPE_MACRO: ast_print_macro(ast->node, depth); break;
 
         default: FRX_ASSERT(FRX_FALSE); break;
     }
@@ -840,6 +843,21 @@ void ast_print_extern_block(const ASTExternBlock* extern_block, usize depth)
 
         ast_print_function_declaration(list_get(&extern_block->function_declarations, i), depth + 1);
     }
+
+    recursion_buffer[depth] = 0;
+}
+
+void ast_print_macro(const ASTMacro* macro, usize depth)
+{
+    FRX_ASSERT(macro != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("macro\n");
+
+    recursion_buffer[depth] = 1;
+
+    ast_print(macro->value, depth + 1);
 
     recursion_buffer[depth] = 0;
 }
