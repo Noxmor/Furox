@@ -204,10 +204,17 @@ typedef struct ASTImportStatement
     char filepath[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } ASTImportStatement;
 
+typedef struct ASTElseIfBlock
+{
+    AST* condition;
+    ASTScope* block;
+} ASTElseIfBlock;
+
 typedef struct ASTIfStatement
 {
     AST* condition;
     ASTScope* if_block;
+    List else_if_blocks;
     ASTScope* else_block;
 } ASTIfStatement;
 

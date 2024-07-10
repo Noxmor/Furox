@@ -440,6 +440,19 @@ void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth)
 
         ast_print_scope(if_statement->if_block, depth + 1);
 
+        print_depth(depth);
+
+        usize size = list_size(&if_statement->else_if_blocks);
+        for(usize i = 0; i < size; ++i)
+        {
+            ASTElseIfBlock* else_if_block = list_get(&if_statement->else_if_blocks, i);
+            ast_print(else_if_block->condition, depth + 1);
+            ast_print_scope(else_if_block->block, depth + 1);
+
+            if(i != size - 1)
+                print_depth(depth);
+        }
+
         recursion_buffer[depth] = 0;
 
         print_depth(depth);

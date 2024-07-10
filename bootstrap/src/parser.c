@@ -1271,6 +1271,39 @@ static FRX_NO_DISCARD ASTIfStatement* parser_parse_if_statement(Parser* parser)
     if(if_statement->if_block == NULL)
         return NULL;
 
+    list_init(&if_statement->else_if_blocks, FRX_MEMORY_CATEGORY_AST);
+
+    while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_ELSE
+        && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_KW_IF)
+    {
+        parser_skip(parser);
+        parser_skip(parser);
+
+        ASTElseIfBlock* else_if_block = arena_alloc(&parser->arena, sizeof(ASTElseIfBlock));
+
+        if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
+        {
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Expected '('!", parser->lexer.filepath, location.line, location.coloumn);
+
+            return NULL;
+        }
+
+        else_if_block->condition = parser_parse_expression(parser);
+
+        if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
+        {
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Expected ')'!", parser->lexer.filepath, location.line, location.coloumn);
+
+            return NULL;
+        }
+
+        else_if_block->block = parser_parse_scope(parser);
+
+        list_push(&if_statement->else_if_blocks, else_if_block);
+    }
+
     if(parser_current_token(parser)->type != FRX_TOKEN_TYPE_KW_ELSE)
     {
         if_statement->else_block = NULL;
