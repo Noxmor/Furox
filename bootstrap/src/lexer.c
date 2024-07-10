@@ -472,7 +472,7 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
     FRX_ASSERT(lexer != NULL);
 
     FRX_ASSERT(token != NULL);
-    
+
     lexer_skip_whitespaces(lexer);
 
     memcpy(&token->location, &lexer->location, sizeof(SourceLocation));
@@ -488,14 +488,14 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
     if(isdigit(current))
     {
         char next = lexer_peek_char(lexer, 1);
-        
+
         if(current == '0' && next == 'b')
             lexer_parse_binary_number(lexer, token);
         else if(current == '0' && next == 'x')
             lexer_parse_hex_number(lexer, token);
         else
             lexer_parse_number(lexer, token);
-        
+
         return FRX_FALSE;
     }
 
@@ -681,13 +681,13 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
             break;
         }
 
-        case '(': token->type = FRX_TOKEN_TYPE_LEFT_PARANTHESIS; break;   
-        case ')': token->type = FRX_TOKEN_TYPE_RIGHT_PARANTHESIS; break;   
-        
-        case '[': token->type = FRX_TOKEN_TYPE_LEFT_BRACKET; break;   
-        case ']': token->type = FRX_TOKEN_TYPE_RIGHT_BRACKET; break;   
-        
-        case '{': token->type = FRX_TOKEN_TYPE_LEFT_BRACE; break;   
+        case '(': token->type = FRX_TOKEN_TYPE_LEFT_PARANTHESIS; break;
+        case ')': token->type = FRX_TOKEN_TYPE_RIGHT_PARANTHESIS; break;
+
+        case '[': token->type = FRX_TOKEN_TYPE_LEFT_BRACKET; break;
+        case ']': token->type = FRX_TOKEN_TYPE_RIGHT_BRACKET; break;
+
+        case '{': token->type = FRX_TOKEN_TYPE_LEFT_BRACE; break;
         case '}': token->type = FRX_TOKEN_TYPE_RIGHT_BRACE; break;
 
         case ',': token->type = FRX_TOKEN_TYPE_COMMA; break;
