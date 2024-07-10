@@ -96,6 +96,8 @@ void ast_transpile_extern_block(Transpiler* transpiler, const ASTExternBlock* ex
 
 void ast_transpile_macro(Transpiler* transpiler, const ASTMacro* macro);
 
+void ast_transpile_sizeof(Transpiler* transpiler, const ASTSizeof* _sizeof);
+
 FRX_NO_DISCARD b8 generate_executable(void);
 
 #endif

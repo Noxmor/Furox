@@ -97,6 +97,7 @@ void lexer_init_keyword_table(void)
     register_keyword("while", FRX_TOKEN_TYPE_KW_WHILE);
     register_keyword("do", FRX_TOKEN_TYPE_KW_DO);
     register_keyword("macro", FRX_TOKEN_TYPE_KW_MACRO);
+    register_keyword("sizeof", FRX_TOKEN_TYPE_KW_SIZEOF);
 }
 
 static void lexer_read(Lexer* lexer)

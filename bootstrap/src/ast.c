@@ -86,6 +86,7 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_EXTERN_BLOCK: return "extern-block";
 
         case FRX_AST_TYPE_MACRO: return "macro";
+        case FRX_AST_TYPE_SIZEOF: return "sizeof";
 
         default: FRX_ASSERT(FRX_FALSE);
     }
@@ -161,6 +162,7 @@ void ast_print(const AST* ast, usize depth)
         case FRX_AST_TYPE_NAMESPACE: ast_print_namespace(ast->node, depth); break;
         case FRX_AST_TYPE_EXTERN_BLOCK: ast_print_extern_block(ast->node, depth); break;
         case FRX_AST_TYPE_MACRO: ast_print_macro(ast->node, depth); break;
+        case FRX_AST_TYPE_SIZEOF: ast_print_sizeof(ast->node, depth); break;
 
         default: FRX_ASSERT(FRX_FALSE); break;
     }
@@ -860,4 +862,13 @@ void ast_print_macro(const ASTMacro* macro, usize depth)
     ast_print(macro->value, depth + 1);
 
     recursion_buffer[depth] = 0;
+}
+
+void ast_print_sizeof(const ASTSizeof *_sizeof, usize depth)
+{
+    FRX_ASSERT(_sizeof != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("sizeof\n");
 }

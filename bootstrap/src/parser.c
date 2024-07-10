@@ -240,6 +240,8 @@ static FRX_NO_DISCARD ASTScope* parser_parse_scope(Parser* parser);
 
 static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser);
 
+static FRX_NO_DISCARD ASTSizeof* parser_parse_sizeof(Parser* parser);
+
 static FRX_NO_DISCARD ASTVariable* parser_parse_variable(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -613,6 +615,16 @@ static FRX_NO_DISCARD AST* parser_parse_primary_expression(Parser* parser)
 
             primary_expression->type = FRX_AST_TYPE_VARIABLE;
             primary_expression->node = parser_parse_variable(parser);
+            if(primary_expression->node == NULL)
+                return NULL;
+
+            return primary_expression;
+        }
+
+        case FRX_TOKEN_TYPE_KW_SIZEOF:
+        {
+            primary_expression->type = FRX_AST_TYPE_SIZEOF;
+            primary_expression->node = parser_parse_sizeof(parser);
             if(primary_expression->node == NULL)
                 return NULL;
 
@@ -2604,6 +2616,51 @@ static FRX_NO_DISCARD ASTMacro* parser_parse_macro(Parser* parser)
     }
 
     return macro;
+}
+
+static FRX_NO_DISCARD ASTSizeof* parser_parse_sizeof(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ASTSizeof* _sizeof = arena_alloc(&parser->arena, sizeof(ASTSizeof));
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_SIZEOF))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'sizeof'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '('!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(!is_primitive(parser_current_token(parser)->type) && parser_current_token(parser)->type != FRX_TOKEN_TYPE_IDENTIFIER)
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected identifier or primitive inside sizeof!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    strcpy(_sizeof->type, parser_current_token(parser)->identifier);
+
+    parser_skip(parser);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ')'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    return _sizeof;
 }
 
 static FRX_NO_DISCARD b8 is_import_statement(Parser* parser)
