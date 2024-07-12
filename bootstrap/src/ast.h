@@ -191,6 +191,8 @@ typedef struct ASTBinaryExpression
     ASTType type;
     AST* left;
     AST* right;
+
+    b8 had_paranthesis;
 } ASTBinaryExpression;
 
 typedef struct ASTUnaryExpression

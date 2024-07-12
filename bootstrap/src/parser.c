@@ -684,6 +684,9 @@ static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
 
         expression = parser_parse_expression(parser);
 
+        if(expression->type == FRX_AST_TYPE_BINARY_EXPRESSION)
+            ((ASTBinaryExpression*)expression->node)->had_paranthesis = FRX_TRUE;
+
         if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
         {
             SourceLocation location = parser_current_location(parser);
@@ -702,7 +705,7 @@ static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
         expression->type = FRX_AST_TYPE_BINARY_EXPRESSION;
         expression->node = arena_alloc(&parser->arena, sizeof(ASTBinaryExpression));
         ASTBinaryExpression* binary_expression = expression->node;
-
+        binary_expression->had_paranthesis = FRX_FALSE;
         binary_expression->left = temp;
 
         switch(parser_current_token(parser)->type)
@@ -753,14 +756,20 @@ static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
             AST* lower_expr_wrapper = binary_expression->right;
             ASTBinaryExpression* lower_expr = (ASTBinaryExpression*)lower_expr_wrapper->node;
 
-            ASTBinaryExpression* left_most_child = lower_expr;
+            AST* left_most_child_wrapper = lower_expr_wrapper;
+            ASTBinaryExpression* left_most_child = left_most_child_wrapper->node;
+
+            ASTBinaryExpression* left_most_child_parent = NULL;
 
             b8 has_higher_precedence_than_subtree = FRX_TRUE;
             while(left_most_child->left->type == FRX_AST_TYPE_BINARY_EXPRESSION)
             {
-                left_most_child = left_most_child->left->node;
+                left_most_child_wrapper = left_most_child->left;
+                left_most_child_parent = left_most_child;
+                left_most_child = left_most_child_wrapper->node;
 
-                if(parser_get_precedence(left_most_child->type) > parser_get_precedence(binary_expression->type))
+                if(parser_get_precedence(left_most_child->type) > parser_get_precedence(binary_expression->type)
+                    || left_most_child->had_paranthesis)
                 {
                     has_higher_precedence_than_subtree = FRX_FALSE;
                     break;
@@ -771,6 +780,12 @@ static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
             {
                 binary_expression->right = left_most_child->left;
                 left_most_child->left = expression;
+                expression = lower_expr_wrapper;
+            }
+            else if(left_most_child->had_paranthesis && left_most_child_parent != NULL)
+            {
+                binary_expression->right = left_most_child_wrapper;
+                left_most_child_parent->left = expression;
                 expression = lower_expr_wrapper;
             }
         }
