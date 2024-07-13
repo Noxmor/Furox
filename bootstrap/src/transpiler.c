@@ -75,7 +75,7 @@ static void append_namespace(const char* namespace)
     __Namespace* last = get_last_namespace();
 
     __Namespace* new = memory_alloc(sizeof(__Namespace), FRX_MEMORY_CATEGORY_UNKNOWN);
-    
+
     if(last == NULL)
         current_namespace = new;
     else
