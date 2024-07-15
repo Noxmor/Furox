@@ -300,6 +300,7 @@ void ast_transpile(Transpiler* transpiler, const AST* ast)
         case FRX_AST_TYPE_IF_STATEMENT: ast_transpile_if_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_SWITCH_STATEMENT: ast_transpile_switch_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_BREAK_STATEMENT: ast_transpile_break_statement(transpiler, ast->node); break;
+        case FRX_AST_TYPE_CONTINUE_STATEMENT: ast_transpile_continue_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_FOR_LOOP: ast_transpile_for_loop(transpiler, ast->node); break;
         case FRX_AST_TYPE_WHILE_LOOP: ast_transpile_while_loop(transpiler, ast->node); break;
         case FRX_AST_TYPE_DO_WHILE_LOOP: ast_transpile_do_while_loop(transpiler, ast->node); break;
@@ -622,6 +623,15 @@ void ast_transpile_break_statement(Transpiler* transpiler, const ASTBreakStateme
     FRX_ASSERT(break_statement != NULL);
 
     FRX_TRANSPILER_WRITE(transpiler, "break");
+}
+
+void ast_transpile_continue_statement(Transpiler* transpiler, const ASTContinueStatement* continue_statement)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(continue_statement != NULL);
+
+    FRX_TRANSPILER_WRITE(transpiler, "continue");
 }
 
 void ast_transpile_for_loop(Transpiler* transpiler, const ASTForLoop* for_loop)

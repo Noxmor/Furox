@@ -1575,6 +1575,31 @@ static FRX_NO_DISCARD ASTBreakStatement* parser_parse_break_statement(Parser* pa
     return break_statement;
 }
 
+static FRX_NO_DISCARD ASTContinueStatement* parser_parse_continue_statement(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_CONTINUE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'continue'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ';' at the end of continue-statement!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    ASTContinueStatement* continue_statement = arena_alloc(&parser->arena, sizeof(ASTContinueStatement));
+
+    return continue_statement;
+}
+
 static FRX_NO_DISCARD b8 is_for_loop(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1830,6 +1855,16 @@ static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_BREAK_STATEMENT;
         ast->node = parser_parse_break_statement(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_CONTINUE)
+    {
+        ast->type = FRX_AST_TYPE_CONTINUE_STATEMENT;
+        ast->node = parser_parse_continue_statement(parser);
         if(ast->node == NULL)
             return NULL;
 

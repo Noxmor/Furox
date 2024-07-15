@@ -66,6 +66,8 @@ void ast_transpile_switch_statement(Transpiler* transpiler, const ASTSwitchState
 
 void ast_transpile_break_statement(Transpiler* transpiler, const ASTBreakStatement* break_statement);
 
+void ast_transpile_continue_statement(Transpiler* transpiler, const ASTContinueStatement* continue_statement);
+
 void ast_transpile_for_loop(Transpiler* transpiler, const ASTForLoop* for_loop);
 
 void ast_transpile_while_loop(Transpiler* transpiler, const ASTWhileLoop* while_loop);

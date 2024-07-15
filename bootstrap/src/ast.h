@@ -67,6 +67,7 @@ enum
     FRX_AST_TYPE_IF_STATEMENT,
     FRX_AST_TYPE_SWITCH_STATEMENT,
     FRX_AST_TYPE_BREAK_STATEMENT,
+    FRX_AST_TYPE_CONTINUE_STATEMENT,
     FRX_AST_TYPE_FOR_LOOP,
     FRX_AST_TYPE_WHILE_LOOP,
     FRX_AST_TYPE_DO_WHILE_LOOP,
@@ -239,6 +240,12 @@ typedef struct ASTBreakStatement
     u8 placeholder;
 } ASTBreakStatement;
 
+typedef struct ASTContinueStatement
+{
+    //NOTE: This struct should not be empty because of the arena allocator
+    u8 placeholder;
+} ASTContinueStatement;
+
 typedef struct ASTForLoop
 {
     AST* expression;
@@ -405,6 +412,8 @@ void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth);
 void ast_print_switch_statement(const ASTSwitchStatement* switch_statement, usize depth);
 
 void ast_print_break_statement(const ASTBreakStatement* break_statement, usize depth);
+
+void ast_print_continue_statement(const ASTContinueStatement* continue_statement, usize depth);
 
 void ast_print_for_loop(const ASTForLoop* for_loop, usize depth);
 

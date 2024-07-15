@@ -94,6 +94,7 @@ void lexer_init_keyword_table(void)
     register_keyword("case", FRX_TOKEN_TYPE_KW_CASE);
     register_keyword("default", FRX_TOKEN_TYPE_KW_DEFAULT);
     register_keyword("break", FRX_TOKEN_TYPE_KW_BREAK);
+    register_keyword("continue", FRX_TOKEN_TYPE_KW_CONTINUE);
     register_keyword("for", FRX_TOKEN_TYPE_KW_FOR);
     register_keyword("while", FRX_TOKEN_TYPE_KW_WHILE);
     register_keyword("do", FRX_TOKEN_TYPE_KW_DO);

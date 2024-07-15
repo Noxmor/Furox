@@ -66,6 +66,8 @@ const char* ast_type_to_str(ASTType type)
 
         case FRX_AST_TYPE_IF_STATEMENT: return "if-statement";
         case FRX_AST_TYPE_SWITCH_STATEMENT: return "switch-statement";
+        case FRX_AST_TYPE_BREAK_STATEMENT: return "break-statement";
+        case FRX_AST_TYPE_CONTINUE_STATEMENT: return "continue-statement";
         case FRX_AST_TYPE_FOR_LOOP: return "for-loop";
         case FRX_AST_TYPE_WHILE_LOOP: return "while-loop";
         case FRX_AST_TYPE_DO_WHILE_LOOP: return "do-while-loop";
@@ -150,6 +152,7 @@ void ast_print(const AST* ast, usize depth)
         case FRX_AST_TYPE_IF_STATEMENT: ast_print_if_statement(ast->node, depth); break;
         case FRX_AST_TYPE_SWITCH_STATEMENT: ast_print_switch_statement(ast->node, depth); break;
         case FRX_AST_TYPE_BREAK_STATEMENT: ast_print_break_statement(ast->node, depth); break;
+        case FRX_AST_TYPE_CONTINUE_STATEMENT: ast_print_continue_statement(ast->node, depth); break;
         case FRX_AST_TYPE_FOR_LOOP: ast_print_for_loop(ast->node, depth); break;
         case FRX_AST_TYPE_WHILE_LOOP: ast_print_while_loop(ast->node, depth); break;
         case FRX_AST_TYPE_DO_WHILE_LOOP: ast_print_do_while_loop(ast->node, depth); break;
@@ -526,6 +529,15 @@ void ast_print_break_statement(const ASTBreakStatement* break_statement, usize d
     print_recursion_buffer(depth);
 
     printf("break-statement\n");
+}
+
+void ast_print_continue_statement(const ASTContinueStatement* continue_statement, usize depth)
+{
+    FRX_ASSERT(continue_statement != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("continue-statement\n");
 }
 
 void ast_print_for_loop(const ASTForLoop* for_loop, usize depth)
