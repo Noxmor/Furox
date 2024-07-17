@@ -572,6 +572,16 @@ void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if
     FRX_TRANSPILER_WRITE(transpiler, ")\n");
     ast_transpile_scope(transpiler, if_statement->if_block);
 
+    for(usize i = 0; i < list_size(&if_statement->else_if_blocks); ++i)
+    {
+        ASTElseIfBlock* else_if_block = list_get(&if_statement->else_if_blocks, i);
+
+        FRX_TRANSPILER_WRITE(transpiler, "else if(");
+        ast_transpile(transpiler, else_if_block->condition);
+        FRX_TRANSPILER_WRITE(transpiler, ")\n");
+        ast_transpile_scope(transpiler, else_if_block->block);
+    }
+
     if(if_statement->else_block != NULL)
     {
         write_indentation_level(transpiler);
