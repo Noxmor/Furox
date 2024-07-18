@@ -33,7 +33,6 @@ void* list_get(const List* list, usize index)
     FRX_ASSERT(index < list->size);
 
     return list->items[index];
-    
 }
 
 usize list_size(const List* list)
