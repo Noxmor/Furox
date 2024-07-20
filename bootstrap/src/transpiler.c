@@ -265,6 +265,30 @@ FRX_NO_DISCARD b8 ast_transpile_program(Transpiler* transpiler, const ASTProgram
     if(transpiler->source == NULL)
         return FRX_TRUE;
 
+    transpiler->mode = FRX_TRANSPILER_MODE_SOURCE_MACROS;
+    for(usize i = 0; i < list_size(&program->top_level_definitions); ++i)
+    {
+        ast_transpile(transpiler, list_get(&program->top_level_definitions, i));
+
+        FRX_TRANSPILER_WRITE(transpiler, "\n");
+    }
+
+    transpiler->mode = FRX_TRANSPILER_MODE_SOURCE_TYPE_DECL;
+    for(usize i = 0; i < list_size(&program->top_level_definitions); ++i)
+    {
+        ast_transpile(transpiler, list_get(&program->top_level_definitions, i));
+
+        FRX_TRANSPILER_WRITE(transpiler, "\n");
+    }
+
+    transpiler->mode = FRX_TRANSPILER_MODE_SOURCE_FUNC_DECL;
+    for(usize i = 0; i < list_size(&program->top_level_definitions); ++i)
+    {
+        ast_transpile(transpiler, list_get(&program->top_level_definitions, i));
+
+        FRX_TRANSPILER_WRITE(transpiler, "\n");
+    }
+
     transpiler->mode = FRX_TRANSPILER_MODE_SOURCE;
     for(usize i = 0; i < list_size(&program->top_level_definitions); ++i)
     {
@@ -745,29 +769,34 @@ void ast_transpile_function_definition(Transpiler* transpiler, const ASTFunction
 
     FRX_ASSERT(function_definition != NULL);
 
+    if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && !function_definition->exported)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_MACROS)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_TYPE_DECL)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_FUNC_DECL && function_definition->exported)
+        return;
+
     FunctionSymbol* symbol = function_definition->function_symbol;
 
-    if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER)
-    {
-        if(!function_definition->exported)
-            return;
+    ast_transpile_typename(transpiler, function_definition->type);
+    FRX_TRANSPILER_WRITE(transpiler, " ");
+    write_current_namespace(transpiler);
+    FRX_TRANSPILER_WRITE(transpiler, "%s", symbol->name);
+    ast_transpile_parameter_list(transpiler, function_definition->parameter_list);
 
-        ast_transpile_typename(transpiler, function_definition->type);
-        FRX_TRANSPILER_WRITE(transpiler, " ");
-        write_current_namespace(transpiler);
-        FRX_TRANSPILER_WRITE(transpiler, "%s", symbol->name);
-        ast_transpile_parameter_list(transpiler, function_definition->parameter_list);
+    if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER
+        || transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_FUNC_DECL)
+    {
         FRX_TRANSPILER_WRITE(transpiler, ";\n");
     }
     else
     {
-        ast_transpile_typename(transpiler, function_definition->type);
-        FRX_TRANSPILER_WRITE(transpiler, " ");
-        write_current_namespace(transpiler);
-        FRX_TRANSPILER_WRITE(transpiler, "%s", symbol->name);
-        ast_transpile_parameter_list(transpiler, function_definition->parameter_list);
         FRX_TRANSPILER_WRITE(transpiler, "\n");
-
         ast_transpile_scope(transpiler, function_definition->scope);
     }
 }
@@ -865,7 +894,16 @@ void ast_transpile_enum_definition(Transpiler* transpiler, const ASTEnumDefiniti
     if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && !enum_definition->exported)
         return;
 
-    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE && enum_definition->exported)
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_MACROS)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_TYPE_DECL && enum_definition->exported)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_FUNC_DECL)
         return;
 
     FRX_TRANSPILER_WRITE(transpiler, "enum\n{\n");
@@ -902,8 +940,19 @@ void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefi
 
     FRX_ASSERT(struct_definition != NULL);
 
-    if((struct_definition->exported && transpiler->mode == FRX_TRANSPILER_MODE_SOURCE)
-            || (!struct_definition->exported && transpiler->mode == FRX_TRANSPILER_MODE_HEADER))
+    if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && !struct_definition->exported)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_MACROS)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_TYPE_DECL && struct_definition->exported)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_FUNC_DECL)
         return;
 
     StructSymbol* symbol = struct_definition->struct_symbol;
@@ -1004,9 +1053,20 @@ void ast_transpile_macro(Transpiler* transpiler, const ASTMacro* macro)
 
     FRX_ASSERT(macro != NULL);
 
-    if(!(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE && !macro->exported)
-        && !(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && macro->exported))
-       return;
+    if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && !macro->exported)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_MACROS && macro->exported)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_TYPE_DECL)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE_FUNC_DECL)
+        return;
 
     FRX_TRANSPILER_WRITE(transpiler, "#define %s (", macro->name);
     ast_transpile(transpiler, macro->value);
