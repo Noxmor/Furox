@@ -969,6 +969,9 @@ void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefi
 
         ASTVariableDeclaration* var = list_get(&struct_definition->fields, i);
 
+        if(strcmp(var->type->name, struct_definition->name) == 0)
+            FRX_TRANSPILER_WRITE(transpiler, "struct ");
+
         ast_transpile_typename(transpiler, var->type);
         FRX_TRANSPILER_WRITE(transpiler, " %s", var->name);
 
