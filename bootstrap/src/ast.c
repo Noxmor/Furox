@@ -786,7 +786,9 @@ void ast_print_struct_definition(const ASTStructDefinition* struct_definition, u
 
     recursion_buffer[depth] = 1;
 
-    usize size = list_size(&struct_definition->fields);
+    const StructSymbol* symbol = struct_definition->struct_symbol;
+
+    usize size = list_size(&symbol->fields);
     for(usize i = 0; i < size; ++i)
     {
         if(i == size - 1)
@@ -794,7 +796,7 @@ void ast_print_struct_definition(const ASTStructDefinition* struct_definition, u
 
         print_depth(depth);
 
-        ast_print_variable_declaration(list_get(&struct_definition->fields, i), depth + 1);
+        ast_print_variable_declaration(list_get(&symbol->fields, i), depth + 1);
     }
 
     recursion_buffer[depth] = 0;

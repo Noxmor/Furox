@@ -9,9 +9,9 @@
 #include "core/log.h"
 #include "core/memory.h"
 #include "namespace.h"
+#include "symbols/function_table.h"
 #include "symbols/struct_table.h"
 #include "symbols/symbol_table.h"
-#include "symbols/variable_table.h"
 #include "token.h"
 
 typedef struct ParserInfo
@@ -250,8 +250,9 @@ static FRX_NO_DISCARD ASTVariable* parser_parse_variable(Parser* parser)
 
     ASTVariable* variable = arena_alloc(&parser->arena, sizeof(ASTVariable));
 
-    variable->variable_symbol = variable_table_find(
-        &parser->symbol_table.variable_table,
+    VariableTable* variable_table = get_global_variable_table();
+
+    variable->variable_symbol = variable_table_find(variable_table,
         parser_current_token(parser)->identifier, parser->current_namespace);
 
     strcpy(variable->name, parser_current_token(parser)->identifier);
@@ -431,6 +432,8 @@ static FRX_NO_DISCARD ASTFunctionCall* parser_parse_function_call(Parser* parser
 {
     FRX_ASSERT(parser != NULL);
 
+    FunctionTable* function_table = get_global_function_table();
+
     ASTFunctionCall* function_call = arena_alloc(&parser->arena, sizeof(ASTFunctionCall));
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
@@ -453,7 +456,7 @@ static FRX_NO_DISCARD ASTFunctionCall* parser_parse_function_call(Parser* parser
         }
 
         function_call->function_symbol = function_table_find_or_insert(
-            &parser->symbol_table.function_table,
+            function_table,
             parser_current_token(parser)->identifier, namespace);
 
         parser_recover(parser, &location);
@@ -466,7 +469,7 @@ static FRX_NO_DISCARD ASTFunctionCall* parser_parse_function_call(Parser* parser
         Namespace* namespace = namespace_create("");
 
         function_call->function_symbol = function_table_find_or_insert(
-            &parser->symbol_table.function_table,
+            function_table,
             parser_current_token(parser)->identifier, namespace);
     }
 
@@ -1046,6 +1049,9 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
 {
     FRX_ASSERT(parser != NULL);
 
+    VariableTable* variable_table = get_global_variable_table();
+    StructTable* struct_table = get_global_struct_table();
+
     VariableSymbol* variable_symbol = NULL;
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
@@ -1070,7 +1076,7 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
         }
 
         const StructSymbol* struct_symbol =
-            struct_table_find_or_insert(&parser->symbol_table.struct_table,
+            struct_table_find_or_insert(struct_table,
                     parser_current_token(parser)->identifier, namespace);
 
         if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
@@ -1096,8 +1102,7 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
             parser_skip(parser);
         }
 
-        variable_symbol = variable_table_insert(
-            &parser->symbol_table.variable_table,
+        variable_symbol = variable_table_insert(variable_table,
             parser_current_token(parser)->identifier, NULL);
 
         parser_skip(parser);
@@ -1114,8 +1119,7 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
         b8 primitive = is_primitive(parser_current_token(parser)->type);
 
         const StructSymbol* struct_symbol =
-            primitive ? NULL : struct_table_find_or_insert(
-                &parser->symbol_table.struct_table,
+            primitive ? NULL : struct_table_find_or_insert(struct_table,
                 parser_current_token(parser)->identifier,
                 parser->current_namespace);
 
@@ -1150,8 +1154,7 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
             parser_skip(parser);
         }
 
-        variable_symbol = variable_table_insert(
-            &parser->symbol_table.variable_table,
+        variable_symbol = variable_table_insert(variable_table,
             parser_current_token(parser)->identifier, NULL);
 
         if(primitive)
@@ -2098,6 +2101,9 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
 {
     FRX_ASSERT(parser != NULL);
 
+    FunctionTable* function_table = get_global_function_table();
+    StructTable* struct_table = get_global_struct_table();
+
     parser_skip_optional_keywords(parser);
 
     FunctionSymbol* function_symbol = NULL;
@@ -2111,8 +2117,7 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
         while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
             parser_skip(parser);
 
-        function_symbol = function_table_find(
-            &parser->symbol_table.function_table,
+        function_symbol = function_table_find(function_table,
             parser_current_token(parser)->identifier,
             parser->current_namespace);
 
@@ -2126,8 +2131,7 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
             return NULL;
         }
 
-        function_symbol = function_table_insert(
-            &parser->symbol_table.function_table,
+        function_symbol = function_table_insert(function_table,
             parser_current_token(parser)->identifier,
             parser->current_namespace);
 
@@ -2159,8 +2163,7 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
             parser_skip(parser);
         }
 
-        StructSymbol* struct_symbol = struct_table_find_or_insert(
-            &parser->symbol_table.struct_table,
+        StructSymbol* struct_symbol = struct_table_find_or_insert(struct_table,
             parser_current_token(parser)->identifier, return_type_namespace);
 
         if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
@@ -2176,8 +2179,7 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
         while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
             parser_skip(parser);
 
-        function_symbol = function_table_insert(
-            &parser->symbol_table.function_table,
+        function_symbol = function_table_insert(function_table,
             parser_current_token(parser)->identifier,
             parser->current_namespace);
 
@@ -2458,6 +2460,8 @@ static FRX_NO_DISCARD StructSymbol* parser_generate_struct_symbol(Parser* parser
 {
     FRX_ASSERT(parser != NULL);
 
+    StructTable* struct_table = get_global_struct_table();
+
     parser_skip_optional_keywords(parser);
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_KW_STRUCT))
@@ -2472,8 +2476,7 @@ static FRX_NO_DISCARD StructSymbol* parser_generate_struct_symbol(Parser* parser
     //TODO: Allow namespaces e.g. "struct std::foo::Bar"
     Namespace* namespace = namespace_duplicate(parser->current_namespace);
 
-    StructSymbol* struct_symbol = struct_table_find(
-        &parser->symbol_table.struct_table,
+    StructSymbol* struct_symbol = struct_table_find(struct_table,
         parser_current_token(parser)->identifier, namespace);
 
     if(struct_symbol != NULL && struct_symbol->defined)
@@ -2486,8 +2489,7 @@ static FRX_NO_DISCARD StructSymbol* parser_generate_struct_symbol(Parser* parser
         return NULL;
     }
 
-    struct_symbol = struct_table_insert(
-        &parser->symbol_table.struct_table,
+    struct_symbol = struct_table_find_or_insert(struct_table,
         parser_current_token(parser)->identifier, namespace);
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
@@ -2533,8 +2535,6 @@ static FRX_NO_DISCARD ASTStructDefinition* parser_parse_struct_definition(Parser
     struct_definition->struct_symbol = parser_generate_struct_symbol(parser);
     parser_recover(parser, &location);
 
-    list_init(&struct_definition->fields, FRX_MEMORY_CATEGORY_AST);
-
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT)
     {
         struct_definition->exported = FRX_TRUE;
@@ -2573,7 +2573,7 @@ static FRX_NO_DISCARD ASTStructDefinition* parser_parse_struct_definition(Parser
         if(field == NULL)
             return NULL;
 
-        list_push(&struct_definition->fields, field);
+        list_push(&struct_definition->struct_symbol->fields, field);
     }
 
     parser_skip(parser);
@@ -3035,8 +3035,6 @@ FRX_NO_DISCARD b8 parser_init(Parser* parser, const char* filepath)
     FRX_ASSERT(filepath != NULL);
 
     parser->current_namespace = namespace_create("");
-
-    symbol_table_init(&parser->symbol_table);
 
     //TODO: Remove constant size. This is only a temporary easy solution
     // because we only parse small files for now.

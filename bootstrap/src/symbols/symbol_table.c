@@ -1,23 +1,28 @@
 #include "symbol_table.h"
 
-#include "core/assert.h"
 #include "symbols/struct_table.h"
 #include "symbols/variable_table.h"
 
-void symbol_table_init(SymbolTable* table)
-{
-    FRX_ASSERT(table != NULL);
+static SymbolTable symbol_table;
 
-    variable_table_init(&table->variable_table);
-    struct_table_init(&table->struct_table);
-    function_table_init(&table->function_table);
+void init_global_symbol_table(void)
+{
+    variable_table_init(&symbol_table.variable_table);
+    struct_table_init(&symbol_table.struct_table);
+    function_table_init(&symbol_table.function_table);
 }
 
-void symbol_table_delete(SymbolTable* table)
+VariableTable* get_global_variable_table(void)
 {
-    FRX_ASSERT(table != NULL);
+    return &symbol_table.variable_table;
+}
 
-    variable_table_delete(&table->variable_table);
-    struct_table_delete(&table->struct_table);
-    function_table_delete(&table->function_table);
+StructTable* get_global_struct_table(void)
+{
+    return &symbol_table.struct_table;
+}
+
+FunctionTable* get_global_function_table(void)
+{
+    return &symbol_table.function_table;
 }

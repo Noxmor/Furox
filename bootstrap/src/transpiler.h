@@ -7,15 +7,14 @@
 
 #include "ast.h"
 
-#include "symbols/symbol_table.h"
-
 enum
 {
-    FRX_TRANSPILER_MODE_HEADER = 0,
-    FRX_TRANSPILER_MODE_SOURCE,
-    FRX_TRANSPILER_MODE_SOURCE_MACROS,
-    FRX_TRANSPILER_MODE_SOURCE_TYPE_DECL,
-    FRX_TRANSPILER_MODE_SOURCE_FUNC_DECL,
+    FRX_TRANSPILER_MODE_MACROS,
+    FRX_TRANSPILER_MODE_ENUMS,
+    FRX_TRANSPILER_MODE_STRUCT_DECL,
+    FRX_TRANSPILER_MODE_STRUCT_IMPL,
+    FRX_TRANSPILER_MODE_FUNC_DECL,
+    FRX_TRANSPILER_MODE_FUNC_IMPL,
 
     FRX_TRANSPILER_MODE_COUNT
 };
@@ -25,11 +24,8 @@ typedef u8 TranspilerMode;
 typedef struct Transpiler
 {
     FILE* source;
-    FILE* header;
 
     TranspilerMode mode;
-
-    SymbolTable* symbol_table;
 
     b8 failed;
 

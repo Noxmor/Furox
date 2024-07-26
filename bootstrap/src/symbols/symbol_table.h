@@ -12,8 +12,12 @@ typedef struct SymbolTable
     FunctionTable function_table;
 } SymbolTable;
 
-void symbol_table_init(SymbolTable* table);
+void init_global_symbol_table(void);
 
-void symbol_table_delete(SymbolTable* table);
+VariableTable* get_global_variable_table(void);
+
+StructTable* get_global_struct_table(void);
+
+FunctionTable* get_global_function_table(void);
 
 #endif

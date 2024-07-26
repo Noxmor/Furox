@@ -16,6 +16,9 @@ typedef struct StructSymbol
 
     Namespace* namespace;
 
+    //Hacky way to transpile structs in the correct order
+    b8 transpiled;
+
     b8 defined;
 } StructSymbol;
 

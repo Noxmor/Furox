@@ -339,8 +339,6 @@ typedef struct ASTStructDefinition
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 exported;
-
-    List fields;
 } ASTStructDefinition;
 
 typedef struct ASTNamespace

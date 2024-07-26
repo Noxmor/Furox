@@ -45,6 +45,9 @@ StructSymbol* struct_table_insert(StructTable* table, const char* name,
     symbol->namespace =
         namespace == NULL ? NULL : namespace_duplicate(namespace);
 
+    list_init(&symbol->fields, FRX_MEMORY_CATEGORY_UNKNOWN);
+
+    symbol->transpiled = FRX_FALSE;
     symbol->defined = FRX_FALSE;
 
     return symbol;
