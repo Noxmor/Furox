@@ -90,6 +90,7 @@ enum
 
     FRX_AST_TYPE_MACRO,
     FRX_AST_TYPE_SIZEOF,
+    FRX_AST_TYPE_ASSERT,
 
     FRX_AST_TYPE_COUNT
 };
@@ -375,6 +376,13 @@ typedef struct ASTSizeof
     char type[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } ASTSizeof;
 
+typedef struct ASTAssert
+{
+    AST* condition;
+    const char* filepath;
+    usize line;
+} ASTAssert;
+
 void ast_print(const AST* ast, usize depth);
 
 void ast_print_noop(usize depth);
@@ -444,5 +452,7 @@ void ast_print_extern_block(const ASTExternBlock* extern_block, usize depth);
 void ast_print_macro(const ASTMacro* macro, usize depth);
 
 void ast_print_sizeof(const ASTSizeof* _sizeof, usize depth);
+
+void ast_print_assert(const ASTAssert* assert, usize depth);
 
 #endif

@@ -299,6 +299,7 @@ void ast_transpile(Transpiler* transpiler, const AST* ast)
         case FRX_AST_TYPE_EXTERN_BLOCK: ast_transpile_extern_block(transpiler, ast->node); break;
         case FRX_AST_TYPE_MACRO: ast_transpile_macro(transpiler, ast->node); break;
         case FRX_AST_TYPE_SIZEOF: ast_transpile_sizeof(transpiler, ast->node); break;
+        case FRX_AST_TYPE_ASSERT: ast_transpile_assert(transpiler, ast->node); break;
 
         default: FRX_ASSERT(FRX_FALSE); break;
     }
@@ -1034,6 +1035,18 @@ void ast_transpile_sizeof(Transpiler* transpiler, const ASTSizeof* _sizeof)
     FRX_ASSERT(_sizeof != NULL);
 
     FRX_TRANSPILER_WRITE(transpiler, "sizeof(%s)", _sizeof->type);
+}
+
+void ast_transpile_assert(Transpiler* transpiler, const ASTAssert* assert)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(assert != NULL);
+
+    FRX_TRANSPILER_WRITE(transpiler, "if(!(");
+    ast_transpile(transpiler, assert->condition);
+    FRX_TRANSPILER_WRITE(transpiler, "%s", ")) { printf(\"%s:%zu: Assertion failed!\\n\", ");
+    FRX_TRANSPILER_WRITE(transpiler, "\"%s\", (size_t)%zu); exit(EXIT_FAILURE); }", assert->filepath, assert->line);
 }
 
 static FRX_NO_DISCARD b8 generate_furox_main_c()

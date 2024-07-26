@@ -244,6 +244,8 @@ static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser);
 
 static FRX_NO_DISCARD ASTSizeof* parser_parse_sizeof(Parser* parser);
 
+static FRX_NO_DISCARD ASTAssert* parser_parse_assert(Parser* parser);
+
 static FRX_NO_DISCARD ASTVariable* parser_parse_variable(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -1834,6 +1836,16 @@ static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser)
 
     AST* ast = arena_alloc(&parser->arena, sizeof(AST));
 
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_ASSERT)
+    {
+        ast->type = FRX_AST_TYPE_ASSERT;
+        ast->node = parser_parse_assert(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IF)
     {
         ast->type = FRX_AST_TYPE_IF_STATEMENT;
@@ -2862,6 +2874,52 @@ static FRX_NO_DISCARD ASTSizeof* parser_parse_sizeof(Parser* parser)
     }
 
     return _sizeof;
+}
+
+static FRX_NO_DISCARD ASTAssert* parser_parse_assert(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ASTAssert* assert = arena_alloc(&parser->arena, sizeof(ASTAssert));
+
+    assert->filepath = parser->lexer.filepath;
+    assert->line = parser_current_token(parser)->location.line;
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_ASSERT))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'assert'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '(' after keyword 'assert'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    assert->condition = parser_parse_expression(parser);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ')' at the end of assert-statement!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ';' at the end of assert-statement!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    return assert;
 }
 
 static FRX_NO_DISCARD b8 is_import_statement(Parser* parser)

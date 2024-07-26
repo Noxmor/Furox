@@ -51,6 +51,7 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_KW_DO: return "do";
         case FRX_TOKEN_TYPE_KW_MACRO: return "macro";
         case FRX_TOKEN_TYPE_KW_SIZEOF: return "sizeof";
+        case FRX_TOKEN_TYPE_KW_ASSERT: return "assert";
 
         case FRX_TOKEN_TYPE_IDENTIFIER: return "Identifier";
 

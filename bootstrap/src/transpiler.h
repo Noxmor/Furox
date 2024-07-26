@@ -99,6 +99,8 @@ void ast_transpile_macro(Transpiler* transpiler, const ASTMacro* macro);
 
 void ast_transpile_sizeof(Transpiler* transpiler, const ASTSizeof* _sizeof);
 
+void ast_transpile_assert(Transpiler* transpiler, const ASTAssert* assert);
+
 FRX_NO_DISCARD b8 generate_executable(void);
 
 #endif

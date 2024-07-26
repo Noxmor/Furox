@@ -23,7 +23,7 @@ typedef struct KeywordTableEntry
     TokenType type;
 } KeywordTableEntry;
 
-#define FRX_KEYWORD_TABLE_SIZE 512
+#define FRX_KEYWORD_TABLE_SIZE 2048
 
 typedef struct KeywordTable
 {
@@ -100,6 +100,7 @@ void lexer_init_keyword_table(void)
     register_keyword("do", FRX_TOKEN_TYPE_KW_DO);
     register_keyword("macro", FRX_TOKEN_TYPE_KW_MACRO);
     register_keyword("sizeof", FRX_TOKEN_TYPE_KW_SIZEOF);
+    register_keyword("assert", FRX_TOKEN_TYPE_KW_ASSERT);
 }
 
 static void lexer_read(Lexer* lexer)
