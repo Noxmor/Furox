@@ -34,6 +34,16 @@ namespace std
     }
 }
 
+struct Foo
+{
+    Bar bar;
+}
+
+struct Bar
+{
+    i32 value;
+}
+
 namespace Math
 {
     usize add(usize a, usize b)
