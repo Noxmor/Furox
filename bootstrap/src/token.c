@@ -45,10 +45,13 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_KW_CASE: return "case";
         case FRX_TOKEN_TYPE_KW_DEFAULT: return "default";
         case FRX_TOKEN_TYPE_KW_BREAK: return "break";
+        case FRX_TOKEN_TYPE_KW_CONTINUE: return "continue";
         case FRX_TOKEN_TYPE_KW_FOR: return "for";
         case FRX_TOKEN_TYPE_KW_WHILE: return "while";
         case FRX_TOKEN_TYPE_KW_DO: return "do";
         case FRX_TOKEN_TYPE_KW_MACRO: return "macro";
+        case FRX_TOKEN_TYPE_KW_SIZEOF: return "sizeof";
+        case FRX_TOKEN_TYPE_KW_ASSERT: return "assert";
 
         case FRX_TOKEN_TYPE_IDENTIFIER: return "Identifier";
 
@@ -75,6 +78,7 @@ const char* token_type_to_str(TokenType type)
         case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: return "Binary Right Shift";
 
         case FRX_TOKEN_TYPE_EQUALS: return "Equals";
+        case FRX_TOKEN_TYPE_NOT_EQUALS: return "Not equals";
         case FRX_TOKEN_TYPE_COMPARISON: return "Comparison";
 
         case FRX_TOKEN_TYPE_GREATER_THAN: return "Greater than";

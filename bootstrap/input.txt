@@ -34,6 +34,16 @@ namespace std
     }
 }
 
+struct Foo
+{
+    Bar bar;
+}
+
+struct Bar
+{
+    i32 value;
+}
+
 namespace Math
 {
     usize add(usize a, usize b)
@@ -190,6 +200,14 @@ usize Main()
             break;
         }
     }
+
+    //This should become (0 || ((1 == 2) && ((3 + 4) == 5)))
+    usize precedence_test = 0 || 1 == 2 && 3 + 4 == 5;
+
+    usize precedence_test2 = 1 + 2 + 3 + 4 * 5 * 6;
+    usize precedence_test3 = 1 + 2 + (3 + 4) + 5;
+    usize precedence_test4 = 1 + 2 * !(0 || 1);
+    usize precedence_test5 = 0 || 1 == (2 && 3) + 4 == 5;
 
     return Math::add(1, 2 * 3) * VariadicFunc(1, 2, 3, 'A', "Test") + day;
 }

@@ -50,6 +50,7 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_BINARY_LEFT_SHIFT: return "binary-left-shift";
         case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: return "binary-right-shift";
 
+        case FRX_AST_TYPE_NEGATED_COMPARISON: return "negated-comparison";
         case FRX_AST_TYPE_COMPARISON: return "comparison";
 
         case FRX_AST_TYPE_GREATER_THAN: return "greater-than";
@@ -65,6 +66,8 @@ const char* ast_type_to_str(ASTType type)
 
         case FRX_AST_TYPE_IF_STATEMENT: return "if-statement";
         case FRX_AST_TYPE_SWITCH_STATEMENT: return "switch-statement";
+        case FRX_AST_TYPE_BREAK_STATEMENT: return "break-statement";
+        case FRX_AST_TYPE_CONTINUE_STATEMENT: return "continue-statement";
         case FRX_AST_TYPE_FOR_LOOP: return "for-loop";
         case FRX_AST_TYPE_WHILE_LOOP: return "while-loop";
         case FRX_AST_TYPE_DO_WHILE_LOOP: return "do-while-loop";
@@ -86,6 +89,8 @@ const char* ast_type_to_str(ASTType type)
         case FRX_AST_TYPE_EXTERN_BLOCK: return "extern-block";
 
         case FRX_AST_TYPE_MACRO: return "macro";
+        case FRX_AST_TYPE_SIZEOF: return "sizeof";
+        case FRX_AST_TYPE_ASSERT: return "assert";
 
         default: FRX_ASSERT(FRX_FALSE);
     }
@@ -148,6 +153,7 @@ void ast_print(const AST* ast, usize depth)
         case FRX_AST_TYPE_IF_STATEMENT: ast_print_if_statement(ast->node, depth); break;
         case FRX_AST_TYPE_SWITCH_STATEMENT: ast_print_switch_statement(ast->node, depth); break;
         case FRX_AST_TYPE_BREAK_STATEMENT: ast_print_break_statement(ast->node, depth); break;
+        case FRX_AST_TYPE_CONTINUE_STATEMENT: ast_print_continue_statement(ast->node, depth); break;
         case FRX_AST_TYPE_FOR_LOOP: ast_print_for_loop(ast->node, depth); break;
         case FRX_AST_TYPE_WHILE_LOOP: ast_print_while_loop(ast->node, depth); break;
         case FRX_AST_TYPE_DO_WHILE_LOOP: ast_print_do_while_loop(ast->node, depth); break;
@@ -161,6 +167,8 @@ void ast_print(const AST* ast, usize depth)
         case FRX_AST_TYPE_NAMESPACE: ast_print_namespace(ast->node, depth); break;
         case FRX_AST_TYPE_EXTERN_BLOCK: ast_print_extern_block(ast->node, depth); break;
         case FRX_AST_TYPE_MACRO: ast_print_macro(ast->node, depth); break;
+        case FRX_AST_TYPE_SIZEOF: ast_print_sizeof(ast->node, depth); break;
+        case FRX_AST_TYPE_ASSERT: ast_print_assert(ast->node, depth); break;
 
         default: FRX_ASSERT(FRX_FALSE); break;
     }
@@ -437,6 +445,19 @@ void ast_print_if_statement(const ASTIfStatement* if_statement, usize depth)
 
         ast_print_scope(if_statement->if_block, depth + 1);
 
+        print_depth(depth);
+
+        usize size = list_size(&if_statement->else_if_blocks);
+        for(usize i = 0; i < size; ++i)
+        {
+            ASTElseIfBlock* else_if_block = list_get(&if_statement->else_if_blocks, i);
+            ast_print(else_if_block->condition, depth + 1);
+            ast_print_scope(else_if_block->block, depth + 1);
+
+            if(i != size - 1)
+                print_depth(depth);
+        }
+
         recursion_buffer[depth] = 0;
 
         print_depth(depth);
@@ -510,6 +531,15 @@ void ast_print_break_statement(const ASTBreakStatement* break_statement, usize d
     print_recursion_buffer(depth);
 
     printf("break-statement\n");
+}
+
+void ast_print_continue_statement(const ASTContinueStatement* continue_statement, usize depth)
+{
+    FRX_ASSERT(continue_statement != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("continue-statement\n");
 }
 
 void ast_print_for_loop(const ASTForLoop* for_loop, usize depth)
@@ -758,7 +788,9 @@ void ast_print_struct_definition(const ASTStructDefinition* struct_definition, u
 
     recursion_buffer[depth] = 1;
 
-    usize size = list_size(&struct_definition->fields);
+    const StructSymbol* symbol = struct_definition->struct_symbol;
+
+    usize size = list_size(&symbol->fields);
     for(usize i = 0; i < size; ++i)
     {
         if(i == size - 1)
@@ -766,7 +798,7 @@ void ast_print_struct_definition(const ASTStructDefinition* struct_definition, u
 
         print_depth(depth);
 
-        ast_print_variable_declaration(list_get(&struct_definition->fields, i), depth + 1);
+        ast_print_variable_declaration(list_get(&symbol->fields, i), depth + 1);
     }
 
     recursion_buffer[depth] = 0;
@@ -860,4 +892,22 @@ void ast_print_macro(const ASTMacro* macro, usize depth)
     ast_print(macro->value, depth + 1);
 
     recursion_buffer[depth] = 0;
+}
+
+void ast_print_sizeof(const ASTSizeof *_sizeof, usize depth)
+{
+    FRX_ASSERT(_sizeof != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("sizeof\n");
+}
+
+void ast_print_assert(const ASTAssert* assert, usize depth)
+{
+    FRX_ASSERT(assert != NULL);
+
+    print_recursion_buffer(depth);
+
+    printf("assert\n");
 }

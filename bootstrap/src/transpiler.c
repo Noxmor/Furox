@@ -10,11 +10,10 @@
 #include "core/assert.h"
 #include "core/core.h"
 #include "core/memory.h"
+#include "symbols/struct_table.h"
 #include "symbols/type_category.h"
 
-#define FRX_TRANSPILER_WRITE(transpiler, format, ...) do { if(fprintf(transpiler->mode == FRX_TRANSPILER_MODE_HEADER ? transpiler->header : transpiler->source, format, ##__VA_ARGS__) < 0) transpiler->failed = FRX_TRUE; } while(FRX_FALSE)
-#define FRX_TRANSPILER_WRITE_HEADER(transpiler, format, ...) do { if(fprintf(transpiler->header, format, ##__VA_ARGS__) < 0) transpiler->failed = FRX_TRUE; } while(FRX_FALSE)
-#define FRX_TRANSPILER_WRITE_SOURCE(transpiler, format, ...) do { if(fprintf(transpiler->source, format, ##__VA_ARGS__) < 0) transpiler->failed = FRX_TRUE; } while(FRX_FALSE)
+#define FRX_TRANSPILER_WRITE(transpiler, format, ...) do { if(fprintf(transpiler->source, format, ##__VA_ARGS__) < 0) transpiler->failed = FRX_TRUE; } while(FRX_FALSE)
 
 typedef struct TranspilerInfo
 {
@@ -75,7 +74,7 @@ static void append_namespace(const char* namespace)
     __Namespace* last = get_last_namespace();
 
     __Namespace* new = memory_alloc(sizeof(__Namespace), FRX_MEMORY_CATEGORY_UNKNOWN);
-    
+
     if(last == NULL)
         current_namespace = new;
     else
@@ -116,6 +115,9 @@ static FRX_NO_DISCARD b8 create_furox_directory_from_source(const char* filepath
 
     FRX_ASSERT(furox_filepath != NULL);
 
+    if(filepath[0] == '.' && filepath[1] == '/')
+        filepath += 2;
+
     const char* last_slash = strrchr(filepath, '/');
 
     if(last_slash == NULL)
@@ -129,6 +131,18 @@ static FRX_NO_DISCARD b8 create_furox_directory_from_source(const char* filepath
         sprintf(furox_filepath, "furox-c/%.*s", (int)path_len, filepath);
     }
 
+    const char* separator = strchr(furox_filepath, '/');
+    while(separator != NULL)
+    {
+        char temp[strlen(furox_filepath) + 1];
+        sprintf(temp, "%.*s", (int)(separator - furox_filepath), furox_filepath);
+
+        if(mkdir(temp, 0777) == -1 && errno != EEXIST)
+            return FRX_TRUE;
+
+        separator = strchr(separator + 1, '/');
+    }
+
     return mkdir(furox_filepath, 0777) == -1 && errno != EEXIST;
 }
 
@@ -140,6 +154,9 @@ static FILE* create_c_file(const char* furox_filepath, const char* filepath)
 
     char c_filepath[strlen(furox_filepath) + strlen("/") + strlen(filepath) + 1];
 
+    const char* last_slash = strrchr(filepath, '/');
+    filepath = last_slash != NULL ? last_slash + 1 : filepath;
+
     sprintf(c_filepath, "%s/%s.c", furox_filepath, filepath);
 
     FILE* f = fopen(c_filepath, "w");
@@ -148,7 +165,7 @@ static FILE* create_c_file(const char* furox_filepath, const char* filepath)
 
     store_c_filepath(c_filepath);
 
-    if(fprintf(f, "#include \"Furox.h\"\n#include \"%s.h\"\n", filepath) < 0)
+    if(fprintf(f, "#include \"Furox.h\"\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <ctype.h>\n#include <limits.h>\n") < 0)
     {
         fclose(f);
 
@@ -166,6 +183,9 @@ static FILE* create_header_file(const char* furox_filepath, const char* filepath
 
     char header_filepath[strlen(furox_filepath) + strlen("/") + strlen(filepath) + 1];
 
+    const char* last_slash = strrchr(filepath, '/');
+    filepath = last_slash != NULL ? last_slash + 1 : filepath;
+
     sprintf(header_filepath, "%s/%s.h", furox_filepath, filepath);
 
     FILE* f = fopen(header_filepath, "w");
@@ -178,7 +198,7 @@ static FILE* create_header_file(const char* furox_filepath, const char* filepath
     if(fprintf(f, "#ifndef %s\n#define %s\n\n", header_filepath, header_filepath) < 0)
     {
         fclose(f);
-        
+
         return NULL;
     }
 
@@ -224,32 +244,19 @@ FRX_NO_DISCARD b8 ast_transpile_program(Transpiler* transpiler, const ASTProgram
     if(create_furox_directory_from_source(src_filepath, furox_filepath))
         return FRX_TRUE;
 
-    transpiler->header = create_header_file(furox_filepath, src_filepath);
-    if(transpiler->header == NULL)
-        return FRX_TRUE;
-
-    transpiler->mode = FRX_TRANSPILER_MODE_HEADER;
-    for(usize i = 0; i < list_size(&program->top_level_definitions); ++i)
-    {
-        ast_transpile(transpiler, list_get(&program->top_level_definitions, i));
-
-        FRX_TRANSPILER_WRITE(transpiler, "\n");
-    }
-
-    FRX_TRANSPILER_WRITE_HEADER(transpiler, "#endif\n");
-
-    fclose(transpiler->header);
-
     transpiler->source = create_c_file(furox_filepath, src_filepath);
     if(transpiler->source == NULL)
         return FRX_TRUE;
 
-    transpiler->mode = FRX_TRANSPILER_MODE_SOURCE;
-    for(usize i = 0; i < list_size(&program->top_level_definitions); ++i)
+    for(TranspilerMode mode = FRX_TRANSPILER_MODE_MACROS; mode < FRX_TRANSPILER_MODE_COUNT; ++mode)
     {
-        ast_transpile(transpiler, list_get(&program->top_level_definitions, i));
+        transpiler->mode = mode;
 
-        FRX_TRANSPILER_WRITE(transpiler, "\n");
+        for(usize i = 0; i < list_size(&program->top_level_definitions); ++i)
+        {
+            ast_transpile(transpiler, list_get(&program->top_level_definitions, i));
+            FRX_TRANSPILER_WRITE(transpiler, "\n");
+        }
     }
 
     fclose(transpiler->source);
@@ -279,6 +286,7 @@ void ast_transpile(Transpiler* transpiler, const AST* ast)
         case FRX_AST_TYPE_IF_STATEMENT: ast_transpile_if_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_SWITCH_STATEMENT: ast_transpile_switch_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_BREAK_STATEMENT: ast_transpile_break_statement(transpiler, ast->node); break;
+        case FRX_AST_TYPE_CONTINUE_STATEMENT: ast_transpile_continue_statement(transpiler, ast->node); break;
         case FRX_AST_TYPE_FOR_LOOP: ast_transpile_for_loop(transpiler, ast->node); break;
         case FRX_AST_TYPE_WHILE_LOOP: ast_transpile_while_loop(transpiler, ast->node); break;
         case FRX_AST_TYPE_DO_WHILE_LOOP: ast_transpile_do_while_loop(transpiler, ast->node); break;
@@ -290,6 +298,8 @@ void ast_transpile(Transpiler* transpiler, const AST* ast)
         case FRX_AST_TYPE_NAMESPACE: ast_transpile_namespace(transpiler, ast->node); break;
         case FRX_AST_TYPE_EXTERN_BLOCK: ast_transpile_extern_block(transpiler, ast->node); break;
         case FRX_AST_TYPE_MACRO: ast_transpile_macro(transpiler, ast->node); break;
+        case FRX_AST_TYPE_SIZEOF: ast_transpile_sizeof(transpiler, ast->node); break;
+        case FRX_AST_TYPE_ASSERT: ast_transpile_assert(transpiler, ast->node); break;
 
         default: FRX_ASSERT(FRX_FALSE); break;
     }
@@ -345,7 +355,7 @@ void ast_transpile_variable_declaration(Transpiler* transpiler, const ASTVariabl
 
     FRX_ASSERT(variable_declaration != NULL);
 
-    if(transpiler->mode != FRX_TRANSPILER_MODE_SOURCE)
+    if(transpiler->mode != FRX_TRANSPILER_MODE_FUNC_IMPL)
         return;
 
     ast_transpile_typename(transpiler, variable_declaration->type);
@@ -370,7 +380,7 @@ void ast_transpile_variable_definition(Transpiler* transpiler, const ASTVariable
 
     FRX_ASSERT(variable_definition != NULL);
 
-    if(transpiler->mode != FRX_TRANSPILER_MODE_SOURCE)
+    if(transpiler->mode != FRX_TRANSPILER_MODE_FUNC_IMPL)
         return;
 
     ast_transpile_typename(transpiler, variable_definition->type);
@@ -487,6 +497,7 @@ void ast_transpile_binary_expression(Transpiler* transpiler, const ASTBinaryExpr
         case FRX_AST_TYPE_BINARY_XOR: FRX_TRANSPILER_WRITE(transpiler, " ^ "); break;
         case FRX_AST_TYPE_BINARY_LEFT_SHIFT: FRX_TRANSPILER_WRITE(transpiler, " << "); break;
         case FRX_AST_TYPE_BINARY_RIGHT_SHIFT: FRX_TRANSPILER_WRITE(transpiler, " >> "); break;
+        case FRX_AST_TYPE_NEGATED_COMPARISON: FRX_TRANSPILER_WRITE(transpiler, " != "); break;
         case FRX_AST_TYPE_COMPARISON: FRX_TRANSPILER_WRITE(transpiler, " == "); break;
         case FRX_AST_TYPE_GREATER_THAN: FRX_TRANSPILER_WRITE(transpiler, " > "); break;
         case FRX_AST_TYPE_GREATER_THAN_EQUALS: FRX_TRANSPILER_WRITE(transpiler, " >= "); break;
@@ -531,10 +542,8 @@ void ast_transpile_import_statement(Transpiler* transpiler, const ASTImportState
 
     FRX_ASSERT(import_statement != NULL);
 
-    if(transpiler->mode != FRX_TRANSPILER_MODE_HEADER)
-        return;
-
-    FRX_TRANSPILER_WRITE(transpiler, "#include \"%s.h\"\n", import_statement->filepath);
+    //Disabled, because we now only produce one output file, no need for includes
+    //FRX_TRANSPILER_WRITE(transpiler, "#include \"%s.h\"\n", import_statement->filepath);
 }
 
 void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if_statement)
@@ -547,6 +556,16 @@ void ast_transpile_if_statement(Transpiler* transpiler, const ASTIfStatement* if
     ast_transpile(transpiler, if_statement->condition);
     FRX_TRANSPILER_WRITE(transpiler, ")\n");
     ast_transpile_scope(transpiler, if_statement->if_block);
+
+    for(usize i = 0; i < list_size(&if_statement->else_if_blocks); ++i)
+    {
+        ASTElseIfBlock* else_if_block = list_get(&if_statement->else_if_blocks, i);
+
+        FRX_TRANSPILER_WRITE(transpiler, "else if(");
+        ast_transpile(transpiler, else_if_block->condition);
+        FRX_TRANSPILER_WRITE(transpiler, ")\n");
+        ast_transpile_scope(transpiler, else_if_block->block);
+    }
 
     if(if_statement->else_block != NULL)
     {
@@ -599,6 +618,15 @@ void ast_transpile_break_statement(Transpiler* transpiler, const ASTBreakStateme
     FRX_ASSERT(break_statement != NULL);
 
     FRX_TRANSPILER_WRITE(transpiler, "break");
+}
+
+void ast_transpile_continue_statement(Transpiler* transpiler, const ASTContinueStatement* continue_statement)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(continue_statement != NULL);
+
+    FRX_TRANSPILER_WRITE(transpiler, "continue");
 }
 
 void ast_transpile_for_loop(Transpiler* transpiler, const ASTForLoop* for_loop)
@@ -704,11 +732,8 @@ void ast_transpile_function_definition(Transpiler* transpiler, const ASTFunction
 
     FunctionSymbol* symbol = function_definition->function_symbol;
 
-    if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER)
+    if(transpiler->mode == FRX_TRANSPILER_MODE_FUNC_DECL)
     {
-        if(!function_definition->exported)
-            return;
-
         ast_transpile_typename(transpiler, function_definition->type);
         FRX_TRANSPILER_WRITE(transpiler, " ");
         write_current_namespace(transpiler);
@@ -716,7 +741,7 @@ void ast_transpile_function_definition(Transpiler* transpiler, const ASTFunction
         ast_transpile_parameter_list(transpiler, function_definition->parameter_list);
         FRX_TRANSPILER_WRITE(transpiler, ";\n");
     }
-    else
+    else if(transpiler->mode == FRX_TRANSPILER_MODE_FUNC_IMPL)
     {
         ast_transpile_typename(transpiler, function_definition->type);
         FRX_TRANSPILER_WRITE(transpiler, " ");
@@ -724,7 +749,6 @@ void ast_transpile_function_definition(Transpiler* transpiler, const ASTFunction
         FRX_TRANSPILER_WRITE(transpiler, "%s", symbol->name);
         ast_transpile_parameter_list(transpiler, function_definition->parameter_list);
         FRX_TRANSPILER_WRITE(transpiler, "\n");
-
         ast_transpile_scope(transpiler, function_definition->scope);
     }
 }
@@ -734,6 +758,9 @@ void ast_transpile_function_declaration(Transpiler* transpiler, const ASTFunctio
     FRX_ASSERT(transpiler != NULL);
 
     FRX_ASSERT(function_declaration != NULL);
+
+    if(transpiler->mode != FRX_TRANSPILER_MODE_FUNC_DECL)
+        return;
 
     FunctionSymbol* symbol = function_declaration->function_symbol;
 
@@ -819,10 +846,7 @@ void ast_transpile_enum_definition(Transpiler* transpiler, const ASTEnumDefiniti
 
     FRX_ASSERT(enum_definition != NULL);
 
-    if(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && !enum_definition->exported)
-        return;
-
-    if(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE && enum_definition->exported)
+    if(transpiler->mode != FRX_TRANSPILER_MODE_ENUMS)
         return;
 
     FRX_TRANSPILER_WRITE(transpiler, "enum\n{\n");
@@ -853,29 +877,43 @@ void ast_transpile_enum_definition(Transpiler* transpiler, const ASTEnumDefiniti
     FRX_TRANSPILER_WRITE(transpiler, " %s;\n", enum_definition->name);
 }
 
-void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefinition* struct_definition)
+static void transpile_struct_symbol(Transpiler* transpiler, StructSymbol* symbol)
 {
     FRX_ASSERT(transpiler != NULL);
 
-    FRX_ASSERT(struct_definition != NULL);
+    FRX_ASSERT(symbol != NULL);
 
-    if((struct_definition->exported && transpiler->mode == FRX_TRANSPILER_MODE_SOURCE)
-            || (!struct_definition->exported && transpiler->mode == FRX_TRANSPILER_MODE_HEADER))
+    if(symbol->transpiled)
         return;
 
-    StructSymbol* symbol = struct_definition->struct_symbol;
+    for(usize i = 0; i < list_size(&symbol->fields); ++i)
+    {
+        ASTVariableDeclaration* var = list_get(&symbol->fields, i);
+        if(var->variable_symbol->type_category != FRX_TYPE_CATEGORY_STRUCT)
+            continue;
 
-    FRX_TRANSPILER_WRITE(transpiler, "typedef struct ");
+        //Should be const, but we hacked the 'transpiled' boolean into the StructSymbol struct.
+        StructSymbol* type = (StructSymbol*) var->variable_symbol->struct_symbol;
+        if(!type->transpiled && var->type->pointer_level == 0)
+        {
+            transpile_struct_symbol(transpiler, type);
+        }
+    }
+
+    FRX_TRANSPILER_WRITE(transpiler, "struct ");
     write_current_namespace(transpiler);
     FRX_TRANSPILER_WRITE(transpiler, "%s\n{\n", symbol->name);
 
     push_indentation_level();
 
-    for(usize i = 0; i < list_size(&struct_definition->fields); ++i)
+    for(usize i = 0; i < list_size(&symbol->fields); ++i)
     {
         write_indentation_level(transpiler);
 
-        ASTVariableDeclaration* var = list_get(&struct_definition->fields, i);
+        ASTVariableDeclaration* var = list_get(&symbol->fields, i);
+
+        if(strcmp(var->type->name, symbol->name) == 0)
+            FRX_TRANSPILER_WRITE(transpiler, "struct ");
 
         ast_transpile_typename(transpiler, var->type);
         FRX_TRANSPILER_WRITE(transpiler, " %s", var->name);
@@ -892,11 +930,35 @@ void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefi
 
     drop_indentation_level();
 
-    FRX_TRANSPILER_WRITE(transpiler, "} ");
-    write_current_namespace(transpiler);
-    FRX_TRANSPILER_WRITE(transpiler, "%s;\n", symbol->name);
+    FRX_TRANSPILER_WRITE(transpiler, "};\n");
+
+    symbol->transpiled = FRX_TRUE;
 }
 
+void ast_transpile_struct_definition(Transpiler* transpiler, const ASTStructDefinition* struct_definition)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(struct_definition != NULL);
+
+    StructSymbol* symbol = struct_definition->struct_symbol;
+
+    if(symbol->transpiled)
+        return;
+
+    if(transpiler->mode == FRX_TRANSPILER_MODE_STRUCT_DECL)
+    {
+        FRX_TRANSPILER_WRITE(transpiler, "typedef struct ");
+        write_current_namespace(transpiler);
+        FRX_TRANSPILER_WRITE(transpiler, "%s ", symbol->name);
+        write_current_namespace(transpiler);
+        FRX_TRANSPILER_WRITE(transpiler, "%s;\n", symbol->name);
+    }
+    else if(transpiler->mode == FRX_TRANSPILER_MODE_STRUCT_IMPL)
+    {
+        transpile_struct_symbol(transpiler, symbol);
+    }
+}
 void ast_transpile_namespace(Transpiler* transpiler, const ASTNamespace* namespace)
 {
     FRX_ASSERT(transpiler != NULL);
@@ -933,41 +995,58 @@ void ast_transpile_extern_block(Transpiler* transpiler, const ASTExternBlock* ex
 
     FRX_ASSERT(extern_block != NULL);
 
-    if(transpiler->mode != FRX_TRANSPILER_MODE_SOURCE)
-        return;
-
-    for(usize i = 0; i < list_size(&extern_block->struct_definitions); ++i)
+    /*if(transpiler->mode == FRX_TRANSPILER_MODE_STRUCT_DECL
+        || transpiler->mode == FRX_TRANSPILER_MODE_STRUCT_IMPL)
     {
-        FRX_TRANSPILER_WRITE(transpiler, "extern ");
-
-        ASTStructDefinition* struct_definition = list_get(&extern_block->struct_definitions, i);
-
-        ast_transpile_struct_definition(transpiler, struct_definition);
+        for(usize i = 0; i < list_size(&extern_block->struct_definitions); ++i)
+        {
+            ASTStructDefinition* struct_definition = list_get(&extern_block->struct_definitions, i);
+            ast_transpile_struct_definition(transpiler, struct_definition);
+        }
     }
-
-    for(usize i = 0; i < list_size(&extern_block->function_declarations); ++i)
+    else if(transpiler->mode == FRX_TRANSPILER_MODE_FUNC_DECL)
     {
-        FRX_TRANSPILER_WRITE(transpiler, "extern ");
-
-        ASTFunctionDeclaration* function_declaration = list_get(&extern_block->function_declarations, i);
-
-        ast_transpile_function_declaration(transpiler, function_declaration);
-    }
+        for(usize i = 0; i < list_size(&extern_block->function_declarations); ++i)
+        {
+            ASTFunctionDeclaration* function_declaration = list_get(&extern_block->function_declarations, i);
+            ast_transpile_function_declaration(transpiler, function_declaration);
+        }
+    }*/
 }
 
-void ast_transpile_macro(Transpiler *transpiler, const ASTMacro *macro)
+void ast_transpile_macro(Transpiler* transpiler, const ASTMacro* macro)
 {
     FRX_ASSERT(transpiler != NULL);
 
     FRX_ASSERT(macro != NULL);
 
-    if(!(transpiler->mode == FRX_TRANSPILER_MODE_SOURCE && !macro->exported)
-        && !(transpiler->mode == FRX_TRANSPILER_MODE_HEADER && macro->exported))
-       return;
+    if(transpiler->mode != FRX_TRANSPILER_MODE_MACROS)
+        return;
 
     FRX_TRANSPILER_WRITE(transpiler, "#define %s (", macro->name);
     ast_transpile(transpiler, macro->value);
     FRX_TRANSPILER_WRITE(transpiler, ")\n");
+}
+
+void ast_transpile_sizeof(Transpiler* transpiler, const ASTSizeof* _sizeof)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(_sizeof != NULL);
+
+    FRX_TRANSPILER_WRITE(transpiler, "sizeof(%s)", _sizeof->type);
+}
+
+void ast_transpile_assert(Transpiler* transpiler, const ASTAssert* assert)
+{
+    FRX_ASSERT(transpiler != NULL);
+
+    FRX_ASSERT(assert != NULL);
+
+    FRX_TRANSPILER_WRITE(transpiler, "if(!(");
+    ast_transpile(transpiler, assert->condition);
+    FRX_TRANSPILER_WRITE(transpiler, "%s", ")) { printf(\"%s:%zu: Assertion failed!\\n\", ");
+    FRX_TRANSPILER_WRITE(transpiler, "\"%s\", (size_t)%zu); exit(EXIT_FAILURE); }", assert->filepath, assert->line);
 }
 
 static FRX_NO_DISCARD b8 generate_furox_main_c()
@@ -1035,7 +1114,7 @@ FRX_NO_DISCARD b8 generate_executable(void)
     if(generate_furox_header())
         return FRX_TRUE;
 
-    strcpy(command, "gcc furox-c/FuroxMain.c");
+    strcpy(command, "gcc -I./furox-c furox-c/FuroxMain.c");
 
     for(usize i = 0; i < transpiler_info.c_filepaths_size; ++i)
     {

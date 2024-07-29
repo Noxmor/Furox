@@ -7,12 +7,14 @@
 
 #include "ast.h"
 
-#include "symbols/symbol_table.h"
-
 enum
 {
-    FRX_TRANSPILER_MODE_HEADER = 0,
-    FRX_TRANSPILER_MODE_SOURCE,
+    FRX_TRANSPILER_MODE_MACROS,
+    FRX_TRANSPILER_MODE_ENUMS,
+    FRX_TRANSPILER_MODE_STRUCT_DECL,
+    FRX_TRANSPILER_MODE_STRUCT_IMPL,
+    FRX_TRANSPILER_MODE_FUNC_DECL,
+    FRX_TRANSPILER_MODE_FUNC_IMPL,
 
     FRX_TRANSPILER_MODE_COUNT
 };
@@ -22,11 +24,8 @@ typedef u8 TranspilerMode;
 typedef struct Transpiler
 {
     FILE* source;
-    FILE* header;
 
     TranspilerMode mode;
-
-    SymbolTable* symbol_table;
 
     b8 failed;
 
@@ -66,6 +65,8 @@ void ast_transpile_switch_statement(Transpiler* transpiler, const ASTSwitchState
 
 void ast_transpile_break_statement(Transpiler* transpiler, const ASTBreakStatement* break_statement);
 
+void ast_transpile_continue_statement(Transpiler* transpiler, const ASTContinueStatement* continue_statement);
+
 void ast_transpile_for_loop(Transpiler* transpiler, const ASTForLoop* for_loop);
 
 void ast_transpile_while_loop(Transpiler* transpiler, const ASTWhileLoop* while_loop);
@@ -95,6 +96,10 @@ void ast_transpile_namespace_ref(Transpiler* transpiler, const ASTNamespaceRef* 
 void ast_transpile_extern_block(Transpiler* transpiler, const ASTExternBlock* extern_block);
 
 void ast_transpile_macro(Transpiler* transpiler, const ASTMacro* macro);
+
+void ast_transpile_sizeof(Transpiler* transpiler, const ASTSizeof* _sizeof);
+
+void ast_transpile_assert(Transpiler* transpiler, const ASTAssert* assert);
 
 FRX_NO_DISCARD b8 generate_executable(void);
 

@@ -9,9 +9,9 @@
 #include "core/log.h"
 #include "core/memory.h"
 #include "namespace.h"
+#include "symbols/function_table.h"
 #include "symbols/struct_table.h"
 #include "symbols/symbol_table.h"
-#include "symbols/variable_table.h"
 #include "token.h"
 
 typedef struct ParserInfo
@@ -152,6 +152,7 @@ static usize parser_get_precedence(ASTType type)
 
         case FRX_AST_TYPE_BINARY_AND: return 5;
 
+        case FRX_AST_TYPE_NEGATED_COMPARISON:
         case FRX_AST_TYPE_COMPARISON: return 6;
 
         case FRX_AST_TYPE_GREATER_THAN:
@@ -218,6 +219,7 @@ static b8 parser_next_token_is_binary_operator(Parser* parser)
         case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT:
         case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT:
 
+        case FRX_TOKEN_TYPE_NOT_EQUALS:
         case FRX_TOKEN_TYPE_COMPARISON:
 
         case FRX_TOKEN_TYPE_GREATER_THAN:
@@ -240,14 +242,19 @@ static FRX_NO_DISCARD ASTScope* parser_parse_scope(Parser* parser);
 
 static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser);
 
+static FRX_NO_DISCARD ASTSizeof* parser_parse_sizeof(Parser* parser);
+
+static FRX_NO_DISCARD ASTAssert* parser_parse_assert(Parser* parser);
+
 static FRX_NO_DISCARD ASTVariable* parser_parse_variable(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
     ASTVariable* variable = arena_alloc(&parser->arena, sizeof(ASTVariable));
 
-    variable->variable_symbol = variable_table_find(
-        &parser->symbol_table.variable_table,
+    VariableTable* variable_table = get_global_variable_table();
+
+    variable->variable_symbol = variable_table_find(variable_table,
         parser_current_token(parser)->identifier, parser->current_namespace);
 
     strcpy(variable->name, parser_current_token(parser)->identifier);
@@ -427,6 +434,8 @@ static FRX_NO_DISCARD ASTFunctionCall* parser_parse_function_call(Parser* parser
 {
     FRX_ASSERT(parser != NULL);
 
+    FunctionTable* function_table = get_global_function_table();
+
     ASTFunctionCall* function_call = arena_alloc(&parser->arena, sizeof(ASTFunctionCall));
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
@@ -449,7 +458,7 @@ static FRX_NO_DISCARD ASTFunctionCall* parser_parse_function_call(Parser* parser
         }
 
         function_call->function_symbol = function_table_find_or_insert(
-            &parser->symbol_table.function_table,
+            function_table,
             parser_current_token(parser)->identifier, namespace);
 
         parser_recover(parser, &location);
@@ -462,7 +471,7 @@ static FRX_NO_DISCARD ASTFunctionCall* parser_parse_function_call(Parser* parser
         Namespace* namespace = namespace_create("");
 
         function_call->function_symbol = function_table_find_or_insert(
-            &parser->symbol_table.function_table,
+            function_table,
             parser_current_token(parser)->identifier, namespace);
     }
 
@@ -619,6 +628,16 @@ static FRX_NO_DISCARD AST* parser_parse_primary_expression(Parser* parser)
             return primary_expression;
         }
 
+        case FRX_TOKEN_TYPE_KW_SIZEOF:
+        {
+            primary_expression->type = FRX_AST_TYPE_SIZEOF;
+            primary_expression->node = parser_parse_sizeof(parser);
+            if(primary_expression->node == NULL)
+                return NULL;
+
+            return primary_expression;
+        }
+
         case FRX_TOKEN_TYPE_KW_NULLPTR:
         case FRX_TOKEN_TYPE_KW_TRUE:
         case FRX_TOKEN_TYPE_KW_FALSE:
@@ -660,6 +679,129 @@ static FRX_NO_DISCARD AST* parser_parse_primary_expression(Parser* parser)
 }
 
 static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    AST* expression = NULL;
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
+    {
+        parser_skip(parser);
+
+        expression = parser_parse_expression(parser);
+
+        if(expression->type == FRX_AST_TYPE_BINARY_EXPRESSION)
+            ((ASTBinaryExpression*)expression->node)->had_paranthesis = FRX_TRUE;
+
+        if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
+        {
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Missing ')' after expression!", parser->lexer.filepath, location.line, location.coloumn);
+
+            return NULL;
+        }
+    }
+    else
+        expression = parser_parse_primary_expression(parser);
+
+    if(parser_next_token_is_binary_operator(parser))
+    {
+        AST* temp = expression;
+        expression = arena_alloc(&parser->arena, sizeof(AST));
+        expression->type = FRX_AST_TYPE_BINARY_EXPRESSION;
+        expression->node = arena_alloc(&parser->arena, sizeof(ASTBinaryExpression));
+        ASTBinaryExpression* binary_expression = expression->node;
+        binary_expression->had_paranthesis = FRX_FALSE;
+        binary_expression->left = temp;
+
+        switch(parser_current_token(parser)->type)
+        {
+            case FRX_TOKEN_TYPE_EQUALS: binary_expression->type = FRX_AST_TYPE_VARIABLE_ASSIGNMENT; break;
+
+            case FRX_TOKEN_TYPE_PLUS: binary_expression->type = FRX_AST_TYPE_ADDITION; break;
+            case FRX_TOKEN_TYPE_MINUS: binary_expression->type = FRX_AST_TYPE_SUBTRACTION; break;
+            case FRX_TOKEN_TYPE_STAR: binary_expression->type = FRX_AST_TYPE_MULTIPLICATION; break;
+            case FRX_TOKEN_TYPE_SLASH: binary_expression->type = FRX_AST_TYPE_DIVISION; break;
+            case FRX_TOKEN_TYPE_MODULO: binary_expression->type = FRX_AST_TYPE_MODULO; break;
+
+            case FRX_TOKEN_TYPE_LOGICAL_AND: binary_expression->type = FRX_AST_TYPE_LOGICAL_AND; break;
+            case FRX_TOKEN_TYPE_LOGICAL_OR: binary_expression->type = FRX_AST_TYPE_LOGICAL_OR; break;
+
+            case FRX_TOKEN_TYPE_BINARY_AND: binary_expression->type = FRX_AST_TYPE_BINARY_AND; break;
+            case FRX_TOKEN_TYPE_BINARY_OR: binary_expression->type = FRX_AST_TYPE_BINARY_OR; break;
+            case FRX_TOKEN_TYPE_BINARY_XOR: binary_expression->type = FRX_AST_TYPE_BINARY_XOR; break;
+            case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT: binary_expression->type = FRX_AST_TYPE_BINARY_LEFT_SHIFT; break;
+            case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: binary_expression->type = FRX_AST_TYPE_BINARY_RIGHT_SHIFT; break;
+
+            case FRX_TOKEN_TYPE_NOT_EQUALS: binary_expression->type = FRX_AST_TYPE_NEGATED_COMPARISON; break;
+            case FRX_TOKEN_TYPE_COMPARISON: binary_expression->type = FRX_AST_TYPE_COMPARISON; break;
+
+            case FRX_TOKEN_TYPE_GREATER_THAN: binary_expression->type = FRX_AST_TYPE_GREATER_THAN; break;
+            case FRX_TOKEN_TYPE_GREATER_THAN_EQUALS: binary_expression->type = FRX_AST_TYPE_GREATER_THAN_EQUALS; break;
+            case FRX_TOKEN_TYPE_LESS_THAN: binary_expression->type = FRX_AST_TYPE_LESS_THAN; break;
+            case FRX_TOKEN_TYPE_LESS_THAN_EQUALS: binary_expression->type = FRX_AST_TYPE_LESS_THAN_EQUALS; break;
+
+            default:
+            {
+                FRX_ASSERT(FRX_FALSE); //Since we only stay in the while loop as long as the next token is a binary operator,
+                                       //we should never end up in this default case.
+
+                break;
+            }
+        }
+
+        parser_skip(parser);
+
+        binary_expression->right = parser_parse_expression(parser);
+        ASTType binary_expr_right_type = binary_expression->right->type;
+        if(binary_expr_right_type == FRX_AST_TYPE_BINARY_EXPRESSION)
+            binary_expr_right_type = ((ASTBinaryExpression*)binary_expression->right->node)->type;
+
+        if(parser_get_precedence(binary_expression->type) >= parser_get_precedence(binary_expr_right_type))
+        {
+            AST* lower_expr_wrapper = binary_expression->right;
+            ASTBinaryExpression* lower_expr = (ASTBinaryExpression*)lower_expr_wrapper->node;
+
+            AST* left_most_child_wrapper = lower_expr_wrapper;
+            ASTBinaryExpression* left_most_child = left_most_child_wrapper->node;
+
+            ASTBinaryExpression* left_most_child_parent = NULL;
+
+            b8 has_higher_precedence_than_subtree = FRX_TRUE;
+            while(left_most_child->left->type == FRX_AST_TYPE_BINARY_EXPRESSION)
+            {
+                left_most_child_wrapper = left_most_child->left;
+                left_most_child_parent = left_most_child;
+                left_most_child = left_most_child_wrapper->node;
+
+                if(parser_get_precedence(left_most_child->type) > parser_get_precedence(binary_expression->type)
+                    || left_most_child->had_paranthesis)
+                {
+                    has_higher_precedence_than_subtree = FRX_FALSE;
+                    break;
+                }
+            }
+
+            if(has_higher_precedence_than_subtree)
+            {
+                binary_expression->right = left_most_child->left;
+                left_most_child->left = expression;
+                expression = lower_expr_wrapper;
+            }
+            else if(left_most_child->had_paranthesis && left_most_child_parent != NULL)
+            {
+                binary_expression->right = left_most_child_wrapper;
+                left_most_child_parent->left = expression;
+                expression = lower_expr_wrapper;
+            }
+        }
+    }
+
+    return expression;
+}
+
+//Old iterative approach on parsing expressions, but it does not work properly.
+/*
+static FRX_NO_DISCARD AST* _parser_parse_expression(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
@@ -718,6 +860,7 @@ static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
             case FRX_TOKEN_TYPE_BINARY_LEFT_SHIFT: binary_expression->type = FRX_AST_TYPE_BINARY_LEFT_SHIFT; break;
             case FRX_TOKEN_TYPE_BINARY_RIGHT_SHIFT: binary_expression->type = FRX_AST_TYPE_BINARY_RIGHT_SHIFT; break;
 
+            case FRX_TOKEN_TYPE_NOT_EQUALS: binary_expression->type = FRX_AST_TYPE_NEGATED_COMPARISON; break;
             case FRX_TOKEN_TYPE_COMPARISON: binary_expression->type = FRX_AST_TYPE_COMPARISON; break;
 
             case FRX_TOKEN_TYPE_GREATER_THAN: binary_expression->type = FRX_AST_TYPE_GREATER_THAN; break;
@@ -736,20 +879,26 @@ static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
 
         parser_skip(parser);
 
-        if(parser_get_precedence(binary_expression->type) > parser_get_precedence(expression->type) && !node_had_paranthesis)
+        ASTType expression_type = expression->type;
+        if(expression_type == FRX_AST_TYPE_BINARY_EXPRESSION)
+            expression_type = ((ASTBinaryExpression*)(expression->node))->type;
+        else if(expression_type == FRX_AST_TYPE_UNARY_EXPRESSION)
+            expression_type = ((ASTUnaryExpression*)(expression->node))->type;
+
+        if(parser_get_precedence(binary_expression->type) > parser_get_precedence(expression_type) && !node_had_paranthesis)
         {
             AST* temp = ((ASTBinaryExpression*)expression->node)->right;
 
             ((ASTBinaryExpression*)expression->node)->right = new_node;
 
-            ((ASTBinaryExpression*)new_node->node)->left = temp;
+            binary_expression->left = temp;
 
             if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_LEFT_PARANTHESIS)
             {
                 parser_skip(parser);
 
-                ((ASTBinaryExpression*)new_node)->right = parser_parse_expression(parser);
-                if(((ASTBinaryExpression*)new_node)->right == NULL)
+                binary_expression->right = parser_parse_expression(parser);
+                if(binary_expression->right == NULL)
                     return NULL;
 
                 if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
@@ -762,8 +911,8 @@ static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
             }
             else
             {
-                ((ASTBinaryExpression*)new_node)->right = parser_parse_primary_expression(parser);
-                if(((ASTBinaryExpression*)new_node)->right == NULL)
+                binary_expression->right = parser_parse_primary_expression(parser);
+                if(binary_expression->right == NULL)
                     return NULL;
             }
         }
@@ -802,6 +951,7 @@ static FRX_NO_DISCARD AST* parser_parse_expression(Parser* parser)
 
     return expression;
 }
+*/
 
 static FRX_NO_DISCARD ASTTypename* parser_parse_type(Parser* parser)
 {
@@ -901,6 +1051,9 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
 {
     FRX_ASSERT(parser != NULL);
 
+    VariableTable* variable_table = get_global_variable_table();
+    StructTable* struct_table = get_global_struct_table();
+
     VariableSymbol* variable_symbol = NULL;
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_IDENTIFIER
@@ -925,7 +1078,7 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
         }
 
         const StructSymbol* struct_symbol =
-            struct_table_find_or_insert(&parser->symbol_table.struct_table,
+            struct_table_find_or_insert(struct_table,
                     parser_current_token(parser)->identifier, namespace);
 
         if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
@@ -951,8 +1104,7 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
             parser_skip(parser);
         }
 
-        variable_symbol = variable_table_insert(
-            &parser->symbol_table.variable_table,
+        variable_symbol = variable_table_insert(variable_table,
             parser_current_token(parser)->identifier, NULL);
 
         parser_skip(parser);
@@ -969,8 +1121,7 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
         b8 primitive = is_primitive(parser_current_token(parser)->type);
 
         const StructSymbol* struct_symbol =
-            primitive ? NULL : struct_table_find_or_insert(
-                &parser->symbol_table.struct_table,
+            primitive ? NULL : struct_table_find_or_insert(struct_table,
                 parser_current_token(parser)->identifier,
                 parser->current_namespace);
 
@@ -1005,8 +1156,7 @@ static FRX_NO_DISCARD VariableSymbol* parser_generate_variable_symbol(Parser* pa
             parser_skip(parser);
         }
 
-        variable_symbol = variable_table_insert(
-            &parser->symbol_table.variable_table,
+        variable_symbol = variable_table_insert(variable_table,
             parser_current_token(parser)->identifier, NULL);
 
         if(primitive)
@@ -1256,6 +1406,39 @@ static FRX_NO_DISCARD ASTIfStatement* parser_parse_if_statement(Parser* parser)
     if(if_statement->if_block == NULL)
         return NULL;
 
+    list_init(&if_statement->else_if_blocks, FRX_MEMORY_CATEGORY_AST);
+
+    while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_ELSE
+        && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_KW_IF)
+    {
+        parser_skip(parser);
+        parser_skip(parser);
+
+        ASTElseIfBlock* else_if_block = arena_alloc(&parser->arena, sizeof(ASTElseIfBlock));
+
+        if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
+        {
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Expected '('!", parser->lexer.filepath, location.line, location.coloumn);
+
+            return NULL;
+        }
+
+        else_if_block->condition = parser_parse_expression(parser);
+
+        if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
+        {
+            SourceLocation location = parser_current_location(parser);
+            FRX_ERROR_FILE("Expected ')'!", parser->lexer.filepath, location.line, location.coloumn);
+
+            return NULL;
+        }
+
+        else_if_block->block = parser_parse_scope(parser);
+
+        list_push(&if_statement->else_if_blocks, else_if_block);
+    }
+
     if(parser_current_token(parser)->type != FRX_TOKEN_TYPE_KW_ELSE)
     {
         if_statement->else_block = NULL;
@@ -1395,6 +1578,31 @@ static FRX_NO_DISCARD ASTBreakStatement* parser_parse_break_statement(Parser* pa
     ASTBreakStatement* break_statement = arena_alloc(&parser->arena, sizeof(ASTBreakStatement));
 
     return break_statement;
+}
+
+static FRX_NO_DISCARD ASTContinueStatement* parser_parse_continue_statement(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_CONTINUE))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'continue'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ';' at the end of continue-statement!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    ASTContinueStatement* continue_statement = arena_alloc(&parser->arena, sizeof(ASTContinueStatement));
+
+    return continue_statement;
 }
 
 static FRX_NO_DISCARD b8 is_for_loop(Parser* parser)
@@ -1628,6 +1836,16 @@ static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser)
 
     AST* ast = arena_alloc(&parser->arena, sizeof(AST));
 
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_ASSERT)
+    {
+        ast->type = FRX_AST_TYPE_ASSERT;
+        ast->node = parser_parse_assert(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_IF)
     {
         ast->type = FRX_AST_TYPE_IF_STATEMENT;
@@ -1652,6 +1870,16 @@ static FRX_NO_DISCARD AST* parser_parse_statement(Parser* parser)
     {
         ast->type = FRX_AST_TYPE_BREAK_STATEMENT;
         ast->node = parser_parse_break_statement(parser);
+        if(ast->node == NULL)
+            return NULL;
+
+        return ast;
+    }
+
+    if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_CONTINUE)
+    {
+        ast->type = FRX_AST_TYPE_CONTINUE_STATEMENT;
+        ast->node = parser_parse_continue_statement(parser);
         if(ast->node == NULL)
             return NULL;
 
@@ -1885,6 +2113,9 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
 {
     FRX_ASSERT(parser != NULL);
 
+    FunctionTable* function_table = get_global_function_table();
+    StructTable* struct_table = get_global_struct_table();
+
     parser_skip_optional_keywords(parser);
 
     FunctionSymbol* function_symbol = NULL;
@@ -1898,8 +2129,7 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
         while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
             parser_skip(parser);
 
-        function_symbol = function_table_find(
-            &parser->symbol_table.function_table,
+        function_symbol = function_table_find(function_table,
             parser_current_token(parser)->identifier,
             parser->current_namespace);
 
@@ -1913,8 +2143,7 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
             return NULL;
         }
 
-        function_symbol = function_table_insert(
-            &parser->symbol_table.function_table,
+        function_symbol = function_table_insert(function_table,
             parser_current_token(parser)->identifier,
             parser->current_namespace);
 
@@ -1946,8 +2175,7 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
             parser_skip(parser);
         }
 
-        StructSymbol* struct_symbol = struct_table_find_or_insert(
-            &parser->symbol_table.struct_table,
+        StructSymbol* struct_symbol = struct_table_find_or_insert(struct_table,
             parser_current_token(parser)->identifier, return_type_namespace);
 
         if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
@@ -1963,13 +2191,14 @@ static FRX_NO_DISCARD FunctionSymbol* parser_generate_function_symbol(Parser* pa
         while(parser_current_token(parser)->type == FRX_TOKEN_TYPE_STAR)
             parser_skip(parser);
 
-        function_symbol = function_table_insert(
-            &parser->symbol_table.function_table,
+        function_symbol = function_table_insert(function_table,
             parser_current_token(parser)->identifier,
             parser->current_namespace);
 
         function_symbol->type_category = FRX_TYPE_CATEGORY_STRUCT;
         function_symbol->struct_symbol_return_type = struct_symbol;
+
+        parser_skip(parser);
     }
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
@@ -2032,6 +2261,8 @@ static FRX_NO_DISCARD ASTFunctionDefinition* parser_parse_function_definition(Pa
     function_definition->function_symbol =
         parser_generate_function_symbol(parser);
     parser_recover(parser, &location);
+
+    FRX_ASSERT(function_definition->function_symbol != NULL);
 
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT)
     {
@@ -2241,6 +2472,8 @@ static FRX_NO_DISCARD StructSymbol* parser_generate_struct_symbol(Parser* parser
 {
     FRX_ASSERT(parser != NULL);
 
+    StructTable* struct_table = get_global_struct_table();
+
     parser_skip_optional_keywords(parser);
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_KW_STRUCT))
@@ -2255,8 +2488,7 @@ static FRX_NO_DISCARD StructSymbol* parser_generate_struct_symbol(Parser* parser
     //TODO: Allow namespaces e.g. "struct std::foo::Bar"
     Namespace* namespace = namespace_duplicate(parser->current_namespace);
 
-    StructSymbol* struct_symbol = struct_table_find(
-        &parser->symbol_table.struct_table,
+    StructSymbol* struct_symbol = struct_table_find(struct_table,
         parser_current_token(parser)->identifier, namespace);
 
     if(struct_symbol != NULL && struct_symbol->defined)
@@ -2269,8 +2501,7 @@ static FRX_NO_DISCARD StructSymbol* parser_generate_struct_symbol(Parser* parser
         return NULL;
     }
 
-    struct_symbol = struct_table_insert(
-        &parser->symbol_table.struct_table,
+    struct_symbol = struct_table_find_or_insert(struct_table,
         parser_current_token(parser)->identifier, namespace);
 
     if(parser_eat(parser, FRX_TOKEN_TYPE_IDENTIFIER))
@@ -2316,8 +2547,6 @@ static FRX_NO_DISCARD ASTStructDefinition* parser_parse_struct_definition(Parser
     struct_definition->struct_symbol = parser_generate_struct_symbol(parser);
     parser_recover(parser, &location);
 
-    list_init(&struct_definition->fields, FRX_MEMORY_CATEGORY_AST);
-
     if(parser_current_token(parser)->type == FRX_TOKEN_TYPE_KW_EXPORT)
     {
         struct_definition->exported = FRX_TRUE;
@@ -2356,7 +2585,7 @@ static FRX_NO_DISCARD ASTStructDefinition* parser_parse_struct_definition(Parser
         if(field == NULL)
             return NULL;
 
-        list_push(&struct_definition->fields, field);
+        list_push(&struct_definition->struct_symbol->fields, field);
     }
 
     parser_skip(parser);
@@ -2602,6 +2831,97 @@ static FRX_NO_DISCARD ASTMacro* parser_parse_macro(Parser* parser)
     return macro;
 }
 
+static FRX_NO_DISCARD ASTSizeof* parser_parse_sizeof(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ASTSizeof* _sizeof = arena_alloc(&parser->arena, sizeof(ASTSizeof));
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_SIZEOF))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'sizeof'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '('!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(!is_primitive(parser_current_token(parser)->type) && parser_current_token(parser)->type != FRX_TOKEN_TYPE_IDENTIFIER)
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected identifier or primitive inside sizeof!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    strcpy(_sizeof->type, parser_current_token(parser)->identifier);
+
+    parser_skip(parser);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ')'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    return _sizeof;
+}
+
+static FRX_NO_DISCARD ASTAssert* parser_parse_assert(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ASTAssert* assert = arena_alloc(&parser->arena, sizeof(ASTAssert));
+
+    assert->filepath = parser->lexer.filepath;
+    assert->line = parser_current_token(parser)->location.line;
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_KW_ASSERT))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected keyword 'assert'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_LEFT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected '(' after keyword 'assert'!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    assert->condition = parser_parse_expression(parser);
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_RIGHT_PARANTHESIS))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ')' at the end of assert-statement!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    if(parser_eat(parser, FRX_TOKEN_TYPE_SEMICOLON))
+    {
+        SourceLocation location = parser_current_location(parser);
+        FRX_ERROR_FILE("Expected ';' at the end of assert-statement!", parser->lexer.filepath, location.line, location.coloumn);
+
+        return NULL;
+    }
+
+    return assert;
+}
+
 static FRX_NO_DISCARD b8 is_import_statement(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
@@ -2773,8 +3093,6 @@ FRX_NO_DISCARD b8 parser_init(Parser* parser, const char* filepath)
     FRX_ASSERT(filepath != NULL);
 
     parser->current_namespace = namespace_create("");
-
-    symbol_table_init(&parser->symbol_table);
 
     //TODO: Remove constant size. This is only a temporary easy solution
     // because we only parse small files for now.

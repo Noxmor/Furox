@@ -7,6 +7,7 @@
 #include "core/log.h"
 
 #include "symbols/hash.h"
+#include "token.h"
 
 typedef struct LexerInfo
 {
@@ -22,7 +23,7 @@ typedef struct KeywordTableEntry
     TokenType type;
 } KeywordTableEntry;
 
-#define FRX_KEYWORD_TABLE_SIZE 512
+#define FRX_KEYWORD_TABLE_SIZE 2048
 
 typedef struct KeywordTable
 {
@@ -93,10 +94,13 @@ void lexer_init_keyword_table(void)
     register_keyword("case", FRX_TOKEN_TYPE_KW_CASE);
     register_keyword("default", FRX_TOKEN_TYPE_KW_DEFAULT);
     register_keyword("break", FRX_TOKEN_TYPE_KW_BREAK);
+    register_keyword("continue", FRX_TOKEN_TYPE_KW_CONTINUE);
     register_keyword("for", FRX_TOKEN_TYPE_KW_FOR);
     register_keyword("while", FRX_TOKEN_TYPE_KW_WHILE);
     register_keyword("do", FRX_TOKEN_TYPE_KW_DO);
     register_keyword("macro", FRX_TOKEN_TYPE_KW_MACRO);
+    register_keyword("sizeof", FRX_TOKEN_TYPE_KW_SIZEOF);
+    register_keyword("assert", FRX_TOKEN_TYPE_KW_ASSERT);
 }
 
 static void lexer_read(Lexer* lexer)
@@ -470,7 +474,7 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
     FRX_ASSERT(lexer != NULL);
 
     FRX_ASSERT(token != NULL);
-    
+
     lexer_skip_whitespaces(lexer);
 
     memcpy(&token->location, &lexer->location, sizeof(SourceLocation));
@@ -486,14 +490,14 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
     if(isdigit(current))
     {
         char next = lexer_peek_char(lexer, 1);
-        
+
         if(current == '0' && next == 'b')
             lexer_parse_binary_number(lexer, token);
         else if(current == '0' && next == 'x')
             lexer_parse_hex_number(lexer, token);
         else
             lexer_parse_number(lexer, token);
-        
+
         return FRX_FALSE;
     }
 
@@ -546,7 +550,23 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
 
         case '%': token->type = FRX_TOKEN_TYPE_MODULO; break;
 
-        case '!': token->type = FRX_TOKEN_TYPE_LOGICAL_NEGATION; break;
+        case '!':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = FRX_TOKEN_TYPE_NOT_EQUALS;
+                strcpy(token->identifier, "!=");
+
+                lexer_advance(lexer);
+                lexer_advance(lexer);
+
+                return FRX_FALSE;
+            }
+
+            token->type = FRX_TOKEN_TYPE_LOGICAL_NEGATION;
+
+            break;
+        }
 
         case '&':
         {
@@ -663,13 +683,13 @@ static FRX_NO_DISCARD b8 lexer_read_token(Lexer* lexer, Token* token)
             break;
         }
 
-        case '(': token->type = FRX_TOKEN_TYPE_LEFT_PARANTHESIS; break;   
-        case ')': token->type = FRX_TOKEN_TYPE_RIGHT_PARANTHESIS; break;   
-        
-        case '[': token->type = FRX_TOKEN_TYPE_LEFT_BRACKET; break;   
-        case ']': token->type = FRX_TOKEN_TYPE_RIGHT_BRACKET; break;   
-        
-        case '{': token->type = FRX_TOKEN_TYPE_LEFT_BRACE; break;   
+        case '(': token->type = FRX_TOKEN_TYPE_LEFT_PARANTHESIS; break;
+        case ')': token->type = FRX_TOKEN_TYPE_RIGHT_PARANTHESIS; break;
+
+        case '[': token->type = FRX_TOKEN_TYPE_LEFT_BRACKET; break;
+        case ']': token->type = FRX_TOKEN_TYPE_RIGHT_BRACKET; break;
+
+        case '{': token->type = FRX_TOKEN_TYPE_LEFT_BRACE; break;
         case '}': token->type = FRX_TOKEN_TYPE_RIGHT_BRACE; break;
 
         case ',': token->type = FRX_TOKEN_TYPE_COMMA; break;

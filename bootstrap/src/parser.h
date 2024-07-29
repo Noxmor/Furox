@@ -6,16 +6,12 @@
 
 #include "core/arena.h"
 
-#include "symbols/symbol_table.h"
-
 typedef struct Parser
 {
     Lexer lexer;
     ASTProgram* program;
 
     Namespace* current_namespace;
-
-    SymbolTable symbol_table;
 
     Arena arena;
 } Parser;

@@ -50,6 +50,7 @@ enum
     FRX_AST_TYPE_BINARY_LEFT_SHIFT,
     FRX_AST_TYPE_BINARY_RIGHT_SHIFT,
 
+    FRX_AST_TYPE_NEGATED_COMPARISON,
     FRX_AST_TYPE_COMPARISON,
 
     FRX_AST_TYPE_GREATER_THAN,
@@ -66,6 +67,7 @@ enum
     FRX_AST_TYPE_IF_STATEMENT,
     FRX_AST_TYPE_SWITCH_STATEMENT,
     FRX_AST_TYPE_BREAK_STATEMENT,
+    FRX_AST_TYPE_CONTINUE_STATEMENT,
     FRX_AST_TYPE_FOR_LOOP,
     FRX_AST_TYPE_WHILE_LOOP,
     FRX_AST_TYPE_DO_WHILE_LOOP,
@@ -87,6 +89,8 @@ enum
     FRX_AST_TYPE_EXTERN_BLOCK,
 
     FRX_AST_TYPE_MACRO,
+    FRX_AST_TYPE_SIZEOF,
+    FRX_AST_TYPE_ASSERT,
 
     FRX_AST_TYPE_COUNT
 };
@@ -189,6 +193,8 @@ typedef struct ASTBinaryExpression
     ASTType type;
     AST* left;
     AST* right;
+
+    b8 had_paranthesis;
 } ASTBinaryExpression;
 
 typedef struct ASTUnaryExpression
@@ -202,10 +208,17 @@ typedef struct ASTImportStatement
     char filepath[FRX_TOKEN_IDENTIFIER_CAPACITY];
 } ASTImportStatement;
 
+typedef struct ASTElseIfBlock
+{
+    AST* condition;
+    ASTScope* block;
+} ASTElseIfBlock;
+
 typedef struct ASTIfStatement
 {
     AST* condition;
     ASTScope* if_block;
+    List else_if_blocks;
     ASTScope* else_block;
 } ASTIfStatement;
 
@@ -227,6 +240,12 @@ typedef struct ASTBreakStatement
     //NOTE: This struct should not be empty because of the arena allocator
     u8 placeholder;
 } ASTBreakStatement;
+
+typedef struct ASTContinueStatement
+{
+    //NOTE: This struct should not be empty because of the arena allocator
+    u8 placeholder;
+} ASTContinueStatement;
 
 typedef struct ASTForLoop
 {
@@ -321,8 +340,6 @@ typedef struct ASTStructDefinition
     char name[FRX_TOKEN_IDENTIFIER_CAPACITY];
 
     b8 exported;
-
-    List fields;
 } ASTStructDefinition;
 
 typedef struct ASTNamespace
@@ -353,6 +370,18 @@ typedef struct ASTMacro
 
     b8 exported;
 } ASTMacro;
+
+typedef struct ASTSizeof
+{
+    char type[FRX_TOKEN_IDENTIFIER_CAPACITY];
+} ASTSizeof;
+
+typedef struct ASTAssert
+{
+    AST* condition;
+    const char* filepath;
+    usize line;
+} ASTAssert;
 
 void ast_print(const AST* ast, usize depth);
 
@@ -390,6 +419,8 @@ void ast_print_switch_statement(const ASTSwitchStatement* switch_statement, usiz
 
 void ast_print_break_statement(const ASTBreakStatement* break_statement, usize depth);
 
+void ast_print_continue_statement(const ASTContinueStatement* continue_statement, usize depth);
+
 void ast_print_for_loop(const ASTForLoop* for_loop, usize depth);
 
 void ast_print_while_loop(const ASTWhileLoop* while_loop, usize depth);
@@ -419,5 +450,9 @@ void ast_print_namespace_ref(const ASTNamespaceRef* namespace_ref, usize depth);
 void ast_print_extern_block(const ASTExternBlock* extern_block, usize depth);
 
 void ast_print_macro(const ASTMacro* macro, usize depth);
+
+void ast_print_sizeof(const ASTSizeof* _sizeof, usize depth);
+
+void ast_print_assert(const ASTAssert* assert, usize depth);
 
 #endif
