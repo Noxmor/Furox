@@ -165,7 +165,7 @@ static FILE* create_c_file(const char* furox_filepath, const char* filepath)
 
     store_c_filepath(c_filepath);
 
-    if(fprintf(f, "#include \"Furox.h\"\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <ctype.h>\n") < 0)
+    if(fprintf(f, "#include \"Furox.h\"\n#include <stdlib.h>\n#include <stdio.h>\n#include <string.h>\n#include <ctype.h>\n#include <limits.h>\n") < 0)
     {
         fclose(f);
 
