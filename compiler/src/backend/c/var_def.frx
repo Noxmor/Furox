@@ -4,6 +4,11 @@ export void transpile_var_def(Transpiler* transpiler, ASTVarDef* var_def)
 
     assert(var_def != nullptr);
 
+    if(transpiler->mode != TRANSPILER_MODE_GLOBAL_VARS)
+    {
+        return;
+    }
+
     VarSymbol* symbol = var_def->symbol;
 
     transpile_type_specifier(transpiler, symbol->type);

@@ -118,13 +118,15 @@ ASTCompound* parse_translation_unit(Parser* parser)
                 {
                     case TOKEN_TYPE_SEMICOLON:
                     {
-                        //TODO: Parse var decl
+                        ast = make_ast(&parser->arena, AST_TYPE_VAR_DECL,
+                            parse_var_decl(parser, type_specifier));
 
                         break;
                     }
                     case TOKEN_TYPE_EQ:
                     {
-                        //TODO: Parse var def
+                        ast = make_ast(&parser->arena, AST_TYPE_VAR_DEF,
+                            parse_var_def(parser, type_specifier));
 
                         break;
                     }
