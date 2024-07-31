@@ -46,4 +46,5 @@ export void print_func_def(ASTFuncDef* func_def, FILE* file, usize depth)
         symbol->name);
 
     print_type_specifier(symbol->return_type, file, depth + 1);
+    print_scope(func_def->body, file, depth + 1);
 }

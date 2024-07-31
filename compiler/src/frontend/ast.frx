@@ -121,6 +121,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
 
             break;
         }
+        case AST_TYPE_RETURN_STMT:
+        {
+            print_return_stmt(node, file, depth);
+
+            break;
+        }
         case AST_TYPE_INT_LITERAL:
         {
             print_int_literal(node, file, depth);

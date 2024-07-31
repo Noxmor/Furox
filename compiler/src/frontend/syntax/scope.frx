@@ -167,4 +167,11 @@ export void print_scope(ASTScope* scope, FILE* file, usize depth)
     print_ast_depth(file, depth);
 
     fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_SCOPE));
+
+    usize i;
+    for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+    {
+        AST* stmt = list_get(&scope->stmts, i);
+        print_ast(stmt, file, depth + 1);
+    }
 }

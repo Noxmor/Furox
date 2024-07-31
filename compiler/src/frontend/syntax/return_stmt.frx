@@ -29,3 +29,20 @@ export ASTReturnStmt* parse_return_stmt(Parser* parser)
 
     return make_return_stmt(&parser->arena, value);
 }
+
+export void print_return_stmt(ASTReturnStmt* return_stmt, FILE* file,
+    usize depth)
+{
+    assert(return_stmt != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_RETURN_STMT));
+
+    if(return_stmt->value != nullptr)
+    {
+        print_ast(return_stmt->value, file, depth + 1);
+    }
+}
