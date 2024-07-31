@@ -1,0 +1,114 @@
+export struct ASTNamespace
+{
+    char* name;
+
+    List global_scope;
+}
+
+export ASTNamespace* make_namespace(Arena* arena, char* name)
+{
+    assert(name != nullptr);
+
+    ASTNamespace* namespace_node = arena_alloc(arena, sizeof(ASTNamespace));
+
+    namespace_node->name = name;
+
+    list_init(&namespace_node->global_scope);
+
+    return namespace_node;
+}
+
+ASTNamespace* parse_namespace(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_KW_NAMESPACE);
+
+    ASTNamespace* namespace_root = make_namespace(&parser->arena,
+        parser->token->identifier);
+
+    Namespace* old_namespace = parser->current_namespace;
+
+    parser_push_namespace(parser, parser->token->identifier);
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    ASTNamespace* current_namespace = namespace_root;
+
+    while(parser->token->type == TOKEN_TYPE_NAMESPACE_RESOLUTION)
+    {
+        parser_eat(parser, TOKEN_TYPE_NAMESPACE_RESOLUTION);
+
+        ASTNamespace* child_namespace = make_namespace(&parser->arena,
+            parser->token->identifier);
+
+        parser_push_namespace(parser, parser->token->identifier);
+
+        parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+        AST* ast = make_ast(&parser->arena, AST_TYPE_NAMESPACE, child_namespace);
+        list_push(&current_namespace->global_scope, ast);
+
+        current_namespace = child_namespace;
+    }
+
+    parser_eat(parser, TOKEN_TYPE_LBRACE);
+
+    parser_push_scope(parser);
+
+    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    {
+        AST* child = parse_global_scope(parser);
+        list_push(&current_namespace->global_scope, child);
+    }
+
+    parser_eat(parser, TOKEN_TYPE_RBRACE);
+
+    pop_back_namespace_until(parser, old_namespace);
+    parser_pop_scope(parser);
+
+    return namespace_root;
+}
+
+export void print_namespace(ASTNamespace* namespace_node, FILE* file,
+usize depth)
+{
+    assert(namespace_node != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_NAMESPACE),
+        namespace_node->name);
+
+    usize i;
+    for(i = 0; i < list_size(&namespace_node->global_scope); i = i + 1)
+    {
+        AST* ast = list_get(&namespace_node->global_scope, i);
+        print_ast(ast, file, depth + 1);
+    }
+}
+
+export void print_namespace_resolution(FILE* file, Namespace* ns)
+{
+    assert(file != nullptr);
+
+    while(ns != nullptr)
+    {
+        fprintf(file, "%s%s", ns->name,
+            token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION));
+
+        ns = ns->parent;
+    }
+}
+
+void pop_back_namespace_until(Parser* parser, Namespace* old_namespace)
+{
+    assert(parser != nullptr);
+
+    while(parser->current_namespace != old_namespace)
+    {
+        parser_pop_namespace(parser);
+    }
+}

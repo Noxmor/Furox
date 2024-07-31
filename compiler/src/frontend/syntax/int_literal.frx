@@ -1,0 +1,39 @@
+export struct ASTIntLiteral
+{
+    u64 value;
+}
+
+export ASTIntLiteral* make_int_literal(Arena* arena, u64 value)
+{
+    assert(arena != nullptr);
+
+    ASTIntLiteral* literal = arena_alloc(arena, sizeof(ASTIntLiteral));
+
+    literal->value = value;
+
+    return literal;
+}
+
+export ASTIntLiteral* parse_int_literal(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    ASTIntLiteral* literal = make_int_literal(&parser->arena,
+        parser->token->int_literal);
+
+    parser_eat(parser, TOKEN_TYPE_INT_LITERAL);
+
+    return literal;
+}
+
+export void print_int_literal(ASTIntLiteral* literal, FILE* file, usize depth)
+{
+    assert(literal != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (%zu)\n", ast_type_to_str(AST_TYPE_INT_LITERAL),
+        literal->value);
+}

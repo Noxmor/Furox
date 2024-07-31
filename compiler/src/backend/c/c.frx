@@ -1,0 +1,59 @@
+export enum TranspilerMode : u8
+{
+    TRANSPILER_MODE_MACROS,
+    TRANSPILER_MODE_ENUMS,
+    TRANSPILER_MODE_STRUCT_DECL,
+    TRANSPILER_MODE_STRUCT_IMPL,
+    TRANSPILER_MODE_FUNC_DECL,
+    TRANSPILER_MODE_FUNC_IMPL,
+
+    TRANSPILER_MODE_COUNT
+}
+
+export struct Transpiler
+{
+    TranspilerMode mode;
+    FILE* file;
+}
+
+export void c_generate_code(ASTProgram* program, char* filepath)
+{
+    assert(filepath != nullptr);
+
+    Transpiler transpiler;
+    transpiler.file = fopen(filepath, "w");
+
+    if(transpiler.file == nullptr)
+    {
+        return;
+    }
+
+    fprintf(transpiler.file, "#include <stddef.h>\n");
+    fprintf(transpiler.file, "#include <stdint.h>\n");
+    fprintf(transpiler.file, "#include <stdlib.h>\n");
+    fprintf(transpiler.file, "#include <stdio.h>\n");
+    fprintf(transpiler.file, "#include <string.h>\n");
+    fprintf(transpiler.file, "#include <ctype.h>\n");
+    fprintf(transpiler.file, "#include <limits.h>\n\n");
+
+    fprintf(transpiler.file, "typedef size_t usize;\n");
+    fprintf(transpiler.file, "typedef int64_t isize;\n");
+    fprintf(transpiler.file, "typedef int8_t i8;\n");
+    fprintf(transpiler.file, "typedef int16_t i16;\n");
+    fprintf(transpiler.file, "typedef int32_t i32;\n");
+    fprintf(transpiler.file, "typedef int64_t i64;\n");
+    fprintf(transpiler.file, "typedef uint8_t u8;\n");
+    fprintf(transpiler.file, "typedef uint16_t u16;\n");
+    fprintf(transpiler.file, "typedef uint32_t u32;\n");
+    fprintf(transpiler.file, "typedef uint64_t u64;\n");
+    fprintf(transpiler.file, "typedef u8 b8;\n");
+    fprintf(transpiler.file, "typedef u16 b16;\n");
+    fprintf(transpiler.file, "typedef u32 b32;\n");
+    fprintf(transpiler.file, "typedef u64 b64;\n");
+    fprintf(transpiler.file, "typedef float f32;\n");
+    fprintf(transpiler.file, "typedef double f64;\n\n");
+
+    transpile_program(&transpiler, program);
+
+    fclose(transpiler.file);
+}

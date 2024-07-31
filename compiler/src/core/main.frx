@@ -1,0 +1,64 @@
+ASTProgram* program;
+
+void compile(char* filepath)
+{
+    if(!compile_table_mark_file_as_compiled(filepath))
+    {
+        return;
+    }
+
+    Parser parser;
+    parser_init(&parser, filepath);
+    parser_parse(&parser);
+
+    list_push(&program->translation_units, parser.translation_unit);
+
+}
+
+void parse_args(usize argc, char** argv)
+{
+    usize i;
+    for(i = 1; i < argc; i = i + 1)
+    {
+        char* arg = argv[i];
+        if(!is_option(arg))
+        {
+            compile(arg);
+        }
+    }
+}
+
+void register_command_line_options()
+{
+    register_option('h', "help", OPTION_TYPE_NO_ARG);
+    register_option('o', "output", OPTION_TYPE_REQ_ARG);
+    register_option('\0', "target", OPTION_TYPE_REQ_ARG);
+    register_option('\0', "emit-ast", OPTION_TYPE_NO_ARG);
+}
+
+usize Main(usize argc, char** argv)
+{
+    register_command_line_options();
+    parse_command_line(argc, argv);
+
+    lexer_init_keyword_table();
+
+    program = make_program();
+
+    parse_args(argc, argv);
+
+    Option* emit_ast = find_long_option("emit-ast");
+    if(emit_ast->arg != nullptr)
+    {
+        FILE* file = fopen("frx.ast", "w");
+        if(file != nullptr)
+        {
+            print_program(program, file, 0);
+            fclose(file);
+        }
+    }
+
+    backend_generate_code(BACKEND_TYPE_NATIVE, program, "output.c");
+
+    return 0;
+}

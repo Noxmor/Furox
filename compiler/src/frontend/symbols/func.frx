@@ -1,0 +1,56 @@
+export struct FuncSymbol
+{
+    Namespace* ns;
+    char* name;
+
+    ASTTypeSpecifier* return_type;
+}
+
+struct FuncTableEntry
+{
+    FuncSymbol* symbol;
+    FuncTableEntry* next;
+}
+
+macro FUNC_TABLE_CAPACITY = 128;
+
+struct FuncTable
+{
+    FuncTableEntry*[FUNC_TABLE_CAPACITY] entries;
+}
+
+FuncTable func_table;
+
+export FuncSymbol* func_table_find_or_insert(Namespace* ns, char* name,
+    ASTTypeSpecifier* return_type)
+{
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % FUNC_TABLE_CAPACITY;
+    FuncTableEntry* entry = func_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        FuncSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        {
+            return symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    FuncSymbol* symbol = malloc(sizeof(FuncSymbol));
+    symbol->ns = ns;
+    symbol->name = name;
+    symbol->return_type = return_type;
+
+    FuncTableEntry* new_entry = malloc(sizeof(FuncTableEntry));
+    new_entry->symbol = symbol;
+    new_entry->next = func_table.entries[index];
+
+    func_table.entries[index] = new_entry;
+
+    return symbol;
+}

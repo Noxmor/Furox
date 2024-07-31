@@ -1,0 +1,68 @@
+export void transpile_ast(Transpiler* transpiler, AST* ast)
+{
+    assert(ast != nullptr);
+
+    void* node = ast->node;
+
+    switch(ast->type)
+    {
+        case AST_TYPE_IMPORT_STMT:
+        {
+            break;
+        }
+        case AST_TYPE_NAMESPACE:
+        {
+            transpile_namespace(transpiler, node);
+
+            break;
+        }
+        case AST_TYPE_ENUM_DEF:
+        {
+            transpile_enum_def(transpiler, node);
+
+            break;
+        }
+        case AST_TYPE_STRUCT_DEF:
+        {
+            transpile_struct_def(transpiler, node);
+
+            break;
+        }
+        case AST_TYPE_FUNC_DEF:
+        {
+            transpile_func_def(transpiler, node);
+
+            break;
+        }
+        case AST_TYPE_SCOPE:
+        {
+            transpile_scope(transpiler, node);
+
+            break;
+        }
+        case AST_TYPE_BINARY_EXPR:
+        {
+            transpile_binary_expr(transpiler, node);
+
+            break;
+        }
+        case AST_TYPE_RETURN_STMT:
+        {
+            transpile_return_stmt(transpiler, node);
+
+            break;
+        }
+        case AST_TYPE_INT_LITERAL:
+        {
+            transpile_int_literal(transpiler, node);
+
+            break;
+        }
+        default:
+        {
+            assert(false);
+
+            break;
+        }
+    }
+}

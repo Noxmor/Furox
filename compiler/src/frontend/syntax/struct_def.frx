@@ -1,0 +1,47 @@
+export struct ASTStructDef
+{
+    StructSymbol* symbol;
+}
+
+export ASTStructDef* make_struct_def(Arena* arena, Namespace* ns, char* name)
+{
+    ASTStructDef* struct_def = arena_alloc(arena, sizeof(ASTStructDef));
+
+    struct_def->symbol = struct_table_find_or_insert(ns, name);
+
+    return struct_def;
+}
+
+export ASTStructDef* parse_struct_def(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_KW_STRUCT);
+
+    ASTStructDef* struct_def = make_struct_def(&parser->arena,
+        parser->current_namespace, parser->token->identifier);
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    parser_eat(parser, TOKEN_TYPE_LBRACE);
+
+    //TODO: Parse fields of struct
+
+    parser_eat(parser, TOKEN_TYPE_RBRACE);
+
+    return struct_def;
+}
+
+export void print_struct_def(ASTStructDef* struct_def, FILE* file, usize depth)
+{
+    assert(struct_def != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    StructSymbol* symbol = struct_def->symbol;
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_STRUCT_DEF),
+        symbol->name);
+}

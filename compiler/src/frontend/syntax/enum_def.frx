@@ -1,0 +1,128 @@
+export struct ASTEnumDef
+{
+    EnumSymbol* symbol;
+}
+
+export ASTEnumDef* make_enum_def(Arena* arena, Namespace* ns, char* name)
+{
+    ASTEnumDef* enum_def = arena_alloc(arena, sizeof(ASTEnumDef));
+
+    enum_def->symbol = enum_table_find_or_insert(ns, name);
+
+    return enum_def;
+}
+
+export ASTEnumDef* parse_enum_def(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_KW_ENUM);
+
+    ASTEnumDef* enum_def = make_enum_def(&parser->arena,
+        parser->current_namespace, parser->token->identifier);
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    parser_eat(parser, TOKEN_TYPE_COLON);
+
+    switch(parser->token->type)
+    {
+        case TOKEN_TYPE_KW_I8:
+        {
+
+        }
+        case TOKEN_TYPE_KW_I16:
+        {
+
+        }
+        case TOKEN_TYPE_KW_I32:
+        {
+
+        }
+        case TOKEN_TYPE_KW_I64:
+        {
+
+        }
+        case TOKEN_TYPE_KW_U8:
+        {
+
+        }
+        case TOKEN_TYPE_KW_U16:
+        {
+
+        }
+        case TOKEN_TYPE_KW_U32:
+        {
+
+        }
+        case TOKEN_TYPE_KW_U64:
+        {
+            enum_def->symbol->type = parser->token->type;
+
+            parser_eat(parser, parser->token->type);
+
+            break;
+        }
+        default:
+        {
+            return nullptr;
+        }
+    }
+
+    parser_eat(parser, TOKEN_TYPE_LBRACE);
+
+    EnumSymbol* symbol = enum_def->symbol;
+
+    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    {
+        char* name = parser->token->identifier;
+
+        parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+        AST* value = nullptr;
+        if(parser->token->type == TOKEN_TYPE_EQ)
+        {
+            parser_eat(parser, TOKEN_TYPE_EQ);
+
+            value = parse_expression(parser);
+        }
+
+        enum_symbol_add_constant(&parser->arena, symbol, name, value);
+
+        if(parser->token->type == TOKEN_TYPE_COMMA)
+        {
+            parser_eat(parser, TOKEN_TYPE_COMMA);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    parser_eat(parser, TOKEN_TYPE_RBRACE);
+
+    return enum_def;
+}
+
+export void print_enum_def(ASTEnumDef* enum_def, FILE* file, usize depth)
+{
+    assert(enum_def != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    EnumSymbol* symbol = enum_def->symbol;
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_ENUM_DEF),
+        symbol->name);
+
+    usize i;
+    for(i = 0; i < list_size(&symbol->constants); i = i + 1)
+    {
+        EnumConstant* constant = list_get(&symbol->constants, i);
+
+        print_ast_depth(file, depth + 1);
+        fprintf(file, "%s\n", constant->name);
+    }
+}

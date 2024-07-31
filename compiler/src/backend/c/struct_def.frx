@@ -1,0 +1,40 @@
+export void transpile_struct_def(Transpiler* transpiler,
+    ASTStructDef* struct_def)
+{
+    assert(transpiler != nullptr);
+
+    assert(struct_def != nullptr);
+
+    StructSymbol* symbol = struct_def->symbol;
+
+    if(transpiler->mode == TRANSPILER_MODE_STRUCT_DECL)
+    {
+        fprintf(transpiler->file, "typedef struct ");
+        transpile_struct_symbol_name(transpiler, symbol);
+        fprintf(transpiler->file, " ");
+        transpile_struct_symbol_name(transpiler, symbol);
+        fprintf(transpiler->file, ";\n");
+    }
+    else if(transpiler->mode == TRANSPILER_MODE_STRUCT_IMPL)
+    {
+        fprintf(transpiler->file, "struct ");
+        transpile_struct_symbol_name(transpiler, symbol);
+        fprintf(transpiler->file, "\n");
+        fprintf(transpiler->file, "{\n");
+
+        //TODO: Transpile fields
+
+        fprintf(transpiler->file, "};\n");
+    }
+}
+
+export void transpile_struct_symbol_name(Transpiler* transpiler,
+    StructSymbol* symbol)
+{
+    assert(transpiler != nullptr);
+
+    assert(symbol != nullptr);
+
+    transpile_namespace_resolution(transpiler, symbol->ns);
+    fprintf(transpiler->file, "%s", symbol->name);
+}

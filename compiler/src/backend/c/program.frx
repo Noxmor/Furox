@@ -1,0 +1,21 @@
+export void transpile_program(Transpiler* transpiler, ASTProgram* program)
+{
+    assert(transpiler != nullptr);
+
+    assert(program != nullptr);
+
+    TranspilerMode mode;
+    for(mode = TRANSPILER_MODE_MACROS; mode < TRANSPILER_MODE_COUNT; mode = mode + 1)
+    {
+        transpiler->mode = mode;
+
+        usize i;
+        for(i = 0; i < list_size(&program->translation_units); i = i + 1)
+        {
+            ASTCompound* translation_unit = list_get(
+                &program->translation_units, i);
+
+            transpile_translation_unit(transpiler, translation_unit);
+        }
+    }
+}

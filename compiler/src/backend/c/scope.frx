@@ -1,0 +1,17 @@
+export void transpile_scope(Transpiler* transpiler, ASTScope* scope)
+{
+    assert(transpiler != nullptr);
+
+    assert(scope != nullptr);
+
+    fprintf(transpiler->file, "{\n");
+
+    usize i;
+    for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+    {
+        AST* stmt = list_get(&scope->stmts, i);
+        transpile_ast(transpiler, stmt);
+    }
+
+    fprintf(transpiler->file, "}\n");
+}

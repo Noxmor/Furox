@@ -1,0 +1,51 @@
+export struct Namespace
+{
+    char* name;
+    Namespace* parent;
+}
+
+export Namespace* namespace_create(Namespace* parent, char* name)
+{
+    Namespace* ns = malloc(sizeof(Namespace));
+
+    ns->name = name;
+    ns->parent = parent;
+
+    return ns;
+}
+
+export void namespace_destroy(Namespace* ns)
+{
+    if(ns == nullptr)
+    {
+        return;
+    }
+
+    namespace_destroy(ns->parent);
+    free(ns);
+}
+
+export b8 namespace_equals(Namespace* left, Namespace* right)
+{
+    if(left == nullptr && right == nullptr)
+    {
+        return true;
+    }
+
+    if(left == nullptr && right != nullptr)
+    {
+        return false;
+    }
+
+    if(left != nullptr && right == nullptr)
+    {
+        return false;
+    }
+
+    if(strcmp(left->name, right->name) != 0)
+    {
+        return false;
+    }
+
+    return namespace_equals(left->parent, right->parent);
+}

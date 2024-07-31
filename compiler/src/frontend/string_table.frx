@@ -1,0 +1,40 @@
+struct StringTableEntry
+{
+    char* str;
+    StringTableEntry* next;
+}
+
+macro STRING_TABLE_CAPACITY = 1024;
+
+struct StringTable
+{
+    StringTableEntry*[STRING_TABLE_CAPACITY] entries;
+}
+
+StringTable string_table;
+
+export char* string_table_insert(char* str)
+{
+    assert(str != nullptr);
+
+    u64 index = hash_djb2(str) % STRING_TABLE_CAPACITY;
+    StringTableEntry* entry = string_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        if(strcmp(entry->str, str) == 0)
+        {
+            return entry->str;
+        }
+
+        entry = entry->next;
+    }
+
+    StringTableEntry* new_entry = malloc(sizeof(StringTableEntry));
+    new_entry->str = strdup(str);
+    new_entry->next = string_table.entries[index];
+
+    string_table.entries[index] = new_entry;
+
+    return new_entry->str;
+}

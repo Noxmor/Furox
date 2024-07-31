@@ -1,0 +1,10 @@
+export void transpile_binary_expr(Transpiler* transpiler, ASTBinaryExpr* expr)
+{
+    assert(transpiler != nullptr);
+
+    assert(expr != nullptr);
+
+    transpile_ast(transpiler, expr->left);
+    fprintf(transpiler->file, " + ");
+    transpile_ast(transpiler, expr->right);
+}

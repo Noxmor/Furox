@@ -1,0 +1,16 @@
+export void transpile_return_stmt(Transpiler* transpiler,
+    ASTReturnStmt* return_stmt)
+{
+    assert(transpiler != nullptr);
+
+    assert(return_stmt != nullptr);
+
+    fprintf(transpiler->file, "return ");
+
+    if(return_stmt->value != nullptr)
+    {
+        transpile_ast(transpiler, return_stmt->value);
+    }
+
+    fprintf(transpiler->file, ";\n");
+}

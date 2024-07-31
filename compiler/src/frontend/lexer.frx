@@ -1,0 +1,1002 @@
+struct LexerInfo
+{
+    usize lines_processed;
+}
+
+LexerInfo lexer_info;
+
+struct KeywordTableEntry
+{
+    char* name;
+    TokenType type;
+}
+
+macro KEYWORD_TABLE_SIZE = 512;
+
+struct KeywordTable
+{
+    KeywordTableEntry[KEYWORD_TABLE_SIZE] entries;
+}
+
+KeywordTable keyword_table;
+
+void register_keyword(char* name, TokenType type)
+{
+    assert(name != nullptr);
+
+    assert(type < TOKEN_TYPE_COUNT);
+
+    u64 index = hash_djb2(name) % KEYWORD_TABLE_SIZE;
+
+    KeywordTableEntry* entry = &keyword_table.entries[index];
+
+    assert(entry->name == nullptr);
+
+    entry->name = name;
+    entry->type = type;
+}
+
+KeywordTableEntry* keyword_table_find(char* name)
+{
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % KEYWORD_TABLE_SIZE;
+    return &keyword_table.entries[index];
+}
+
+export void lexer_init_keyword_table()
+{
+    TokenType type;
+    for(type = TOKEN_TYPE_KW_U8; type <= TOKEN_TYPE_KW_MACRO; type = (type + 1))
+    {
+        register_keyword(token_type_to_str(type), type);
+    }
+}
+
+export macro LEXER_BUFFER_CAPACITY = 1024;
+export macro LEXER_TOKEN_CAPACITY = 8;
+
+//Needs to be at least 3 in order to store char literals
+macro LEXER_IDENTIFIER_START_SIZE = 4;
+
+export struct Lexer
+{
+    FILE* file;
+    char* filepath;
+
+    SourceLocation location;
+
+    char[LEXER_BUFFER_CAPACITY] buffer;
+    usize buffer_index;
+
+    Token[LEXER_TOKEN_CAPACITY] tokens;
+    usize tokens_count;
+
+    char* identifier_placeholder;
+    usize identifier_placeholder_size;
+
+    b8 failed;
+}
+
+void lexer_read(Lexer* lexer)
+{
+    assert(lexer != nullptr);
+
+    assert(lexer->buffer_index <= LEXER_BUFFER_CAPACITY);
+
+    usize characters_to_copy = 0;
+    if(lexer->buffer_index > 0)
+    {
+        characters_to_copy = LEXER_BUFFER_CAPACITY - lexer->buffer_index;
+    }
+
+    memcpy(lexer->buffer, &lexer->buffer[lexer->buffer_index], characters_to_copy * sizeof(char));
+
+    usize characters_read = 0;
+    if((characters_read = fread(&lexer->buffer[characters_to_copy], sizeof(char), LEXER_BUFFER_CAPACITY - characters_to_copy, lexer->file)) < LEXER_BUFFER_CAPACITY - characters_to_copy)
+    {
+        lexer->buffer[characters_to_copy + characters_read] = '\0';
+
+        //Since the last line of a file does not contain a '\n' at the end, we need to manually count this line.
+        lexer_info.lines_processed = lexer_info.lines_processed + 1;
+    }
+
+    lexer->buffer_index = 0;
+}
+
+export void lexer_init(Lexer* lexer, char* filepath)
+{
+    assert(lexer != nullptr);
+
+    assert(filepath != nullptr);
+
+    lexer->failed = false;
+
+    lexer->identifier_placeholder = malloc(sizeof(char) * LEXER_IDENTIFIER_START_SIZE);
+    lexer->identifier_placeholder_size = LEXER_IDENTIFIER_START_SIZE;
+
+    lexer->file = fopen(filepath, "r");
+
+    if(lexer->file == nullptr)
+    {
+        lexer->failed = true;
+    }
+
+    lexer->filepath = filepath;
+
+    lexer->location.pos = 0;
+    lexer->location.line = 1;
+    lexer->location.column = 1;
+
+    //This will automatically trigger the first lexer_read().
+    lexer->buffer_index = LEXER_BUFFER_CAPACITY;
+
+    lexer_read_token(lexer, &lexer->tokens[0]);
+
+    lexer->tokens_count = 1;
+}
+
+export Token* lexer_peek(Lexer* lexer, usize offset)
+{
+    assert(lexer != nullptr);
+
+    usize i;
+    for(i = lexer->tokens_count; i <= offset; i = (i + 1))
+    {
+        lexer_read_token(lexer, &lexer->tokens[i]);
+
+        lexer->tokens_count = lexer->tokens_count + 1;
+    }
+
+    return &lexer->tokens[offset];
+}
+
+void lexer_grow_identifier_placeholder(Lexer* lexer)
+{
+    assert(lexer != nullptr);
+
+    lexer->identifier_placeholder_size = lexer->identifier_placeholder_size * 2;
+    lexer->identifier_placeholder = realloc(lexer->identifier_placeholder,
+        sizeof(char) * lexer->identifier_placeholder_size);
+}
+
+char lexer_peek_char(Lexer* lexer, usize offset)
+{
+    assert(lexer != nullptr);
+
+    assert(offset < LEXER_BUFFER_CAPACITY);
+
+    if(lexer->buffer_index + offset >= LEXER_BUFFER_CAPACITY)
+    {
+        lexer_read(lexer);
+    }
+
+    usize i;
+    for(i = lexer->buffer_index; i < lexer->buffer_index + offset; i = (i + 1))
+    {
+        if(lexer->buffer[i] == '\0')
+        {
+            return '\0';
+        }
+    }
+
+    return lexer->buffer[lexer->buffer_index + offset];
+}
+
+char lexer_current_char(Lexer* lexer)
+{
+    return lexer_peek_char(lexer, 0);
+}
+
+void lexer_advance_n(Lexer* lexer, usize count)
+{
+    assert(lexer != nullptr);
+
+    usize i;
+    for(i = 0; i < count; i = i + 1)
+    {
+        char current = lexer_current_char(lexer);
+
+        if(current == '\0')
+        {
+            return;
+        }
+
+        if(current == '\n')
+        {
+            lexer->location.line = lexer->location.line + 1;
+            lexer->location.column = 1;
+
+            lexer_info.lines_processed = lexer_info.lines_processed + 1;
+        }
+        else
+        {
+            lexer->location.column = lexer->location.column + 1;
+        }
+
+        lexer->buffer_index = lexer->buffer_index + 1;
+
+        lexer->location.pos = lexer->location.pos + 1;
+
+        if(lexer->buffer_index >= LEXER_BUFFER_CAPACITY)
+        {
+            lexer_read(lexer);
+        }
+    }
+}
+
+void lexer_advance(Lexer* lexer)
+{
+    lexer_advance_n(lexer, 1);
+}
+
+void lexer_skip_whitespaces(Lexer* lexer)
+{
+    char current = lexer_current_char(lexer);
+    while(current == ' ' || current == '\t' || current == '\n' || current == '\r')
+    {
+        lexer_advance(lexer);
+        current = lexer_current_char(lexer);
+    }
+}
+
+void lexer_skip_comment(Lexer* lexer)
+{
+    while(lexer_current_char(lexer) != '\n')
+    {
+        lexer_advance(lexer);
+    }
+
+    lexer_advance(lexer);
+}
+
+void lexer_skip_comment_block(Lexer* lexer)
+{
+    assert(lexer != nullptr);
+
+    usize line_start = lexer->location.line;
+    usize column_start = lexer->location.column;
+
+    usize comment_blocks_to_skip = 1;
+
+    while(comment_blocks_to_skip > 0)
+    {
+        lexer_advance(lexer);
+
+        char current = lexer_current_char(lexer);
+        char next = lexer_peek_char(lexer, 1);
+
+        if(current == '/' && next == '*')
+        {
+            line_start = lexer->location.line;
+            column_start = lexer->location.column;
+
+            comment_blocks_to_skip = comment_blocks_to_skip + 1;
+
+            lexer_advance_n(lexer, 2);
+        }
+        else if(current == '*' && next == '/')
+        {
+            comment_blocks_to_skip = comment_blocks_to_skip - 1;
+
+            lexer_advance_n(lexer, 2);
+        }
+
+        if(lexer_current_char(lexer) == '\0')
+        {
+            lexer->failed = true;
+        }
+    }
+}
+
+void lexer_parse_identifier(Lexer* lexer, Token* token)
+{
+    assert(lexer != nullptr);
+
+    assert(token != nullptr);
+
+    token->type = TOKEN_TYPE_IDENTIFIER;
+
+    usize identifier_index = 0;
+    char current = lexer_current_char(lexer);
+
+    while(isalnum(current) || current == '_')
+    {
+        lexer->identifier_placeholder[identifier_index] = current;
+        identifier_index = identifier_index + 1;
+
+        if(identifier_index >= lexer->identifier_placeholder_size)
+        {
+            lexer_grow_identifier_placeholder(lexer);
+        }
+
+        lexer_advance(lexer);
+        current = lexer_current_char(lexer);
+    }
+
+    lexer->identifier_placeholder[identifier_index] = '\0';
+
+    token->identifier = string_table_insert(lexer->identifier_placeholder);
+
+    KeywordTableEntry* entry = keyword_table_find(token->identifier);
+
+    if(entry->name != nullptr && strcmp(entry->name, token->identifier) == 0)
+    {
+        token->type = entry->type;
+    }
+}
+
+void lexer_parse_binary_number(Lexer* lexer, Token* token)
+{
+    assert(lexer != nullptr);
+
+    assert(token != nullptr);
+
+    token->type = TOKEN_TYPE_INT_LITERAL;
+
+    lexer_advance_n(lexer, 2);
+
+    token->int_literal = 0;
+
+    char current = lexer_current_char(lexer);
+    while(current == '0' || current == '1')
+    {
+        token->int_literal = token->int_literal * 2 + (current - '0');
+        lexer_advance(lexer);
+        current = lexer_current_char(lexer);
+    }
+}
+
+void lexer_parse_hex_number(Lexer* lexer, Token* token)
+{
+    assert(lexer != nullptr);
+
+    assert(token != nullptr);
+
+    token->type = TOKEN_TYPE_INT_LITERAL;
+
+    lexer_advance_n(lexer, 2);
+
+    token->int_literal = 0;
+
+    char current = toupper(lexer_current_char(lexer));
+    while(isdigit(current) || (current >= 'A' && current <= 'F'))
+    {
+        if(isdigit(current))
+        {
+            token->int_literal = token->int_literal * 16 + (current - '0');
+        }
+        else
+        {
+            token->int_literal = token->int_literal * 16 + (current - 'A' + 10);
+        }
+
+        lexer_advance(lexer);
+        current = lexer_current_char(lexer);
+    }
+}
+
+void lexer_parse_number(Lexer* lexer, Token* token)
+{
+    assert(lexer != nullptr);
+
+    assert(token != nullptr);
+
+    token->type = TOKEN_TYPE_INT_LITERAL;
+
+    token->int_literal = 0;
+
+    char current = lexer_current_char(lexer);
+    while(isdigit(current))
+    {
+        token->int_literal = token->int_literal * 10 + (current - '0');
+
+        lexer_advance(lexer);
+        current = lexer_current_char(lexer);
+    }
+}
+
+b8 lexer_parse_char_literal(Lexer* lexer, Token* token)
+{
+    assert(lexer != nullptr);
+
+    assert(token != nullptr);
+
+    token->type = TOKEN_TYPE_CHAR_LITERAL;
+
+    lexer_advance(lexer);
+
+    lexer->identifier_placeholder[0] = lexer_current_char(lexer);
+    lexer->identifier_placeholder[1] = '\0';
+
+    lexer_advance(lexer);
+
+    if(lexer->identifier_placeholder[0] == '\\')
+    {
+        lexer->identifier_placeholder[2] = '\0';
+
+        switch(lexer_current_char(lexer))
+        {
+            //TODO: Refactor once proper switch-cases are implemented
+            case '0':
+            {
+
+            }
+            case 'n':
+            {
+
+            }
+            case 't':
+            {
+
+            }
+            case 'v':
+            {
+
+            }
+            case 'b':
+            {
+
+            }
+            case 'r':
+            {
+
+            }
+            case 'f':
+            {
+
+            }
+            case 'a':
+            {
+
+            }
+            case '\\':
+            {
+
+            }
+            case '\'':
+            {
+
+            }
+            case '"':
+            {
+                lexer->identifier_placeholder[1] = lexer_current_char(lexer);
+                break;
+            }
+
+            default:
+            {
+                lexer->failed = true;
+            }
+        }
+
+        lexer_advance(lexer);
+    }
+
+    token->identifier = string_table_insert(lexer->identifier_placeholder);
+
+    if(lexer_current_char(lexer) != '\'')
+    {
+        lexer->failed = true;
+    }
+
+    lexer_advance(lexer);
+}
+
+void lexer_parse_string_literal(Lexer* lexer, Token* token)
+{
+    assert(lexer != nullptr);
+
+    assert(token != nullptr);
+
+    token->type = TOKEN_TYPE_STRING_LITERAL;
+
+    lexer_advance(lexer);
+
+    usize identifier_index = 0;
+    char current = '\0';
+    while((current = lexer_current_char(lexer)) != '"')
+    {
+        if(current == '\0')
+        {
+            lexer->failed = true;
+        }
+
+        lexer->identifier_placeholder[identifier_index] = current;
+        identifier_index = identifier_index + 1;
+
+        if(identifier_index >= lexer->identifier_placeholder_size)
+        {
+            lexer_grow_identifier_placeholder(lexer);
+        }
+
+        lexer_advance(lexer);
+    }
+
+    lexer->identifier_placeholder[identifier_index] = '\0';
+
+    token->identifier = string_table_insert(lexer->identifier_placeholder);
+
+    lexer_advance(lexer);
+}
+
+export void lexer_read_token(Lexer* lexer, Token* token)
+{
+    assert(lexer != nullptr);
+
+    assert(token != nullptr);
+
+    if(lexer->failed)
+    {
+        token->type = TOKEN_TYPE_ERROR;
+        return;
+    }
+
+    lexer_skip_whitespaces(lexer);
+
+    token->location = lexer->location;
+
+    char current = lexer_current_char(lexer);
+
+    if(isalpha(current))
+    {
+        lexer_parse_identifier(lexer, token);
+        return;
+    }
+
+    if(isdigit(current))
+    {
+        char next = lexer_peek_char(lexer, 1);
+
+        if(current == '0' && next == 'b')
+        {
+            lexer_parse_binary_number(lexer, token);
+        }
+        else if(current == '0' && next == 'x')
+        {
+            lexer_parse_hex_number(lexer, token);
+        }
+        else
+        {
+            lexer_parse_number(lexer, token);
+        }
+
+        return;
+    }
+
+    switch(current)
+    {
+        case '\'':
+        {
+            lexer_parse_char_literal(lexer, token);
+            return;
+        }
+        case '"':
+        {
+            lexer_parse_string_literal(lexer, token);
+            return;
+        }
+
+        case '+':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = TOKEN_TYPE_PLUS_EQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_PLUS;
+            break;
+        }
+        case '-':
+        {
+            if(lexer_peek_char(lexer, 1) == '>')
+            {
+                token->type = TOKEN_TYPE_ARROW;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_MINUS;
+            break;
+        }
+        case '*':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = TOKEN_TYPE_MULTIPLY_EQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_STAR;
+            break;
+        }
+        case '/':
+        {
+            char next = lexer_peek_char(lexer, 1);
+
+            if(next == '=')
+            {
+                token->type = TOKEN_TYPE_DIVIDE_EQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            if(next == '/')
+            {
+                lexer_skip_comment(lexer);
+                lexer_read_token(lexer, token);
+
+                return;
+            }
+
+            if(next == '*')
+            {
+                lexer_skip_comment_block(lexer);
+                lexer_read_token(lexer, token);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_DIVIDE;
+            break;
+        }
+        case '%':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = TOKEN_TYPE_MODULO_EQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_MODULO;
+            break;
+        }
+
+        case '!':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = TOKEN_TYPE_NEQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_LOG_NEG;
+            break;
+        }
+
+        case '&':
+        {
+            char next = lexer_peek_char(lexer, 1);
+
+            if(next == '&')
+            {
+                token->type = TOKEN_TYPE_LOG_AND;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            if(next == '=')
+            {
+                token->type = TOKEN_TYPE_BIN_AND_EQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_BIN_AND;
+            break;
+        }
+        case '|':
+        {
+            char next = lexer_peek_char(lexer, 1);
+
+            if(next == '|')
+            {
+                token->type = TOKEN_TYPE_LOG_OR;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            if(next == '=')
+            {
+                token->type = TOKEN_TYPE_BIN_OR_EQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_BIN_OR;
+            break;
+        }
+        case '^':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = TOKEN_TYPE_BIN_XOR_EQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_BIN_XOR;
+            break;
+        }
+        case '~':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = TOKEN_TYPE_BIN_NEG_EQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_BIN_NEG;
+            break;
+        }
+        case '<':
+        {
+            char next = lexer_peek_char(lexer, 1);
+
+            if(next == '<')
+            {
+                if(lexer_peek_char(lexer, 2) == '=')
+                {
+                    token->type = TOKEN_TYPE_BIN_LSHIFT_EQ;
+                    token->identifier = token_type_to_str(token->type);
+
+                    lexer_advance_n(lexer, 3);
+
+                    return;
+                }
+
+                token->type = TOKEN_TYPE_BIN_LSHIFT;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            if(next == '=')
+            {
+                token->type = TOKEN_TYPE_LEQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_LT;
+            break;
+        }
+        case '>':
+        {
+            char next = lexer_peek_char(lexer, 1);
+
+            if(next == '>')
+            {
+                if(lexer_peek_char(lexer, 2) == '=')
+                {
+                    token->type = TOKEN_TYPE_BIN_RSHIFT_EQ;
+                    token->identifier = token_type_to_str(token->type);
+
+                    lexer_advance_n(lexer, 3);
+
+                    return;
+                }
+                
+                token->type = TOKEN_TYPE_BIN_RSHIFT;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            if(next == '=')
+            {
+                token->type = TOKEN_TYPE_GEQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_GT;
+            break;
+        }
+
+        case '=':
+        {
+            if(lexer_peek_char(lexer, 1) == '=')
+            {
+                token->type = TOKEN_TYPE_EQ;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_ASSIGN;
+            break;
+        }
+
+        case '(':
+        {
+            token->type = TOKEN_TYPE_LPAREN;
+            break;
+        }
+        case ')':
+        {
+            token->type = TOKEN_TYPE_RPAREN;
+            break;
+        }
+
+        case '[':
+        {
+            token->type = TOKEN_TYPE_LBRACKET;
+            break;
+        }
+        case ']':
+        {
+            token->type = TOKEN_TYPE_RBRACKET;
+            break;
+        }
+
+        case '{':
+        {
+            token->type = TOKEN_TYPE_LBRACE;
+            break;
+        }
+        case '}':
+        {
+            token->type = TOKEN_TYPE_RBRACE;
+            break;
+        }
+
+        case ',':
+        {
+            token->type = TOKEN_TYPE_COMMA;
+            break;
+        }
+        case '.':
+        {
+            if(lexer_peek_char(lexer, 1) == '.' && lexer_peek_char(lexer, 2) == '.')
+            {
+                token->type = TOKEN_TYPE_ELLIPSIS;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 3);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_DOT;
+            break;
+        }
+        case ':':
+        {
+            if(lexer_peek_char(lexer, 1) == ':')
+            {
+                token->type = TOKEN_TYPE_NAMESPACE_RESOLUTION;
+                token->identifier = token_type_to_str(token->type);
+
+                lexer_advance_n(lexer, 2);
+
+                return;
+            }
+
+            token->type = TOKEN_TYPE_COLON;
+            break;
+        }
+        case ';':
+        {
+            token->type = TOKEN_TYPE_SEMICOLON;
+            break;
+        }
+
+        case '\0':
+        {
+            token->type = TOKEN_TYPE_EOF;
+            break;
+        }
+
+        default:
+        {
+            lexer->failed = true;
+        }
+    }
+
+    token->identifier = token_type_to_str(token->type);
+
+    lexer_advance(lexer);
+}
+
+export void lexer_next_token(Lexer* lexer)
+{
+    assert(lexer != nullptr);
+
+    usize i;
+    for(i = 1; i < lexer->tokens_count; i = (i + 1))
+    {
+        memcpy(&lexer->tokens[i - 1], &lexer->tokens[i], sizeof(Token));
+    }
+
+    if(lexer->tokens_count == 1)
+    {
+        lexer_read_token(lexer, &lexer->tokens[0]);
+    }
+    else
+    {
+        lexer->tokens_count = lexer->tokens_count - 1;
+    }
+}
+
+export void lexer_recover(Lexer* lexer, SourceLocation* location)
+{
+    assert(lexer != nullptr);
+
+    assert(location != nullptr);
+
+    if(fseek(lexer->file, location->pos, SEEK_SET) != 0)
+    {
+        lexer->failed = true;
+        return;
+    }
+
+    lexer->location = *location;
+
+    lexer->buffer_index = LEXER_BUFFER_CAPACITY;
+
+    lexer_read_token(lexer, &lexer->tokens[0]);
+
+    lexer->tokens_count = 1;
+}
+
+export void lexer_destroy(Lexer* lexer)
+{
+    assert(lexer != nullptr);
+
+    fclose(lexer->file);
+}

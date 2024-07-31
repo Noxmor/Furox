@@ -1,0 +1,48 @@
+export void transpile_type_specifier(Transpiler* transpiler,
+    ASTTypeSpecifier* type_specifier)
+{
+    assert(transpiler != nullptr);
+
+    assert(type_specifier != nullptr);
+
+    if(type_specifier->primitive_type != 0)
+    {
+        fprintf(transpiler->file, "%s",
+            token_type_to_str(type_specifier->primitive_type));
+    }
+    else if(type_specifier->enum_type != nullptr)
+    {
+        EnumSymbol* symbol = type_specifier->enum_type;
+        transpile_enum_symbol_name(transpiler, symbol);
+    }
+    else if(type_specifier->struct_type != nullptr)
+    {
+        StructSymbol* symbol = type_specifier->struct_type;
+        transpile_struct_symbol_name(transpiler, symbol);
+    }
+
+    usize i;
+    for(i = 0; i < type_specifier->pointer_level; i = i + 1)
+    {
+        fprintf(transpiler->file, "*");
+    }
+
+    fprintf(transpiler->file, " ");
+}
+
+void transpile_type_specifier_array_dimensions(Transpiler* transpiler,
+    ASTTypeSpecifier* type_specifier)
+{
+    assert(transpiler != nullptr);
+
+    assert(type_specifier != nullptr);
+
+    usize i;
+    for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
+    {
+        fprintf(transpiler->file, "[");
+        AST* dimension_size = list_get(&type_specifier->array_dimensions, i);
+        transpile_ast(transpiler, dimension_size);
+        fprintf(transpiler->file, "]");
+    }
+}

@@ -1,0 +1,42 @@
+export struct ASTBinaryExpr
+{
+    AST* left;
+    AST* right;
+}
+
+export ASTBinaryExpr* make_binary_expr(Arena* arena, AST* left, AST* right)
+{
+    assert(arena != nullptr);
+
+    assert(left != nullptr);
+
+    assert(right != nullptr);
+
+    ASTBinaryExpr* expr = arena_alloc(arena, sizeof(ASTBinaryExpr));
+
+    expr->left = left;
+    expr->right = right;
+
+    return expr;
+}
+
+export ASTBinaryExpr* parse_binary_expression(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    return nullptr;
+}
+
+export void print_binary_expr(ASTBinaryExpr* expr, FILE* file, usize depth)
+{
+    assert(expr != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_BINARY_EXPR));
+
+    print_ast(expr->left, file, depth + 1);
+    print_ast(expr->right, file, depth + 1);
+}

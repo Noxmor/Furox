@@ -1,0 +1,6 @@
+export AST* parse_expression(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    return make_ast(&parser->arena, AST_TYPE_INT_LITERAL, parse_int_literal(parser));
+}

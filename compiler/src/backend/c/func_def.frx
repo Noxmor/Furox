@@ -1,0 +1,35 @@
+export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
+{
+    assert(transpiler != nullptr);
+
+    assert(func_def != nullptr);
+
+    FuncSymbol* symbol = func_def->symbol;
+
+    if(transpiler->mode == TRANSPILER_MODE_FUNC_DECL)
+    {
+        transpile_type_specifier(transpiler, symbol->return_type);
+
+        transpile_function_symbol_name(transpiler, symbol);
+        fprintf(transpiler->file, "();\n");
+    }
+    else if(transpiler->mode == TRANSPILER_MODE_FUNC_IMPL)
+    {
+        transpile_type_specifier(transpiler, symbol->return_type);
+
+        transpile_function_symbol_name(transpiler, symbol);
+        fprintf(transpiler->file, "()\n");
+
+        transpile_scope(transpiler, func_def->body);
+    }
+}
+
+void transpile_function_symbol_name(Transpiler* transpiler, FuncSymbol* symbol)
+{
+    assert(transpiler != nullptr);
+
+    assert(symbol != nullptr);
+
+    transpile_namespace_resolution(transpiler, symbol->ns);
+    fprintf(transpiler->file, "%s", symbol->name);
+}

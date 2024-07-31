@@ -1,0 +1,4 @@
+void log_error(char* filepath, SourceLocation location, char* message)
+{
+    printf("[ERROR]:%s:%zu:%zu: %s", filepath, location.line, location.column, message);
+}

@@ -1,0 +1,60 @@
+export struct List
+{
+    void** items;
+    usize size;
+    usize capacity;
+}
+
+export void list_init(List* list)
+{
+    assert(list != nullptr);
+
+    list->items = nullptr;
+    list->size = list->capacity = 0;
+}
+
+export void list_push(List* list, void* item)
+{
+    assert(list != nullptr);
+
+    if(list->size >= list->capacity)
+    {
+        if(list->capacity > 0)
+        {
+            list->capacity = list->capacity * 2;
+        }
+        else
+        {
+            list->capacity = 1;
+        }
+
+        //TODO: Change sizeof to use void* instead of usize
+        list->items = realloc(list->items, list->capacity * sizeof(usize));
+    }
+
+    list->items[list->size] = item;
+    list->size = list->size + 1;
+}
+
+export void* list_get(List* list, usize index)
+{
+    assert(list != nullptr);
+
+    assert(index < list->size);
+
+    return list->items[index];
+}
+
+export usize list_size(List* list)
+{
+    assert(list != nullptr);
+
+    return list->size;
+}
+
+export void list_destroy(List* list)
+{
+    assert(list != nullptr);
+
+    free(list->items);
+}

@@ -1,0 +1,31 @@
+export struct ASTReturnStmt
+{
+    AST* value;
+}
+
+export ASTReturnStmt* make_return_stmt(Arena* arena, AST* value)
+{
+    ASTReturnStmt* return_stmt = arena_alloc(arena, sizeof(ASTReturnStmt));
+
+    return_stmt->value = value;
+
+    return return_stmt;
+}
+
+export ASTReturnStmt* parse_return_stmt(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_KW_RETURN);
+
+    AST* value = nullptr;
+
+    if(parser->token->type != TOKEN_TYPE_SEMICOLON)
+    {
+        value = parse_expression(parser);
+    }
+
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+
+    return make_return_stmt(&parser->arena, value);
+}

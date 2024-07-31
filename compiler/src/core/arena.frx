@@ -1,0 +1,49 @@
+export struct Arena
+{
+    usize size;
+    usize pos;
+
+    void* buffer;
+}
+
+export void arena_init(Arena* arena, usize size)
+{
+    assert(arena != nullptr);
+
+    assert(size > 0);
+
+    arena->size = size;
+    arena->pos = 0;
+    arena->buffer = malloc(arena->size);
+}
+
+export void* arena_alloc(Arena* arena, usize size)
+{
+    assert(arena != nullptr);
+
+    assert(size > 0);
+
+    assert(arena->buffer != nullptr);
+
+    assert(arena->pos + size <= arena->size);
+
+    void* memory = arena->buffer + arena->pos;
+
+    arena->pos = arena->pos + size;
+
+    return memory;
+}
+
+export void arena_reset(Arena* arena)
+{
+    assert(arena != nullptr);
+
+    arena->pos = 0;
+}
+
+export void arena_destroy(Arena* arena)
+{
+    assert(arena != nullptr);
+
+    free(arena->buffer);
+}

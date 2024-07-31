@@ -1,0 +1,177 @@
+export struct Parser
+{
+    Lexer lexer;
+
+    ASTCompound* translation_unit;
+
+    Token* token;
+
+    Namespace* current_namespace;
+    Scope* current_scope;
+
+    b8 panic;
+    b8 failed;
+
+    Arena arena;
+}
+
+export void parser_init(Parser* parser, char* filepath)
+{
+    assert(parser != nullptr);
+
+    assert(filepath != nullptr);
+
+    lexer_init(&parser->lexer, filepath);
+
+    parser->translation_unit = nullptr;
+
+    parser->token = lexer_peek(&parser->lexer, 0);
+
+    parser->current_namespace = nullptr;
+    parser->current_scope = scope_create(nullptr);
+
+    parser->panic = false;
+    parser->failed = false;
+
+    arena_init(&parser->arena, 1024 * 1024);
+}
+
+void parser_advance(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    lexer_next_token(&parser->lexer);
+}
+
+export void parser_eat(Parser* parser, TokenType type)
+{
+    if(parser->token->type != type)
+    {
+        if(!parser->panic)
+        {   printf("%s:%zu%zu: Error: expected '%s', but found '%s'\n",
+                parser->lexer.filepath, parser->token->location.line,
+                parser->token->location.column, token_type_to_str(type),
+                token_type_to_str(parser->token->type));
+        }
+
+        parser->failed = true;
+        return;
+    }
+
+    parser->panic = false;
+    parser_advance(parser);
+}
+
+void parser_panic(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser->panic = true;
+
+    while(true)
+    {
+        switch(parser->token->type)
+        {
+            case TOKEN_TYPE_EOF:
+            {
+
+            }
+            case TOKEN_TYPE_ERROR:
+            {
+
+            }
+            case TOKEN_TYPE_SEMICOLON:
+            {
+
+            }
+            case TOKEN_TYPE_RBRACE:
+            {
+                return;
+            }
+            default:
+            {
+                parser_advance(parser);
+
+                break;
+            }
+        }
+    }
+}
+
+export void parser_parse(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser->translation_unit = parse_translation_unit(parser);
+}
+
+export void parser_next_token(Parser* parser)
+{
+    lexer_next_token(&parser->lexer);
+}
+
+export Token* parser_peek(Parser* parser, usize offset)
+{
+    assert(parser != nullptr);
+
+    return lexer_peek(&parser->lexer, offset);
+}
+
+export void parser_destroy(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    lexer_destroy(&parser->lexer);
+}
+
+void parser_push_namespace(Parser* parser, char* name)
+{
+    assert(parser != nullptr);
+
+    parser->current_namespace = namespace_create(parser->current_namespace,
+        name);
+}
+
+void parser_pop_namespace(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    assert(parser->current_namespace != nullptr);
+
+    parser->current_namespace = parser->current_namespace->parent;
+}
+
+void parser_push_scope(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser->current_scope = scope_create(parser->current_scope);
+}
+
+void parser_pop_scope(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser->current_scope = parser->current_scope->parent;
+}
+
+
+void parse_type(Parser* parser)
+{
+    Token* next = parser_peek(parser, 1);
+
+    while(parser->token->type == TOKEN_TYPE_IDENTIFIER
+        && next->type == TOKEN_TYPE_NAMESPACE_RESOLUTION)
+    {
+        //Handle possible namespace resolutions first
+    }
+
+    if(parser->token->type == TOKEN_TYPE_IDENTIFIER)
+    {
+
+    }
+    else
+    {
+
+    }
+}

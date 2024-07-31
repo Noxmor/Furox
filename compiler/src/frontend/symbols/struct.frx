@@ -1,0 +1,74 @@
+export struct StructSymbol
+{
+    Namespace* ns;
+    char* name;
+}
+
+struct StructTableEntry
+{
+    StructSymbol* symbol;
+    StructTableEntry* next;
+}
+
+macro STRUCT_TABLE_CAPACITY = 128;
+
+struct StructTable
+{
+    StructTableEntry*[STRUCT_TABLE_CAPACITY] entries;
+}
+
+StructTable struct_table;
+
+export StructSymbol* struct_table_find(Namespace* ns, char* name)
+{
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % STRUCT_TABLE_CAPACITY;
+    StructTableEntry* entry = struct_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        StructSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        {
+            return symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    return nullptr;
+}
+
+export StructSymbol* struct_table_find_or_insert(Namespace* ns, char* name)
+{
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % STRUCT_TABLE_CAPACITY;
+    StructTableEntry* entry = struct_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        StructSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        {
+            return symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    StructSymbol* symbol = malloc(sizeof(StructSymbol));
+    symbol->ns = ns;
+    symbol->name = name;
+
+    StructTableEntry* new_entry = malloc(sizeof(StructTableEntry));
+    new_entry->symbol = symbol;
+    new_entry->next = struct_table.entries[index];
+
+    struct_table.entries[index] = new_entry;
+
+    return symbol;
+}

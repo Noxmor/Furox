@@ -1,0 +1,16 @@
+export u64 hash_djb2(char* str)
+{
+    assert(str != nullptr);
+
+    u64 hash = 5381;
+
+    char c;
+    do
+    {
+        c = *str;
+        str = str + 1;
+        hash = ((hash << 5) + hash) + c;
+    } while(c);
+
+    return hash;
+}

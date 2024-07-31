@@ -1,0 +1,124 @@
+export struct EnumConstant
+{
+    char* name;
+
+    AST* value;
+}
+
+export struct EnumSymbol
+{
+    Namespace* ns;
+    char* name;
+
+    TokenType type;
+
+    List constants;
+}
+
+export void enum_symbol_add_constant(Arena* arena, EnumSymbol* symbol,
+    char* name, AST* value)
+{
+    assert(symbol != nullptr);
+
+    assert(name != nullptr);
+
+    EnumConstant* constant = malloc(sizeof(EnumConstant));
+
+    constant->name = name;
+    constant->value = value;
+
+    if(constant->value == nullptr)
+    {
+        if(list_size(&symbol->constants) == 0)
+        {
+            ASTIntLiteral* literal = make_int_literal(arena, 0);
+            constant->value = make_ast(arena, AST_TYPE_INT_LITERAL, literal);
+        }
+        else
+        {
+            EnumConstant* last_constant = list_get(&symbol->constants,
+                list_size(&symbol->constants) - 1);
+
+            AST* left = last_constant->value;
+
+            ASTIntLiteral* literal = make_int_literal(arena, 1);
+            AST* right = make_ast(arena, AST_TYPE_INT_LITERAL, literal);
+
+            ASTBinaryExpr* expr = make_binary_expr(arena, left, right);
+
+            constant->value = make_ast(arena, AST_TYPE_BINARY_EXPR, expr);
+        }
+    }
+
+    list_push(&symbol->constants, constant);
+}
+
+struct EnumTableEntry
+{
+    EnumSymbol* symbol;
+    EnumTableEntry* next;
+}
+
+macro ENUM_TABLE_CAPACITY = 128;
+
+struct EnumTable
+{
+    EnumTableEntry*[ENUM_TABLE_CAPACITY] entries;
+}
+
+EnumTable enum_table;
+
+export EnumSymbol* enum_table_find(Namespace* ns, char* name)
+{
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % ENUM_TABLE_CAPACITY;
+    EnumTableEntry* entry = enum_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        EnumSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        {
+            return entry->symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    return nullptr;
+}
+
+export EnumSymbol* enum_table_find_or_insert(Namespace* ns, char* name)
+{
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % ENUM_TABLE_CAPACITY;
+    EnumTableEntry* entry = enum_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        EnumSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        {
+            return entry->symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    EnumSymbol* symbol = malloc(sizeof(EnumSymbol));
+    symbol->ns = ns;
+    symbol->name = name;
+    list_init(&symbol->constants);
+
+    EnumTableEntry* new_entry = malloc(sizeof(EnumTableEntry));
+    new_entry->symbol = symbol;
+    new_entry->next = enum_table.entries[index];
+
+    enum_table.entries[index] = new_entry;
+
+    return symbol;
+}

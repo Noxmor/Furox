@@ -1,0 +1,25 @@
+export AST* parse_statement(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    AST* ast = nullptr;
+
+    switch(parser->token->type)
+    {
+        case TOKEN_TYPE_KW_RETURN:
+        {
+            ast = make_ast(&parser->arena, AST_TYPE_RETURN_STMT,
+                parse_return_stmt(parser));
+
+            break;
+        }
+        default:
+        {
+            parser_panic(parser);
+
+            break;
+        }
+    }
+
+    return ast;
+}

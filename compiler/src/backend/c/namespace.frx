@@ -1,0 +1,22 @@
+export void transpile_namespace(Transpiler* transpiler,
+    ASTNamespace* namespace_node)
+{
+    usize i;
+    for(i = 0; i < list_size(&namespace_node->global_scope); i = i + 1)
+    {
+        AST* ast = list_get(&namespace_node->global_scope, i);
+        transpile_ast(transpiler, ast);
+    }
+}
+
+export void transpile_namespace_resolution(Transpiler* transpiler,
+    Namespace* ns)
+{
+    assert(transpiler != nullptr);
+
+    while(ns != nullptr)
+    {
+        fprintf(transpiler->file, "%s_", ns->name);
+        ns = ns->parent;
+    }
+}

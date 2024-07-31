@@ -1,0 +1,68 @@
+export struct ASTScope
+{
+    List stmts;
+}
+
+export ASTScope* make_scope(Arena* arena)
+{
+    ASTScope* scope = arena_alloc(arena, sizeof(ASTScope));
+
+    list_init(&scope->stmts);
+
+    return scope;
+}
+
+export ASTScope* parse_scope(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_LBRACE);
+
+    parser_push_scope(parser);
+
+    ASTScope* scope = make_scope(&parser->arena);
+
+    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    {
+        switch(parser->token->type)
+        {
+            case TOKEN_TYPE_LBRACE:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AST_TYPE_SCOPE, parse_scope(parser)));
+
+                break;
+            }
+            case TOKEN_TYPE_KW_RETURN:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AST_TYPE_RETURN_STMT, parse_return_stmt(parser)));
+
+                break;
+            }
+            default:
+            {
+                parser_panic(parser);
+
+                break;
+            }
+        }
+    }
+
+    parser_eat(parser, TOKEN_TYPE_RBRACE);
+
+    parser_pop_scope(parser);
+
+    return scope;
+}
+
+export void print_scope(ASTScope* scope, FILE* file, usize depth)
+{
+    assert(scope != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_SCOPE));
+}

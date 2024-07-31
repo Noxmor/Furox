@@ -1,0 +1,49 @@
+export struct ASTFuncDef
+{
+    FuncSymbol* symbol;
+
+    ASTScope* body;
+}
+
+export ASTFuncDef* make_func_def(Arena* arena, Namespace* ns, char* name,
+    ASTTypeSpecifier* return_type)
+{
+    ASTFuncDef* func_def = arena_alloc(arena, sizeof(ASTFuncDef));
+
+    func_def->symbol = func_table_find_or_insert(ns, name, return_type);
+
+    return func_def;
+}
+
+export ASTFuncDef* parse_func_def(Parser* parser, ASTTypeSpecifier* return_type)
+{
+    assert(parser != nullptr);
+
+    ASTFuncDef* func_def = make_func_def(&parser->arena,
+        parser->current_namespace, parser->token->identifier, return_type);
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    parser_eat(parser, TOKEN_TYPE_LPAREN);
+    parser_eat(parser, TOKEN_TYPE_RPAREN);
+
+    func_def->body = parse_scope(parser);
+
+    return func_def;
+}
+
+export void print_func_def(ASTFuncDef* func_def, FILE* file, usize depth)
+{
+    assert(func_def != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    FuncSymbol* symbol = func_def->symbol;
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_FUNC_DEF),
+        symbol->name);
+
+    print_type_specifier(symbol->return_type, file, depth + 1);
+}

@@ -1,0 +1,178 @@
+char*[AST_TYPE_COUNT] ast_type_names = {
+    "program",
+    "compound",
+    "type-specifier",
+    "import-statement",
+    "namespace",
+    "enum-definition",
+    "struct-definition",
+    "function-definition",
+    "scope",
+    "binary-expression",
+    "return-statement",
+    "int-literal"
+};
+
+export enum ASTType : u8
+{
+    AST_TYPE_PROGRAM,
+    AST_TYPE_COMPOUND,
+
+    AST_TYPE_TYPE_SPECIFIER,
+
+    AST_TYPE_IMPORT_STMT,
+    AST_TYPE_NAMESPACE,
+    AST_TYPE_ENUM_DEF,
+    AST_TYPE_STRUCT_DEF,
+    AST_TYPE_FUNC_DEF,
+    AST_TYPE_SCOPE,
+
+    AST_TYPE_BINARY_EXPR,
+
+    AST_TYPE_RETURN_STMT,
+
+    AST_TYPE_INT_LITERAL,
+
+    AST_TYPE_COUNT
+}
+
+export struct AST
+{
+    ASTType type;
+    void* node;
+}
+
+export AST* make_ast(Arena* arena, ASTType type, void* node)
+{
+    assert(type < AST_TYPE_COUNT);
+
+    assert(node != nullptr);
+
+    AST* ast = arena_alloc(arena, sizeof(AST));
+
+    ast->type = type;
+    ast->node = node;
+
+    return ast;
+}
+
+export void print_ast(AST* ast, FILE* file, usize depth)
+{
+    assert(ast != nullptr);
+
+    void* node = ast->node;
+
+    switch(ast->type)
+    {
+        case AST_TYPE_COMPOUND:
+        {
+            print_compound(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_IMPORT_STMT:
+        {
+            print_import_stmt(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_NAMESPACE:
+        {
+            print_namespace(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_ENUM_DEF:
+        {
+            print_enum_def(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_STRUCT_DEF:
+        {
+            print_struct_def(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_FUNC_DEF:
+        {
+            print_func_def(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_SCOPE:
+        {
+            print_scope(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_BINARY_EXPR:
+        {
+            print_binary_expr(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_INT_LITERAL:
+        {
+            print_int_literal(node, file, depth);
+
+            break;
+        }
+        default:
+        {
+            assert(false);
+
+            break;
+        }
+    }
+}
+
+export struct ASTCompound
+{
+    List nodes;
+}
+
+export ASTCompound* make_compound(Arena* arena)
+{
+    ASTCompound* compound = arena_alloc(arena, sizeof(ASTCompound));
+
+    list_init(&compound->nodes);
+
+    return compound;
+}
+
+export void print_compound(ASTCompound* compound, FILE* file, usize depth)
+{
+    assert(compound != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_COMPOUND));
+
+    usize i;
+    for(i = 0; i < list_size(&compound->nodes); i = i + 1)
+    {
+        AST* ast = list_get(&compound->nodes, i);
+        print_ast(ast, file, depth + 1);
+    }
+}
+
+export void print_ast_depth(FILE* file, usize depth)
+{
+    assert(file != nullptr);
+
+    usize i;
+    for(i = 0; i < depth; i = i + 1)
+    {
+        fprintf(file, "    ");
+    }
+}
+
+export char* ast_type_to_str(ASTType type)
+{
+    assert(type < AST_TYPE_COUNT);
+
+    return ast_type_names[type];
+}

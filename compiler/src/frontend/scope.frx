@@ -1,0 +1,19 @@
+export struct Scope
+{
+    Scope* parent;
+    usize id;
+}
+
+usize next_scope_id;
+
+export Scope* scope_create(Scope* parent)
+{
+    Scope* scope = malloc(sizeof(Scope));
+
+    scope->parent = parent;
+    scope->id = next_scope_id;
+
+    next_scope_id = next_scope_id + 1;
+
+    return scope;
+}
