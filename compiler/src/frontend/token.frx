@@ -268,8 +268,7 @@ export struct Token
 {
     TokenType type;
 
-    //TODO: Replace with: SourceRange range;
-    SourceLocation location;
+    SourceRange range;
 
     char* identifier;
     u64 int_literal;

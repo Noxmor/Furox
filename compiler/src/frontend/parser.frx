@@ -49,8 +49,8 @@ export void parser_eat(Parser* parser, TokenType type)
     {
         if(!parser->panic)
         {   printf("%s:%zu%zu: Error: expected '%s', but found '%s'\n",
-                parser->lexer.filepath, parser->token->location.line,
-                parser->token->location.column, token_type_to_str(type),
+                parser->lexer.filepath, parser->token->range.start.line,
+                parser->token->range.start.column, token_type_to_str(type),
                 token_type_to_str(parser->token->type));
         }
 
