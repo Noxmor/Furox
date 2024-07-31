@@ -108,7 +108,8 @@ AST* parse_global_scope(Parser* parser)
             {
                 case TOKEN_TYPE_SEMICOLON:
                 {
-                    //TODO: Parse var decl
+                    ast = make_ast(&parser->arena, AST_TYPE_VAR_DECL,
+                        parse_var_decl(parser, type_specifier));
 
                     break;
                 }

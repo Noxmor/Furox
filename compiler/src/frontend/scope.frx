@@ -17,3 +17,20 @@ export Scope* scope_create(Scope* parent)
 
     return scope;
 }
+
+export b8 scope_is_child_of(Scope* child, Scope* parent)
+{
+    assert(child != nullptr && parent != nullptr);
+
+    if(child->id == parent->id)
+    {
+        return true;
+    }
+
+    if(child->parent == nullptr)
+    {
+        return false;
+    }
+
+    return scope_is_child_of(child->parent, parent);
+}
