@@ -46,6 +46,12 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
 
             break;
         }
+        case AST_TYPE_VAR_DEF:
+        {
+            transpile_var_def(transpiler, node);
+
+            break;
+        }
         case AST_TYPE_BINARY_EXPR:
         {
             transpile_binary_expr(transpiler, node);

@@ -1,0 +1,15 @@
+export void transpile_var_def(Transpiler* transpiler, ASTVarDef* var_def)
+{
+    assert(transpiler != nullptr);
+
+    assert(var_def != nullptr);
+
+    VarSymbol* symbol = var_def->symbol;
+
+    transpile_type_specifier(transpiler, symbol->type);
+    fprintf(transpiler->file, "%s", symbol->name);
+    transpile_type_specifier_array_dimensions(transpiler, symbol->type);
+    fprintf(transpiler->file, " = ");
+    transpile_ast(transpiler, var_def->value);
+    fprintf(transpiler->file, ";\n");
+}

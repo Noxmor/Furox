@@ -9,6 +9,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "function-definition",
     "scope",
     "variable-declaration",
+    "variable-definition",
     "binary-expression",
     "return-statement",
     "int-literal"
@@ -29,6 +30,7 @@ export enum ASTType : u8
     AST_TYPE_SCOPE,
 
     AST_TYPE_VAR_DECL,
+    AST_TYPE_VAR_DEF,
 
     AST_TYPE_BINARY_EXPR,
 
@@ -112,6 +114,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_VAR_DECL:
         {
             print_var_decl(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_VAR_DEF:
+        {
+            print_var_def(node, file, depth);
 
             break;
         }
