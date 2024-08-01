@@ -1,15 +1,52 @@
 export struct ASTUnaryExpr
 {
+    TokenType operator;
     AST* operand;
 }
 
-export ASTUnaryExpr* make_unary_expr(Arena* arena, AST* operand)
+export ASTUnaryExpr* make_unary_expr(Arena* arena, TokenType operator,
+    AST* operand)
 {
+    assert(token_type_is_unary_operator(operator)
+        || operator == TOKEN_TYPE_ERROR);
+
+    assert(operand != nullptr);
+
     ASTUnaryExpr* unary_expr = arena_alloc(arena, sizeof(ASTUnaryExpr));
 
+    unary_expr->operator = operator;
     unary_expr->operand = operand;
 
     return unary_expr;
+}
+
+export ASTUnaryExpr* parse_unary_expr(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    TokenType operator = parser->token->type;
+    if(!token_type_is_unary_operator(operator))
+    {
+        operator = TOKEN_TYPE_ERROR;
+
+        parser_panic(parser);
+    }
+
+    parser_eat(parser, parser->token->type);
+
+    AST* operand = nullptr;
+    if(parser->token->type == TOKEN_TYPE_LPAREN)
+    {
+        parser_eat(parser, TOKEN_TYPE_LPAREN);
+        operand = parse_expr(parser);
+        parser_eat(parser, TOKEN_TYPE_RPAREN);
+    }
+    else
+    {
+        operand = parse_primary_expr(parser);
+    }
+
+    return make_unary_expr(&parser->arena, operator, operand);
 }
 
 export void print_unary_expr(ASTUnaryExpr* expr, FILE* file, usize depth)
@@ -20,7 +57,8 @@ export void print_unary_expr(ASTUnaryExpr* expr, FILE* file, usize depth)
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_UNARY_EXPR));
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_UNARY_EXPR),
+        token_type_to_str(expr->operator));
 
     print_ast(expr->operand, file, depth + 1);
 }

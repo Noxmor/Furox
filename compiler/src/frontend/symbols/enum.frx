@@ -44,7 +44,10 @@ export void enum_symbol_add_constant(Arena* arena, EnumSymbol* symbol,
             ASTIntLiteral* literal = make_int_literal(arena, 1);
             AST* right = make_ast(arena, AST_TYPE_INT_LITERAL, literal);
 
-            ASTBinaryExpr* expr = make_binary_expr(arena, left, right);
+            TokenType operator = TOKEN_TYPE_PLUS;
+
+            ASTBinaryExpr* expr = make_binary_expr(arena, operator,
+                left, right);
 
             constant->value = make_ast(arena, AST_TYPE_BINARY_EXPR, expr);
         }

@@ -52,6 +52,10 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
 
             break;
         }
+        case AST_TYPE_UNARY_EXPR:
+        {
+            transpile_unary_expr(transpiler, node);
+        }
         case AST_TYPE_BINARY_EXPR:
         {
             transpile_binary_expr(transpiler, node);

@@ -251,6 +251,109 @@ export b8 token_type_is_primitive(TokenType type)
     return type >= TOKEN_TYPE_KW_U8 && type <= TOKEN_TYPE_KW_VOID;
 }
 
+export b8 token_type_is_unary_operator(TokenType type)
+{
+    assert(type < TOKEN_TYPE_COUNT);
+
+    switch(type)
+    {
+        case TOKEN_TYPE_BIN_AND:
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+export b8 token_type_is_binary_operator(TokenType type)
+{
+    assert(type < TOKEN_TYPE_COUNT);
+
+    switch(type)
+    {
+        case TOKEN_TYPE_PLUS:
+        {
+
+        }
+        case TOKEN_TYPE_MINUS:
+        {
+
+        }
+        case TOKEN_TYPE_STAR:
+        {
+
+        }
+        case TOKEN_TYPE_DIVIDE:
+        {
+
+        }
+        case TOKEN_TYPE_MODULO:
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+export enum Precedence : u8
+{
+    PRECEDENCE_MAX,
+
+    PRECEDENCE_1,
+    PRECEDENCE_2,
+    PRECEDENCE_3,
+    PRECEDENCE_4,
+    PRECEDENCE_5,
+    PRECEDENCE_6,
+    PRECEDENCE_7,
+    PRECEDENCE_8,
+    PRECEDENCE_9,
+    PRECEDENCE_10,
+    PRECEDENCE_11,
+    PRECEDENCE_12,
+    PRECEDENCE_13,
+    PRECEDENCE_14,
+
+    PRECEDENCE_MIN,
+
+    PRECEDENCE_COUNT
+}
+
+export Precedence token_type_to_binary_operator_precedence(TokenType type)
+{
+    assert(type < TOKEN_TYPE_COUNT);
+
+    switch(type)
+    {
+        case TOKEN_TYPE_PLUS:
+        {
+            return PRECEDENCE_4;
+        }
+        case TOKEN_TYPE_MINUS:
+        {
+            return PRECEDENCE_4;
+        }
+        case TOKEN_TYPE_STAR:
+        {
+            return PRECEDENCE_3;
+        }
+        case TOKEN_TYPE_DIVIDE:
+        {
+            return PRECEDENCE_3;
+        }
+        case TOKEN_TYPE_MODULO:
+        {
+            return PRECEDENCE_3;
+        }
+    }
+
+    assert(false);
+
+    return PRECEDENCE_1;
+}
+
 export struct SourceLocation
 {
     usize pos;

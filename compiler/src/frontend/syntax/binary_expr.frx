@@ -1,12 +1,21 @@
+
 export struct ASTBinaryExpr
 {
+    TokenType operator;
+    Precedence precedence;
+
     AST* left;
     AST* right;
 }
 
-export ASTBinaryExpr* make_binary_expr(Arena* arena, AST* left, AST* right)
+export ASTBinaryExpr* make_binary_expr(Arena* arena, TokenType operator,
+    AST* left, AST* right)
 {
     assert(arena != nullptr);
+
+    assert(operator < TOKEN_TYPE_COUNT);
+
+    assert(token_type_is_binary_operator(operator));
 
     assert(left != nullptr);
 
@@ -14,17 +23,12 @@ export ASTBinaryExpr* make_binary_expr(Arena* arena, AST* left, AST* right)
 
     ASTBinaryExpr* expr = arena_alloc(arena, sizeof(ASTBinaryExpr));
 
+    expr->operator = operator;
+    expr->precedence = token_type_to_binary_operator_precedence(operator);
     expr->left = left;
     expr->right = right;
 
     return expr;
-}
-
-export ASTBinaryExpr* parse_binary_expression(Parser* parser)
-{
-    assert(parser != nullptr);
-
-    return nullptr;
 }
 
 export void print_binary_expr(ASTBinaryExpr* expr, FILE* file, usize depth)
@@ -35,7 +39,8 @@ export void print_binary_expr(ASTBinaryExpr* expr, FILE* file, usize depth)
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_BINARY_EXPR));
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_BINARY_EXPR),
+        token_type_to_str(expr->operator));
 
     print_ast(expr->left, file, depth + 1);
     print_ast(expr->right, file, depth + 1);

@@ -125,6 +125,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
 
             break;
         }
+        case AST_TYPE_UNARY_EXPR:
+        {
+            print_unary_expr(node, file, depth);
+
+            break;
+        }
         case AST_TYPE_BINARY_EXPR:
         {
             print_binary_expr(node, file, depth);

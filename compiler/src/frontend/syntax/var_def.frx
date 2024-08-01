@@ -28,7 +28,7 @@ export ASTVarDef* parse_var_def(Parser* parser, ASTTypeSpecifier* type)
 
     parser_eat(parser, TOKEN_TYPE_EQ);
 
-    var_def->value = parse_expression(parser);
+    var_def->value = parse_expr(parser);
 
     parser_eat(parser, TOKEN_TYPE_SEMICOLON);
 

@@ -1,0 +1,74 @@
+export AST* parse_primary_expr(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    if(token_type_is_unary_operator(parser->token->type))
+    {
+        return make_ast(&parser->arena, AST_TYPE_UNARY_EXPR,
+            parse_unary_expr(parser));
+    }
+
+    AST* primary_expr = nullptr;
+
+    switch(parser->token->type)
+    {
+        case TOKEN_TYPE_INT_LITERAL:
+        {
+            primary_expr = make_ast(&parser->arena, AST_TYPE_INT_LITERAL,
+                parse_int_literal(parser));
+
+            break;
+        }
+        default:
+        {
+            parser_panic(parser);
+
+            break;
+        }
+    }
+
+    return primary_expr;
+}
+
+export AST* parse_expr(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    AST* expr = nullptr;
+
+    if(parser->token->type == TOKEN_TYPE_LPAREN)
+    {
+        parser_eat(parser, TOKEN_TYPE_LPAREN);
+
+        expr = parse_expr(parser);
+        if(expr->type == AST_TYPE_BINARY_EXPR)
+        {
+            ASTBinaryExpr* binary_expr = expr->node;
+            binary_expr->precedence = PRECEDENCE_MAX;
+        }
+
+        parser_eat(parser, TOKEN_TYPE_RPAREN);
+    }
+    else
+    {
+        expr = parse_primary_expr(parser);
+    }
+
+    if(!token_type_is_binary_operator(parser->token->type))
+    {
+        return expr;
+    }
+
+    TokenType operator = parser->token->type;
+
+    parser_eat(parser, parser->token->type);
+
+    AST* left = expr;
+    AST* right = parse_expr(parser);
+    ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena, operator,
+        left, right);
+
+    //TODO: Handle operator precedence
+
+    return make_ast(&parser->arena, AST_TYPE_BINARY_EXPR, binary_expr);
+}

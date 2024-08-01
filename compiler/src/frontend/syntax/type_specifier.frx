@@ -114,7 +114,7 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
     {
         parser_eat(parser, TOKEN_TYPE_LBRACKET);
 
-        list_push(&type_specifier->array_dimensions, parse_expression(parser));
+        list_push(&type_specifier->array_dimensions, parse_expr(parser));
 
         parser_eat(parser, TOKEN_TYPE_RBRACKET);
     }

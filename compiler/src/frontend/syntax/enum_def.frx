@@ -84,7 +84,7 @@ export ASTEnumDef* parse_enum_def(Parser* parser)
         {
             parser_eat(parser, TOKEN_TYPE_EQ);
 
-            value = parse_expression(parser);
+            value = parse_expr(parser);
         }
 
         enum_symbol_add_constant(&parser->arena, symbol, name, value);

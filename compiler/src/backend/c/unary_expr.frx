@@ -1,0 +1,10 @@
+export void transpile_unary_expr(Transpiler* transpiler, ASTUnaryExpr* expr)
+{
+    assert(transpiler != nullptr);
+
+    assert(expr != nullptr);
+
+    fprintf(transpiler->file, "%s(", token_type_to_str(expr->operator));
+    transpile_ast(transpiler, expr->operand);
+    fprintf(transpiler->file, ")");
+}

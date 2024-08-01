@@ -22,7 +22,7 @@ export ASTReturnStmt* parse_return_stmt(Parser* parser)
 
     if(parser->token->type != TOKEN_TYPE_SEMICOLON)
     {
-        value = parse_expression(parser);
+        value = parse_expr(parser);
     }
 
     parser_eat(parser, TOKEN_TYPE_SEMICOLON);
