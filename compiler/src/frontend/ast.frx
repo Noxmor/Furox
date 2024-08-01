@@ -10,6 +10,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "scope",
     "variable-declaration",
     "variable-definition",
+    "unary-expression",
     "binary-expression",
     "return-statement",
     "int-literal"
@@ -32,6 +33,7 @@ export enum ASTType : u8
     AST_TYPE_VAR_DECL,
     AST_TYPE_VAR_DEF,
 
+    AST_TYPE_UNARY_EXPR,
     AST_TYPE_BINARY_EXPR,
 
     AST_TYPE_RETURN_STMT,

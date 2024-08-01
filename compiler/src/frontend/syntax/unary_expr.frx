@@ -1,0 +1,26 @@
+export struct ASTUnaryExpr
+{
+    AST* operand;
+}
+
+export ASTUnaryExpr* make_unary_expr(Arena* arena, AST* operand)
+{
+    ASTUnaryExpr* unary_expr = arena_alloc(arena, sizeof(ASTUnaryExpr));
+
+    unary_expr->operand = operand;
+
+    return unary_expr;
+}
+
+export void print_unary_expr(ASTUnaryExpr* expr, FILE* file, usize depth)
+{
+    assert(expr != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_UNARY_EXPR));
+
+    print_ast(expr->operand, file, depth + 1);
+}
