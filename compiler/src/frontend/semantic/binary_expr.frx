@@ -1,0 +1,9 @@
+export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
+{
+    assert(parser != nullptr);
+
+    assert(expr != nullptr);
+
+    analyze_ast(parser, expr->left);
+    analyze_ast(parser, expr->right);
+}

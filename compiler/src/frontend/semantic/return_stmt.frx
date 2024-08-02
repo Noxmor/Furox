@@ -1,0 +1,11 @@
+export void analyze_return_stmt(Parser* parser, ASTReturnStmt* return_stmt)
+{
+    assert(parser != nullptr);
+
+    assert(return_stmt != nullptr);
+
+    if(return_stmt->value != nullptr)
+    {
+        analyze_ast(parser, return_stmt->value);
+    }
+}

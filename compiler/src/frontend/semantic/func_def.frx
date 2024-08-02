@@ -1,0 +1,8 @@
+export void analyze_func_def(Parser* parser, ASTFuncDef* func_def)
+{
+    assert(parser != nullptr);
+
+    assert(func_def != nullptr);
+
+    analyze_scope(parser, func_def->body);
+}

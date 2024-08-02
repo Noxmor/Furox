@@ -1,0 +1,13 @@
+export void analyze_namespace(Parser* parser, ASTNamespace* namespace_node)
+{
+    assert(parser != nullptr);
+
+    assert(namespace_node != nullptr);
+
+    usize i;
+    for(i = 0; i < list_size(&namespace_node->global_scope); i = i + 1)
+    {
+        AST* ast = list_get(&namespace_node->global_scope, i);
+        analyze_ast(parser, ast);
+    }
+}

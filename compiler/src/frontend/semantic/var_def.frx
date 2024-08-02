@@ -1,0 +1,8 @@
+export void analyze_var_def(Parser* parser, ASTVarDef* var_def)
+{
+    assert(parser != nullptr);
+
+    assert(var_def != nullptr);
+
+    analyze_ast(parser, var_def->value);
+}

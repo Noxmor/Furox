@@ -1,0 +1,78 @@
+export void analyze_ast(Parser* parser, AST* ast)
+{
+    assert(ast != nullptr);
+
+    void* node = ast->node;
+
+    switch(ast->type)
+    {
+        case AST_TYPE_IMPORT_STMT:
+        {
+            break;
+        }
+        case AST_TYPE_NAMESPACE:
+        {
+            analyze_namespace(parser, node);
+
+            break;
+        }
+        case AST_TYPE_ENUM_DEF:
+        {
+            break;
+        }
+        case AST_TYPE_STRUCT_DEF:
+        {
+            break;
+        }
+        case AST_TYPE_FUNC_DEF:
+        {
+            analyze_func_def(parser, node);
+
+            break;
+        }
+        case AST_TYPE_SCOPE:
+        {
+            analyze_scope(parser, node);
+
+            break;
+        }
+        case AST_TYPE_VAR_DECL:
+        {
+            break;
+        }
+        case AST_TYPE_VAR_DEF:
+        {
+            analyze_var_def(parser, node);
+
+            break;
+        }
+        case AST_TYPE_UNARY_EXPR:
+        {
+            analyze_unary_expr(parser, node);
+
+            break;
+        }
+        case AST_TYPE_BINARY_EXPR:
+        {
+            analyze_binary_expr(parser, node);
+
+            break;
+        }
+        case AST_TYPE_RETURN_STMT:
+        {
+            analyze_return_stmt(parser, node);
+
+            break;
+        }
+        case AST_TYPE_INT_LITERAL:
+        {
+            break;
+        }
+        default:
+        {
+            assert(false);
+
+            break;
+        }
+    }
+}

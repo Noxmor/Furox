@@ -105,6 +105,13 @@ export void parser_parse(Parser* parser)
     parser->translation_unit = parse_translation_unit(parser);
 }
 
+export void parser_analyze(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    analyze_compound(parser, parser->translation_unit);
+}
+
 export void parser_next_token(Parser* parser)
 {
     lexer_next_token(&parser->lexer);

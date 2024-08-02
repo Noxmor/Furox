@@ -1,0 +1,13 @@
+export void analyze_scope(Parser* parser, ASTScope* scope)
+{
+    assert(parser != nullptr);
+
+    assert(scope != nullptr);
+
+    usize i;
+    for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+    {
+        AST* stmt = list_get(&scope->stmts, i);
+        analyze_ast(parser, stmt);
+    }
+}

@@ -1,0 +1,8 @@
+export void analyze_unary_expr(Parser* parser, ASTUnaryExpr* expr)
+{
+    assert(parser != nullptr);
+
+    assert(expr != nullptr);
+
+    analyze_ast(parser, expr->operand);
+}
