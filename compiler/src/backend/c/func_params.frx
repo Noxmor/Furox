@@ -20,6 +20,10 @@ export void transpile_func_params(Transpiler* transpiler, ASTFuncParams* params)
     {
         transpile_func_param(transpiler, list_get(&params->params, 0));
     }
+    else
+    {
+        fprintf(transpiler->file, "void");
+    }
 
     usize i;
     for(i = 1; i < list_size(&params->params); i = i + 1)
