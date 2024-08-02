@@ -5,12 +5,14 @@ export void transpile_return_stmt(Transpiler* transpiler,
 
     assert(return_stmt != nullptr);
 
-    fprintf(transpiler->file, "return ");
-
     if(return_stmt->value != nullptr)
     {
+        fprintf(transpiler->file, "return ");
         transpile_ast(transpiler, return_stmt->value);
+        fprintf(transpiler->file, ";\n");
     }
-
-    fprintf(transpiler->file, ";\n");
+    else
+    {
+        fprintf(transpiler->file, "return;\n");
+    }
 }
