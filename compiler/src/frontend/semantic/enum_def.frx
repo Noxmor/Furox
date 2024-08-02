@@ -1,0 +1,16 @@
+export void analyze_enum_def(Parser* parser, ASTEnumDef* enum_def)
+{
+    assert(parser != nullptr);
+
+    assert(enum_def != nullptr);
+
+    if(enum_def->symbol == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        log_error(parser->lexer.filepath, loc,
+            "Encountered redefinition of enum %s!", enum_def->name);
+
+        parser->failed = true;
+    }
+}

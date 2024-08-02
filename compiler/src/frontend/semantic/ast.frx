@@ -18,6 +18,8 @@ export void analyze_ast(Parser* parser, AST* ast)
         }
         case AST_TYPE_ENUM_DEF:
         {
+            analyze_enum_def(parser, node);
+
             break;
         }
         case AST_TYPE_STRUCT_DEF:

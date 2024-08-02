@@ -1,59 +1,6 @@
-export struct EnumConstant
-{
-    char* name;
-
-    AST* value;
-}
-
 export struct EnumSymbol
 {
-    Namespace* ns;
-    char* name;
-
-    TokenType type;
-
-    List constants;
-}
-
-export void enum_symbol_add_constant(Arena* arena, EnumSymbol* symbol,
-    char* name, AST* value)
-{
-    assert(symbol != nullptr);
-
-    assert(name != nullptr);
-
-    EnumConstant* constant = malloc(sizeof(EnumConstant));
-
-    constant->name = name;
-    constant->value = value;
-
-    if(constant->value == nullptr)
-    {
-        if(list_size(&symbol->constants) == 0)
-        {
-            ASTIntLiteral* literal = make_int_literal(arena, 0);
-            constant->value = make_ast(arena, AST_TYPE_INT_LITERAL, literal);
-        }
-        else
-        {
-            EnumConstant* last_constant = list_get(&symbol->constants,
-                list_size(&symbol->constants) - 1);
-
-            AST* left = last_constant->value;
-
-            ASTIntLiteral* literal = make_int_literal(arena, 1);
-            AST* right = make_ast(arena, AST_TYPE_INT_LITERAL, literal);
-
-            TokenType operator = TOKEN_TYPE_PLUS;
-
-            ASTBinaryExpr* expr = make_binary_expr(arena, operator,
-                left, right);
-
-            constant->value = make_ast(arena, AST_TYPE_BINARY_EXPR, expr);
-        }
-    }
-
-    list_push(&symbol->constants, constant);
+    ASTEnumDef* enum_def;
 }
 
 struct EnumTableEntry
@@ -82,7 +29,8 @@ export EnumSymbol* enum_table_find(Namespace* ns, char* name)
     {
         EnumSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(strcmp(symbol->enum_def->name, name) == 0
+            && namespace_equals(symbol->enum_def->ns, ns))
         {
             return entry->symbol;
         }
@@ -93,29 +41,28 @@ export EnumSymbol* enum_table_find(Namespace* ns, char* name)
     return nullptr;
 }
 
-export EnumSymbol* enum_table_find_or_insert(Namespace* ns, char* name)
+export EnumSymbol* enum_table_insert(ASTEnumDef* enum_def)
 {
-    assert(name != nullptr);
+    assert(enum_def != nullptr);
 
-    u64 index = hash_djb2(name) % ENUM_TABLE_CAPACITY;
+    u64 index = hash_djb2(enum_def->name) % ENUM_TABLE_CAPACITY;
     EnumTableEntry* entry = enum_table.entries[index];
 
     while(entry != nullptr)
     {
         EnumSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(strcmp(symbol->enum_def->name, enum_def->name) == 0
+            && namespace_equals(symbol->enum_def->ns, enum_def->ns))
         {
-            return entry->symbol;
+            return nullptr;
         }
 
         entry = entry->next;
     }
 
     EnumSymbol* symbol = malloc(sizeof(EnumSymbol));
-    symbol->ns = ns;
-    symbol->name = name;
-    list_init(&symbol->constants);
+    symbol->enum_def = enum_def;
 
     EnumTableEntry* new_entry = malloc(sizeof(EnumTableEntry));
     new_entry->symbol = symbol;

@@ -144,8 +144,8 @@ void print_type_specifier(ASTTypeSpecifier* type_specifier, FILE* file,
     {
         EnumSymbol* symbol = type_specifier->enum_type;
 
-        print_namespace_resolution(file, symbol->ns);
-        fprintf(file, "%s", symbol->name);
+        print_namespace_resolution(file, symbol->enum_def->ns);
+        fprintf(file, "%s", symbol->enum_def->name);
     }
     else if(type_specifier->struct_type != nullptr)
     {

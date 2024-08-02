@@ -1,13 +1,105 @@
+export struct ASTEnumConstant
+{
+    char* name;
+    AST* value;
+}
+
+ASTEnumConstant* make_enum_constant(Arena* arena, char* name, AST* value)
+{
+    assert(name != nullptr);
+
+    ASTEnumConstant* constant = arena_alloc(arena, sizeof(ASTEnumConstant));
+
+    constant->name = name;
+    constant->value = value;
+
+    return constant;
+}
+
+ASTEnumConstant* parse_enum_constant(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    AST* value = nullptr;
+    if(parser->token->type == TOKEN_TYPE_EQ)
+    {
+        parser_eat(parser, TOKEN_TYPE_EQ);
+
+        value = parse_expr(parser);
+    }
+
+    return make_enum_constant(&parser->arena, name, value);
+}
+
 export struct ASTEnumDef
 {
     EnumSymbol* symbol;
+
+    TokenType type;
+
+    Namespace* ns;
+    char* name;
+
+    List constants;
 }
 
-export ASTEnumDef* make_enum_def(Arena* arena, Namespace* ns, char* name)
+void enum_def_add_constant(Arena* arena, ASTEnumDef* enum_def,
+    ASTEnumConstant* constant)
 {
+    assert(enum_def != nullptr);
+
+    assert(constant != nullptr);
+
+    if(constant->value == nullptr)
+    {
+        AST* new_value = nullptr;
+
+        if(list_size(&enum_def->constants) == 0)
+        {
+            ASTIntLiteral* literal = make_int_literal(arena, 0);
+            new_value = make_ast(arena, AST_TYPE_INT_LITERAL, literal);
+        }
+        else
+        {
+            ASTIntLiteral* literal = make_int_literal(arena, 1);
+
+            ASTEnumConstant* last_constant = list_get(&enum_def->constants,
+                list_size(&enum_def->constants) - 1);
+
+            AST* left = last_constant->value;
+            AST* right = make_ast(arena, AST_TYPE_INT_LITERAL, literal);
+
+            ASTBinaryExpr* expr = make_binary_expr(arena, TOKEN_TYPE_PLUS,
+                left, right);
+
+            new_value = make_ast(arena, AST_TYPE_BINARY_EXPR, expr);
+        }
+
+        constant->value = new_value;
+    }
+
+    list_push(&enum_def->constants, constant);
+}
+
+export ASTEnumDef* make_enum_def(Arena* arena, Namespace* ns, char* name,
+    TokenType type)
+{
+    assert(name != nullptr);
+
+    assert(type != TOKEN_TYPE_ERROR);
+
     ASTEnumDef* enum_def = arena_alloc(arena, sizeof(ASTEnumDef));
 
-    enum_def->symbol = enum_table_find_or_insert(ns, name);
+    enum_def->type = type;
+    enum_def->ns = ns;
+    enum_def->name = name;
+    list_init(&enum_def->constants);
+
+    enum_def->symbol = enum_table_insert(enum_def);
 
     return enum_def;
 }
@@ -18,12 +110,14 @@ export ASTEnumDef* parse_enum_def(Parser* parser)
 
     parser_eat(parser, TOKEN_TYPE_KW_ENUM);
 
-    ASTEnumDef* enum_def = make_enum_def(&parser->arena,
-        parser->current_namespace, parser->token->identifier);
+    char* name = parser->token->identifier;
+
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
     parser_eat(parser, TOKEN_TYPE_COLON);
+
+    TokenType type = TOKEN_TYPE_ERROR;
 
     switch(parser->token->type)
     {
@@ -57,7 +151,7 @@ export ASTEnumDef* parse_enum_def(Parser* parser)
         }
         case TOKEN_TYPE_KW_U64:
         {
-            enum_def->symbol->type = parser->token->type;
+            type = parser->token->type;
 
             parser_eat(parser, parser->token->type);
 
@@ -65,29 +159,22 @@ export ASTEnumDef* parse_enum_def(Parser* parser)
         }
         default:
         {
-            return nullptr;
+            parser_panic(parser);
+
+            break;
         }
     }
 
-    parser_eat(parser, TOKEN_TYPE_LBRACE);
+    ASTEnumDef* enum_def = make_enum_def(&parser->arena,
+        parser->current_namespace, name, type);
 
-    EnumSymbol* symbol = enum_def->symbol;
+    parser_eat(parser, TOKEN_TYPE_LBRACE);
 
     while(parser->token->type != TOKEN_TYPE_RBRACE)
     {
-        char* name = parser->token->identifier;
+        ASTEnumConstant* constant = parse_enum_constant(parser);
 
-        parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
-
-        AST* value = nullptr;
-        if(parser->token->type == TOKEN_TYPE_EQ)
-        {
-            parser_eat(parser, TOKEN_TYPE_EQ);
-
-            value = parse_expr(parser);
-        }
-
-        enum_symbol_add_constant(&parser->arena, symbol, name, value);
+        enum_def_add_constant(&parser->arena, enum_def, constant);
 
         if(parser->token->type == TOKEN_TYPE_COMMA)
         {
@@ -112,15 +199,13 @@ export void print_enum_def(ASTEnumDef* enum_def, FILE* file, usize depth)
 
     print_ast_depth(file, depth);
 
-    EnumSymbol* symbol = enum_def->symbol;
-
     fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_ENUM_DEF),
-        symbol->name);
+        enum_def->name);
 
     usize i;
-    for(i = 0; i < list_size(&symbol->constants); i = i + 1)
+    for(i = 0; i < list_size(&enum_def->constants); i = i + 1)
     {
-        EnumConstant* constant = list_get(&symbol->constants, i);
+        ASTEnumConstant* constant = list_get(&enum_def->constants, i);
 
         print_ast_depth(file, depth + 1);
         fprintf(file, "%s\n", constant->name);

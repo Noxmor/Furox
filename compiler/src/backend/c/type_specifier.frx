@@ -13,7 +13,7 @@ export void transpile_type_specifier(Transpiler* transpiler,
     else if(type_specifier->enum_type != nullptr)
     {
         EnumSymbol* symbol = type_specifier->enum_type;
-        transpile_enum_symbol_name(transpiler, symbol);
+        transpile_enum_def_name(transpiler, symbol->enum_def);
     }
     else if(type_specifier->struct_type != nullptr)
     {
