@@ -6,6 +6,7 @@ export void analyze_var_def(Parser* parser, ASTVarDef* var_def)
 
     if(var_def->symbol == nullptr)
     {
+        //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
         log_error(parser->lexer.filepath, loc,
             "Encountered redefinition of variable %s!", var_def->name);
