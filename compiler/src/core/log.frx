@@ -1,4 +1,9 @@
-void log_error(char* filepath, SourceLocation location, char* message)
+void log_error(char* filepath, SourceLocation location, char* format, ...)
 {
-    printf("[ERROR]:%s:%zu:%zu: %s", filepath, location.line, location.column, message);
+    printf("[ERROR]:%s:%zu:%zu: ", filepath, location.line, location.column);
+
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
 }
