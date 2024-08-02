@@ -4,6 +4,8 @@ export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
 
     assert(func_def != nullptr);
 
+    transpiler->inside_function_body = true;
+
     FuncSymbol* symbol = func_def->symbol;
 
     if(transpiler->mode == TRANSPILER_MODE_FUNC_DECL)
@@ -24,6 +26,8 @@ export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
 
         transpile_scope(transpiler, func_def->body);
     }
+
+    transpiler->inside_function_body = false;
 }
 
 void transpile_function_symbol_name(Transpiler* transpiler, FuncSymbol* symbol)

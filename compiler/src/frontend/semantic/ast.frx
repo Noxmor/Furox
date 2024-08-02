@@ -54,6 +54,12 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
+        case AST_TYPE_VAR:
+        {
+            analyze_var(parser, node);
+
+            break;
+        }
         case AST_TYPE_UNARY_EXPR:
         {
             analyze_unary_expr(parser, node);

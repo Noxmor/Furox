@@ -1,0 +1,40 @@
+export struct ASTVar
+{
+    Namespace* ns;
+    Scope* scope;
+    char* name;
+}
+
+export ASTVar* make_var(Arena* arena, Namespace* ns, Scope* scope, char* name)
+{
+    assert(name != nullptr);
+
+    ASTVar* var = arena_alloc(arena, sizeof(ASTVar));
+
+    var->ns = ns;
+    var->scope = scope;
+    var->name = name;
+}
+
+export ASTVar* parse_var(Parser* parser, Namespace* ns)
+{
+    assert(parser != nullptr);
+
+    ASTVar* var = make_var(&parser->arena, ns, parser->current_scope,
+        parser->token->identifier);
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    return var;
+}
+
+export void print_var(ASTVar* var, FILE* file, usize depth)
+{
+    assert(var != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_VAR), var->name);
+}

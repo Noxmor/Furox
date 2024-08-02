@@ -4,7 +4,9 @@ export void transpile_var_decl(Transpiler* transpiler, ASTVarDecl* var_decl)
 
     assert(var_decl != nullptr);
 
-    if(transpiler->mode != TRANSPILER_MODE_GLOBAL_VARS)
+    if(transpiler->mode != TRANSPILER_MODE_GLOBAL_VARS
+        && !(transpiler->mode == TRANSPILER_MODE_FUNC_IMPL
+            && transpiler->inside_function_body))
     {
         return;
     }

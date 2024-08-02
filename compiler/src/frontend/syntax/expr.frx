@@ -22,6 +22,12 @@ export AST* parse_primary_expr(Parser* parser)
                 primary_expr = make_ast(&parser->arena, AST_TYPE_FUNC_CALL,
                     parse_func_call(parser, parser->current_namespace));
             }
+            else
+            {
+                //TODO: What if this is an enum constant?
+                primary_expr = make_ast(&parser->arena, AST_TYPE_VAR,
+                    parse_var(parser, parser->current_namespace));
+            }
 
             break;
         }

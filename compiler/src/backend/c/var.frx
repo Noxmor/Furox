@@ -1,0 +1,8 @@
+export void transpile_var(Transpiler* transpiler, ASTVar* var)
+{
+    assert(transpiler != nullptr);
+
+    assert(var != nullptr);
+
+    fprintf(transpiler->file, "%s", var->name);
+}
