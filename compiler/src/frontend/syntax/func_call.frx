@@ -1,0 +1,66 @@
+export struct ASTFuncCall
+{
+    Namespace* ns;
+    char* name;
+
+    List args;
+}
+
+export ASTFuncCall* make_func_call(Arena* arena, Namespace* ns, char* name)
+{
+    assert(name != nullptr);
+
+    ASTFuncCall* func_call = arena_alloc(arena, sizeof(ASTFuncCall));
+
+    func_call->ns = ns;
+    func_call->name = name;
+    list_init(&func_call->args);
+
+    return func_call;
+}
+
+export ASTFuncCall* parse_func_call(Parser* parser, Namespace* ns)
+{
+    assert(parser != nullptr);
+
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    ASTFuncCall* func_call = make_func_call(&parser->arena, ns, name);
+
+    parser_eat(parser, TOKEN_TYPE_LPAREN);
+
+    while(parser->token->type != TOKEN_TYPE_RPAREN)
+    {
+        if(list_size(&func_call->args) > 0)
+        {
+            parser_eat(parser, TOKEN_TYPE_COMMA);
+        }
+
+        AST* arg = parse_expr(parser);
+        list_push(&func_call->args, arg);
+    }
+
+    parser_eat(parser, TOKEN_TYPE_RPAREN);
+
+    return func_call;
+}
+
+export void print_func_call(ASTFuncCall* func_call, FILE* file, usize depth)
+{
+    assert(func_call != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_FUNC_CALL),
+        func_call->name);
+
+    usize i;
+    for(i = 0; i < list_size(&func_call->args); i = i + 1)
+    {
+        AST* ast = list_get(&func_call->args, i);
+        print_ast(ast, file, depth + 1);
+    }
+}

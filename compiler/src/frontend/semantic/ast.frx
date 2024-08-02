@@ -30,6 +30,12 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
+        case AST_TYPE_FUNC_CALL:
+        {
+            analyze_func_call(parser, node);
+
+            break;
+        }
         case AST_TYPE_SCOPE:
         {
             analyze_scope(parser, node);

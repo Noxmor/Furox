@@ -1,0 +1,6 @@
+export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
+{
+    assert(parser != nullptr);
+
+    assert(func_call != nullptr);
+}

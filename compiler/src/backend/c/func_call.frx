@@ -1,0 +1,23 @@
+export void transpile_func_call(Transpiler* transpiler, ASTFuncCall* func_call)
+{
+    assert(transpiler != nullptr);
+
+    assert(func_call != nullptr);
+
+    transpile_namespace_resolution(transpiler, func_call->ns);
+    fprintf(transpiler->file, "%s(", func_call->name);
+
+    usize i;
+    for(i = 0; i < list_size(&func_call->args); i = i + 1)
+    {
+        AST* ast = list_get(&func_call->args, i);
+        transpile_ast(transpiler, ast);
+
+        if(i < list_size(&func_call->args) - 1)
+        {
+            fprintf(transpiler->file, ", ");
+        }
+    }
+
+    fprintf(transpiler->file, ")");
+}

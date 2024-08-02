@@ -8,6 +8,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "struct-definition",
     "function-definition",
     "parameter-list",
+    "function-call",
     "scope",
     "variable-declaration",
     "variable-definition",
@@ -30,6 +31,7 @@ export enum ASTType : u8
     AST_TYPE_STRUCT_DEF,
     AST_TYPE_FUNC_DEF,
     AST_TYPE_FUNC_PARAMS,
+    AST_TYPE_FUNC_CALL,
     AST_TYPE_SCOPE,
 
     AST_TYPE_VAR_DECL,
@@ -106,6 +108,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_FUNC_DEF:
         {
             print_func_def(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_FUNC_CALL:
+        {
+            print_func_call(node, file, depth);
 
             break;
         }

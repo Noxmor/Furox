@@ -34,6 +34,12 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
 
             break;
         }
+        case AST_TYPE_FUNC_CALL:
+        {
+            transpile_func_call(transpiler, node);
+
+            break;
+        }
         case AST_TYPE_SCOPE:
         {
             transpile_scope(transpiler, node);
