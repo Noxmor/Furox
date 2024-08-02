@@ -7,6 +7,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "enum-definition",
     "struct-definition",
     "function-definition",
+    "parameter-list",
     "scope",
     "variable-declaration",
     "variable-definition",
@@ -28,6 +29,7 @@ export enum ASTType : u8
     AST_TYPE_ENUM_DEF,
     AST_TYPE_STRUCT_DEF,
     AST_TYPE_FUNC_DEF,
+    AST_TYPE_FUNC_PARAMS,
     AST_TYPE_SCOPE,
 
     AST_TYPE_VAR_DECL,

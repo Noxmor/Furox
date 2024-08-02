@@ -2,6 +2,8 @@ export struct ASTFuncDef
 {
     FuncSymbol* symbol;
 
+    ASTFuncParams* params;
+
     ASTScope* body;
 }
 
@@ -24,8 +26,7 @@ export ASTFuncDef* parse_func_def(Parser* parser, ASTTypeSpecifier* return_type)
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-    parser_eat(parser, TOKEN_TYPE_LPAREN);
-    parser_eat(parser, TOKEN_TYPE_RPAREN);
+    func_def->params = parse_func_params(parser);
 
     func_def->body = parse_scope(parser);
 
@@ -46,5 +47,6 @@ export void print_func_def(ASTFuncDef* func_def, FILE* file, usize depth)
         symbol->name);
 
     print_type_specifier(symbol->return_type, file, depth + 1);
+    print_func_params(func_def->params, file, depth + 1);
     print_scope(func_def->body, file, depth + 1);
 }

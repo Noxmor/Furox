@@ -1,0 +1,113 @@
+export struct ASTFuncParam
+{
+    ASTTypeSpecifier* type;
+    char* name;
+}
+
+ASTFuncParam* make_func_param(Arena* arena, ASTTypeSpecifier* type, char* name)
+{
+    assert(type != nullptr);
+
+    assert(name != nullptr);
+
+    ASTFuncParam* param = arena_alloc(arena, sizeof(ASTFuncParam));
+
+    param->type = type;
+    param->name = name;
+
+    return param;
+}
+
+ASTFuncParam* parse_func_param(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    ASTTypeSpecifier* type = parse_type_specifier(parser);
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    return make_func_param(&parser->arena, type, name);
+}
+
+void print_func_param(ASTFuncParam* param, FILE* file, usize depth)
+{
+    assert(param != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+    fprintf(file, "%s\n", param->name);
+
+    print_type_specifier(param->type, file, depth + 1);
+}
+
+export struct ASTFuncParams
+{
+    b8 variadic;
+
+    List params;
+}
+
+export ASTFuncParams* make_func_params(Arena* arena)
+{
+    ASTFuncParams* func_params = arena_alloc(arena, sizeof(ASTFuncParams));
+
+    func_params->variadic = false;
+    list_init(&func_params->params);
+
+    return func_params;
+}
+
+export ASTFuncParams* parse_func_params(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    ASTFuncParams* func_params = make_func_params(&parser->arena);
+
+    parser_eat(parser, TOKEN_TYPE_LPAREN);
+
+    while(parser->token->type != TOKEN_TYPE_RPAREN)
+    {
+        if(list_size(&func_params->params) > 0)
+        {
+            parser_eat(parser, TOKEN_TYPE_COMMA);
+
+            if(parser->token->type == TOKEN_TYPE_ELLIPSIS)
+            {
+                parser_eat(parser, TOKEN_TYPE_ELLIPSIS);
+
+                func_params->variadic = true;
+
+                break;
+            }
+        }
+
+        list_push(&func_params->params, parse_func_param(parser));
+    }
+
+    parser_eat(parser, TOKEN_TYPE_RPAREN);
+
+    return func_params;
+}
+
+export void print_func_params(ASTFuncParams* func_params, FILE* file,
+    usize depth)
+{
+    assert(func_params != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_FUNC_PARAMS));
+
+    print_ast_depth(file, depth + 1);
+    fprintf(file, "variadic: %d\n", func_params->variadic);
+
+    usize i;
+    for(i = 0; i < list_size(&func_params->params); i = i + 1)
+    {
+        ASTFuncParam* param = list_get(&func_params->params, i);
+        print_func_param(param, file, depth + 1);
+    }
+}

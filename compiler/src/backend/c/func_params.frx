@@ -1,0 +1,37 @@
+void transpile_func_param(Transpiler* transpiler, ASTFuncParam* param)
+{
+    assert(transpiler != nullptr);
+
+    assert(param != nullptr);
+
+    transpile_type_specifier(transpiler, param->type);
+    fprintf(transpiler->file, " %s", param->name);
+}
+
+export void transpile_func_params(Transpiler* transpiler, ASTFuncParams* params)
+{
+    assert(transpiler != nullptr);
+
+    assert(params != nullptr);
+
+    fprintf(transpiler->file, "(");
+
+    if(list_size(&params->params) > 0)
+    {
+        transpile_func_param(transpiler, list_get(&params->params, 0));
+    }
+
+    usize i;
+    for(i = 1; i < list_size(&params->params); i = i + 1)
+    {
+        fprintf(transpiler->file, ", ");
+        transpile_func_param(transpiler, list_get(&params->params, i));
+    }
+
+    if(params->variadic)
+    {
+        fprintf(transpiler->file, ", ...");
+    }
+
+    fprintf(transpiler->file, ")");
+}
