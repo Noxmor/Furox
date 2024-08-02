@@ -14,13 +14,9 @@ void compile(char* filepath)
 
     parser_analyze(&parser);
 
-    if(parser.failed)
-    {
-        failed = true;
-    }
+    failed = failed || parser.failed;
 
     list_push(&program->translation_units, parser.translation_unit);
-
 }
 
 void parse_args(usize argc, char** argv)
