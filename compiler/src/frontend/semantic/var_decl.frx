@@ -1,0 +1,15 @@
+export void analyze_var_decl(Parser* parser, ASTVarDecl* var_decl)
+{
+    assert(parser != nullptr);
+
+    assert(var_decl != nullptr);
+
+    if(var_decl->symbol == nullptr)
+    {
+        SourceLocation loc;
+        log_error(parser->lexer.filepath, loc,
+            "Encountered redefinition of variable %s!", var_decl->name);
+
+        parser->failed = true;
+    }
+}

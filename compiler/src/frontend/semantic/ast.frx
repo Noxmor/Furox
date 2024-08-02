@@ -44,6 +44,8 @@ export void analyze_ast(Parser* parser, AST* ast)
         }
         case AST_TYPE_VAR_DECL:
         {
+            analyze_var_decl(parser, node);
+
             break;
         }
         case AST_TYPE_VAR_DEF:

@@ -43,6 +43,43 @@ export VarSymbol* var_table_find(Scope* scope, char* name)
     return nullptr;
 }
 
+export VarSymbol* var_table_insert(ASTTypeSpecifier* type, Scope* scope,
+    char* name)
+{
+    assert(type != nullptr);
+
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % VAR_TABLE_CAPACITY;
+    VarTableEntry* entry = var_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        VarSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0
+            && scope_is_child_of(scope, symbol->scope))
+        {
+            return nullptr;
+        }
+
+        entry = entry->next;
+    }
+
+    VarSymbol* symbol = malloc(sizeof(VarSymbol));
+    symbol->type = type;
+    symbol->scope = scope;
+    symbol->name = name;
+
+    VarTableEntry* new_entry = malloc(sizeof(VarTableEntry));
+    new_entry->symbol = symbol;
+    new_entry->next = var_table.entries[index];
+
+    var_table.entries[index] = new_entry;
+
+    return symbol;
+}
+
 export VarSymbol* var_table_find_or_insert(Scope* scope, char* name)
 {
     assert(name != nullptr);

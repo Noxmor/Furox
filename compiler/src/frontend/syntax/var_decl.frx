@@ -1,16 +1,26 @@
 export struct ASTVarDecl
 {
     VarSymbol* symbol;
+
+    ASTTypeSpecifier* type;
+    Scope* scope;
+    char* name;
 }
 
 export ASTVarDecl* make_var_decl(Arena* arena, ASTTypeSpecifier* type,
     Scope* scope, char* name)
 {
+    assert(type != nullptr);
+
+    assert(name != nullptr);
+
     ASTVarDecl* var_decl = arena_alloc(arena, sizeof(ASTVarDecl));
 
-    var_decl->symbol = var_table_find_or_insert(scope, name);
+    var_decl->symbol = var_table_insert(type, scope, name);
 
-    var_decl->symbol->type = type;
+    var_decl->type = type;
+    var_decl->scope = scope;
+    var_decl->name = name;
 
     return var_decl;
 }
@@ -37,10 +47,8 @@ export void print_var_decl(ASTVarDecl* var_decl, FILE* file, usize depth)
 
     print_ast_depth(file, depth);
 
-    VarSymbol* symbol = var_decl->symbol;
-
     fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_VAR_DECL),
-        symbol->name);
+        var_decl->name);
 
-    print_type_specifier(symbol->type, file, depth + 1);
+    print_type_specifier(var_decl->type, file, depth + 1);
 }

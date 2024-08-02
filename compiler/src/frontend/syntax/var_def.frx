@@ -2,17 +2,27 @@ export struct ASTVarDef
 {
     VarSymbol* symbol;
 
+    ASTTypeSpecifier* type;
+    Scope* scope;
+    char* name;
+
     AST* value;
 }
 
 export ASTVarDef* make_var_def(Arena* arena, ASTTypeSpecifier* type,
     Scope* scope, char* name)
 {
+    assert(type != nullptr);
+
+    assert(name != nullptr);
+
     ASTVarDef* var_def = arena_alloc(arena, sizeof(ASTVarDef));
 
-    var_def->symbol = var_table_find_or_insert(scope, name);
+    var_def->symbol = var_table_insert(type, scope, name);
 
-    var_def->symbol->type = type;
+    var_def->type = type;
+    var_def->scope = scope;
+    var_def->name = name;
 
     return var_def;
 }
@@ -43,11 +53,9 @@ export void print_var_def(ASTVarDef* var_def, FILE* file, usize depth)
 
     print_ast_depth(file, depth);
 
-    VarSymbol* symbol = var_def->symbol;
-
     fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_VAR_DEF),
-        symbol->name);
+        var_def->name);
 
-    print_type_specifier(symbol->type, file, depth + 1);
+    print_type_specifier(var_def->type, file, depth + 1);
     print_ast(var_def->value, file, depth + 1);
 }

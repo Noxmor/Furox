@@ -4,5 +4,14 @@ export void analyze_var_def(Parser* parser, ASTVarDef* var_def)
 
     assert(var_def != nullptr);
 
+    if(var_def->symbol == nullptr)
+    {
+        SourceLocation loc;
+        log_error(parser->lexer.filepath, loc,
+            "Encountered redefinition of variable %s!", var_def->name);
+
+        parser->failed = true;
+    }
+
     analyze_ast(parser, var_def->value);
 }
