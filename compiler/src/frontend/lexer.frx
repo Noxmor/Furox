@@ -619,7 +619,7 @@ export void lexer_read_token(Lexer* lexer, Token* token)
 
             if(lexer_peek_char(lexer, 1) == '=')
             {
-                token->type = TOKEN_TYPE_MULTIPLY_EQ;
+                token->type = TOKEN_TYPE_STAR_EQ;
                 lexer_advance(lexer);
             }
 

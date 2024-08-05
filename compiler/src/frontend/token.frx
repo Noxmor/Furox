@@ -182,7 +182,7 @@ export enum TokenType : u8
     TOKEN_TYPE_MINUS_EQ,
 
     TOKEN_TYPE_STAR,
-    TOKEN_TYPE_MULTIPLY_EQ,
+    TOKEN_TYPE_STAR_EQ,
 
     TOKEN_TYPE_DIVIDE,
     TOKEN_TYPE_DIVIDE_EQ,
@@ -435,7 +435,7 @@ export enum Precedence : u8
 
 export Precedence token_type_to_binary_operator_precedence(TokenType type)
 {
-    assert(type < TOKEN_TYPE_COUNT);
+    assert(token_type_is_binary_operator(type));
 
     switch(type)
     {
@@ -443,25 +443,123 @@ export Precedence token_type_to_binary_operator_precedence(TokenType type)
         {
             return PRECEDENCE_4;
         }
+        case TOKEN_TYPE_PLUS_EQ:
+        {
+            return PRECEDENCE_14;
+        }
         case TOKEN_TYPE_MINUS:
         {
             return PRECEDENCE_4;
+        }
+        case TOKEN_TYPE_MINUS_EQ:
+        {
+            return PRECEDENCE_14;
         }
         case TOKEN_TYPE_STAR:
         {
             return PRECEDENCE_3;
         }
+        case TOKEN_TYPE_STAR_EQ:
+        {
+            return PRECEDENCE_14;
+        }
         case TOKEN_TYPE_DIVIDE:
         {
             return PRECEDENCE_3;
+        }
+        case TOKEN_TYPE_DIVIDE_EQ:
+        {
+            return PRECEDENCE_14;
         }
         case TOKEN_TYPE_MODULO:
         {
             return PRECEDENCE_3;
         }
+        case TOKEN_TYPE_MODULO_EQ:
+        {
+            return PRECEDENCE_14;
+        }
+        case TOKEN_TYPE_LOG_AND:
+        {
+            return PRECEDENCE_11;
+        }
+        case TOKEN_TYPE_LOG_OR:
+        {
+            return PRECEDENCE_12;
+        }
+        case TOKEN_TYPE_BIN_AND:
+        {
+            return PRECEDENCE_8;
+        }
+        case TOKEN_TYPE_BIN_AND_EQ:
+        {
+            return PRECEDENCE_14;
+        }
+        case TOKEN_TYPE_BIN_OR:
+        {
+            return PRECEDENCE_10;
+        }
+        case TOKEN_TYPE_BIN_OR_EQ:
+        {
+            return PRECEDENCE_14;
+        }
+        case TOKEN_TYPE_BIN_XOR:
+        {
+            return PRECEDENCE_9;
+        }
+        case TOKEN_TYPE_BIN_XOR_EQ:
+        {
+            return PRECEDENCE_14;
+        }
+        case TOKEN_TYPE_BIN_NEG_EQ:
+        {
+            return PRECEDENCE_14;
+        }
+        case TOKEN_TYPE_BIN_LSHIFT:
+        {
+            return PRECEDENCE_5;
+        }
+        case TOKEN_TYPE_BIN_LSHIFT_EQ:
+        {
+            return PRECEDENCE_14;
+        }
+        case TOKEN_TYPE_BIN_RSHIFT:
+        {
+            return PRECEDENCE_5;
+        }
+        case TOKEN_TYPE_BIN_RSHIFT_EQ:
+        {
+            return PRECEDENCE_14;
+        }
+        case TOKEN_TYPE_EQ:
+        {
+            return PRECEDENCE_14;
+        }
+        case TOKEN_TYPE_LOG_NEQ:
+        {
+            return PRECEDENCE_7;
+        }
+        case TOKEN_TYPE_LOG_EQ:
+        {
+            return PRECEDENCE_7;
+        }
+        case TOKEN_TYPE_GT:
+        {
+            return PRECEDENCE_6;
+        }
+        case TOKEN_TYPE_GEQ:
+        {
+            return PRECEDENCE_6;
+        }
+        case TOKEN_TYPE_LT:
+        {
+            return PRECEDENCE_6;
+        }
+        case TOKEN_TYPE_LEQ:
+        {
+            return PRECEDENCE_6;
+        }
     }
-
-    assert(false);
 
     return PRECEDENCE_1;
 }
