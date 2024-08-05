@@ -259,6 +259,18 @@ export b8 token_type_is_unary_operator(TokenType type)
     {
         case TOKEN_TYPE_BIN_AND:
         {
+
+        }
+        case TOKEN_TYPE_MINUS:
+        {
+
+        }
+        case TOKEN_TYPE_LOG_NEG:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_NEG:
+        {
             return true;
         }
     }
