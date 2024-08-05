@@ -14,19 +14,20 @@ export AST* parse_primary_expr(Parser* parser)
     {
         case TOKEN_TYPE_IDENTIFIER:
         {
-            //TODO: Handle namespace resolution, if present
+            Namespace* resolved_ns = parse_namespace_resolution(parser);
 
             Token* next = parser_peek(parser, 1);
+
             if(next->type == TOKEN_TYPE_LPAREN)
             {
                 primary_expr = make_ast(&parser->arena, AST_TYPE_FUNC_CALL,
-                    parse_func_call(parser, parser->current_namespace));
+                    parse_func_call(parser, resolved_ns));
             }
             else
             {
                 //TODO: What if this is an enum constant?
                 primary_expr = make_ast(&parser->arena, AST_TYPE_VAR,
-                    parse_var(parser, parser->current_namespace));
+                    parse_var(parser, resolved_ns));
             }
 
             break;

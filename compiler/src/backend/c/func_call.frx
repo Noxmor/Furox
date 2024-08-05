@@ -4,7 +4,15 @@ export void transpile_func_call(Transpiler* transpiler, ASTFuncCall* func_call)
 
     assert(func_call != nullptr);
 
-    transpile_namespace_resolution(transpiler, func_call->ns);
+    if(func_call->resolved_ns != nullptr)
+    {
+        transpile_namespace_resolution(transpiler, func_call->resolved_ns);
+    }
+    else
+    {
+        transpile_namespace_resolution(transpiler, func_call->ns);
+    }
+
     fprintf(transpiler->file, "%s(", func_call->name);
 
     usize i;

@@ -1,17 +1,20 @@
 export struct ASTFuncCall
 {
+    Namespace* resolved_ns;
     Namespace* ns;
     char* name;
 
     List args;
 }
 
-export ASTFuncCall* make_func_call(Arena* arena, Namespace* ns, char* name)
+export ASTFuncCall* make_func_call(Arena* arena, Namespace* resolved_ns,
+    Namespace* ns, char* name)
 {
     assert(name != nullptr);
 
     ASTFuncCall* func_call = arena_alloc(arena, sizeof(ASTFuncCall));
 
+    func_call->resolved_ns = resolved_ns;
     func_call->ns = ns;
     func_call->name = name;
     list_init(&func_call->args);
@@ -19,7 +22,7 @@ export ASTFuncCall* make_func_call(Arena* arena, Namespace* ns, char* name)
     return func_call;
 }
 
-export ASTFuncCall* parse_func_call(Parser* parser, Namespace* ns)
+export ASTFuncCall* parse_func_call(Parser* parser, Namespace* resolved_ns)
 {
     assert(parser != nullptr);
 
@@ -27,7 +30,8 @@ export ASTFuncCall* parse_func_call(Parser* parser, Namespace* ns)
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-    ASTFuncCall* func_call = make_func_call(&parser->arena, ns, name);
+    ASTFuncCall* func_call = make_func_call(&parser->arena, resolved_ns,
+        parser->current_namespace, name);
 
     parser_eat(parser, TOKEN_TYPE_LPAREN);
 
