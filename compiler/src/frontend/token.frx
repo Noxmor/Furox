@@ -276,7 +276,15 @@ export b8 token_type_is_binary_operator(TokenType type)
         {
 
         }
+        case TOKEN_TYPE_PLUS_EQ:
+        {
+
+        }
         case TOKEN_TYPE_MINUS:
+        {
+
+        }
+        case TOKEN_TYPE_MINUS_EQ:
         {
 
         }
@@ -284,11 +292,103 @@ export b8 token_type_is_binary_operator(TokenType type)
         {
 
         }
+        case TOKEN_TYPE_STAR_EQ:
+        {
+
+        }
         case TOKEN_TYPE_DIVIDE:
         {
 
         }
+        case TOKEN_TYPE_DIVIDE_EQ:
+        {
+
+        }
         case TOKEN_TYPE_MODULO:
+        {
+
+        }
+        case TOKEN_TYPE_MODULO_EQ:
+        {
+
+        }
+        case TOKEN_TYPE_LOG_AND:
+        {
+
+        }
+        case TOKEN_TYPE_LOG_OR:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_AND:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_AND_EQ:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_OR:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_OR_EQ:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_XOR:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_XOR_EQ:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_NEG_EQ:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_LSHIFT:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_LSHIFT_EQ:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_RSHIFT:
+        {
+
+        }
+        case TOKEN_TYPE_BIN_RSHIFT_EQ:
+        {
+
+        }
+        case TOKEN_TYPE_EQ:
+        {
+
+        }
+        case TOKEN_TYPE_LOG_NEQ:
+        {
+
+        }
+        case TOKEN_TYPE_LOG_EQ:
+        {
+
+        }
+        case TOKEN_TYPE_GT:
+        {
+
+        }
+        case TOKEN_TYPE_GEQ:
+        {
+
+        }
+        case TOKEN_TYPE_LT:
+        {
+
+        }
+        case TOKEN_TYPE_LEQ:
         {
             return true;
         }
