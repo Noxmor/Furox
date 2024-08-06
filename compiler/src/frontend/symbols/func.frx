@@ -21,8 +21,7 @@ struct FuncTable
 
 FuncTable func_table;
 
-export FuncSymbol* func_table_find_or_insert(Namespace* ns, char* name,
-    ASTTypeSpecifier* return_type)
+export FuncSymbol* func_table_find(Namespace* ns, char* name)
 {
     assert(name != nullptr);
 
@@ -36,6 +35,29 @@ export FuncSymbol* func_table_find_or_insert(Namespace* ns, char* name,
         if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    return nullptr;
+}
+
+export FuncSymbol* func_table_insert(Namespace* ns, char* name,
+    ASTTypeSpecifier* return_type)
+{
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % FUNC_TABLE_CAPACITY;
+    FuncTableEntry* entry = func_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        FuncSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        {
+            return nullptr;
         }
 
         entry = entry->next;

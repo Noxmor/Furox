@@ -2,17 +2,25 @@ export struct ASTFuncDef
 {
     FuncSymbol* symbol;
 
+    ASTTypeSpecifier* return_type;
+    char* name;
     ASTFuncParams* params;
-
     ASTScope* body;
 }
 
 export ASTFuncDef* make_func_def(Arena* arena, Namespace* ns, char* name,
     ASTTypeSpecifier* return_type)
 {
+    assert(name != nullptr);
+
+    assert(return_type != nullptr);
+
     ASTFuncDef* func_def = arena_alloc(arena, sizeof(ASTFuncDef));
 
-    func_def->symbol = func_table_find_or_insert(ns, name, return_type);
+    func_def->symbol = func_table_insert(ns, name, return_type);
+
+    func_def->return_type = return_type;
+    func_def->name = name;
 
     return func_def;
 }

@@ -4,5 +4,15 @@ export void analyze_func_def(Parser* parser, ASTFuncDef* func_def)
 
     assert(func_def != nullptr);
 
+    if(func_def->symbol == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        log_error(parser->lexer.filepath, loc,
+            "Encountered redefinition of function %s!", func_def->name);
+
+        parser->failed = true;
+    }
+
     analyze_scope(parser, func_def->body);
 }
