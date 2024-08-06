@@ -3,4 +3,21 @@ export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
     assert(parser != nullptr);
 
     assert(func_call != nullptr);
+
+    Namespace* ns = func_call->resolved_ns;
+    if(ns == nullptr)
+    {
+        ns = func_call->ns;
+    }
+
+    FuncSymbol* symbol = func_table_find(ns, func_call->name);
+    if(symbol == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        log_error(parser->lexer.filepath, loc,
+            "Encountered function-call to undefined function %s!", func_call->name);
+
+        parser->failed = true;
+    }
 }
