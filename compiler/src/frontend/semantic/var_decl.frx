@@ -8,8 +8,7 @@ export void analyze_var_decl(Parser* parser, ASTVarDecl* var_decl)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
-        log_error(parser->lexer.filepath, loc,
-            "Encountered redefinition of variable %s!", var_decl->name);
+        error_var_redefinition(parser->lexer.filepath, loc, var_decl->name);
 
         parser->failed = true;
     }

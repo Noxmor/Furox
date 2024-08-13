@@ -1,16 +1,19 @@
 export struct ASTNamespace
 {
+    Namespace* parent_namespace;
     char* name;
 
     List global_scope;
 }
 
-export ASTNamespace* make_namespace(Arena* arena, char* name)
+export ASTNamespace* make_namespace(Arena* arena, Namespace* parent_namespace,
+    char* name)
 {
     assert(name != nullptr);
 
     ASTNamespace* namespace_node = arena_alloc(arena, sizeof(ASTNamespace));
 
+    namespace_node->parent_namespace = parent_namespace;
     namespace_node->name = name;
 
     list_init(&namespace_node->global_scope);
@@ -25,7 +28,7 @@ ASTNamespace* parse_namespace(Parser* parser)
     parser_eat(parser, TOKEN_TYPE_KW_NAMESPACE);
 
     ASTNamespace* namespace_root = make_namespace(&parser->arena,
-        parser->token->identifier);
+        parser->current_namespace, parser->token->identifier);
 
     Namespace* old_namespace = parser->current_namespace;
 
@@ -40,7 +43,7 @@ ASTNamespace* parse_namespace(Parser* parser)
         parser_eat(parser, TOKEN_TYPE_NAMESPACE_RESOLUTION);
 
         ASTNamespace* child_namespace = make_namespace(&parser->arena,
-            parser->token->identifier);
+            parser->current_namespace, parser->token->identifier);
 
         parser_push_namespace(parser, parser->token->identifier);
 

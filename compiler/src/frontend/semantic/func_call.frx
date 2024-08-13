@@ -15,8 +15,7 @@ export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
-        log_error(parser->lexer.filepath, loc,
-            "Encountered function-call to undefined function %s!", func_call->name);
+        error_undefined_func_call(parser->lexer.filepath, loc, func_call->name);
 
         parser->failed = true;
     }

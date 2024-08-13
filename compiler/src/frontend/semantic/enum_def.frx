@@ -8,8 +8,7 @@ export void analyze_enum_def(Parser* parser, ASTEnumDef* enum_def)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
-        log_error(parser->lexer.filepath, loc,
-            "Encountered redefinition of enum %s!", enum_def->name);
+        error_enum_redefinition(parser->lexer.filepath, loc, enum_def->name);
 
         parser->failed = true;
     }
