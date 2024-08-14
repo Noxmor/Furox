@@ -11,6 +11,7 @@ export void analyze_namespace(Parser* parser, ASTNamespace* namespace_node)
     {
         SourceLocation loc;
         error_namespace_enum_conflict(parser->lexer.filepath, loc, name);
+        parser->failed = true;
     }
 
     usize i;
