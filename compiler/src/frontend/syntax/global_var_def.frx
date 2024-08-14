@@ -1,0 +1,67 @@
+export struct ASTGlobalVarDef
+{
+    VarSymbol* symbol;
+
+    Namespace* ns;
+
+    ASTTypeSpecifier* type;
+    Scope* scope;
+    char* name;
+
+    AST* value;
+}
+
+export ASTGlobalVarDef* make_global_var_def(Arena* arena, Namespace* ns,
+    ASTTypeSpecifier* type, Scope* scope, char* name)
+{
+    assert(type != nullptr);
+
+    assert(name != nullptr);
+
+    ASTGlobalVarDef* var_def = arena_alloc(arena, sizeof(ASTGlobalVarDef));
+
+    var_def->symbol = var_table_insert(type, scope, name);
+
+    var_def->ns = ns;
+    var_def->type = type;
+    var_def->scope = scope;
+    var_def->name = name;
+
+    return var_def;
+}
+
+export ASTGlobalVarDef* parse_global_var_def(Parser* parser,
+    ASTTypeSpecifier* type)
+{
+    assert(parser != nullptr);
+
+    ASTGlobalVarDef* var_def = make_global_var_def(&parser->arena,
+        parser->current_namespace, type, parser->current_scope,
+        parser->token->identifier);
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    parser_eat(parser, TOKEN_TYPE_EQ);
+
+    var_def->value = parse_expr(parser);
+
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+
+    return var_def;
+}
+
+export void print_global_var_def(ASTGlobalVarDef* var_def, FILE* file,
+    usize depth)
+{
+    assert(var_def != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_GLOBAL_VAR_DEF),
+        var_def->name);
+
+    print_type_specifier(var_def->type, file, depth + 1);
+    print_ast(var_def->value, file, depth + 1);
+}

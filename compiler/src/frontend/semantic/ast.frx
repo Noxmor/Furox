@@ -50,6 +50,18 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
+        case AST_TYPE_GLOBAL_VAR_DECL:
+        {
+            analyze_global_var_decl(parser, node);
+
+            break;
+        }
+        case AST_TYPE_GLOBAL_VAR_DEF:
+        {
+            analyze_global_var_def(parser, node);
+
+            break;
+        }
         case AST_TYPE_VAR_DECL:
         {
             analyze_var_decl(parser, node);

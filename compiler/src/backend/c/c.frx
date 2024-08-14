@@ -15,8 +15,6 @@ export struct Transpiler
 {
     TranspilerMode mode;
     FILE* file;
-
-    b8 inside_function_body;
 }
 
 export void c_generate_code(ASTProgram* program, char* filepath)
@@ -30,8 +28,6 @@ export void c_generate_code(ASTProgram* program, char* filepath)
     {
         return;
     }
-
-    transpiler.inside_function_body = false;
 
     fprintf(transpiler.file, "#include <stddef.h>\n");
     fprintf(transpiler.file, "#include <stdint.h>\n");

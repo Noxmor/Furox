@@ -11,6 +11,8 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "parameter-list",
     "function-call",
     "scope",
+    "global-variable-declaration",
+    "global-variable-definition",
     "variable-declaration",
     "variable-definition",
     "variable",
@@ -37,6 +39,9 @@ export enum ASTType : u8
     AST_TYPE_FUNC_PARAMS,
     AST_TYPE_FUNC_CALL,
     AST_TYPE_SCOPE,
+
+    AST_TYPE_GLOBAL_VAR_DECL,
+    AST_TYPE_GLOBAL_VAR_DEF,
 
     AST_TYPE_VAR_DECL,
     AST_TYPE_VAR_DEF,
@@ -133,6 +138,18 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_SCOPE:
         {
             print_scope(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_GLOBAL_VAR_DECL:
+        {
+            print_global_var_decl(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_GLOBAL_VAR_DEF:
+        {
+            print_global_var_def(node, file, depth);
 
             break;
         }

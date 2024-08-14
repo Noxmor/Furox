@@ -1,10 +1,11 @@
-export void transpile_var_decl(Transpiler* transpiler, ASTVarDecl* var_decl)
+export void transpile_global_var_decl(Transpiler* transpiler,
+    ASTGlobalVarDecl* var_decl)
 {
     assert(transpiler != nullptr);
 
     assert(var_decl != nullptr);
 
-    if(transpiler->mode != TRANSPILER_MODE_FUNC_IMPL)
+    if(transpiler->mode != TRANSPILER_MODE_GLOBAL_VARS)
     {
         return;
     }
@@ -12,6 +13,7 @@ export void transpile_var_decl(Transpiler* transpiler, ASTVarDecl* var_decl)
     VarSymbol* symbol = var_decl->symbol;
 
     transpile_type_specifier(transpiler, symbol->type);
+    transpile_namespace_resolution(transpiler, var_decl->ns);
     fprintf(transpiler->file, "%s", symbol->name);
     transpile_type_specifier_array_dimensions(transpiler, symbol->type);
     fprintf(transpiler->file, ";\n");

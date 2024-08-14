@@ -1,0 +1,15 @@
+export void analyze_global_var_decl(Parser* parser, ASTGlobalVarDecl* var_decl)
+{
+    assert(parser != nullptr);
+
+    assert(var_decl != nullptr);
+
+    if(var_decl->symbol == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_var_redefinition(parser->lexer.filepath, loc, var_decl->name);
+
+        parser->failed = true;
+    }
+}
