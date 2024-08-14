@@ -5,6 +5,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "import-statement",
     "namespace",
     "enum-definition",
+    "enum-constant",
     "struct-definition",
     "function-definition",
     "parameter-list",
@@ -13,6 +14,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "variable-declaration",
     "variable-definition",
     "variable",
+    "enum-constant-or-global-var",
     "unary-expression",
     "binary-expression",
     "return-statement",
@@ -29,6 +31,7 @@ export enum ASTType : u8
     AST_TYPE_IMPORT_STMT,
     AST_TYPE_NAMESPACE,
     AST_TYPE_ENUM_DEF,
+    AST_TYPE_ENUM_CONSTANT,
     AST_TYPE_STRUCT_DEF,
     AST_TYPE_FUNC_DEF,
     AST_TYPE_FUNC_PARAMS,
@@ -38,6 +41,8 @@ export enum ASTType : u8
     AST_TYPE_VAR_DECL,
     AST_TYPE_VAR_DEF,
     AST_TYPE_VAR,
+
+    AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR,
 
     AST_TYPE_UNARY_EXPR,
     AST_TYPE_BINARY_EXPR,
@@ -101,6 +106,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
 
             break;
         }
+        case AST_TYPE_ENUM_CONSTANT:
+        {
+            print_enum_constant(node, file, depth);
+
+            break;
+        }
         case AST_TYPE_STRUCT_DEF:
         {
             print_struct_def(node, file, depth);
@@ -140,6 +151,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_VAR:
         {
             print_var(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR:
+        {
+            print_enum_constant_or_global_var(node, file, depth);
 
             break;
         }

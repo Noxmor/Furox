@@ -1,0 +1,17 @@
+export void transpile_enum_constant(Transpiler* transpiler,
+    ASTEnumConstant* constant)
+{
+    assert(transpiler != nullptr);
+
+    assert(constant != nullptr);
+
+    transpile_namespace_resolution(transpiler, constant->enum_namespace);
+
+    usize i;
+    for(i = 0; i < strlen(constant->enum_name); i = i + 1)
+    {
+        fprintf(transpiler->file, "%c", toupper(constant->enum_name[i]));
+    }
+
+    fprintf(transpiler->file, "_%s", constant->name);
+}

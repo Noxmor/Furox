@@ -22,6 +22,12 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
+        case AST_TYPE_ENUM_CONSTANT:
+        {
+            analyze_enum_constant(parser, node);
+
+            break;
+        }
         case AST_TYPE_STRUCT_DEF:
         {
             break;
@@ -59,6 +65,12 @@ export void analyze_ast(Parser* parser, AST* ast)
         case AST_TYPE_VAR:
         {
             analyze_var(parser, node);
+
+            break;
+        }
+        case AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR:
+        {
+            analyze_enum_constant_or_global_var(parser, node, ast);
 
             break;
         }

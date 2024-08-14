@@ -1,0 +1,33 @@
+export void analyze_enum_constant(Parser* parser, ASTEnumConstant* constant)
+{
+    assert(parser != nullptr);
+
+    assert(constant != nullptr);
+
+    EnumSymbol* symbol = enum_table_find(constant->enum_namespace,
+        constant->enum_name);
+
+    ASTEnumDef* enum_def = symbol->enum_def;
+
+    b8 exists = false;
+
+    usize i;
+    for(i = 0; i < list_size(&enum_def->constants); i = i + 1)
+    {
+        ASTEnumConstantDef* constant_def = list_get(&enum_def->constants, i);
+
+        if(strcmp(constant_def->name, constant->name) == 0)
+        {
+            exists = true;
+            break;
+        }
+    }
+
+    if(!exists)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_undefined_enum_constant(parser->lexer.filepath, loc,
+            enum_def->name, constant->name);
+    }
+}

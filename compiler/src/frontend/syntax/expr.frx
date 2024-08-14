@@ -23,11 +23,16 @@ export AST* parse_primary_expr(Parser* parser)
                 primary_expr = make_ast(&parser->arena, AST_TYPE_FUNC_CALL,
                     parse_func_call(parser, resolved_ns));
             }
+            else if(resolved_ns == nullptr)
+            {
+                primary_expr = make_ast(&parser->arena,
+                    AST_TYPE_VAR, parse_var(parser, nullptr));
+            }
             else
             {
-                //TODO: What if this is an enum constant?
-                primary_expr = make_ast(&parser->arena, AST_TYPE_VAR,
-                    parse_var(parser, resolved_ns));
+                primary_expr = make_ast(&parser->arena,
+                    AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR,
+                    parse_enum_constant_or_global_var(parser, resolved_ns));
             }
 
             break;

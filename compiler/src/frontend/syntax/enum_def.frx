@@ -1,14 +1,14 @@
-export struct ASTEnumConstant
+export struct ASTEnumConstantDef
 {
     char* name;
     AST* value;
 }
 
-ASTEnumConstant* make_enum_constant(Arena* arena, char* name, AST* value)
+ASTEnumConstantDef* make_enum_constant_def(Arena* arena, char* name, AST* value)
 {
     assert(name != nullptr);
 
-    ASTEnumConstant* constant = arena_alloc(arena, sizeof(ASTEnumConstant));
+    ASTEnumConstantDef* constant = arena_alloc(arena, sizeof(ASTEnumConstantDef));
 
     constant->name = name;
     constant->value = value;
@@ -16,7 +16,7 @@ ASTEnumConstant* make_enum_constant(Arena* arena, char* name, AST* value)
     return constant;
 }
 
-ASTEnumConstant* parse_enum_constant(Parser* parser)
+ASTEnumConstantDef* parse_enum_constant(Parser* parser)
 {
     assert(parser != nullptr);
 
@@ -32,7 +32,7 @@ ASTEnumConstant* parse_enum_constant(Parser* parser)
         value = parse_expr(parser);
     }
 
-    return make_enum_constant(&parser->arena, name, value);
+    return make_enum_constant_def(&parser->arena, name, value);
 }
 
 export struct ASTEnumDef
@@ -48,7 +48,7 @@ export struct ASTEnumDef
 }
 
 void enum_def_add_constant(Arena* arena, ASTEnumDef* enum_def,
-    ASTEnumConstant* constant)
+    ASTEnumConstantDef* constant)
 {
     assert(enum_def != nullptr);
 
@@ -67,7 +67,7 @@ void enum_def_add_constant(Arena* arena, ASTEnumDef* enum_def,
         {
             ASTIntLiteral* literal = make_int_literal(arena, 1);
 
-            ASTEnumConstant* last_constant = list_get(&enum_def->constants,
+            ASTEnumConstantDef* last_constant = list_get(&enum_def->constants,
                 list_size(&enum_def->constants) - 1);
 
             AST* left = last_constant->value;
@@ -172,7 +172,7 @@ export ASTEnumDef* parse_enum_def(Parser* parser)
 
     while(parser->token->type != TOKEN_TYPE_RBRACE)
     {
-        ASTEnumConstant* constant = parse_enum_constant(parser);
+        ASTEnumConstantDef* constant = parse_enum_constant(parser);
 
         enum_def_add_constant(&parser->arena, enum_def, constant);
 
@@ -205,7 +205,7 @@ export void print_enum_def(ASTEnumDef* enum_def, FILE* file, usize depth)
     usize i;
     for(i = 0; i < list_size(&enum_def->constants); i = i + 1)
     {
-        ASTEnumConstant* constant = list_get(&enum_def->constants, i);
+        ASTEnumConstantDef* constant = list_get(&enum_def->constants, i);
 
         print_ast_depth(file, depth + 1);
         fprintf(file, "%s\n", constant->name);

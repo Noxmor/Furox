@@ -4,6 +4,13 @@ export void error_enum_redefinition(char* filepath, SourceLocation loc,
     log_error(filepath, loc, "Encountered redefinition of enum %s!", name);
 }
 
+export void error_undefined_enum_constant(char* filepath, SourceLocation loc,
+    char* enum_name, char* constant_name)
+{
+    log_error(filepath, loc, "Encountered undefined enum-constant %s for enum %s!",
+        constant_name, enum_name);
+}
+
 export void error_namespace_enum_conflict(char* filepath, SourceLocation loc,
     char* name)
 {
