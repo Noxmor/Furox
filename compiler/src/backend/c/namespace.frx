@@ -1,12 +1,17 @@
 export void transpile_namespace(Transpiler* transpiler,
     ASTNamespace* namespace_node)
 {
+    Namespace* old_namespace = transpiler->current_namespace;
+    transpiler->current_namespace = namespace_node->ns;
+
     usize i;
     for(i = 0; i < list_size(&namespace_node->global_scope); i = i + 1)
     {
         AST* ast = list_get(&namespace_node->global_scope, i);
         transpile_ast(transpiler, ast);
     }
+
+    transpiler->current_namespace = old_namespace;
 }
 
 export void transpile_namespace_resolution(Transpiler* transpiler,

@@ -1,20 +1,17 @@
 export struct ASTFuncCall
 {
-    Namespace* resolved_ns;
     Namespace* ns;
     char* name;
 
     List args;
 }
 
-export ASTFuncCall* make_func_call(Arena* arena, Namespace* resolved_ns,
-    Namespace* ns, char* name)
+export ASTFuncCall* make_func_call(Arena* arena, Namespace* ns, char* name)
 {
     assert(name != nullptr);
 
     ASTFuncCall* func_call = arena_alloc(arena, sizeof(ASTFuncCall));
 
-    func_call->resolved_ns = resolved_ns;
     func_call->ns = ns;
     func_call->name = name;
     list_init(&func_call->args);
@@ -22,7 +19,7 @@ export ASTFuncCall* make_func_call(Arena* arena, Namespace* resolved_ns,
     return func_call;
 }
 
-export ASTFuncCall* parse_func_call(Parser* parser, Namespace* resolved_ns)
+export ASTFuncCall* parse_func_call(Parser* parser, Namespace* ns)
 {
     assert(parser != nullptr);
 
@@ -30,8 +27,7 @@ export ASTFuncCall* parse_func_call(Parser* parser, Namespace* resolved_ns)
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-    ASTFuncCall* func_call = make_func_call(&parser->arena, resolved_ns,
-        parser->current_namespace, name);
+    ASTFuncCall* func_call = make_func_call(&parser->arena, ns, name);
 
     parser_eat(parser, TOKEN_TYPE_LPAREN);
 
@@ -58,8 +54,10 @@ export void print_func_call(ASTFuncCall* func_call, FILE* file, usize depth)
     assert(file != nullptr);
 
     print_ast_depth(file, depth);
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_FUNC_CALL),
-        func_call->name);
+
+    fprintf(file, "%s (", ast_type_to_str(AST_TYPE_FUNC_CALL));
+    print_namespace_resolution(file, func_call->ns);
+    fprintf(file, "%s)\n", func_call->name);
 
     usize i;
     for(i = 0; i < list_size(&func_call->args); i = i + 1)
