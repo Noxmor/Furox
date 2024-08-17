@@ -6,6 +6,13 @@ export void analyze_namespace(Parser* parser, ASTNamespace* namespace_node)
 
     Namespace* ns = namespace_node->ns;
 
+    if(namespace_is_internal(ns))
+    {
+        SourceLocation loc;
+        error_namespace_is_reserved(parser->lexer.filepath, loc, ns);
+        parser->failed = true;
+    }
+
     if(enum_table_find(ns->parent, ns->name) != nullptr)
     {
         SourceLocation loc;
