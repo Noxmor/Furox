@@ -1,0 +1,139 @@
+export struct ASTSizeof
+{
+    Namespace* ns;
+    char* name;
+    TokenType primitive_type;
+}
+
+ASTSizeof* make_sizeof(Arena* arena, Namespace* ns, char* name,
+    TokenType primitive_type)
+{
+    assert(primitive_type < TOKEN_TYPE_COUNT);
+
+    ASTSizeof* sizeof_node = arena_alloc(arena, sizeof(ASTSizeof));
+
+    sizeof_node->ns = ns;
+    sizeof_node->name = name;
+    sizeof_node->primitive_type = primitive_type;
+
+    return sizeof_node;
+}
+
+ASTSizeof* parse_sizeof(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    if(token_type_is_primitive(parser->token->type))
+    {
+        TokenType type = parser->token->type;
+
+        parser_eat(parser, parser->token->type);
+
+        return make_sizeof(&parser->arena, nullptr, nullptr, type);
+    }
+    else
+    {
+        Namespace* ns = parse_namespace_resolution(parser);
+        char* name = parser->token->identifier;
+
+        parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+        return make_sizeof(&parser->arena, ns, name, TOKEN_TYPE_ERROR);
+    }
+}
+
+export void print_sizeof(ASTSizeof* sizeof_node, FILE* file, usize depth)
+{
+    assert(sizeof_node != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_SIZEOF));
+
+    print_ast_depth(file, depth + 1);
+    print_namespace_resolution(file, sizeof_node->ns);
+
+    if(sizeof_node->name != nullptr)
+    {
+        fprintf(file, "%s\n", sizeof_node->name);
+    }
+    else
+    {
+        fprintf(file, "%s\n", token_type_to_str(sizeof_node->primitive_type));
+    }
+}
+
+export struct ASTEnumCount
+{
+    Namespace* ns;
+    char* name;
+}
+
+ASTEnumCount* make_enum_count(Arena* arena, Namespace* ns, char* name)
+{
+    assert(name != nullptr);
+
+    ASTEnumCount* enum_count = arena_alloc(arena, sizeof(ASTEnumCount));
+
+    enum_count->ns = ns;
+    enum_count->name = name;
+
+    return enum_count;
+}
+
+ASTEnumCount* parse_enum_count(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    Namespace* ns = parse_namespace_resolution(parser);
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    return make_enum_count(&parser->arena, ns, name);
+}
+
+export void print_enum_count(ASTEnumCount* enum_count, FILE* file, usize depth)
+{
+    assert(enum_count != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_ENUM_COUNT));
+
+    print_ast_depth(file, depth + 1);
+
+    print_namespace_resolution(file, enum_count->ns);
+    fprintf(file, "%s\n", enum_count->name);
+}
+
+export AST* parse_internal_func_call(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    AST* ast = nullptr;
+
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    parser_eat(parser, TOKEN_TYPE_LPAREN);
+
+    if(strcmp(name, "sizeof") == 0)
+    {
+        ast = make_ast(&parser->arena, AST_TYPE_SIZEOF, parse_sizeof(parser));
+    }
+    else if(strcmp(name, "enum_count") == 0)
+    {
+        ast = make_ast(&parser->arena, AST_TYPE_ENUM_COUNT,
+            parse_enum_count(parser));
+    }
+
+    parser_eat(parser, TOKEN_TYPE_RPAREN);
+
+    return ast;
+}

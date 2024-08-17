@@ -36,3 +36,17 @@ export void error_var_redefinition(char* filepath, SourceLocation loc,
 {
     log_error(filepath, loc, "Encountered redefinition of variable %s!", name);
 }
+
+export void error_sizeof_invalid_arg(char* filepath, SourceLocation loc,
+    char* name)
+{
+    log_error(filepath, loc, "Invalid argument %s to internal function sizeof!",
+        name);
+}
+
+export void error_enum_count_invalid_arg(char* filepath, SourceLocation loc,
+    char* name)
+{
+    log_error(filepath, loc, "Invalid argument %s to internal function enum_count!",
+        name);
+}

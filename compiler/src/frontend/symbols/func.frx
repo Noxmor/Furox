@@ -21,6 +21,18 @@ struct FuncTable
 
 FuncTable func_table;
 
+export FuncSymbol* func_table_find_r(Namespace* ns, char* name)
+{
+    FuncSymbol* symbol = func_table_find(ns, name);
+    while(symbol == nullptr && ns != nullptr)
+    {
+        ns = ns->parent;
+        symbol = func_table_find(ns, name);
+    }
+
+    return symbol;
+}
+
 export FuncSymbol* func_table_find(Namespace* ns, char* name)
 {
     assert(name != nullptr);

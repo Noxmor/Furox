@@ -1,0 +1,86 @@
+export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
+{
+    assert(parser != nullptr);
+
+    assert(sizeof_node != nullptr);
+
+    if(sizeof_node->primitive_type != TOKEN_TYPE_ERROR)
+    {
+        ast->type = AST_TYPE_INT_LITERAL;
+
+        usize size = primitive_type_to_size(sizeof_node->primitive_type);
+        ast->node = make_int_literal(&parser->arena, size);
+
+        return;
+    }
+
+    StructSymbol* struct_symbol = nullptr;
+    EnumSymbol* enum_symbol = nullptr;
+
+    if(sizeof_node->ns == nullptr)
+    {
+        struct_symbol = struct_table_find_r(parser->current_namespace,
+            sizeof_node->name);
+
+        enum_symbol = enum_table_find_r(parser->current_namespace,
+            sizeof_node->name);
+    }
+    else
+    {
+        struct_symbol = struct_table_find(sizeof_node->ns, sizeof_node->name);
+        enum_symbol = enum_table_find(sizeof_node->ns, sizeof_node->name);
+    }
+
+    if(struct_symbol != nullptr)
+    {
+        ast->type = AST_TYPE_INT_LITERAL;
+
+        //TODO: Calculate size of the struct
+        usize size = 0;
+        ast->node = make_int_literal(&parser->arena, size);
+    }
+    else if(enum_symbol != nullptr)
+    {
+        ast->type = AST_TYPE_INT_LITERAL;
+
+        usize size = primitive_type_to_size(
+            enum_symbol->enum_def->type);
+        ast->node = make_int_literal(&parser->arena, size);
+    }
+    else
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_sizeof_invalid_arg(parser->lexer.filepath, loc,
+            sizeof_node->name);
+
+        parser->failed = true;
+    }
+}
+
+export void analyze_enum_count(Parser* parser, ASTEnumCount* enum_count,
+    AST* ast)
+{
+    assert(parser != nullptr);
+
+    assert(enum_count != nullptr);
+
+    EnumSymbol* symbol = enum_table_find(enum_count->ns, enum_count->name);
+
+    if(symbol == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_enum_count_invalid_arg(parser->lexer.filepath, loc,
+            enum_count->name);
+        parser->failed = true;
+    }
+    else
+    {
+        ASTEnumDef* enum_def = symbol->enum_def;
+
+        ast->type = AST_TYPE_INT_LITERAL;
+        ast->node = make_int_literal(&parser->arena,
+            list_size(&enum_def->constants));
+    }
+}

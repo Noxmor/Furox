@@ -18,6 +18,18 @@ struct EnumTable
 
 EnumTable enum_table;
 
+export EnumSymbol* enum_table_find_r(Namespace* ns, char* name)
+{
+    EnumSymbol* symbol = enum_table_find(ns, name);
+    while(symbol == nullptr && ns != nullptr)
+    {
+        ns = ns->parent;
+        symbol = enum_table_find(ns, name);
+    }
+
+    return symbol;
+}
+
 export EnumSymbol* enum_table_find(Namespace* ns, char* name)
 {
     assert(name != nullptr);

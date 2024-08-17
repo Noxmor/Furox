@@ -49,3 +49,9 @@ export b8 namespace_equals(Namespace* left, Namespace* right)
 
     return namespace_equals(left->parent, right->parent);
 }
+
+export b8 namespace_is_internal(Namespace* ns)
+{
+    return ns != nullptr && strcmp(ns->name, "frx") == 0
+        && ns->parent == nullptr;
+}

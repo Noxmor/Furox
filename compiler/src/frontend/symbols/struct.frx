@@ -19,6 +19,18 @@ struct StructTable
 
 StructTable struct_table;
 
+export StructSymbol* struct_table_find_r(Namespace* ns, char* name)
+{
+    StructSymbol* symbol = struct_table_find(ns, name);
+    while(symbol == nullptr && ns != nullptr)
+    {
+        ns = ns->parent;
+        symbol = struct_table_find(ns, name);
+    }
+
+    return symbol;
+}
+
 export StructSymbol* struct_table_find(Namespace* ns, char* name)
 {
     assert(name != nullptr);

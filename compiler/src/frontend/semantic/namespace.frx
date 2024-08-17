@@ -4,15 +4,17 @@ export void analyze_namespace(Parser* parser, ASTNamespace* namespace_node)
 
     assert(namespace_node != nullptr);
 
-    Namespace* ns = namespace_node->parent_namespace;
-    char* name = namespace_node->name;
+    Namespace* ns = namespace_node->ns;
 
-    if(enum_table_find(ns, name) != nullptr)
+    if(enum_table_find(ns->parent, ns->name) != nullptr)
     {
         SourceLocation loc;
-        error_namespace_enum_conflict(parser->lexer.filepath, loc, name);
+        error_namespace_enum_conflict(parser->lexer.filepath, loc, ns->name);
         parser->failed = true;
     }
+
+    Namespace* old_namespace = parser->current_namespace;
+    parser->current_namespace = ns;
 
     usize i;
     for(i = 0; i < list_size(&namespace_node->global_scope); i = i + 1)
@@ -20,4 +22,6 @@ export void analyze_namespace(Parser* parser, ASTNamespace* namespace_node)
         AST* ast = list_get(&namespace_node->global_scope, i);
         analyze_ast(parser, ast);
     }
+
+    parser->current_namespace = old_namespace;
 }
