@@ -161,24 +161,3 @@ void parser_pop_scope(Parser* parser)
 
     parser->current_scope = parser->current_scope->parent;
 }
-
-
-void parse_type(Parser* parser)
-{
-    Token* next = parser_peek(parser, 1);
-
-    while(parser->token->type == TOKEN_TYPE_IDENTIFIER
-        && next->type == TOKEN_TYPE_NAMESPACE_RESOLUTION)
-    {
-        //Handle possible namespace resolutions first
-    }
-
-    if(parser->token->type == TOKEN_TYPE_IDENTIFIER)
-    {
-
-    }
-    else
-    {
-
-    }
-}
