@@ -124,6 +124,13 @@ export Token* parser_peek(Parser* parser, usize offset)
     return lexer_peek(&parser->lexer, offset);
 }
 
+export char* parser_source_file(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    return lexer_source_file(&parser->lexer);
+}
+
 export void parser_destroy(Parser* parser)
 {
     assert(parser != nullptr);

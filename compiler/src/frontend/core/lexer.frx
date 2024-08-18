@@ -934,6 +934,13 @@ export void lexer_recover(Lexer* lexer, SourceLocation* location)
     lexer->tokens_count = 1;
 }
 
+export char* lexer_source_file(Lexer* lexer)
+{
+    assert(lexer != nullptr);
+
+    return lexer->filepath;
+}
+
 export void lexer_destroy(Lexer* lexer)
 {
     assert(lexer != nullptr);

@@ -27,7 +27,7 @@ export void analyze_enum_constant(Parser* parser, ASTEnumConstant* constant)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
-        error_undefined_enum_constant(parser->lexer.filepath, loc,
+        error_undefined_enum_constant(parser_source_file(parser), loc,
             enum_def->name, constant->name);
     }
 }

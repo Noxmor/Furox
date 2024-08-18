@@ -51,7 +51,7 @@ export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
-        error_sizeof_invalid_arg(parser->lexer.filepath, loc,
+        error_sizeof_invalid_arg(parser_source_file(parser), loc,
             sizeof_node->name);
 
         parser->failed = true;

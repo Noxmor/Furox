@@ -8,7 +8,8 @@ export void analyze_func_def(Parser* parser, ASTFuncDef* func_def)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
-        error_func_redefinition(parser->lexer.filepath, loc, func_def->name);
+        error_func_redefinition(parser_source_file(parser), loc,
+            func_def->name);
 
         parser->failed = true;
     }
