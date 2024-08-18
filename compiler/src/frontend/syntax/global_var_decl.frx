@@ -7,10 +7,11 @@ export struct ASTGlobalVarDecl
     ASTTypeSpecifier* type;
     Scope* scope;
     char* name;
+    b8 mutable;
 }
 
 export ASTGlobalVarDecl* make_global_var_decl(Arena* arena, Namespace* ns,
-    ASTTypeSpecifier* type, Scope* scope, char* name)
+    ASTTypeSpecifier* type, Scope* scope, char* name, b8 mutable)
 {
     assert(type != nullptr);
 
@@ -18,23 +19,25 @@ export ASTGlobalVarDecl* make_global_var_decl(Arena* arena, Namespace* ns,
 
     ASTGlobalVarDecl* var_decl = arena_alloc(arena, sizeof(ASTGlobalVarDecl));
 
-    var_decl->symbol = var_table_insert(type, scope, name);
+    var_decl->symbol = var_table_insert(type, scope, name, mutable);
 
     var_decl->ns = ns;
     var_decl->type = type;
     var_decl->scope = scope;
     var_decl->name = name;
+    var_decl->mutable = mutable;
 
     return var_decl;
 }
 
-export ASTGlobalVarDecl* parse_global_var_decl(Parser* parser, ASTTypeSpecifier* type)
+export ASTGlobalVarDecl* parse_global_var_decl(Parser* parser,
+    ASTTypeSpecifier* type, b8 mutable)
 {
     assert(parser != nullptr);
 
     ASTGlobalVarDecl* var_decl = make_global_var_decl(&parser->arena,
         parser->current_namespace, type, parser->current_scope,
-        parser->token->identifier);
+        parser->token->identifier, mutable);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
@@ -43,7 +46,8 @@ export ASTGlobalVarDecl* parse_global_var_decl(Parser* parser, ASTTypeSpecifier*
     return var_decl;
 }
 
-export void print_global_var_decl(ASTGlobalVarDecl* var_decl, FILE* file, usize depth)
+export void print_global_var_decl(ASTGlobalVarDecl* var_decl, FILE* file,
+    usize depth)
 {
     assert(var_decl != nullptr);
 

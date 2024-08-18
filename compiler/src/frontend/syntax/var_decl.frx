@@ -5,10 +5,11 @@ export struct ASTVarDecl
     ASTTypeSpecifier* type;
     Scope* scope;
     char* name;
+    b8 mutable;
 }
 
 export ASTVarDecl* make_var_decl(Arena* arena, ASTTypeSpecifier* type,
-    Scope* scope, char* name)
+    Scope* scope, char* name, b8 mutable)
 {
     assert(type != nullptr);
 
@@ -16,21 +17,23 @@ export ASTVarDecl* make_var_decl(Arena* arena, ASTTypeSpecifier* type,
 
     ASTVarDecl* var_decl = arena_alloc(arena, sizeof(ASTVarDecl));
 
-    var_decl->symbol = var_table_insert(type, scope, name);
+    var_decl->symbol = var_table_insert(type, scope, name, mutable);
 
     var_decl->type = type;
     var_decl->scope = scope;
     var_decl->name = name;
+    var_decl->mutable = mutable;
 
     return var_decl;
 }
 
-export ASTVarDecl* parse_var_decl(Parser* parser, ASTTypeSpecifier* type)
+export ASTVarDecl* parse_var_decl(Parser* parser, ASTTypeSpecifier* type,
+    b8 mutable)
 {
     assert(parser != nullptr);
 
     ASTVarDecl* var_decl = make_var_decl(&parser->arena, type,
-        parser->current_scope, parser->token->identifier);
+        parser->current_scope, parser->token->identifier, mutable);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 

@@ -11,6 +11,11 @@ export void transpile_var_decl(Transpiler* transpiler, ASTVarDecl* var_decl)
 
     VarSymbol* symbol = var_decl->symbol;
 
+    if(!symbol->mutable)
+    {
+        fprintf(transpiler->file, "const ");
+    }
+
     transpile_type_specifier(transpiler, symbol->type);
     fprintf(transpiler->file, "%s", symbol->name);
     transpile_type_specifier_array_dimensions(transpiler, symbol->type);

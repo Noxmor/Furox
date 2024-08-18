@@ -119,14 +119,16 @@ ASTCompound* parse_translation_unit(Parser* parser)
                     case TOKEN_TYPE_SEMICOLON:
                     {
                         ast = make_ast(&parser->arena, AST_TYPE_GLOBAL_VAR_DECL,
-                            parse_global_var_decl(parser, type_specifier));
+                            parse_global_var_decl(parser, type_specifier,
+                            false));
 
                         break;
                     }
                     case TOKEN_TYPE_EQ:
                     {
                         ast = make_ast(&parser->arena, AST_TYPE_GLOBAL_VAR_DEF,
-                            parse_global_var_def(parser, type_specifier));
+                            parse_global_var_def(parser, type_specifier,
+                            false));
 
                         break;
                     }
@@ -143,6 +145,26 @@ ASTCompound* parse_translation_unit(Parser* parser)
 
                         break;
                     }
+                }
+
+                break;
+            }
+            case TOKEN_TYPE_KW_MUT:
+            {
+                parser_eat(parser, TOKEN_TYPE_KW_MUT);
+
+                ASTTypeSpecifier* type_specifier = parse_type_specifier(parser);
+
+                Token* next = parser_peek(parser, 1);
+                if(next->type == TOKEN_TYPE_SEMICOLON)
+                {
+                    ast = make_ast(&parser->arena, AST_TYPE_GLOBAL_VAR_DECL,
+                        parse_global_var_decl(parser, type_specifier, true));
+                }
+                else
+                {
+                    ast = make_ast(&parser->arena, AST_TYPE_GLOBAL_VAR_DEF,
+                        parse_global_var_def(parser, type_specifier, true));
                 }
 
                 break;

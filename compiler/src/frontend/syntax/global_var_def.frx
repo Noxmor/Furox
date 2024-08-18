@@ -7,12 +7,13 @@ export struct ASTGlobalVarDef
     ASTTypeSpecifier* type;
     Scope* scope;
     char* name;
+    b8 mutable;
 
     AST* value;
 }
 
 export ASTGlobalVarDef* make_global_var_def(Arena* arena, Namespace* ns,
-    ASTTypeSpecifier* type, Scope* scope, char* name)
+    ASTTypeSpecifier* type, Scope* scope, char* name, b8 mutable)
 {
     assert(type != nullptr);
 
@@ -20,24 +21,25 @@ export ASTGlobalVarDef* make_global_var_def(Arena* arena, Namespace* ns,
 
     ASTGlobalVarDef* var_def = arena_alloc(arena, sizeof(ASTGlobalVarDef));
 
-    var_def->symbol = var_table_insert(type, scope, name);
+    var_def->symbol = var_table_insert(type, scope, name, mutable);
 
     var_def->ns = ns;
     var_def->type = type;
     var_def->scope = scope;
     var_def->name = name;
+    var_def->mutable = mutable;
 
     return var_def;
 }
 
 export ASTGlobalVarDef* parse_global_var_def(Parser* parser,
-    ASTTypeSpecifier* type)
+    ASTTypeSpecifier* type, b8 mutable)
 {
     assert(parser != nullptr);
 
     ASTGlobalVarDef* var_def = make_global_var_def(&parser->arena,
         parser->current_namespace, type, parser->current_scope,
-        parser->token->identifier);
+        parser->token->identifier, mutable);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 

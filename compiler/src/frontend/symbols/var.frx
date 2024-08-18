@@ -3,6 +3,7 @@ export struct VarSymbol
     ASTTypeSpecifier* type;
     Scope* scope;
     char* name;
+    b8 mutable;
 }
 
 struct VarTableEntry
@@ -44,7 +45,7 @@ export VarSymbol* var_table_find(Scope* scope, char* name)
 }
 
 export VarSymbol* var_table_insert(ASTTypeSpecifier* type, Scope* scope,
-    char* name)
+    char* name, b8 mutable)
 {
     assert(type != nullptr);
 
@@ -70,6 +71,7 @@ export VarSymbol* var_table_insert(ASTTypeSpecifier* type, Scope* scope,
     symbol->type = type;
     symbol->scope = scope;
     symbol->name = name;
+    symbol->mutable = mutable;
 
     VarTableEntry* new_entry = malloc(sizeof(VarTableEntry));
     new_entry->symbol = symbol;

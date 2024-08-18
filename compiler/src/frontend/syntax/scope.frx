@@ -122,14 +122,14 @@ export ASTScope* parse_scope(Parser* parser)
                     case TOKEN_TYPE_SEMICOLON:
                     {
                         list_push(&scope->stmts, make_ast(&parser->arena,
-                            AST_TYPE_VAR_DECL, parse_var_decl(parser, type)));
+                            AST_TYPE_VAR_DECL, parse_var_decl(parser, type, false)));
 
                         break;
                     }
                     case TOKEN_TYPE_EQ:
                     {
                         list_push(&scope->stmts, make_ast(&parser->arena,
-                            AST_TYPE_VAR_DEF, parse_var_def(parser, type)));
+                            AST_TYPE_VAR_DEF, parse_var_def(parser, type, false)));
 
                         break;
                     }
@@ -139,6 +139,26 @@ export ASTScope* parse_scope(Parser* parser)
 
                         break;
                     }
+                }
+
+                break;
+            }
+            case TOKEN_TYPE_KW_MUT:
+            {
+                parser_eat(parser, TOKEN_TYPE_KW_MUT);
+
+                ASTTypeSpecifier* type = parse_type_specifier(parser);
+
+                Token* next = parser_peek(parser, 1);
+                if(next->type == TOKEN_TYPE_SEMICOLON)
+                {
+                    list_push(&scope->stmts, make_ast(&parser->arena,
+                        AST_TYPE_VAR_DECL, parse_var_decl(parser, type, true)));
+                }
+                else
+                {
+                    list_push(&scope->stmts, make_ast(&parser->arena,
+                        AST_TYPE_VAR_DEF, parse_var_def(parser, type, true)));
                 }
 
                 break;
