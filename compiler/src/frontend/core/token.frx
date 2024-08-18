@@ -129,6 +129,7 @@ export enum TokenType : u8
     TOKEN_TYPE_INT_LITERAL,
     TOKEN_TYPE_FLOAT_LITERAL,
 
+    /* All keywords must be contiguous */
     TOKEN_TYPE_KW_U8,
     TOKEN_TYPE_KW_U16,
     TOKEN_TYPE_KW_U32,
