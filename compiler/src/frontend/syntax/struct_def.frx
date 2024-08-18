@@ -1,25 +1,34 @@
 export struct ASTStructDef
 {
     StructSymbol* symbol;
+
+    Namespace* ns;
+    char* name;
+    b8 exported;
 }
 
-export ASTStructDef* make_struct_def(Arena* arena, Namespace* ns, char* name)
+export ASTStructDef* make_struct_def(Arena* arena, Namespace* ns, char* name,
+    b8 exported)
 {
     ASTStructDef* struct_def = arena_alloc(arena, sizeof(ASTStructDef));
 
     struct_def->symbol = struct_table_find_or_insert(ns, name);
 
+    struct_def->ns = ns;
+    struct_def->name = name;
+    struct_def->exported = exported;
+
     return struct_def;
 }
 
-export ASTStructDef* parse_struct_def(Parser* parser)
+export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
 {
     assert(parser != nullptr);
 
     parser_eat(parser, TOKEN_TYPE_KW_STRUCT);
 
     ASTStructDef* struct_def = make_struct_def(&parser->arena,
-        parser->current_namespace, parser->token->identifier);
+        parser->current_namespace, parser->token->identifier, exported);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 

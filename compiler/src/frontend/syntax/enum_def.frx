@@ -44,6 +44,8 @@ export struct ASTEnumDef
     Namespace* ns;
     char* name;
 
+    b8 exported;
+
     List constants;
 }
 
@@ -86,7 +88,7 @@ void enum_def_add_constant(Arena* arena, ASTEnumDef* enum_def,
 }
 
 export ASTEnumDef* make_enum_def(Arena* arena, Namespace* ns, char* name,
-    TokenType type)
+    TokenType type, b8 exported)
 {
     assert(name != nullptr);
 
@@ -97,6 +99,7 @@ export ASTEnumDef* make_enum_def(Arena* arena, Namespace* ns, char* name,
     enum_def->type = type;
     enum_def->ns = ns;
     enum_def->name = name;
+    enum_def->exported = exported;
     list_init(&enum_def->constants);
 
     enum_def->symbol = enum_table_insert(enum_def);
@@ -104,7 +107,7 @@ export ASTEnumDef* make_enum_def(Arena* arena, Namespace* ns, char* name,
     return enum_def;
 }
 
-export ASTEnumDef* parse_enum_def(Parser* parser)
+export ASTEnumDef* parse_enum_def(Parser* parser, b8 exported)
 {
     assert(parser != nullptr);
 
@@ -166,7 +169,7 @@ export ASTEnumDef* parse_enum_def(Parser* parser)
     }
 
     ASTEnumDef* enum_def = make_enum_def(&parser->arena,
-        parser->current_namespace, name, type);
+        parser->current_namespace, name, type, exported);
 
     parser_eat(parser, TOKEN_TYPE_LBRACE);
 

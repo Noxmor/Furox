@@ -6,10 +6,11 @@ export struct ASTFuncDef
     char* name;
     ASTFuncParams* params;
     ASTScope* body;
+    b8 exported;
 }
 
 export ASTFuncDef* make_func_def(Arena* arena, Namespace* ns, char* name,
-    ASTTypeSpecifier* return_type)
+    ASTTypeSpecifier* return_type, b8 exported)
 {
     assert(name != nullptr);
 
@@ -21,16 +22,21 @@ export ASTFuncDef* make_func_def(Arena* arena, Namespace* ns, char* name,
 
     func_def->return_type = return_type;
     func_def->name = name;
+    func_def->params = nullptr;
+    func_def->body = nullptr;
+    func_def->exported = exported;
 
     return func_def;
 }
 
-export ASTFuncDef* parse_func_def(Parser* parser, ASTTypeSpecifier* return_type)
+export ASTFuncDef* parse_func_def(Parser* parser, ASTTypeSpecifier* return_type,
+    b8 exported)
 {
     assert(parser != nullptr);
 
     ASTFuncDef* func_def = make_func_def(&parser->arena,
-        parser->current_namespace, parser->token->identifier, return_type);
+        parser->current_namespace, parser->token->identifier, return_type,
+        exported);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
