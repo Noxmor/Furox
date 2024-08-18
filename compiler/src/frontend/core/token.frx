@@ -244,6 +244,16 @@ export enum TokenType : u8
     TOKEN_TYPE_COUNT
 }
 
+export TokenType token_type_first_keyword()
+{
+    return TOKEN_TYPE_KW_U8;
+}
+
+export TokenType token_type_last_keyword()
+{
+    return TOKEN_TYPE_KW_MACRO;
+}
+
 export b8 token_type_is_primitive(TokenType type)
 {
     assert(type < TOKEN_TYPE_COUNT);

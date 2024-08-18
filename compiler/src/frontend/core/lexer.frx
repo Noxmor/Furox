@@ -47,7 +47,8 @@ KeywordTableEntry* keyword_table_find(char* name)
 export void lexer_init_keyword_table()
 {
     TokenType type;
-    for(type = TOKEN_TYPE_KW_U8; type <= TOKEN_TYPE_KW_MACRO; type = (type + 1))
+    for(type = token_type_first_keyword(); type <= token_type_last_keyword();
+        type = (type + 1))
     {
         register_keyword(token_type_to_str(type), type);
     }
