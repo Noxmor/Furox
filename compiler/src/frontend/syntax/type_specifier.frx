@@ -1,7 +1,7 @@
 export struct ASTTypeSpecifier
 {
     TokenType primitive_type;
-    ASTEnumDef* enum_type;
+    EnumSymbol* enum_type;
     ASTStructDef* struct_type;
 
     usize pointer_level;
@@ -10,7 +10,7 @@ export struct ASTTypeSpecifier
 }
 
 export ASTTypeSpecifier* make_type_specifier(Arena* arena,
-    TokenType primitive_type, ASTEnumDef* enum_type, ASTStructDef* struct_type,
+    TokenType primitive_type, EnumSymbol* enum_type, ASTStructDef* struct_type,
     usize pointer_level)
 {
     ASTTypeSpecifier* type_specifier = arena_alloc(arena,
@@ -30,7 +30,7 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
     assert(parser != nullptr);
 
     TokenType primitive_type = TOKEN_TYPE_ERROR;
-    ASTEnumDef* enum_type = nullptr;
+    EnumSymbol* enum_type = nullptr;
     ASTStructDef* struct_type = nullptr;
 
     if(token_type_is_primitive(parser->token->type))
@@ -139,10 +139,10 @@ void print_type_specifier(ASTTypeSpecifier* type_specifier, FILE* file,
     }
     else if(type_specifier->enum_type != nullptr)
     {
-        ASTEnumDef* enum_def = type_specifier->enum_type;
+        EnumSymbol* enum_symbol = type_specifier->enum_type;
 
-        print_namespace_resolution(file, enum_def->ns);
-        fprintf(file, "%s", enum_def->name);
+        print_namespace_resolution(file, enum_symbol->ns);
+        fprintf(file, "%s", enum_symbol->name);
     }
     else if(type_specifier->struct_type != nullptr)
     {

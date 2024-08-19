@@ -1,6 +1,29 @@
+export struct EnumSymbol
+{
+    TokenType type;
+    Namespace* ns;
+    char* name;
+    List constants;
+}
+
+export void enum_symbol_init(EnumSymbol* symbol, TokenType type, Namespace* ns,
+    char* name)
+{
+    assert(symbol != nullptr);
+
+    assert(type != TOKEN_TYPE_ERROR && type < TOKEN_TYPE_COUNT);
+
+    assert(name != nullptr);
+
+    symbol->type = type;
+    symbol->ns = ns;
+    symbol->name = name;
+    list_init(&symbol->constants);
+}
+
 struct EnumTableEntry
 {
-    ASTEnumDef* enum_def;
+    EnumSymbol* symbol;
     EnumTableEntry* next;
 }
 
@@ -13,19 +36,19 @@ struct EnumTable
 
 EnumTable enum_table;
 
-export ASTEnumDef* enum_table_find_r(Namespace* ns, char* name)
+export EnumSymbol* enum_table_find_r(Namespace* ns, char* name)
 {
-    ASTEnumDef* enum_def = enum_table_find(ns, name);
-    while(enum_def == nullptr && ns != nullptr)
+    EnumSymbol* symbol = enum_table_find(ns, name);
+    while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
-        enum_def = enum_table_find(ns, name);
+        symbol = enum_table_find(ns, name);
     }
 
-    return enum_def;
+    return symbol;
 }
 
-export ASTEnumDef* enum_table_find(Namespace* ns, char* name)
+export EnumSymbol* enum_table_find(Namespace* ns, char* name)
 {
     assert(name != nullptr);
 
@@ -34,12 +57,11 @@ export ASTEnumDef* enum_table_find(Namespace* ns, char* name)
 
     while(entry != nullptr)
     {
-        ASTEnumDef* enum_def = entry->enum_def;
+        EnumSymbol* symbol = entry->symbol;
 
-        if(strcmp(enum_def->name, name) == 0 && namespace_equals(enum_def->ns,
-            ns))
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
-            return enum_def;
+            return symbol;
         }
 
         entry = entry->next;
@@ -48,31 +70,31 @@ export ASTEnumDef* enum_table_find(Namespace* ns, char* name)
     return nullptr;
 }
 
-export ASTEnumDef* enum_table_insert(ASTEnumDef* enum_def)
+export b8 enum_table_insert(EnumSymbol* symbol)
 {
-    assert(enum_def != nullptr);
+    assert(symbol != nullptr);
 
-    u64 index = hash_djb2(enum_def->name) % ENUM_TABLE_CAPACITY;
+    u64 index = hash_djb2(symbol->name) % ENUM_TABLE_CAPACITY;
     EnumTableEntry* entry = enum_table.entries[index];
 
     while(entry != nullptr)
     {
-        ASTEnumDef* existing_enum_def = entry->enum_def;
+        EnumSymbol* existing_symbol = entry->symbol;
 
-        if(strcmp(existing_enum_def->name, enum_def->name) == 0
-            && namespace_equals(existing_enum_def->ns, enum_def->ns))
+        if(strcmp(existing_symbol->name, symbol->name) == 0
+            && namespace_equals(existing_symbol->ns, symbol->ns))
         {
-            return nullptr;
+            return false;
         }
 
         entry = entry->next;
     }
 
     EnumTableEntry* new_entry = malloc(sizeof(EnumTableEntry));
-    new_entry->enum_def = enum_def;
+    new_entry->symbol = symbol;
     new_entry->next = enum_table.entries[index];
 
     enum_table.entries[index] = new_entry;
 
-    return enum_def;
+    return true;
 }

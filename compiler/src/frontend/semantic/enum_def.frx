@@ -4,12 +4,12 @@ export void analyze_enum_def(Parser* parser, ASTEnumDef* enum_def)
 
     assert(enum_def != nullptr);
 
-    if(enum_def->symbol == nullptr)
+    if(enum_def->is_redefinition)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
         error_enum_redefinition(parser_source_file(parser), loc,
-            enum_def->name);
+            enum_def->symbol.name);
 
         parser->failed = true;
     }

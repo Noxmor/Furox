@@ -9,20 +9,23 @@ export void transpile_enum_def(Transpiler* transpiler, ASTEnumDef* enum_def)
         return;
     }
 
+    EnumSymbol* symbol = &enum_def->symbol;
+
     fprintf(transpiler->file, "enum {\n");
 
-    char[strlen(enum_def->name) + 1] namespaced_name;
-    strcpy(namespaced_name, enum_def->name);
+    char[strlen(symbol->name) + 1] namespaced_name;
+    strcpy(namespaced_name, symbol->name);
 
     usize i;
     for(i = 0; i < strlen(namespaced_name); i = i + 1)
     {
+        //TODO: Remove this var. Bootstrap compiler cannot handle lvalues...
         char temp = namespaced_name[i] = toupper(namespaced_name[i]);
     }
 
-    for(i = 0; i < list_size(&enum_def->constants); i = i + 1)
+    for(i = 0; i < list_size(&symbol->constants); i = i + 1)
     {
-        ASTEnumConstantDef* constant = list_get(&enum_def->constants, i);
+        ASTEnumConstantDef* constant = list_get(&symbol->constants, i);
 
         fprintf(transpiler->file, "%s_%s = ", namespaced_name, constant->name);
         transpile_ast(transpiler, constant->value);
@@ -31,18 +34,18 @@ export void transpile_enum_def(Transpiler* transpiler, ASTEnumDef* enum_def)
 
     fprintf(transpiler->file, "};\n");
 
-    fprintf(transpiler->file, "typedef %s ", token_type_to_str(enum_def->type));
-    transpile_enum_def_name(transpiler, enum_def);
+    fprintf(transpiler->file, "typedef %s ", token_type_to_str(symbol->type));
+    transpile_enum_symbol_name(transpiler, symbol);
     fprintf(transpiler->file, ";\n");
 }
 
-export void transpile_enum_def_name(Transpiler* transpiler,
-    ASTEnumDef* enum_def)
+export void transpile_enum_symbol_name(Transpiler* transpiler,
+    EnumSymbol* symbol)
 {
     assert(transpiler != nullptr);
 
-    assert(enum_def != nullptr);
+    assert(symbol != nullptr);
 
-    transpile_namespace_resolution(transpiler, enum_def->ns);
-    fprintf(transpiler->file, "%s", enum_def->name);
+    transpile_namespace_resolution(transpiler, symbol->ns);
+    fprintf(transpiler->file, "%s", symbol->name);
 }

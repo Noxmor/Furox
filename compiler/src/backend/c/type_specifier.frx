@@ -12,8 +12,8 @@ export void transpile_type_specifier(Transpiler* transpiler,
     }
     else if(type_specifier->enum_type != nullptr)
     {
-        ASTEnumDef* enum_def = type_specifier->enum_type;
-        transpile_enum_def_name(transpiler, enum_def);
+        EnumSymbol* enum_symbol = type_specifier->enum_type;
+        transpile_enum_symbol_name(transpiler, enum_symbol);
     }
     else if(type_specifier->struct_type != nullptr)
     {

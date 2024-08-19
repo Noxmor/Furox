@@ -1,5 +1,7 @@
 export struct ASTEnumConstant
 {
+    EnumSymbol* symbol;
+
     Namespace* enum_namespace;
     char* enum_name;
     char* name;
@@ -14,6 +16,7 @@ export ASTEnumConstant* make_enum_constant(Arena* arena,
 
     ASTEnumConstant* constant = arena_alloc(arena, sizeof(ASTEnumConstant));
 
+    constant->symbol = nullptr;
     constant->enum_namespace = enum_namespace;
     constant->enum_name = enum_name;
     constant->name = name;
