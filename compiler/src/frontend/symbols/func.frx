@@ -1,14 +1,6 @@
-export struct FuncSymbol
-{
-    Namespace* ns;
-    char* name;
-
-    ASTTypeSpecifier* return_type;
-}
-
 struct FuncTableEntry
 {
-    FuncSymbol* symbol;
+    ASTFuncDef* func_def;
     FuncTableEntry* next;
 }
 
@@ -21,19 +13,19 @@ struct FuncTable
 
 FuncTable func_table;
 
-export FuncSymbol* func_table_find_r(Namespace* ns, char* name)
+export ASTFuncDef* func_table_find_r(Namespace* ns, char* name)
 {
-    FuncSymbol* symbol = func_table_find(ns, name);
-    while(symbol == nullptr && ns != nullptr)
+    ASTFuncDef* func_def = func_table_find(ns, name);
+    while(func_def == nullptr && ns != nullptr)
     {
         ns = ns->parent;
-        symbol = func_table_find(ns, name);
+        func_def = func_table_find(ns, name);
     }
 
-    return symbol;
+    return func_def;
 }
 
-export FuncSymbol* func_table_find(Namespace* ns, char* name)
+export ASTFuncDef* func_table_find(Namespace* ns, char* name)
 {
     assert(name != nullptr);
 
@@ -42,11 +34,12 @@ export FuncSymbol* func_table_find(Namespace* ns, char* name)
 
     while(entry != nullptr)
     {
-        FuncSymbol* symbol = entry->symbol;
+        ASTFuncDef* func_def = entry->func_def;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(strcmp(func_def->name, name) == 0 && namespace_equals(func_def->ns,
+            ns))
         {
-            return symbol;
+            return func_def;
         }
 
         entry = entry->next;
@@ -55,19 +48,19 @@ export FuncSymbol* func_table_find(Namespace* ns, char* name)
     return nullptr;
 }
 
-export FuncSymbol* func_table_insert(Namespace* ns, char* name,
-    ASTTypeSpecifier* return_type)
+export ASTFuncDef* func_table_insert(ASTFuncDef* func_def)
 {
-    assert(name != nullptr);
+    assert(func_def != nullptr);
 
-    u64 index = hash_djb2(name) % FUNC_TABLE_CAPACITY;
+    u64 index = hash_djb2(func_def->name) % FUNC_TABLE_CAPACITY;
     FuncTableEntry* entry = func_table.entries[index];
 
     while(entry != nullptr)
     {
-        FuncSymbol* symbol = entry->symbol;
+        ASTFuncDef* existing_func_def = entry->func_def;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(strcmp(existing_func_def->name, func_def->name) == 0
+            && namespace_equals(existing_func_def->ns, func_def->ns))
         {
             return nullptr;
         }
@@ -75,16 +68,11 @@ export FuncSymbol* func_table_insert(Namespace* ns, char* name,
         entry = entry->next;
     }
 
-    FuncSymbol* symbol = malloc(sizeof(FuncSymbol));
-    symbol->ns = ns;
-    symbol->name = name;
-    symbol->return_type = return_type;
-
     FuncTableEntry* new_entry = malloc(sizeof(FuncTableEntry));
-    new_entry->symbol = symbol;
+    new_entry->func_def = func_def;
     new_entry->next = func_table.entries[index];
 
     func_table.entries[index] = new_entry;
 
-    return symbol;
+    return func_def;
 }

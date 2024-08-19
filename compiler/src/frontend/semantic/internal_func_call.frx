@@ -14,24 +14,24 @@ export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
         return;
     }
 
-    StructSymbol* struct_symbol = nullptr;
-    EnumSymbol* enum_symbol = nullptr;
+    ASTStructDef* struct_def = nullptr;
+    ASTEnumDef* enum_def = nullptr;
 
     if(sizeof_node->ns == nullptr)
     {
-        struct_symbol = struct_table_find_r(parser->current_namespace,
+        struct_def = struct_table_find_r(parser->current_namespace,
             sizeof_node->name);
 
-        enum_symbol = enum_table_find_r(parser->current_namespace,
+        enum_def = enum_table_find_r(parser->current_namespace,
             sizeof_node->name);
     }
     else
     {
-        struct_symbol = struct_table_find(sizeof_node->ns, sizeof_node->name);
-        enum_symbol = enum_table_find(sizeof_node->ns, sizeof_node->name);
+        struct_def = struct_table_find(sizeof_node->ns, sizeof_node->name);
+        enum_def = enum_table_find(sizeof_node->ns, sizeof_node->name);
     }
 
-    if(struct_symbol != nullptr)
+    if(struct_def != nullptr)
     {
         ast->type = AST_TYPE_INT_LITERAL;
 
@@ -39,12 +39,11 @@ export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
         usize size = 0;
         ast->node = make_int_literal(&parser->arena, size);
     }
-    else if(enum_symbol != nullptr)
+    else if(enum_def != nullptr)
     {
         ast->type = AST_TYPE_INT_LITERAL;
 
-        usize size = primitive_type_to_size(
-            enum_symbol->enum_def->type);
+        usize size = primitive_type_to_size(enum_def->type);
         ast->node = make_int_literal(&parser->arena, size);
     }
     else
@@ -65,9 +64,9 @@ export void analyze_enum_count(Parser* parser, ASTEnumCount* enum_count,
 
     assert(enum_count != nullptr);
 
-    EnumSymbol* symbol = enum_table_find(enum_count->ns, enum_count->name);
+    ASTEnumDef* enum_def = enum_table_find(enum_count->ns, enum_count->name);
 
-    if(symbol == nullptr)
+    if(enum_def == nullptr)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
@@ -77,8 +76,6 @@ export void analyze_enum_count(Parser* parser, ASTEnumCount* enum_count,
     }
     else
     {
-        ASTEnumDef* enum_def = symbol->enum_def;
-
         ast->type = AST_TYPE_INT_LITERAL;
         ast->node = make_int_literal(&parser->arena,
             list_size(&enum_def->constants));

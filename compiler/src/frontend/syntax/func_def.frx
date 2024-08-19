@@ -1,8 +1,9 @@
 export struct ASTFuncDef
 {
-    FuncSymbol* symbol;
+    ASTFuncDef* symbol;
 
     ASTTypeSpecifier* return_type;
+    Namespace* ns;
     char* name;
     ASTFuncParams* params;
     ASTScope* body;
@@ -18,13 +19,14 @@ export ASTFuncDef* make_func_def(Arena* arena, Namespace* ns, char* name,
 
     ASTFuncDef* func_def = arena_alloc(arena, sizeof(ASTFuncDef));
 
-    func_def->symbol = func_table_insert(ns, name, return_type);
-
     func_def->return_type = return_type;
+    func_def->ns = ns;
     func_def->name = name;
     func_def->params = nullptr;
     func_def->body = nullptr;
     func_def->exported = exported;
+
+    func_def->symbol = func_table_insert(func_def);
 
     return func_def;
 }
@@ -55,12 +57,10 @@ export void print_func_def(ASTFuncDef* func_def, FILE* file, usize depth)
 
     print_ast_depth(file, depth);
 
-    FuncSymbol* symbol = func_def->symbol;
-
     fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_FUNC_DEF),
-        symbol->name);
+        func_def->name);
 
-    print_type_specifier(symbol->return_type, file, depth + 1);
+    print_type_specifier(func_def->return_type, file, depth + 1);
     print_func_params(func_def->params, file, depth + 1);
     print_scope(func_def->body, file, depth + 1);
 }

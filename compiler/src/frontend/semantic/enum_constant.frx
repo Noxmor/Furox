@@ -4,10 +4,8 @@ export void analyze_enum_constant(Parser* parser, ASTEnumConstant* constant)
 
     assert(constant != nullptr);
 
-    EnumSymbol* symbol = enum_table_find(constant->enum_namespace,
+    ASTEnumDef* enum_def = enum_table_find(constant->enum_namespace,
         constant->enum_name);
-
-    ASTEnumDef* enum_def = symbol->enum_def;
 
     b8 exists = false;
 

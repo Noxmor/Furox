@@ -37,7 +37,7 @@ ASTEnumConstantDef* parse_enum_constant(Parser* parser)
 
 export struct ASTEnumDef
 {
-    EnumSymbol* symbol;
+    ASTEnumDef* symbol;
 
     TokenType type;
 

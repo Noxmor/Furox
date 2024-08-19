@@ -4,7 +4,7 @@ export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
 
     assert(func_call != nullptr);
 
-    FuncSymbol* symbol = nullptr;
+    ASTFuncDef* symbol = nullptr;
 
     if(func_call->ns == nullptr)
     {

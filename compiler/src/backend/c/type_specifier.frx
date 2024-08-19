@@ -12,13 +12,13 @@ export void transpile_type_specifier(Transpiler* transpiler,
     }
     else if(type_specifier->enum_type != nullptr)
     {
-        EnumSymbol* symbol = type_specifier->enum_type;
-        transpile_enum_def_name(transpiler, symbol->enum_def);
+        ASTEnumDef* enum_def = type_specifier->enum_type;
+        transpile_enum_def_name(transpiler, enum_def);
     }
     else if(type_specifier->struct_type != nullptr)
     {
-        StructSymbol* symbol = type_specifier->struct_type;
-        transpile_struct_symbol_name(transpiler, symbol);
+        ASTStructDef* struct_def = type_specifier->struct_type;
+        transpile_struct_symbol_name(transpiler, struct_def);
     }
 
     usize i;
