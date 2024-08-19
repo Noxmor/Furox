@@ -3,4 +3,22 @@ export void analyze_var(Parser* parser, ASTVar* var)
     assert(parser != nullptr);
 
     assert(var != nullptr);
+
+    if(var->ns == nullptr)
+    {
+        var->symbol = var_table_find_by_scope(var->scope, var->name);
+    }
+    else
+    {
+        var->symbol = var_table_find_by_namespace(var->ns, var->name);
+    }
+
+    if(var->symbol == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_undefined_var(parser_source_file(parser), loc, var->name);
+
+        parser->failed = true;
+    }
 }

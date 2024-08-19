@@ -18,7 +18,8 @@ export void analyze_enum_constant_or_global_var(Parser* parser,
     else
     {
         ast->type = AST_TYPE_VAR;
-        ast->node = make_var(&parser->arena, ns, nullptr, enum_constant_or_global_var->scope, name);
+        ast->node = make_var(&parser->arena, ns,
+            enum_constant_or_global_var->scope, name);
     }
 
     analyze_ast(parser, ast);

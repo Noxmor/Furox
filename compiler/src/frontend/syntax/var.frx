@@ -2,32 +2,28 @@ export struct ASTVar
 {
     VarSymbol* symbol;
 
-    Namespace* resolved_ns;
     Namespace* ns;
     Scope* scope;
     char* name;
 }
 
-export ASTVar* make_var(Arena* arena, Namespace* resolved_ns, Namespace* ns,
-    Scope* scope, char* name)
+export ASTVar* make_var(Arena* arena, Namespace* ns, Scope* scope, char* name)
 {
     assert(name != nullptr);
 
     ASTVar* var = arena_alloc(arena, sizeof(ASTVar));
 
     var->symbol = nullptr;
-    var->resolved_ns = resolved_ns;
     var->ns = ns;
     var->scope = scope;
     var->name = name;
 }
 
-export ASTVar* parse_var(Parser* parser, Namespace* resolved_ns)
+export ASTVar* parse_var(Parser* parser, Namespace* ns)
 {
     assert(parser != nullptr);
 
-    ASTVar* var = make_var(&parser->arena, resolved_ns,
-        parser->current_namespace, parser->current_scope,
+    ASTVar* var = make_var(&parser->arena, ns, parser->current_scope,
         parser->token->identifier);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);

@@ -40,8 +40,32 @@ struct VarTable
 
 VarTable var_table;
 
-export VarSymbol* var_table_find(Scope* scope, char* name)
+export VarSymbol* var_table_find_by_namespace(Namespace* ns, char* name)
 {
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % VAR_TABLE_CAPACITY;
+    VarTableEntry* entry = var_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        VarSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        {
+            return symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    return nullptr;
+}
+
+export VarSymbol* var_table_find_by_scope(Scope* scope, char* name)
+{
+    assert(scope != nullptr);
+
     assert(name != nullptr);
 
     u64 index = hash_djb2(name) % VAR_TABLE_CAPACITY;

@@ -4,14 +4,9 @@ export void transpile_var(Transpiler* transpiler, ASTVar* var)
 
     assert(var != nullptr);
 
-    if(var->resolved_ns != nullptr)
-    {
-        transpile_namespace_resolution(transpiler, var->resolved_ns);
-    }
-    else
-    {
-        transpile_namespace_resolution(transpiler, var->ns);
-    }
+    VarSymbol* symbol = var->symbol;
 
-    fprintf(transpiler->file, "%s", var->name);
+    transpile_namespace_resolution(transpiler, symbol->ns);
+
+    fprintf(transpiler->file, "%s", symbol->name);
 }
