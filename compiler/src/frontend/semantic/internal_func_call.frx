@@ -14,7 +14,7 @@ export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
         return;
     }
 
-    ASTStructDef* struct_def = nullptr;
+    StructSymbol* struct_def = nullptr;
     EnumSymbol* enum_symbol = nullptr;
 
     if(sizeof_node->ns == nullptr)

@@ -1,6 +1,22 @@
+export struct StructSymbol
+{
+    Namespace* ns;
+    char* name;
+}
+
+export void struct_symbol_init(StructSymbol* symbol, Namespace* ns, char* name)
+{
+    assert(symbol != nullptr);
+
+    assert(name != nullptr);
+
+    symbol->ns = ns;
+    symbol->name = name;
+}
+
 struct StructTableEntry
 {
-    ASTStructDef* struct_def;
+    StructSymbol* symbol;
     StructTableEntry* next;
 }
 
@@ -13,19 +29,19 @@ struct StructTable
 
 StructTable struct_table;
 
-export ASTStructDef* struct_table_find_r(Namespace* ns, char* name)
+export StructSymbol* struct_table_find_r(Namespace* ns, char* name)
 {
-    ASTStructDef* struct_def = struct_table_find(ns, name);
-    while(struct_def == nullptr && ns != nullptr)
+    StructSymbol* symbol = struct_table_find(ns, name);
+    while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
-        struct_def = struct_table_find(ns, name);
+        symbol = struct_table_find(ns, name);
     }
 
-    return struct_def;
+    return symbol;
 }
 
-export ASTStructDef* struct_table_find(Namespace* ns, char* name)
+export StructSymbol* struct_table_find(Namespace* ns, char* name)
 {
     assert(name != nullptr);
 
@@ -34,12 +50,11 @@ export ASTStructDef* struct_table_find(Namespace* ns, char* name)
 
     while(entry != nullptr)
     {
-        ASTStructDef* struct_def = entry->struct_def;
+        StructSymbol* symbol = entry->symbol;
 
-        if(strcmp(struct_def->name, name) == 0
-            && namespace_equals(struct_def->ns, ns))
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
-            return struct_def;
+            return symbol;
         }
 
         entry = entry->next;
@@ -48,31 +63,31 @@ export ASTStructDef* struct_table_find(Namespace* ns, char* name)
     return nullptr;
 }
 
-export ASTStructDef* struct_table_insert(ASTStructDef* struct_def)
+export b8 struct_table_insert(StructSymbol* symbol)
 {
-    assert(struct_def != nullptr);
+    assert(symbol != nullptr);
 
-    u64 index = hash_djb2(struct_def->name) % STRUCT_TABLE_CAPACITY;
+    u64 index = hash_djb2(symbol->name) % STRUCT_TABLE_CAPACITY;
     StructTableEntry* entry = struct_table.entries[index];
 
     while(entry != nullptr)
     {
-        ASTStructDef* existing_struct_def = entry->struct_def;
+        StructSymbol* existing_symbol = entry->symbol;
 
-        if(strcmp(existing_struct_def->name, struct_def->name) == 0
-            && namespace_equals(existing_struct_def->ns, struct_def->ns))
+        if(strcmp(existing_symbol->name, symbol->name) == 0
+            && namespace_equals(existing_symbol->ns, symbol->ns))
         {
-            return nullptr;
+            return false;
         }
 
         entry = entry->next;
     }
 
     StructTableEntry* new_entry = malloc(sizeof(StructTableEntry));
-    new_entry->struct_def = struct_def;
+    new_entry->symbol = symbol;
     new_entry->next = struct_table.entries[index];
 
     struct_table.entries[index] = new_entry;
 
-    return struct_def;
+    return true;
 }
