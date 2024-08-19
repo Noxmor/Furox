@@ -4,11 +4,13 @@ export void analyze_global_var_decl(Parser* parser, ASTGlobalVarDecl* var_decl)
 
     assert(var_decl != nullptr);
 
-    if(var_decl->symbol == nullptr)
+    VarSymbol* symbol = &var_decl->symbol;
+
+    if(var_decl->is_redefinition)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
-        error_var_redefinition(parser_source_file(parser), loc, var_decl->name);
+        error_var_redefinition(parser_source_file(parser), loc, symbol->name);
 
         parser->failed = true;
     }

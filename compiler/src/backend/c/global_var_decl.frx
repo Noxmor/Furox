@@ -10,10 +10,10 @@ export void transpile_global_var_decl(Transpiler* transpiler,
         return;
     }
 
-    VarSymbol* symbol = var_decl->symbol;
+    VarSymbol* symbol = &var_decl->symbol;
 
     transpile_type_specifier(transpiler, symbol->type);
-    transpile_namespace_resolution(transpiler, var_decl->ns);
+    transpile_namespace_resolution(transpiler, symbol->ns);
     fprintf(transpiler->file, "%s", symbol->name);
     transpile_type_specifier_array_dimensions(transpiler, symbol->type);
     fprintf(transpiler->file, ";\n");

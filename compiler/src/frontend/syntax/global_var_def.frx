@@ -1,33 +1,20 @@
 export struct ASTGlobalVarDef
 {
-    VarSymbol* symbol;
-
-    Namespace* ns;
-
-    ASTTypeSpecifier* type;
-    Scope* scope;
-    char* name;
-    b8 mutable;
+    VarSymbol symbol;
 
     AST* value;
+
+    b8 is_redefinition;
 }
 
 export ASTGlobalVarDef* make_global_var_def(Arena* arena, Namespace* ns,
     ASTTypeSpecifier* type, Scope* scope, char* name, b8 mutable)
 {
-    assert(type != nullptr);
-
-    assert(name != nullptr);
-
     ASTGlobalVarDef* var_def = arena_alloc(arena, sizeof(ASTGlobalVarDef));
 
-    var_def->symbol = var_table_insert(type, scope, name, mutable);
+    var_symbol_init(&var_def->symbol, ns, type, scope, name, mutable);
 
-    var_def->ns = ns;
-    var_def->type = type;
-    var_def->scope = scope;
-    var_def->name = name;
-    var_def->mutable = mutable;
+    var_def->is_redefinition = !var_table_insert(&var_def->symbol);
 
     return var_def;
 }
@@ -61,9 +48,11 @@ export void print_global_var_def(ASTGlobalVarDef* var_def, FILE* file,
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_GLOBAL_VAR_DEF),
-        var_def->name);
+    VarSymbol* symbol = &var_def->symbol;
 
-    print_type_specifier(var_def->type, file, depth + 1);
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_GLOBAL_VAR_DEF),
+        symbol->name);
+
+    print_type_specifier(symbol->type, file, depth + 1);
     print_ast(var_def->value, file, depth + 1);
 }

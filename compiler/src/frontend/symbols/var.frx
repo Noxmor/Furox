@@ -1,9 +1,28 @@
 export struct VarSymbol
 {
+    Namespace* ns;
     ASTTypeSpecifier* type;
     Scope* scope;
     char* name;
     b8 mutable;
+}
+
+export void var_symbol_init(VarSymbol* symbol, Namespace* ns,
+    ASTTypeSpecifier* type, Scope* scope, char* name, b8 mutable)
+{
+    assert(symbol != nullptr);
+
+    assert(type != nullptr);
+
+    assert(scope != nullptr);
+
+    assert(name != nullptr);
+
+    symbol->ns = ns;
+    symbol->type = type;
+    symbol->scope = scope;
+    symbol->name = name;
+    symbol->mutable = mutable;
 }
 
 struct VarTableEntry
@@ -44,34 +63,25 @@ export VarSymbol* var_table_find(Scope* scope, char* name)
     return nullptr;
 }
 
-export VarSymbol* var_table_insert(ASTTypeSpecifier* type, Scope* scope,
-    char* name, b8 mutable)
+export b8 var_table_insert(VarSymbol* symbol)
 {
-    assert(type != nullptr);
+    assert(symbol != nullptr);
 
-    assert(name != nullptr);
-
-    u64 index = hash_djb2(name) % VAR_TABLE_CAPACITY;
+    u64 index = hash_djb2(symbol->name) % VAR_TABLE_CAPACITY;
     VarTableEntry* entry = var_table.entries[index];
 
     while(entry != nullptr)
     {
-        VarSymbol* symbol = entry->symbol;
+        VarSymbol* existing_symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0
-            && scope_is_child_of(scope, symbol->scope))
+        if(strcmp(existing_symbol->name, symbol->name) == 0
+            && scope_is_child_of(symbol->scope, existing_symbol->scope))
         {
-            return nullptr;
+            return false;
         }
 
         entry = entry->next;
     }
-
-    VarSymbol* symbol = malloc(sizeof(VarSymbol));
-    symbol->type = type;
-    symbol->scope = scope;
-    symbol->name = name;
-    symbol->mutable = mutable;
 
     VarTableEntry* new_entry = malloc(sizeof(VarTableEntry));
     new_entry->symbol = symbol;
@@ -79,38 +89,5 @@ export VarSymbol* var_table_insert(ASTTypeSpecifier* type, Scope* scope,
 
     var_table.entries[index] = new_entry;
 
-    return symbol;
-}
-
-export VarSymbol* var_table_find_or_insert(Scope* scope, char* name)
-{
-    assert(name != nullptr);
-
-    u64 index = hash_djb2(name) % VAR_TABLE_CAPACITY;
-    VarTableEntry* entry = var_table.entries[index];
-
-    while(entry != nullptr)
-    {
-        VarSymbol* symbol = entry->symbol;
-
-        if(strcmp(symbol->name, name) == 0
-            && scope_is_child_of(scope, symbol->scope))
-        {
-            return symbol;
-        }
-
-        entry = entry->next;
-    }
-
-    VarSymbol* symbol = malloc(sizeof(VarSymbol));
-    symbol->scope = scope;
-    symbol->name = name;
-
-    VarTableEntry* new_entry = malloc(sizeof(VarTableEntry));
-    new_entry->symbol = symbol;
-    new_entry->next = var_table.entries[index];
-
-    var_table.entries[index] = new_entry;
-
-    return symbol;
+    return true;
 }

@@ -9,7 +9,7 @@ export void transpile_var_decl(Transpiler* transpiler, ASTVarDecl* var_decl)
         return;
     }
 
-    VarSymbol* symbol = var_decl->symbol;
+    VarSymbol* symbol = &var_decl->symbol;
 
     if(!symbol->mutable)
     {

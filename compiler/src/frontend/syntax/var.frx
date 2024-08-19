@@ -1,5 +1,7 @@
 export struct ASTVar
 {
+    VarSymbol* symbol;
+
     Namespace* resolved_ns;
     Namespace* ns;
     Scope* scope;
@@ -13,6 +15,7 @@ export ASTVar* make_var(Arena* arena, Namespace* resolved_ns, Namespace* ns,
 
     ASTVar* var = arena_alloc(arena, sizeof(ASTVar));
 
+    var->symbol = nullptr;
     var->resolved_ns = resolved_ns;
     var->ns = ns;
     var->scope = scope;
