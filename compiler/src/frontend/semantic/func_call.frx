@@ -4,18 +4,17 @@ export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
 
     assert(func_call != nullptr);
 
-    ASTFuncDef* symbol = nullptr;
-
     if(func_call->ns == nullptr)
     {
-        symbol = func_table_find_r(parser->current_namespace, func_call->name);
+        func_call->symbol = func_table_find_r(parser->current_namespace,
+            func_call->name);
     }
     else
     {
-        symbol = func_table_find(func_call->ns, func_call->name);
+        func_call->symbol = func_table_find(func_call->ns, func_call->name);
     }
 
-    if(symbol == nullptr)
+    if(func_call->symbol == nullptr)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;

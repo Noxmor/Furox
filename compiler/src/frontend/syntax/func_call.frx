@@ -1,5 +1,7 @@
 export struct ASTFuncCall
 {
+    FuncSymbol* symbol;
+
     Namespace* ns;
     char* name;
 
@@ -12,6 +14,7 @@ export ASTFuncCall* make_func_call(Arena* arena, Namespace* ns, char* name)
 
     ASTFuncCall* func_call = arena_alloc(arena, sizeof(ASTFuncCall));
 
+    func_call->symbol = nullptr;
     func_call->ns = ns;
     func_call->name = name;
     list_init(&func_call->args);

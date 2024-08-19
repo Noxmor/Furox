@@ -4,21 +4,11 @@ export void transpile_func_call(Transpiler* transpiler, ASTFuncCall* func_call)
 
     assert(func_call != nullptr);
 
-    ASTFuncDef* func_def = nullptr;
-    if(func_call->ns == nullptr)
-    {
-        func_def = func_table_find_r(transpiler->current_namespace,
-            func_call->name);
-    }
-    else
-    {
-        func_def = func_table_find(func_call->ns, func_call->name);
-    }
+    FuncSymbol* symbol = func_call->symbol;
 
-    Namespace* ns = func_def->ns;
-    transpile_namespace_resolution(transpiler, ns);
+    transpile_namespace_resolution(transpiler, symbol->ns);
 
-    fprintf(transpiler->file, "%s(", func_call->name);
+    fprintf(transpiler->file, "%s(", symbol->name);
 
     usize i;
     for(i = 0; i < list_size(&func_call->args); i = i + 1)

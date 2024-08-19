@@ -4,12 +4,12 @@ export void analyze_func_def(Parser* parser, ASTFuncDef* func_def)
 
     assert(func_def != nullptr);
 
-    if(func_def->symbol == nullptr)
+    if(func_def->is_redefinition)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
         error_func_redefinition(parser_source_file(parser), loc,
-            func_def->name);
+            func_def->symbol.name);
 
         parser->failed = true;
     }
