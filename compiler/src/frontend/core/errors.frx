@@ -48,6 +48,12 @@ export void error_namespace_enum_conflict(char* filepath, SourceLocation loc,
         name, name);
 }
 
+export void error_undefined_type_specifier(char* filepath, SourceLocation loc,
+    char* name)
+{
+    log_error(filepath, loc, "Encountered undefined type-specifier %s!", name);
+}
+
 export void error_undefined_func_call(char* filepath, SourceLocation loc,
     char* name)
 {

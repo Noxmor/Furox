@@ -1,5 +1,9 @@
 export struct ASTTypeSpecifier
 {
+    Namespace* ns;
+    char* name;
+    Scope* scope;
+
     TokenType primitive_type;
     EnumSymbol* enum_type;
     StructSymbol* struct_type;
@@ -9,16 +13,22 @@ export struct ASTTypeSpecifier
     List array_dimensions;
 }
 
-export ASTTypeSpecifier* make_type_specifier(Arena* arena,
-    TokenType primitive_type, EnumSymbol* enum_type, StructSymbol* struct_type,
-    usize pointer_level)
+export ASTTypeSpecifier* make_type_specifier(Arena* arena, Namespace* ns,
+    char* name, Scope* scope, TokenType primitive_type, usize pointer_level)
 {
+    assert(name != nullptr || primitive_type != TOKEN_TYPE_ERROR);
+
+    assert(scope != nullptr);
+
     ASTTypeSpecifier* type_specifier = arena_alloc(arena,
         sizeof(ASTTypeSpecifier));
 
+    type_specifier->ns = ns;
+    type_specifier->name = name;
+    type_specifier->scope = scope;
     type_specifier->primitive_type = primitive_type;
-    type_specifier->enum_type = enum_type;
-    type_specifier->struct_type = struct_type;
+    type_specifier->enum_type = nullptr;
+    type_specifier->struct_type = nullptr;
     type_specifier->pointer_level = pointer_level;
     list_init(&type_specifier->array_dimensions);
 
@@ -29,9 +39,9 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
 {
     assert(parser != nullptr);
 
+    Namespace* ns = nullptr;
+    char* name = nullptr;
     TokenType primitive_type = TOKEN_TYPE_ERROR;
-    EnumSymbol* enum_type = nullptr;
-    StructSymbol* struct_type = nullptr;
 
     if(token_type_is_primitive(parser->token->type))
     {
@@ -41,58 +51,8 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
     }
     else
     {
-        Token* next = parser_peek(parser, 1);
-
-        Namespace* type_namespace = parser->current_namespace;
-        if(next->type == TOKEN_TYPE_NAMESPACE_RESOLUTION)
-        {
-            type_namespace = nullptr;
-        }
-
-        while(next->type == TOKEN_TYPE_NAMESPACE_RESOLUTION)
-        {
-            type_namespace = namespace_create(type_namespace,
-                parser->token->identifier);
-
-            parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
-            parser_eat(parser, TOKEN_TYPE_NAMESPACE_RESOLUTION);
-
-            next = parser_peek(parser, 1);
-        }
-
-        if(type_namespace == parser->current_namespace)
-        {
-            while(true)
-            {
-                enum_type = enum_table_find(type_namespace,
-                    parser->token->identifier, parser->current_scope);
-                struct_type = struct_table_find(type_namespace,
-                    parser->token->identifier, parser->current_scope);
-
-                if(enum_type != nullptr || struct_type != nullptr
-                    || type_namespace == nullptr)
-                {
-                    break;
-                }
-
-                type_namespace = type_namespace->parent;
-            }
-        }
-        else
-        {
-            enum_type = enum_table_find(type_namespace,
-                parser->token->identifier, parser->current_scope);
-            struct_type = struct_table_find(type_namespace,
-                parser->token->identifier, parser->current_scope);
-        }
-
-        //TODO: This manual cleanup is certainly not the best solution.
-        while(type_namespace != nullptr && type_namespace != parser->current_namespace)
-        {
-            Namespace* free_ns = type_namespace;
-            type_namespace = type_namespace->parent;
-            free(type_namespace);
-        }
+        ns = parse_namespace_resolution(parser);
+        name = parser->token->identifier;
 
         parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
     }
@@ -106,8 +66,8 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
         parser_eat(parser, TOKEN_TYPE_STAR);
     }
 
-    ASTTypeSpecifier* type_specifier = make_type_specifier(&parser->arena,
-        primitive_type, enum_type, struct_type, pointer_level);
+    ASTTypeSpecifier* type_specifier = make_type_specifier(&parser->arena, ns,
+        name, parser->current_scope, primitive_type, pointer_level);
 
     while(parser->token->type == TOKEN_TYPE_LBRACKET)
     {
@@ -139,19 +99,10 @@ void print_type_specifier(ASTTypeSpecifier* type_specifier, FILE* file,
     {
         fprintf(file, "%s", token_type_to_str(type_specifier->primitive_type));
     }
-    else if(type_specifier->enum_type != nullptr)
+    else
     {
-        EnumSymbol* enum_symbol = type_specifier->enum_type;
-
-        print_namespace_resolution(file, enum_symbol->ns);
-        fprintf(file, "%s", enum_symbol->name);
-    }
-    else if(type_specifier->struct_type != nullptr)
-    {
-        StructSymbol* struct_symbol = type_specifier->struct_type;
-
-        print_namespace_resolution(file, struct_symbol->ns);
-        fprintf(file, "%s", struct_symbol->name);
+        print_namespace_resolution(file, type_specifier->ns);
+        fprintf(file, "%s", type_specifier->name);
     }
 
     fprintf(file, "\n");

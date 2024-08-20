@@ -6,6 +6,8 @@ export void analyze_var_decl(Parser* parser, ASTVarDecl* var_decl)
 
     VarSymbol* symbol = &var_decl->symbol;
 
+    analyze_type_specifier(parser, symbol->type);
+
     if(var_decl->is_redefinition)
     {
         //FIXME: Print the correct location, this is only a placeholder

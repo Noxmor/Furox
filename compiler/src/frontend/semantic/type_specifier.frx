@@ -1,0 +1,38 @@
+export void analyze_type_specifier(Parser* parser,
+    ASTTypeSpecifier* type_specifier)
+{
+    assert(parser != nullptr);
+
+    assert(type_specifier != nullptr);
+
+    if(type_specifier->primitive_type != TOKEN_TYPE_ERROR)
+    {
+        return;
+    }
+
+    Namespace* ns = type_specifier->ns;
+    char* name = type_specifier->name;
+    Scope* scope = type_specifier->scope;
+
+    if(type_specifier->ns == nullptr)
+    {
+        type_specifier->enum_type = enum_table_find_r(parser->current_namespace,
+            name, scope);
+        type_specifier->struct_type =
+            struct_table_find_r(parser->current_namespace, name, scope);
+    }
+    else
+    {
+        type_specifier->enum_type = enum_table_find(ns, name, scope);
+        type_specifier->struct_type = struct_table_find(ns, name, scope);
+    }
+
+    if(type_specifier->enum_type == nullptr
+        && type_specifier->struct_type == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_undefined_type_specifier(parser_source_file(parser), loc, name);
+        parser->failed = true;
+    }
+}
