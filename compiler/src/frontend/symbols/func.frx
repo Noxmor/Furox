@@ -2,16 +2,23 @@ export struct FuncSymbol
 {
     Namespace* ns;
     char* name;
+    Scope* scope;
+    b8 exported;
 }
 
-export void func_symbol_init(FuncSymbol* symbol, Namespace* ns, char* name)
+export void func_symbol_init(FuncSymbol* symbol, Namespace* ns, char* name,
+    Scope* scope, b8 exported)
 {
     assert(symbol != nullptr);
 
     assert(name != nullptr);
 
+    assert(scope != nullptr);
+
     symbol->ns = ns;
     symbol->name = name;
+    symbol->scope = scope;
+    symbol->exported = exported;
 }
 
 struct FuncTableEntry
@@ -29,19 +36,19 @@ struct FuncTable
 
 FuncTable func_table;
 
-export FuncSymbol* func_table_find_r(Namespace* ns, char* name)
+export FuncSymbol* func_table_find_r(Namespace* ns, char* name, Scope* scope)
 {
-    FuncSymbol* symbol = func_table_find(ns, name);
+    FuncSymbol* symbol = func_table_find(ns, name, scope);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
-        symbol = func_table_find(ns, name);
+        symbol = func_table_find(ns, name, scope);
     }
 
     return symbol;
 }
 
-export FuncSymbol* func_table_find(Namespace* ns, char* name)
+export FuncSymbol* func_table_find(Namespace* ns, char* name, Scope* scope)
 {
     assert(name != nullptr);
 
@@ -52,7 +59,10 @@ export FuncSymbol* func_table_find(Namespace* ns, char* name)
     {
         FuncSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        b8 visible = scope_same_root(symbol->scope, scope) || symbol->exported;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns)
+            && visible)
         {
             return symbol;
         }

@@ -4,10 +4,12 @@ export struct EnumSymbol
     Namespace* ns;
     char* name;
     List constants;
+    Scope* scope;
+    b8 exported;
 }
 
 export void enum_symbol_init(EnumSymbol* symbol, TokenType type, Namespace* ns,
-    char* name)
+    char* name, Scope* scope, b8 exported)
 {
     assert(symbol != nullptr);
 
@@ -15,10 +17,14 @@ export void enum_symbol_init(EnumSymbol* symbol, TokenType type, Namespace* ns,
 
     assert(name != nullptr);
 
+    assert(scope != nullptr);
+
     symbol->type = type;
     symbol->ns = ns;
     symbol->name = name;
     list_init(&symbol->constants);
+    symbol->scope = scope;
+    symbol->exported = exported;
 }
 
 struct EnumTableEntry
@@ -36,21 +42,23 @@ struct EnumTable
 
 EnumTable enum_table;
 
-export EnumSymbol* enum_table_find_r(Namespace* ns, char* name)
+export EnumSymbol* enum_table_find_r(Namespace* ns, char* name, Scope* scope)
 {
-    EnumSymbol* symbol = enum_table_find(ns, name);
+    EnumSymbol* symbol = enum_table_find(ns, name, scope);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
-        symbol = enum_table_find(ns, name);
+        symbol = enum_table_find(ns, name, scope);
     }
 
     return symbol;
 }
 
-export EnumSymbol* enum_table_find(Namespace* ns, char* name)
+export EnumSymbol* enum_table_find(Namespace* ns, char* name, Scope* scope)
 {
     assert(name != nullptr);
+
+    assert(scope != nullptr);
 
     u64 index = hash_djb2(name) % ENUM_TABLE_CAPACITY;
     EnumTableEntry* entry = enum_table.entries[index];
@@ -59,7 +67,10 @@ export EnumSymbol* enum_table_find(Namespace* ns, char* name)
     {
         EnumSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        b8 visible = scope_same_root(symbol->scope, scope) || symbol->exported;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns)
+            && visible)
         {
             return symbol;
         }

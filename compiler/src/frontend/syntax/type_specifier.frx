@@ -64,9 +64,10 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
         {
             while(true)
             {
-                enum_type = enum_table_find(type_namespace, parser->token->identifier);
+                enum_type = enum_table_find(type_namespace,
+                    parser->token->identifier, parser->current_scope);
                 struct_type = struct_table_find(type_namespace,
-                    parser->token->identifier);
+                    parser->token->identifier, parser->current_scope);
 
                 if(enum_type != nullptr || struct_type != nullptr
                     || type_namespace == nullptr)
@@ -79,9 +80,10 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
         }
         else
         {
-            enum_type = enum_table_find(type_namespace, parser->token->identifier);
+            enum_type = enum_table_find(type_namespace,
+                parser->token->identifier, parser->current_scope);
             struct_type = struct_table_find(type_namespace,
-                parser->token->identifier);
+                parser->token->identifier, parser->current_scope);
         }
 
         //TODO: This manual cleanup is certainly not the best solution.

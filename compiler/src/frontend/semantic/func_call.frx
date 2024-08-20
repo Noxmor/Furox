@@ -7,11 +7,12 @@ export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
     if(func_call->ns == nullptr)
     {
         func_call->symbol = func_table_find_r(parser->current_namespace,
-            func_call->name);
+            func_call->name, func_call->scope);
     }
     else
     {
-        func_call->symbol = func_table_find(func_call->ns, func_call->name);
+        func_call->symbol = func_table_find(func_call->ns, func_call->name,
+            func_call->scope);
     }
 
     if(func_call->symbol == nullptr)

@@ -38,7 +38,6 @@ ASTEnumConstantDef* parse_enum_constant(Parser* parser)
 export struct ASTEnumDef
 {
     EnumSymbol symbol;
-    b8 exported;
 
     b8 is_redefinition;
 }
@@ -84,12 +83,11 @@ void enum_def_add_constant(Arena* arena, ASTEnumDef* enum_def,
 }
 
 export ASTEnumDef* make_enum_def(Arena* arena, Namespace* ns, char* name,
-    TokenType type, b8 exported)
+    TokenType type, Scope* scope, b8 exported)
 {
     ASTEnumDef* enum_def = arena_alloc(arena, sizeof(ASTEnumDef));
 
-    enum_symbol_init(&enum_def->symbol, type, ns, name);
-    enum_def->exported = exported;
+    enum_symbol_init(&enum_def->symbol, type, ns, name, scope, exported);
 
     enum_def->is_redefinition = !enum_table_insert(&enum_def->symbol);
 
@@ -158,7 +156,7 @@ export ASTEnumDef* parse_enum_def(Parser* parser, b8 exported)
     }
 
     ASTEnumDef* enum_def = make_enum_def(&parser->arena,
-        parser->current_namespace, name, type, exported);
+        parser->current_namespace, name, type, parser->current_scope, exported);
 
     parser_eat(parser, TOKEN_TYPE_LBRACE);
 

@@ -7,13 +7,15 @@ export void analyze_enum_constant_or_global_var(Parser* parser,
 
     Namespace* ns = enum_constant_or_global_var->ns;
     char* name = enum_constant_or_global_var->name;
+    Scope* scope = enum_constant_or_global_var->scope;
 
-    b8 is_enum_constant = enum_table_find(ns->parent, ns->name) != nullptr;
+    b8 is_enum_constant = enum_table_find(ns->parent, ns->name, scope)
+        != nullptr;
     if(is_enum_constant)
     {
         ast->type = AST_TYPE_ENUM_CONSTANT;
         ast->node = make_enum_constant(&parser->arena, ns->parent, ns->name,
-            name);
+            name, scope);
     }
     else
     {

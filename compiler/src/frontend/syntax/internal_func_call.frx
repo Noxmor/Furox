@@ -3,18 +3,22 @@ export struct ASTSizeof
     Namespace* ns;
     char* name;
     TokenType primitive_type;
+    Scope* scope;
 }
 
 ASTSizeof* make_sizeof(Arena* arena, Namespace* ns, char* name,
-    TokenType primitive_type)
+    TokenType primitive_type, Scope* scope)
 {
     assert(primitive_type < TOKEN_TYPE_COUNT);
+
+    assert(scope != nullptr);
 
     ASTSizeof* sizeof_node = arena_alloc(arena, sizeof(ASTSizeof));
 
     sizeof_node->ns = ns;
     sizeof_node->name = name;
     sizeof_node->primitive_type = primitive_type;
+    sizeof_node->scope = scope;
 
     return sizeof_node;
 }
@@ -29,7 +33,8 @@ ASTSizeof* parse_sizeof(Parser* parser)
 
         parser_eat(parser, parser->token->type);
 
-        return make_sizeof(&parser->arena, nullptr, nullptr, type);
+        return make_sizeof(&parser->arena, nullptr, nullptr, type,
+            parser->current_scope);
     }
     else
     {
@@ -38,7 +43,8 @@ ASTSizeof* parse_sizeof(Parser* parser)
 
         parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-        return make_sizeof(&parser->arena, ns, name, TOKEN_TYPE_ERROR);
+        return make_sizeof(&parser->arena, ns, name, TOKEN_TYPE_ERROR,
+            parser->current_scope);
     }
 }
 
@@ -69,16 +75,21 @@ export struct ASTEnumCount
 {
     Namespace* ns;
     char* name;
+    Scope* scope;
 }
 
-ASTEnumCount* make_enum_count(Arena* arena, Namespace* ns, char* name)
+ASTEnumCount* make_enum_count(Arena* arena, Namespace* ns, char* name,
+    Scope* scope)
 {
     assert(name != nullptr);
+
+    assert(scope != nullptr);
 
     ASTEnumCount* enum_count = arena_alloc(arena, sizeof(ASTEnumCount));
 
     enum_count->ns = ns;
     enum_count->name = name;
+    enum_count->scope = scope;
 
     return enum_count;
 }
@@ -92,7 +103,7 @@ ASTEnumCount* parse_enum_count(Parser* parser)
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-    return make_enum_count(&parser->arena, ns, name);
+    return make_enum_count(&parser->arena, ns, name, parser->current_scope);
 }
 
 export void print_enum_count(ASTEnumCount* enum_count, FILE* file, usize depth)

@@ -5,10 +5,11 @@ export struct ASTEnumConstant
     Namespace* enum_namespace;
     char* enum_name;
     char* name;
+    Scope* scope;
 }
 
 export ASTEnumConstant* make_enum_constant(Arena* arena,
-    Namespace* enum_namespace, char* enum_name, char* name)
+    Namespace* enum_namespace, char* enum_name, char* name, Scope* scope)
 {
     assert(enum_name != nullptr);
 
@@ -20,6 +21,7 @@ export ASTEnumConstant* make_enum_constant(Arena* arena,
     constant->enum_namespace = enum_namespace;
     constant->enum_name = enum_name;
     constant->name = name;
+    constant->scope = scope;
 
     return constant;
 }

@@ -2,16 +2,23 @@ export struct StructSymbol
 {
     Namespace* ns;
     char* name;
+    Scope* scope;
+    b8 exported;
 }
 
-export void struct_symbol_init(StructSymbol* symbol, Namespace* ns, char* name)
+export void struct_symbol_init(StructSymbol* symbol, Namespace* ns, char* name,
+    Scope* scope, b8 exported)
 {
     assert(symbol != nullptr);
 
     assert(name != nullptr);
 
+    assert(scope != nullptr);
+
     symbol->ns = ns;
     symbol->name = name;
+    symbol->scope = scope;
+    symbol->exported = exported;
 }
 
 struct StructTableEntry
@@ -29,21 +36,24 @@ struct StructTable
 
 StructTable struct_table;
 
-export StructSymbol* struct_table_find_r(Namespace* ns, char* name)
+export StructSymbol* struct_table_find_r(Namespace* ns, char* name,
+    Scope* scope)
 {
-    StructSymbol* symbol = struct_table_find(ns, name);
+    StructSymbol* symbol = struct_table_find(ns, name, scope);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
-        symbol = struct_table_find(ns, name);
+        symbol = struct_table_find(ns, name, scope);
     }
 
     return symbol;
 }
 
-export StructSymbol* struct_table_find(Namespace* ns, char* name)
+export StructSymbol* struct_table_find(Namespace* ns, char* name, Scope* scope)
 {
     assert(name != nullptr);
+
+    assert(scope != nullptr);
 
     u64 index = hash_djb2(name) % STRUCT_TABLE_CAPACITY;
     StructTableEntry* entry = struct_table.entries[index];
@@ -52,7 +62,10 @@ export StructSymbol* struct_table_find(Namespace* ns, char* name)
     {
         StructSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        b8 visible = scope_same_root(symbol->scope, scope) || symbol->exported;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns)
+            && visible)
         {
             return symbol;
         }

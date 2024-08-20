@@ -34,3 +34,22 @@ export b8 scope_is_child_of(Scope* child, Scope* parent)
 
     return scope_is_child_of(child->parent, parent);
 }
+
+export b8 scope_same_root(Scope* left, Scope* right)
+{
+    assert(left != nullptr);
+
+    assert(right != nullptr);
+
+    while(left->parent != nullptr)
+    {
+        left = left->parent;
+    }
+
+    while(right->parent != nullptr)
+    {
+        right = right->parent;
+    }
+
+    return left->id == right->id;
+}

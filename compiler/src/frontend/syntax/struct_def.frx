@@ -1,18 +1,16 @@
 export struct ASTStructDef
 {
     StructSymbol symbol;
-    b8 exported;
 
     b8 is_redefinition;
 }
 
 export ASTStructDef* make_struct_def(Arena* arena, Namespace* ns, char* name,
-    b8 exported)
+    Scope* scope, b8 exported)
 {
     ASTStructDef* struct_def = arena_alloc(arena, sizeof(ASTStructDef));
 
-    struct_symbol_init(&struct_def->symbol, ns, name);
-    struct_def->exported = exported;
+    struct_symbol_init(&struct_def->symbol, ns, name, scope, exported);
 
     struct_def->is_redefinition = !struct_table_insert(&struct_def->symbol);
 
@@ -26,7 +24,8 @@ export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
     parser_eat(parser, TOKEN_TYPE_KW_STRUCT);
 
     ASTStructDef* struct_def = make_struct_def(&parser->arena,
-        parser->current_namespace, parser->token->identifier, exported);
+        parser->current_namespace, parser->token->identifier,
+        parser->current_scope, exported);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
