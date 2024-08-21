@@ -44,6 +44,15 @@ export AST* parse_primary_expr(Parser* parser)
 
             break;
         }
+        case TOKEN_TYPE_NAMESPACE_RESOLUTION:
+        {
+            Namespace* resolved_ns = parse_namespace_resolution(parser);
+
+            primary_expr = make_ast(&parser->arena, AST_TYPE_FUNC_CALL,
+                parse_func_call(parser, resolved_ns));
+
+            break;
+        }
         case TOKEN_TYPE_INT_LITERAL:
         {
             primary_expr = make_ast(&parser->arena, AST_TYPE_INT_LITERAL,
