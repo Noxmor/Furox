@@ -36,6 +36,8 @@ export void analyze_ast(Parser* parser, AST* ast)
         }
         case AST_TYPE_STRUCT_DEF:
         {
+            analyze_struct_def(parser, node);
+
             break;
         }
         case AST_TYPE_FUNC_DECL:

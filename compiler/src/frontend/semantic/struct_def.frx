@@ -1,0 +1,16 @@
+export void analyze_struct_def(Parser* parser, ASTStructDef* struct_def)
+{
+    assert(parser != nullptr);
+
+    assert(struct_def != nullptr);
+
+    if(struct_def->is_redefinition)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_struct_redefinition(parser_source_file(parser), loc,
+            struct_def->symbol.name);
+
+        parser->failed = true;
+    }
+}
