@@ -4,12 +4,25 @@ export void analyze_func_decl(Parser* parser, ASTFuncDecl* func_decl)
 
     assert(func_decl != nullptr);
 
-    if(func_decl->is_redefinition)
+    FuncSymbol* symbol = &func_decl->symbol;
+
+    b8 is_redefinition = false;
+
+    usize i;
+    for(i = 0; i < list_size(&parser->imported_parsers) && !is_redefinition;
+        i = i + 1)
+    {
+        Parser* imported_parser = list_get(&parser->imported_parsers, i);
+        is_redefinition = func_table_find(&imported_parser->func_table,
+            symbol->ns, symbol->name) != nullptr;
+    }
+
+    if(is_redefinition)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
         error_func_decl_redefinition(parser_source_file(parser), loc,
-            func_decl->symbol.name);
+            symbol->name);
 
         parser->failed = true;
     }

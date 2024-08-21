@@ -4,12 +4,24 @@ export void analyze_enum_def(Parser* parser, ASTEnumDef* enum_def)
 
     assert(enum_def != nullptr);
 
-    if(enum_def->is_redefinition)
+    EnumSymbol* symbol = &enum_def->symbol;
+
+    b8 is_redefinition = false;
+
+    usize i;
+    for(i = 0; i < list_size(&parser->imported_parsers) && !is_redefinition;
+        i = i + 1)
+    {
+        Parser* imported_parser = list_get(&parser->imported_parsers, i);
+        is_redefinition = enum_table_find(&imported_parser->enum_table,
+            symbol->ns, symbol->name) != nullptr;
+    }
+
+    if(is_redefinition)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
-        error_enum_redefinition(parser_source_file(parser), loc,
-            enum_def->symbol.name);
+        error_enum_redefinition(parser_source_file(parser), loc, symbol->name);
 
         parser->failed = true;
     }

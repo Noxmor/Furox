@@ -1,8 +1,6 @@
 export struct ASTStructDef
 {
     StructSymbol symbol;
-
-    b8 is_redefinition;
 }
 
 export ASTStructDef* make_struct_def(Arena* arena, Namespace* ns, char* name,
@@ -26,9 +24,7 @@ export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
     ASTStructDef* struct_def = make_struct_def(&parser->arena,
         parser->current_namespace, name, exported);
 
-    struct_def->is_redefinition = parser_find_struct_symbol(parser,
-        parser->current_namespace, name)
-        || !struct_table_insert(&parser->struct_table, &struct_def->symbol);
+    struct_table_insert(&parser->struct_table, &struct_def->symbol);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
