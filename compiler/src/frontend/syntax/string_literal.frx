@@ -1,0 +1,40 @@
+export struct ASTStringLiteral
+{
+    char* literal;
+}
+
+ASTStringLiteral* make_string_literal(Arena* arena, char* literal)
+{
+    assert(literal != nullptr);
+
+    ASTStringLiteral* str_literal = arena_alloc(arena,
+        sizeof(ASTStringLiteral));
+
+    str_literal->literal = literal;
+
+    return str_literal;
+}
+
+export ASTStringLiteral* parse_string_literal(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    char* literal = parser->token->identifier;
+
+    parser_eat(parser, TOKEN_TYPE_STRING_LITERAL);
+
+    return make_string_literal(&parser->arena, literal);
+}
+
+export void print_string_literal(ASTStringLiteral* str_literal, FILE* file,
+    usize depth)
+{
+    assert(str_literal != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_STRING_LITERAL),
+        str_literal->literal);
+}

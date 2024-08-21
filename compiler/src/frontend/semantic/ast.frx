@@ -114,6 +114,14 @@ export void analyze_ast(Parser* parser, AST* ast)
         {
             break;
         }
+        case AST_TYPE_CHAR_LITERAL:
+        {
+            break;
+        }
+        case AST_TYPE_STRING_LITERAL:
+        {
+            break;
+        }
         case AST_TYPE_SIZEOF:
         {
             analyze_sizeof(parser, node, ast);

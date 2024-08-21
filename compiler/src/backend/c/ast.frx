@@ -112,6 +112,18 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
 
             break;
         }
+        case AST_TYPE_CHAR_LITERAL:
+        {
+            transpile_char_literal(transpiler, node);
+
+            break;
+        }
+        case AST_TYPE_STRING_LITERAL:
+        {
+            transpile_string_literal(transpiler, node);
+
+            break;
+        }
         default:
         {
             assert(false);

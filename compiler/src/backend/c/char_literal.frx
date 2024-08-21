@@ -1,0 +1,9 @@
+export void transpile_char_literal(Transpiler* transpiler,
+    ASTCharLiteral* char_literal)
+{
+    assert(transpiler != nullptr);
+
+    assert(char_literal != nullptr);
+
+    fprintf(transpiler->file, "'%s'", char_literal->literal);
+}

@@ -60,6 +60,20 @@ export AST* parse_primary_expr(Parser* parser)
 
             break;
         }
+        case TOKEN_TYPE_CHAR_LITERAL:
+        {
+            primary_expr = make_ast(&parser->arena, AST_TYPE_CHAR_LITERAL,
+                parse_char_literal(parser));
+
+            break;
+        }
+        case TOKEN_TYPE_STRING_LITERAL:
+        {
+            primary_expr = make_ast(&parser->arena, AST_TYPE_STRING_LITERAL,
+                parse_string_literal(parser));
+
+            break;
+        }
         default:
         {
             parser_panic(parser);
