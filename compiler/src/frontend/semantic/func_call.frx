@@ -24,4 +24,11 @@ export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
 
         parser->failed = true;
     }
+
+    usize i;
+    for(i = 0; i < list_size(&func_call->args); i = i + 1)
+    {
+        AST* ast = list_get(&func_call->args, i);
+        analyze_ast(parser, ast);
+    }
 }
