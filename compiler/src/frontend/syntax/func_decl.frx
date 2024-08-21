@@ -1,0 +1,62 @@
+export struct ASTFuncDecl
+{
+    ASTTypeSpecifier* return_type;
+    FuncSymbol symbol;
+    ASTFuncParams* params;
+
+    b8 is_redefinition;
+}
+
+ASTFuncDecl* make_func_decl(Arena* arena, char* name,
+    ASTTypeSpecifier* return_type, Scope* scope)
+{
+    assert(return_type != nullptr);
+
+    ASTFuncDecl* func_decl = arena_alloc(arena, sizeof(ASTFuncDecl));
+
+    func_symbol_init(&func_decl->symbol, nullptr, name, scope, false);
+
+    func_decl->return_type = return_type;
+    func_decl->params = nullptr;
+
+    func_decl->is_redefinition = !func_table_insert(&func_decl->symbol);
+
+    return func_decl;
+}
+
+export ASTFuncDecl* parse_func_decl(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    ASTTypeSpecifier* return_type = parse_type_specifier(parser);
+
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    ASTFuncDecl* func_decl = make_func_decl(&parser->arena, name, return_type,
+        parser->current_scope);
+
+    func_decl->params = parse_func_params(parser);
+
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+
+    return func_decl;
+}
+
+export void print_func_decl(ASTFuncDecl* func_decl, FILE* file, usize depth)
+{
+    assert(func_decl != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    FuncSymbol* symbol = &func_decl->symbol;
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_FUNC_DECL),
+        symbol->name);
+
+    print_type_specifier(func_decl->return_type, file, depth + 1);
+    print_func_params(func_decl->params, file, depth + 1);
+}

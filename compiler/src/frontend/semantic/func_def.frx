@@ -10,7 +10,7 @@ export void analyze_func_def(Parser* parser, ASTFuncDef* func_def)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;
-        error_func_redefinition(parser_source_file(parser), loc,
+        error_func_def_redefinition(parser_source_file(parser), loc,
             func_def->symbol.name);
 
         parser->failed = true;

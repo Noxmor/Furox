@@ -61,7 +61,13 @@ export void error_undefined_func_call(char* filepath, SourceLocation loc,
         name);
 }
 
-export void error_func_redefinition(char* filepath, SourceLocation loc,
+export void error_func_decl_redefinition(char* filepath, SourceLocation loc,
+    char* name)
+{
+    log_error(filepath, loc, "Encountered redefinition of function %s!", name);
+}
+
+export void error_func_def_redefinition(char* filepath, SourceLocation loc,
     char* name)
 {
     log_error(filepath, loc, "Encountered redefinition of function %s!", name);

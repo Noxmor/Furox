@@ -1,0 +1,22 @@
+export void transpile_func_decl(Transpiler* transpiler, ASTFuncDecl* func_decl)
+{
+    assert(transpiler != nullptr);
+
+    assert(func_decl != nullptr);
+
+    //We assume this func-decl is a standard c function,
+    //so it does not need to be transpiled.
+    return;
+
+    if(transpiler->mode != TRANSPILER_MODE_FUNC_DECL)
+    {
+        return;
+    }
+
+    FuncSymbol* symbol = &func_decl->symbol;
+
+    transpile_type_specifier(transpiler, func_decl->return_type);
+    fprintf(transpiler->file, "%s", symbol->name);
+    transpile_func_params(transpiler, func_decl->params);
+    fprintf(transpiler->file, ";\n");
+}

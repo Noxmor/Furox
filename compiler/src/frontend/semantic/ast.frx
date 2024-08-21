@@ -32,6 +32,12 @@ export void analyze_ast(Parser* parser, AST* ast)
         {
             break;
         }
+        case AST_TYPE_FUNC_DECL:
+        {
+            analyze_func_decl(parser, node);
+
+            break;
+        }
         case AST_TYPE_FUNC_DEF:
         {
             analyze_func_def(parser, node);
