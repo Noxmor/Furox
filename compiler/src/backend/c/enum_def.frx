@@ -13,21 +13,15 @@ export void transpile_enum_def(Transpiler* transpiler, ASTEnumDef* enum_def)
 
     fprintf(transpiler->file, "enum {\n");
 
-    char[strlen(symbol->name) + 1] namespaced_name;
-    strcpy(namespaced_name, symbol->name);
+    char* mangled_name = mangle_enum_name(symbol->scope, symbol->ns,
+        symbol->name);
 
     usize i;
-    for(i = 0; i < strlen(namespaced_name); i = i + 1)
-    {
-        //TODO: Remove this var. Bootstrap compiler cannot handle lvalues...
-        char temp = namespaced_name[i] = toupper(namespaced_name[i]);
-    }
-
     for(i = 0; i < list_size(&symbol->constants); i = i + 1)
     {
         ASTEnumConstantDef* constant = list_get(&symbol->constants, i);
 
-        fprintf(transpiler->file, "%s_%s = ", namespaced_name, constant->name);
+        fprintf(transpiler->file, "%s_%s = ", mangled_name, constant->name);
         transpile_ast(transpiler, constant->value);
         fprintf(transpiler->file, ",\n");
     }
@@ -35,8 +29,7 @@ export void transpile_enum_def(Transpiler* transpiler, ASTEnumDef* enum_def)
     fprintf(transpiler->file, "};\n");
 
     fprintf(transpiler->file, "typedef %s ", token_type_to_str(symbol->type));
-    transpile_enum_symbol_name(transpiler, symbol);
-    fprintf(transpiler->file, ";\n");
+    fprintf(transpiler->file, "%s;\n", mangled_name);
 }
 
 export void transpile_enum_symbol_name(Transpiler* transpiler,

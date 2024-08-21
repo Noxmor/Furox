@@ -80,12 +80,12 @@ void enum_def_add_constant(Arena* arena, ASTEnumDef* enum_def,
     list_push(constants, constant);
 }
 
-export ASTEnumDef* make_enum_def(Arena* arena, Namespace* ns, char* name,
-    TokenType type, b8 exported)
+export ASTEnumDef* make_enum_def(Arena* arena, Scope* scope, Namespace* ns,
+    char* name, TokenType type, b8 exported)
 {
     ASTEnumDef* enum_def = arena_alloc(arena, sizeof(ASTEnumDef));
 
-    enum_symbol_init(&enum_def->symbol, type, ns, name, exported);
+    enum_symbol_init(&enum_def->symbol, type, scope, ns, name, exported);
 
     return enum_def;
 }
@@ -152,7 +152,7 @@ export ASTEnumDef* parse_enum_def(Parser* parser, b8 exported)
     }
 
     ASTEnumDef* enum_def = make_enum_def(&parser->arena,
-        parser->current_namespace, name, type, exported);
+        parser->current_scope, parser->current_namespace, name, type, exported);
 
     enum_table_insert(&parser->enum_table, &enum_def->symbol);
 

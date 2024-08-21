@@ -5,13 +5,10 @@ export void transpile_enum_constant(Transpiler* transpiler,
 
     assert(constant != nullptr);
 
-    transpile_namespace_resolution(transpiler, constant->enum_namespace);
+    EnumSymbol* symbol = constant->symbol;
 
-    usize i;
-    for(i = 0; i < strlen(constant->enum_name); i = i + 1)
-    {
-        fprintf(transpiler->file, "%c", toupper(constant->enum_name[i]));
-    }
+    char* mangled_name = mangle_enum_name(symbol->scope, symbol->ns,
+        symbol->name);
 
-    fprintf(transpiler->file, "_%s", constant->name);
+    fprintf(transpiler->file, "%s_%s", mangled_name, constant->name);
 }

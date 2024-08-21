@@ -22,6 +22,41 @@ void mangle_namespace(Namespace* ns)
     }
 }
 
+export char* mangle_enum_name(Scope* scope, Namespace* ns, char* name)
+{
+    assert(scope != nullptr);
+
+    assert(name != nullptr);
+
+    usize size = strlen(name);
+
+    Namespace* temp = ns;
+    while(temp != nullptr)
+    {
+        size = size + strlen(ns->name) + 1;
+
+        temp = temp->parent;
+    }
+
+    if(size > buffer_size)
+    {
+        realloc_buffer(size);
+    }
+
+    strcpy(buffer, "");
+
+    mangle_namespace(ns);
+
+    strcat(buffer, name);
+
+    char* buffer_end = strrchr(buffer, '\0');
+    sprintf(buffer_end, "%zu", scope->id);
+
+    strcat(buffer, "E");
+
+    return buffer;
+}
+
 export char* mangle_struct_name(Scope* scope, Namespace* ns, char* name)
 {
     assert(scope != nullptr);
