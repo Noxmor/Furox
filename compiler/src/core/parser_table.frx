@@ -1,0 +1,72 @@
+struct ParserTableEntry
+{
+    Parser* parser;
+    char* fullpath;
+    ParserTableEntry* next;
+}
+
+macro PARSER_TABLE_CAPACITY = 1024;
+
+struct ParserTable
+{
+    ParserTableEntry*[PARSER_TABLE_CAPACITY] entries;
+}
+
+ParserTable parser_table;
+
+export Parser* parser_table_find(char* filepath)
+{
+    assert(filepath != nullptr);
+
+    char* fullpath = realpath(filepath, nullptr);
+
+    u64 index = hash_djb2(fullpath) % PARSER_TABLE_CAPACITY;
+    ParserTableEntry* entry = parser_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        if(strcmp(entry->fullpath, fullpath) == 0)
+        {
+            free(fullpath);
+
+            return entry->parser;
+        }
+
+        entry = entry->next;
+    }
+
+    free(fullpath);
+
+    return nullptr;
+}
+
+export b8 parser_table_insert(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    char* fullpath = realpath(parser_source_file(parser), nullptr);
+
+    u64 index = hash_djb2(fullpath) % PARSER_TABLE_CAPACITY;
+    ParserTableEntry* entry = parser_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        if(strcmp(entry->fullpath, fullpath) == 0)
+        {
+            free(fullpath);
+
+            return false;
+        }
+
+        entry = entry->next;
+    }
+
+    ParserTableEntry* new_entry = malloc(sizeof(ParserTableEntry));
+    new_entry->parser = parser;
+    new_entry->fullpath = fullpath;
+    new_entry->next = parser_table.entries[index];
+
+    parser_table.entries[index] = new_entry;
+
+    return true;
+}

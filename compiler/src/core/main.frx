@@ -8,15 +8,18 @@ void compile(char* filepath)
         return;
     }
 
-    Parser parser;
-    parser_init(&parser, filepath);
-    parser_parse(&parser);
+    Parser* parser = malloc(sizeof(Parser));
+    parser_init(parser, filepath);
 
-    parser_analyze(&parser);
+    parser_table_insert(parser);
 
-    failed = failed || parser.failed;
+    parser_parse(parser);
 
-    list_push(&program->translation_units, parser.translation_unit);
+    parser_analyze(parser);
+
+    failed = failed || parser->failed;
+
+    list_push(&program->translation_units, parser->translation_unit);
 }
 
 void parse_args(usize argc, char** argv)
