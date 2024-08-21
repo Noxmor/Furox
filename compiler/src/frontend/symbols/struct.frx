@@ -1,17 +1,21 @@
 export struct StructSymbol
 {
+    Scope* scope;
     Namespace* ns;
     char* name;
     b8 exported;
 }
 
-export void struct_symbol_init(StructSymbol* symbol, Namespace* ns, char* name,
-    b8 exported)
+export void struct_symbol_init(StructSymbol* symbol, Scope* scope,
+    Namespace* ns, char* name, b8 exported)
 {
     assert(symbol != nullptr);
 
+    assert(scope != nullptr);
+
     assert(name != nullptr);
 
+    symbol->scope = scope;
     symbol->ns = ns;
     symbol->name = name;
     symbol->exported = exported;

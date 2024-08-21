@@ -3,12 +3,12 @@ export struct ASTStructDef
     StructSymbol symbol;
 }
 
-export ASTStructDef* make_struct_def(Arena* arena, Namespace* ns, char* name,
-    b8 exported)
+export ASTStructDef* make_struct_def(Arena* arena, Scope* scope, Namespace* ns,
+    char* name, b8 exported)
 {
     ASTStructDef* struct_def = arena_alloc(arena, sizeof(ASTStructDef));
 
-    struct_symbol_init(&struct_def->symbol, ns, name, exported);
+    struct_symbol_init(&struct_def->symbol, scope, ns, name, exported);
 
     return struct_def;
 }
@@ -22,7 +22,7 @@ export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
     char* name = parser->token->identifier;
 
     ASTStructDef* struct_def = make_struct_def(&parser->arena,
-        parser->current_namespace, name, exported);
+        parser->current_scope, parser->current_namespace, name, exported);
 
     struct_table_insert(&parser->struct_table, &struct_def->symbol);
 
