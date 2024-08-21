@@ -13,4 +13,6 @@ export void analyze_func_decl(Parser* parser, ASTFuncDecl* func_decl)
 
         parser->failed = true;
     }
+
+    analyze_func_params(parser, func_decl->params);
 }

@@ -37,7 +37,11 @@ export ASTFuncDecl* parse_func_decl(Parser* parser)
     ASTFuncDecl* func_decl = make_func_decl(&parser->arena,
         parser->current_namespace, name, return_type, parser->current_scope);
 
+    parser_push_scope(parser);
+
     func_decl->params = parse_func_params(parser);
+
+    parser_pop_scope(parser);
 
     parser_eat(parser, TOKEN_TYPE_SEMICOLON);
 

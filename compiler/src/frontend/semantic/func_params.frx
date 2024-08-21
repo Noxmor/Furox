@@ -1,0 +1,30 @@
+void analyze_func_param(Parser* parser, ASTFuncParam* param)
+{
+    assert(parser != nullptr);
+
+    assert(param != nullptr);
+
+    if(param->is_redefinition)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_var_redefinition(parser_source_file(parser), loc,
+            param->symbol.name);
+
+        parser->failed = true;
+    }
+}
+
+export void analyze_func_params(Parser* parser, ASTFuncParams* params)
+{
+    assert(parser != nullptr);
+
+    assert(params != nullptr);
+
+    usize i;
+    for(i = 0; i < list_size(&params->params); i = i + 1)
+    {
+        ASTFuncParam* param = list_get(&params->params, i);
+        analyze_func_param(parser, param);
+    }
+}

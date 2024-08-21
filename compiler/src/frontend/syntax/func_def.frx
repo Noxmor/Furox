@@ -36,9 +36,13 @@ export ASTFuncDef* parse_func_def(Parser* parser, ASTTypeSpecifier* return_type,
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
+    parser_push_scope(parser);
+
     func_def->params = parse_func_params(parser);
 
     func_def->body = parse_scope(parser);
+
+    parser_pop_scope(parser);
 
     return func_def;
 }

@@ -16,5 +16,7 @@ export void analyze_func_def(Parser* parser, ASTFuncDef* func_def)
         parser->failed = true;
     }
 
+    analyze_func_params(parser, func_def->params);
+
     analyze_scope(parser, func_def->body);
 }

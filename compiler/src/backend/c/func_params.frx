@@ -4,8 +4,10 @@ void transpile_func_param(Transpiler* transpiler, ASTFuncParam* param)
 
     assert(param != nullptr);
 
-    transpile_type_specifier(transpiler, param->type);
-    fprintf(transpiler->file, " %s", param->name);
+    VarSymbol* symbol = &param->symbol;
+
+    transpile_type_specifier(transpiler, symbol->type);
+    fprintf(transpiler->file, " %s", symbol->name);
 }
 
 export void transpile_func_params(Transpiler* transpiler, ASTFuncParams* params)
