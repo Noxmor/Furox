@@ -16,14 +16,14 @@ export void analyze_type_specifier(Parser* parser,
 
     if(type_specifier->ns == nullptr)
     {
-        type_specifier->enum_type = enum_table_find_r(parser->current_namespace,
-            name, scope);
+        type_specifier->enum_type = parser_find_enum_symbol_r(parser,
+            parser->current_namespace, name);
         type_specifier->struct_type =
             struct_table_find_r(parser->current_namespace, name, scope);
     }
     else
     {
-        type_specifier->enum_type = enum_table_find(ns, name, scope);
+        type_specifier->enum_type = parser_find_enum_symbol(parser, ns, name);
         type_specifier->struct_type = struct_table_find(ns, name, scope);
     }
 

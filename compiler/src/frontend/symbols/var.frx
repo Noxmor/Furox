@@ -40,6 +40,13 @@ struct VarTable
 
 VarTable var_table;
 
+export void var_table_init(VarTable* table)
+{
+    assert(table != nullptr);
+
+    memset(table, 0, sizeof(VarTable));
+}
+
 export VarSymbol* var_table_find_by_namespace(Namespace* ns, char* name)
 {
     assert(name != nullptr);

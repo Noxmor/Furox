@@ -9,10 +9,17 @@ export struct Parser
     Namespace* current_namespace;
     Scope* current_scope;
 
+    List imported_parsers;
+
     b8 panic;
     b8 failed;
 
     Arena arena;
+
+    EnumTable enum_table;
+    StructTable struct_table;
+    FuncTable func_table;
+    VarTable var_table;
 }
 
 export void parser_init(Parser* parser, char* filepath)
@@ -30,10 +37,17 @@ export void parser_init(Parser* parser, char* filepath)
     parser->current_namespace = namespace_create_global();
     parser->current_scope = scope_create(nullptr);
 
+    list_init(&parser->imported_parsers);
+
     parser->panic = false;
     parser->failed = false;
 
     arena_init(&parser->arena, 1024 * 1024);
+
+    enum_table_init(&parser->enum_table);
+    struct_table_init(&parser->struct_table);
+    func_table_init(&parser->func_table);
+    var_table_init(&parser->var_table);
 }
 
 void parser_advance(Parser* parser)
@@ -122,6 +136,54 @@ export Token* parser_peek(Parser* parser, usize offset)
     assert(parser != nullptr);
 
     return lexer_peek(&parser->lexer, offset);
+}
+
+export void parser_add_imported_parser(Parser* parser, Parser* imported_parser)
+{
+    assert(parser != nullptr);
+
+    assert(imported_parser != nullptr);
+
+    list_push(&parser->imported_parsers, imported_parser);
+}
+
+export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, Namespace* ns,
+    char* name)
+{
+    EnumSymbol* symbol = parser_find_enum_symbol(parser, ns, name);
+    while(symbol == nullptr && ns != nullptr)
+    {
+        ns = ns->parent;
+        symbol = parser_find_enum_symbol(parser, ns, name);
+    }
+
+    return symbol;
+}
+
+export EnumSymbol* parser_find_enum_symbol(Parser* parser, Namespace* ns,
+    char* name)
+{
+    assert(parser != nullptr);
+
+    EnumSymbol* symbol = enum_table_find(&parser->enum_table, ns, name);
+    if(symbol != nullptr)
+    {
+        return symbol;
+    }
+
+    usize i;
+    for(i = 0; i < list_size(&parser->imported_parsers); i = i + 1)
+    {
+        Parser* imported_parser = list_get(&parser->imported_parsers, i);
+
+        symbol = enum_table_find(&imported_parser->enum_table, ns, name);
+        if(symbol != nullptr && symbol->exported)
+        {
+            return symbol;
+        }
+    }
+
+    return nullptr;
 }
 
 export char* parser_source_file(Parser* parser)

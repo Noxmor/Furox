@@ -22,15 +22,15 @@ export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
         struct_def = struct_table_find_r(parser->current_namespace,
             sizeof_node->name, sizeof_node->scope);
 
-        enum_symbol = enum_table_find_r(parser->current_namespace,
-            sizeof_node->name, sizeof_node->scope);
+        enum_symbol = parser_find_enum_symbol_r(parser,
+            parser->current_namespace, sizeof_node->name);
     }
     else
     {
         struct_def = struct_table_find(sizeof_node->ns, sizeof_node->name,
             sizeof_node->scope);
-        enum_symbol = enum_table_find(sizeof_node->ns, sizeof_node->name,
-            sizeof_node->scope);
+        enum_symbol = parser_find_enum_symbol(parser, sizeof_node->ns,
+            sizeof_node->name);
     }
 
     if(struct_def != nullptr)
@@ -70,13 +70,13 @@ export void analyze_enum_count(Parser* parser, ASTEnumCount* enum_count,
 
     if(enum_count->ns == nullptr)
     {
-        symbol = enum_table_find_r(parser->current_namespace, enum_count->name,
-            enum_count->scope);
+        symbol = parser_find_enum_symbol_r(parser, parser->current_namespace,
+            enum_count->name);
     }
     else
     {
-        symbol = enum_table_find(enum_count->ns, enum_count->name,
-            enum_count->scope);
+        symbol = parser_find_enum_symbol(parser, enum_count->ns,
+            enum_count->name);
     }
 
     if(symbol == nullptr)

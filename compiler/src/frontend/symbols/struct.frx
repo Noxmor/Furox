@@ -29,12 +29,19 @@ struct StructTableEntry
 
 macro STRUCT_TABLE_CAPACITY = 128;
 
-struct StructTable
+export struct StructTable
 {
     StructTableEntry*[STRUCT_TABLE_CAPACITY] entries;
 }
 
 StructTable struct_table;
+
+export void struct_table_init(StructTable* table)
+{
+    assert(table != nullptr);
+
+    memset(table, 0, sizeof(StructTable));
+}
 
 export StructSymbol* struct_table_find_r(Namespace* ns, char* name,
     Scope* scope)

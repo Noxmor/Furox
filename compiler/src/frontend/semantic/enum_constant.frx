@@ -4,8 +4,8 @@ export void analyze_enum_constant(Parser* parser, ASTEnumConstant* constant)
 
     assert(constant != nullptr);
 
-    constant->symbol = enum_table_find(constant->enum_namespace,
-        constant->enum_name, constant->scope);
+    constant->symbol = parser_find_enum_symbol(parser, constant->enum_namespace,
+        constant->enum_name);
 
     EnumSymbol* symbol = constant->symbol;
 

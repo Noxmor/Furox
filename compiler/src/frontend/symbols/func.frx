@@ -29,12 +29,19 @@ struct FuncTableEntry
 
 macro FUNC_TABLE_CAPACITY = 128;
 
-struct FuncTable
+export struct FuncTable
 {
     FuncTableEntry*[FUNC_TABLE_CAPACITY] entries;
 }
 
 FuncTable func_table;
+
+export void func_table_init(FuncTable* table)
+{
+    assert(table != nullptr);
+
+    memset(table, 0, sizeof(FuncTable));
+}
 
 export FuncSymbol* func_table_find_r(Namespace* ns, char* name, Scope* scope)
 {
