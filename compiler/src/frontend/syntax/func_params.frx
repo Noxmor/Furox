@@ -10,7 +10,7 @@ ASTFuncParam* make_func_param(Arena* arena, ASTTypeSpecifier* type,
 {
     ASTFuncParam* param = arena_alloc(arena, sizeof(ASTFuncParam));
 
-    var_symbol_init(&param->symbol, nullptr, type, scope, name, mutable);
+    var_symbol_init(&param->symbol, nullptr, type, scope, name, false, mutable);
 
     return param;
 }

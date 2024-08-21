@@ -6,7 +6,12 @@ export void transpile_var(Transpiler* transpiler, ASTVar* var)
 
     VarSymbol* symbol = var->symbol;
 
-    transpile_namespace_resolution(transpiler, symbol->ns);
+    char* mangled_name = symbol->name;
+    if(symbol->global)
+    {
+        mangled_name = mangle_global_var_name(symbol->scope, symbol->ns,
+            symbol->name);
+    }
 
-    fprintf(transpiler->file, "%s", symbol->name);
+    fprintf(transpiler->file, "%s", mangled_name);
 }

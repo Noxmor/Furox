@@ -9,7 +9,7 @@ export ASTGlobalVarDecl* make_global_var_decl(Arena* arena, Namespace* ns,
     ASTGlobalVarDecl* var_decl = arena_alloc(arena, sizeof(ASTGlobalVarDecl));
 
 
-    var_symbol_init(&var_decl->symbol, ns, type, scope, name, mutable);
+    var_symbol_init(&var_decl->symbol, ns, type, scope, name, true, mutable);
 
     return var_decl;
 }

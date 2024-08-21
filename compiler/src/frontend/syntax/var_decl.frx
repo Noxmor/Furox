@@ -8,7 +8,8 @@ export ASTVarDecl* make_var_decl(Arena* arena, ASTTypeSpecifier* type,
 {
     ASTVarDecl* var_decl = arena_alloc(arena, sizeof(ASTVarDecl));
 
-    var_symbol_init(&var_decl->symbol, nullptr, type, scope, name, mutable);
+    var_symbol_init(&var_decl->symbol, nullptr, type, scope, name, false,
+        mutable);
 
     return var_decl;
 }

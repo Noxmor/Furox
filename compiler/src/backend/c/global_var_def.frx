@@ -12,9 +12,11 @@ export void transpile_global_var_def(Transpiler* transpiler,
 
     VarSymbol* symbol = &var_def->symbol;
 
+    char* mangled_name = mangle_global_var_name(symbol->scope, symbol->ns,
+        symbol->name);
+
     transpile_type_specifier(transpiler, symbol->type);
-    transpile_namespace_resolution(transpiler, symbol->ns);
-    fprintf(transpiler->file, "%s", symbol->name);
+    fprintf(transpiler->file, "%s", mangled_name);
     transpile_type_specifier_array_dimensions(transpiler, symbol->type);
     fprintf(transpiler->file, " = ");
     transpile_ast(transpiler, var_def->value);

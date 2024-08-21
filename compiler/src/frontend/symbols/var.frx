@@ -4,11 +4,12 @@ export struct VarSymbol
     ASTTypeSpecifier* type;
     Scope* scope;
     char* name;
+    b8 global;
     b8 mutable;
 }
 
 export void var_symbol_init(VarSymbol* symbol, Namespace* ns,
-    ASTTypeSpecifier* type, Scope* scope, char* name, b8 mutable)
+    ASTTypeSpecifier* type, Scope* scope, char* name, b8 global, b8 mutable)
 {
     assert(symbol != nullptr);
 
@@ -22,6 +23,7 @@ export void var_symbol_init(VarSymbol* symbol, Namespace* ns,
     symbol->type = type;
     symbol->scope = scope;
     symbol->name = name;
+    symbol->global = global;
     symbol->mutable = mutable;
 }
 

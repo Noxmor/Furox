@@ -9,7 +9,8 @@ export ASTVarDef* make_var_def(Arena* arena, ASTTypeSpecifier* type,
 {
     ASTVarDef* var_def = arena_alloc(arena, sizeof(ASTVarDef));
 
-    var_symbol_init(&var_def->symbol, nullptr, type, scope, name, mutable);
+    var_symbol_init(&var_def->symbol, nullptr, type, scope, name, false,
+        mutable);
 
     return var_def;
 }
