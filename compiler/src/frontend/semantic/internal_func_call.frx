@@ -14,26 +14,26 @@ export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
         return;
     }
 
-    StructSymbol* struct_def = nullptr;
+    StructSymbol* struct_symbol = nullptr;
     EnumSymbol* enum_symbol = nullptr;
 
     if(sizeof_node->ns == nullptr)
     {
-        struct_def = struct_table_find_r(parser->current_namespace,
-            sizeof_node->name, sizeof_node->scope);
+        struct_symbol = parser_find_struct_symbol_r(parser,
+            parser->current_namespace, sizeof_node->name);
 
         enum_symbol = parser_find_enum_symbol_r(parser,
             parser->current_namespace, sizeof_node->name);
     }
     else
     {
-        struct_def = struct_table_find(sizeof_node->ns, sizeof_node->name,
-            sizeof_node->scope);
+        struct_symbol = parser_find_struct_symbol(parser, sizeof_node->ns,
+            sizeof_node->name);
         enum_symbol = parser_find_enum_symbol(parser, sizeof_node->ns,
             sizeof_node->name);
     }
 
-    if(struct_def != nullptr)
+    if(struct_symbol != nullptr)
     {
         ast->type = AST_TYPE_INT_LITERAL;
 

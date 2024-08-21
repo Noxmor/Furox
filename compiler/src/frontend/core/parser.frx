@@ -186,6 +186,45 @@ export EnumSymbol* parser_find_enum_symbol(Parser* parser, Namespace* ns,
     return nullptr;
 }
 
+export StructSymbol* parser_find_struct_symbol_r(Parser* parser, Namespace* ns,
+    char* name)
+{
+    StructSymbol* symbol = parser_find_struct_symbol(parser, ns, name);
+    while(symbol == nullptr && ns != nullptr)
+    {
+        ns = ns->parent;
+        symbol = parser_find_struct_symbol(parser, ns, name);
+    }
+
+    return symbol;
+}
+
+export StructSymbol* parser_find_struct_symbol(Parser* parser, Namespace* ns,
+    char* name)
+{
+    assert(parser != nullptr);
+
+    StructSymbol* symbol = struct_table_find(&parser->struct_table, ns, name);
+    if(symbol != nullptr)
+    {
+        return symbol;
+    }
+
+    usize i;
+    for(i = 0; i < list_size(&parser->imported_parsers); i = i + 1)
+    {
+        Parser* imported_parser = list_get(&parser->imported_parsers, i);
+
+        symbol = struct_table_find(&imported_parser->struct_table, ns, name);
+        if(symbol != nullptr && symbol->exported)
+        {
+            return symbol;
+        }
+    }
+
+    return nullptr;
+}
+
 export char* parser_source_file(Parser* parser)
 {
     assert(parser != nullptr);

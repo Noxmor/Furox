@@ -2,22 +2,18 @@ export struct StructSymbol
 {
     Namespace* ns;
     char* name;
-    Scope* scope;
     b8 exported;
 }
 
 export void struct_symbol_init(StructSymbol* symbol, Namespace* ns, char* name,
-    Scope* scope, b8 exported)
+    b8 exported)
 {
     assert(symbol != nullptr);
 
     assert(name != nullptr);
 
-    assert(scope != nullptr);
-
     symbol->ns = ns;
     symbol->name = name;
-    symbol->scope = scope;
     symbol->exported = exported;
 }
 
@@ -34,8 +30,6 @@ export struct StructTable
     StructTableEntry*[STRUCT_TABLE_CAPACITY] entries;
 }
 
-StructTable struct_table;
-
 export void struct_table_init(StructTable* table)
 {
     assert(table != nullptr);
@@ -43,36 +37,34 @@ export void struct_table_init(StructTable* table)
     memset(table, 0, sizeof(StructTable));
 }
 
-export StructSymbol* struct_table_find_r(Namespace* ns, char* name,
-    Scope* scope)
+export StructSymbol* struct_table_find_r(StructTable* table, Namespace* ns,
+    char* name)
 {
-    StructSymbol* symbol = struct_table_find(ns, name, scope);
+    StructSymbol* symbol = struct_table_find(table, ns, name);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
-        symbol = struct_table_find(ns, name, scope);
+        symbol = struct_table_find(table, ns, name);
     }
 
     return symbol;
 }
 
-export StructSymbol* struct_table_find(Namespace* ns, char* name, Scope* scope)
+export StructSymbol* struct_table_find(StructTable* table, Namespace* ns,
+    char* name)
 {
+    assert(table != nullptr);
+
     assert(name != nullptr);
 
-    assert(scope != nullptr);
-
     u64 index = hash_djb2(name) % STRUCT_TABLE_CAPACITY;
-    StructTableEntry* entry = struct_table.entries[index];
+    StructTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
         StructSymbol* symbol = entry->symbol;
 
-        b8 visible = scope_same_root(symbol->scope, scope) || symbol->exported;
-
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns)
-            && visible)
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -83,20 +75,21 @@ export StructSymbol* struct_table_find(Namespace* ns, char* name, Scope* scope)
     return nullptr;
 }
 
-export b8 struct_table_insert(StructSymbol* symbol)
+export b8 struct_table_insert(StructTable* table, StructSymbol* symbol)
 {
+    assert(table != nullptr);
+
     assert(symbol != nullptr);
 
     u64 index = hash_djb2(symbol->name) % STRUCT_TABLE_CAPACITY;
-    StructTableEntry* entry = struct_table.entries[index];
+    StructTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
         StructSymbol* existing_symbol = entry->symbol;
 
         if(strcmp(existing_symbol->name, symbol->name) == 0
-            && namespace_equals(existing_symbol->ns, symbol->ns)
-            && scope_same_root(existing_symbol->scope, symbol->scope))
+            && namespace_equals(existing_symbol->ns, symbol->ns))
         {
             return false;
         }
@@ -106,9 +99,9 @@ export b8 struct_table_insert(StructSymbol* symbol)
 
     StructTableEntry* new_entry = malloc(sizeof(StructTableEntry));
     new_entry->symbol = symbol;
-    new_entry->next = struct_table.entries[index];
+    new_entry->next = table->entries[index];
 
-    struct_table.entries[index] = new_entry;
+    table->entries[index] = new_entry;
 
     return true;
 }
