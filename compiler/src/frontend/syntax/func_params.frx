@@ -6,11 +6,11 @@ export struct ASTFuncParam
 }
 
 ASTFuncParam* make_func_param(Arena* arena, ASTTypeSpecifier* type,
-    Scope* scope, char* name)
+    Scope* scope, char* name, b8 mutable)
 {
     ASTFuncParam* param = arena_alloc(arena, sizeof(ASTFuncParam));
 
-    var_symbol_init(&param->symbol, nullptr, type, scope, name, false);
+    var_symbol_init(&param->symbol, nullptr, type, scope, name, mutable);
 
     param->is_redefinition = !var_table_insert(&param->symbol);
 
@@ -21,12 +21,20 @@ ASTFuncParam* parse_func_param(Parser* parser)
 {
     assert(parser != nullptr);
 
+    b8 mutable = false;
+    if(parser->token->type == TOKEN_TYPE_KW_MUT)
+    {
+        mutable = true;
+        parser_eat(parser, TOKEN_TYPE_KW_MUT);
+    }
+
     ASTTypeSpecifier* type = parse_type_specifier(parser);
     char* name = parser->token->identifier;
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-    return make_func_param(&parser->arena, type, parser->current_scope, name);
+    return make_func_param(&parser->arena, type, parser->current_scope, name,
+        mutable);
 }
 
 void print_func_param(ASTFuncParam* param, FILE* file, usize depth)
