@@ -1,0 +1,13 @@
+export void analyze_extern_block(Parser* parser, ASTExternBlock* extern_block)
+{
+    assert(parser != nullptr);
+
+    assert(extern_block != nullptr);
+
+    usize i;
+    for(i = 0; i < list_size(&extern_block->func_decls); i = i + 1)
+    {
+        ASTFuncDecl* func_decl = list_get(&extern_block->func_decls, i);
+        analyze_func_decl(parser, func_decl);
+    }
+}

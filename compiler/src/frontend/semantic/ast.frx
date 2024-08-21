@@ -10,6 +10,12 @@ export void analyze_ast(Parser* parser, AST* ast)
         {
             break;
         }
+        case AST_TYPE_EXTERN_BLOCK:
+        {
+            analyze_extern_block(parser, node);
+
+            break;
+        }
         case AST_TYPE_NAMESPACE:
         {
             analyze_namespace(parser, node);

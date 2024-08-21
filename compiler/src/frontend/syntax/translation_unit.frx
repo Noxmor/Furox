@@ -39,10 +39,19 @@ ASTCompound* parse_translation_unit(Parser* parser)
             }
             case TOKEN_TYPE_KW_EXTERN:
             {
-                parser_eat(parser, TOKEN_TYPE_KW_EXTERN);
+                Token* next = parser_peek(parser, 1);
+                if(next->type == TOKEN_TYPE_LBRACE)
+                {
+                    ast = make_ast(&parser->arena, AST_TYPE_EXTERN_BLOCK,
+                        parse_extern_block(parser));
+                }
+                else
+                {
+                    parser_eat(parser, TOKEN_TYPE_KW_EXTERN);
 
-                ast = make_ast(&parser->arena, AST_TYPE_FUNC_DECL,
-                    parse_func_decl(parser));
+                    ast = make_ast(&parser->arena, AST_TYPE_FUNC_DECL,
+                        parse_func_decl(parser));
+                }
 
                 break;
             }

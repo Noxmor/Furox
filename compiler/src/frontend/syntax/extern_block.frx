@@ -1,0 +1,52 @@
+export struct ASTExternBlock
+{
+    List func_decls;
+}
+
+ASTExternBlock* make_extern_block(Arena* arena)
+{
+    ASTExternBlock* extern_block = arena_alloc(arena, sizeof(ASTExternBlock));
+
+    list_init(&extern_block->func_decls);
+
+    return extern_block;
+}
+
+export ASTExternBlock* parse_extern_block(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    ASTExternBlock* extern_block = make_extern_block(&parser->arena);
+
+    parser_eat(parser, TOKEN_TYPE_KW_EXTERN);
+
+    parser_eat(parser, TOKEN_TYPE_LBRACE);
+
+    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    {
+        list_push(&extern_block->func_decls, parse_func_decl(parser));
+    }
+
+    parser_eat(parser, TOKEN_TYPE_RBRACE);
+
+    return extern_block;
+}
+
+export void print_extern_block(ASTExternBlock* extern_block, FILE* file,
+    usize depth)
+{
+    assert(extern_block != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_EXTERN_BLOCK));
+
+    usize i;
+    for(i = 0; i < list_size(&extern_block->func_decls); i = i + 1)
+    {
+        ASTFuncDecl* func_decl = list_get(&extern_block->func_decls, i);
+        print_func_decl(func_decl, file, depth + 1);
+    }
+}

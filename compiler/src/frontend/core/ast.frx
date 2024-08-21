@@ -3,6 +3,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "compound",
     "type-specifier",
     "import-statement",
+    "extern-block",
     "namespace",
     "enum-definition",
     "enum-constant",
@@ -36,6 +37,7 @@ export enum ASTType : u8
     AST_TYPE_TYPE_SPECIFIER,
 
     AST_TYPE_IMPORT_STMT,
+    AST_TYPE_EXTERN_BLOCK,
     AST_TYPE_NAMESPACE,
     AST_TYPE_ENUM_DEF,
     AST_TYPE_ENUM_CONSTANT,
@@ -107,6 +109,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_IMPORT_STMT:
         {
             print_import_stmt(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_EXTERN_BLOCK:
+        {
+            print_extern_block(node, file, depth);
 
             break;
         }
