@@ -2,22 +2,18 @@ export struct FuncSymbol
 {
     Namespace* ns;
     char* name;
-    Scope* scope;
     b8 exported;
 }
 
 export void func_symbol_init(FuncSymbol* symbol, Namespace* ns, char* name,
-    Scope* scope, b8 exported)
+    b8 exported)
 {
     assert(symbol != nullptr);
 
     assert(name != nullptr);
 
-    assert(scope != nullptr);
-
     symbol->ns = ns;
     symbol->name = name;
-    symbol->scope = scope;
     symbol->exported = exported;
 }
 
@@ -34,8 +30,6 @@ export struct FuncTable
     FuncTableEntry*[FUNC_TABLE_CAPACITY] entries;
 }
 
-FuncTable func_table;
-
 export void func_table_init(FuncTable* table)
 {
     assert(table != nullptr);
@@ -43,33 +37,33 @@ export void func_table_init(FuncTable* table)
     memset(table, 0, sizeof(FuncTable));
 }
 
-export FuncSymbol* func_table_find_r(Namespace* ns, char* name, Scope* scope)
+export FuncSymbol* func_table_find_r(FuncTable* table, Namespace* ns,
+    char* name)
 {
-    FuncSymbol* symbol = func_table_find(ns, name, scope);
+    FuncSymbol* symbol = func_table_find(table, ns, name);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
-        symbol = func_table_find(ns, name, scope);
+        symbol = func_table_find(table, ns, name);
     }
 
     return symbol;
 }
 
-export FuncSymbol* func_table_find(Namespace* ns, char* name, Scope* scope)
+export FuncSymbol* func_table_find(FuncTable* table, Namespace* ns, char* name)
 {
+    assert(table != nullptr);
+
     assert(name != nullptr);
 
     u64 index = hash_djb2(name) % FUNC_TABLE_CAPACITY;
-    FuncTableEntry* entry = func_table.entries[index];
+    FuncTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
         FuncSymbol* symbol = entry->symbol;
 
-        b8 visible = scope_same_root(symbol->scope, scope) || symbol->exported;
-
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns)
-            && visible)
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -80,20 +74,21 @@ export FuncSymbol* func_table_find(Namespace* ns, char* name, Scope* scope)
     return nullptr;
 }
 
-export b8 func_table_insert(FuncSymbol* symbol)
+export b8 func_table_insert(FuncTable* table, FuncSymbol* symbol)
 {
+    assert(table != nullptr);
+
     assert(symbol != nullptr);
 
     u64 index = hash_djb2(symbol->name) % FUNC_TABLE_CAPACITY;
-    FuncTableEntry* entry = func_table.entries[index];
+    FuncTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
         FuncSymbol* existing_symbol = entry->symbol;
 
         if(strcmp(existing_symbol->name, symbol->name) == 0
-            && namespace_equals(existing_symbol->ns, symbol->ns)
-            && scope_same_root(existing_symbol->scope, symbol->scope))
+            && namespace_equals(existing_symbol->ns, symbol->ns))
         {
             return false;
         }
@@ -103,9 +98,9 @@ export b8 func_table_insert(FuncSymbol* symbol)
 
     FuncTableEntry* new_entry = malloc(sizeof(FuncTableEntry));
     new_entry->symbol = symbol;
-    new_entry->next = func_table.entries[index];
+    new_entry->next = table->entries[index];
 
-    func_table.entries[index] = new_entry;
+    table->entries[index] = new_entry;
 
     return true;
 }

@@ -9,18 +9,16 @@ export struct ASTFuncDef
 }
 
 export ASTFuncDef* make_func_def(Arena* arena, Namespace* ns, char* name,
-    ASTTypeSpecifier* return_type, Scope* scope, b8 exported)
+    ASTTypeSpecifier* return_type, b8 exported)
 {
     assert(return_type != nullptr);
 
     ASTFuncDef* func_def = arena_alloc(arena, sizeof(ASTFuncDef));
 
     func_def->return_type = return_type;
-    func_symbol_init(&func_def->symbol, ns, name, scope, exported);
+    func_symbol_init(&func_def->symbol, ns, name, exported);
     func_def->params = nullptr;
     func_def->body = nullptr;
-
-    func_def->is_redefinition = !func_table_insert(&func_def->symbol);
 
     return func_def;
 }
@@ -30,9 +28,14 @@ export ASTFuncDef* parse_func_def(Parser* parser, ASTTypeSpecifier* return_type,
 {
     assert(parser != nullptr);
 
+    char* name = parser->token->identifier;
+
     ASTFuncDef* func_def = make_func_def(&parser->arena,
-        parser->current_namespace, parser->token->identifier, return_type,
-        parser->current_scope, exported);
+        parser->current_namespace, name, return_type, exported);
+
+    func_def->is_redefinition = parser_find_func_symbol(parser,
+        parser->current_namespace, name)
+        || !func_table_insert(&parser->func_table, &func_def->symbol);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 

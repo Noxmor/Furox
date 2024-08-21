@@ -225,6 +225,45 @@ export StructSymbol* parser_find_struct_symbol(Parser* parser, Namespace* ns,
     return nullptr;
 }
 
+export FuncSymbol* parser_find_func_symbol_r(Parser* parser, Namespace* ns,
+    char* name)
+{
+    FuncSymbol* symbol = parser_find_func_symbol(parser, ns, name);
+    while(symbol == nullptr && ns != nullptr)
+    {
+        ns = ns->parent;
+        symbol = parser_find_func_symbol(parser, ns, name);
+    }
+
+    return symbol;
+}
+
+export FuncSymbol* parser_find_func_symbol(Parser* parser, Namespace* ns,
+    char* name)
+{
+    assert(parser != nullptr);
+
+    FuncSymbol* symbol = func_table_find(&parser->func_table, ns, name);
+    if(symbol != nullptr)
+    {
+        return symbol;
+    }
+
+    usize i;
+    for(i = 0; i < list_size(&parser->imported_parsers); i = i + 1)
+    {
+        Parser* imported_parser = list_get(&parser->imported_parsers, i);
+
+        symbol = func_table_find(&imported_parser->func_table, ns, name);
+        if(symbol != nullptr && symbol->exported)
+        {
+            return symbol;
+        }
+    }
+
+    return nullptr;
+}
+
 export char* parser_source_file(Parser* parser)
 {
     assert(parser != nullptr);
