@@ -15,8 +15,11 @@ export void analyze_func_def(Parser* parser, ASTFuncDef* func_def)
         i = i + 1)
     {
         Parser* imported_parser = list_get(&parser->imported_parsers, i);
-        is_redefinition = func_table_find(&imported_parser->func_table,
-            symbol->ns, symbol->name) != nullptr;
+        FuncSymbol* imported_symbol = func_table_find(
+            &imported_parser->func_table, symbol->ns, symbol->name);
+
+        is_redefinition = imported_symbol != nullptr
+            && imported_symbol->exported;
     }
 
     if(is_redefinition)

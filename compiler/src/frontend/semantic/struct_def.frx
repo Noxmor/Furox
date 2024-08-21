@@ -13,8 +13,11 @@ export void analyze_struct_def(Parser* parser, ASTStructDef* struct_def)
         i = i + 1)
     {
         Parser* imported_parser = list_get(&parser->imported_parsers, i);
-        is_redefinition = struct_table_find(&imported_parser->struct_table,
-            symbol->ns, symbol->name) != nullptr;
+        StructSymbol* imported_symbol = struct_table_find(
+            &imported_parser->struct_table, symbol->ns, symbol->name);
+
+        is_redefinition = imported_symbol != nullptr
+            && imported_symbol->exported;
     }
 
     if(is_redefinition)

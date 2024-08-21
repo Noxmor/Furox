@@ -13,8 +13,11 @@ export void analyze_enum_def(Parser* parser, ASTEnumDef* enum_def)
         i = i + 1)
     {
         Parser* imported_parser = list_get(&parser->imported_parsers, i);
-        is_redefinition = enum_table_find(&imported_parser->enum_table,
-            symbol->ns, symbol->name) != nullptr;
+        EnumSymbol* imported_symbol = enum_table_find(
+            &imported_parser->enum_table, symbol->ns, symbol->name);
+
+        is_redefinition = imported_symbol != nullptr
+            && imported_symbol->exported;
     }
 
     if(is_redefinition)
