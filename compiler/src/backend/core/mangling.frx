@@ -1,0 +1,62 @@
+char* buffer = nullptr;
+usize buffer_size = 0;
+
+void realloc_buffer(usize size)
+{
+    buffer = realloc(buffer, size * sizeof(char));
+}
+
+void mangle_namespace(Namespace* ns)
+{
+    if(ns == nullptr)
+    {
+        return;
+    }
+
+    mangle_namespace(ns->parent);
+
+    if(strcmp(ns->name, "") != 0)
+    {
+        strcat(buffer, ns->name);
+        strcat(buffer, "_");
+    }
+}
+
+export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
+{
+    assert(name != nullptr);
+
+    usize size = strlen(name);
+
+    Namespace* temp = ns;
+    while(temp != nullptr)
+    {
+        size = size + strlen(ns->name) + 1;
+
+        temp = temp->parent;
+    }
+
+    if(size > buffer_size)
+    {
+        realloc_buffer(size);
+    }
+
+    if(namespace_is_global(ns) && strcmp(name, "main") == 0)
+    {
+        strcpy(buffer, "main");
+        return buffer;
+    }
+
+    strcpy(buffer, "");
+
+    mangle_namespace(ns);
+
+    strcat(buffer, name);
+
+    char* buffer_end = strrchr(buffer, '\0');
+    sprintf(buffer_end, "%zu", scope->id);
+
+    strcat(buffer, "F");
+
+    return buffer;
+}

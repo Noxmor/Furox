@@ -4,11 +4,14 @@ export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
 
     assert(func_def != nullptr);
 
+    FuncSymbol* symbol = &func_def->symbol;
+
     if(transpiler->mode == TRANSPILER_MODE_FUNC_DECL)
     {
         transpile_type_specifier(transpiler, func_def->return_type);
 
-        transpile_function_symbol_name(transpiler, &func_def->symbol);
+        fprintf(transpiler->file, "%s", mangle_function_name(symbol->scope,
+            symbol->ns, symbol->name));
         transpile_func_params(transpiler, func_def->params);
         fprintf(transpiler->file, ";\n");
     }
@@ -16,7 +19,8 @@ export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
     {
         transpile_type_specifier(transpiler, func_def->return_type);
 
-        transpile_function_symbol_name(transpiler, &func_def->symbol);
+        fprintf(transpiler->file, "%s", mangle_function_name(symbol->scope,
+            symbol->ns, symbol->name));
         transpile_func_params(transpiler, func_def->params);
         fprintf(transpiler->file, "\n");
 

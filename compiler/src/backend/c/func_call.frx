@@ -6,9 +6,13 @@ export void transpile_func_call(Transpiler* transpiler, ASTFuncCall* func_call)
 
     FuncSymbol* symbol = func_call->symbol;
 
-    transpile_namespace_resolution(transpiler, symbol->ns);
+    char* name = symbol->name;
+    if(!symbol->external)
+    {
+        name = mangle_function_name(symbol->scope, symbol->ns, symbol->name);
+    }
 
-    fprintf(transpiler->file, "%s(", symbol->name);
+    fprintf(transpiler->file, "%s(", name);
 
     usize i;
     for(i = 0; i < list_size(&func_call->args); i = i + 1)

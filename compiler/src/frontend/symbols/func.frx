@@ -1,20 +1,26 @@
 export struct FuncSymbol
 {
+    Scope* scope;
     Namespace* ns;
     char* name;
     b8 exported;
+    b8 external;
 }
 
-export void func_symbol_init(FuncSymbol* symbol, Namespace* ns, char* name,
-    b8 exported)
+export void func_symbol_init(FuncSymbol* symbol, Scope* scope, Namespace* ns,
+    char* name, b8 exported, b8 external)
 {
     assert(symbol != nullptr);
 
+    assert(scope != nullptr);
+
     assert(name != nullptr);
 
+    symbol->scope = scope;
     symbol->ns = ns;
     symbol->name = name;
     symbol->exported = exported;
+    symbol->external = external;
 }
 
 struct FuncTableEntry
