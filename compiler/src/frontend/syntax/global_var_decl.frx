@@ -1,8 +1,6 @@
 export struct ASTGlobalVarDecl
 {
     VarSymbol symbol;
-
-    b8 is_redefinition;
 }
 
 export ASTGlobalVarDecl* make_global_var_decl(Arena* arena, Namespace* ns,
@@ -25,8 +23,7 @@ export ASTGlobalVarDecl* parse_global_var_decl(Parser* parser,
         parser->current_namespace, type, parser->current_scope,
         parser->token->identifier, mutable);
 
-    var_decl->is_redefinition = !var_table_insert(&parser->var_table,
-        &var_decl->symbol);
+    var_table_insert(&parser->var_table, &var_decl->symbol);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 

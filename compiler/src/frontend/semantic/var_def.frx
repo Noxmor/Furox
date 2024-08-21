@@ -8,7 +8,10 @@ export void analyze_var_def(Parser* parser, ASTVarDef* var_def)
 
     analyze_type_specifier(parser, symbol->type);
 
-    if(var_def->is_redefinition)
+    b8 is_redefinition = var_table_find_by_scope(&parser->var_table,
+        symbol->scope, symbol->name) != symbol;
+
+    if(is_redefinition)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;

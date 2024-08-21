@@ -1,8 +1,6 @@
 export struct ASTVarDecl
 {
     VarSymbol symbol;
-
-    b8 is_redefinition;
 }
 
 export ASTVarDecl* make_var_decl(Arena* arena, ASTTypeSpecifier* type,
@@ -23,8 +21,7 @@ export ASTVarDecl* parse_var_decl(Parser* parser, ASTTypeSpecifier* type,
     ASTVarDecl* var_decl = make_var_decl(&parser->arena, type,
         parser->current_scope, parser->token->identifier, mutable);
 
-    var_decl->is_redefinition = !var_table_insert(&parser->var_table,
-        &var_decl->symbol);
+    var_table_insert(&parser->var_table, &var_decl->symbol);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
