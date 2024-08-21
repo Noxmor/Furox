@@ -27,13 +27,3 @@ export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
         transpile_scope(transpiler, func_def->body);
     }
 }
-
-void transpile_function_symbol_name(Transpiler* transpiler, FuncSymbol* symbol)
-{
-    assert(transpiler != nullptr);
-
-    assert(symbol != nullptr);
-
-    transpile_namespace_resolution(transpiler, symbol->ns);
-    fprintf(transpiler->file, "%s", symbol->name);
-}

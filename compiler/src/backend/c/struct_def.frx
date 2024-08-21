@@ -27,14 +27,3 @@ export void transpile_struct_def(Transpiler* transpiler,
         fprintf(transpiler->file, "};\n");
     }
 }
-
-export void transpile_struct_symbol_name(Transpiler* transpiler,
-    StructSymbol* symbol)
-{
-    assert(transpiler != nullptr);
-
-    assert(symbol != nullptr);
-
-    transpile_namespace_resolution(transpiler, symbol->ns);
-    fprintf(transpiler->file, "%s", symbol->name);
-}

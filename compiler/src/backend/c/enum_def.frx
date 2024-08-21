@@ -31,14 +31,3 @@ export void transpile_enum_def(Transpiler* transpiler, ASTEnumDef* enum_def)
     fprintf(transpiler->file, "typedef %s ", token_type_to_str(symbol->type));
     fprintf(transpiler->file, "%s;\n", mangled_name);
 }
-
-export void transpile_enum_symbol_name(Transpiler* transpiler,
-    EnumSymbol* symbol)
-{
-    assert(transpiler != nullptr);
-
-    assert(symbol != nullptr);
-
-    transpile_namespace_resolution(transpiler, symbol->ns);
-    fprintf(transpiler->file, "%s", symbol->name);
-}
