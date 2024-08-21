@@ -14,8 +14,6 @@ export ASTGlobalVarDef* make_global_var_def(Arena* arena, Namespace* ns,
 
     var_symbol_init(&var_def->symbol, ns, type, scope, name, mutable);
 
-    var_def->is_redefinition = !var_table_insert(&var_def->symbol);
-
     return var_def;
 }
 
@@ -27,6 +25,9 @@ export ASTGlobalVarDef* parse_global_var_def(Parser* parser,
     ASTGlobalVarDef* var_def = make_global_var_def(&parser->arena,
         parser->current_namespace, type, parser->current_scope,
         parser->token->identifier, mutable);
+
+    var_def->is_redefinition = !var_table_insert(&parser->var_table,
+        &var_def->symbol);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 

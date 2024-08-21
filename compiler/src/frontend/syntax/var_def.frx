@@ -13,8 +13,6 @@ export ASTVarDef* make_var_def(Arena* arena, ASTTypeSpecifier* type,
 
     var_symbol_init(&var_def->symbol, nullptr, type, scope, name, mutable);
 
-    var_def->is_redefinition = !var_table_insert(&var_def->symbol);
-
     return var_def;
 }
 
@@ -25,6 +23,9 @@ export ASTVarDef* parse_var_def(Parser* parser, ASTTypeSpecifier* type,
 
     ASTVarDef* var_def = make_var_def(&parser->arena, type,
         parser->current_scope, parser->token->identifier, mutable);
+
+    var_def->is_redefinition = !var_table_insert(&parser->var_table,
+        &var_def->symbol);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 

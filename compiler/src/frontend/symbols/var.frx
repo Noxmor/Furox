@@ -38,8 +38,6 @@ struct VarTable
     VarTableEntry*[VAR_TABLE_CAPACITY] entries;
 }
 
-VarTable var_table;
-
 export void var_table_init(VarTable* table)
 {
     assert(table != nullptr);
@@ -47,12 +45,15 @@ export void var_table_init(VarTable* table)
     memset(table, 0, sizeof(VarTable));
 }
 
-export VarSymbol* var_table_find_by_namespace(Namespace* ns, char* name)
+export VarSymbol* var_table_find_by_namespace(VarTable* table, Namespace* ns,
+    char* name)
 {
+    assert(table != nullptr);
+
     assert(name != nullptr);
 
     u64 index = hash_djb2(name) % VAR_TABLE_CAPACITY;
-    VarTableEntry* entry = var_table.entries[index];
+    VarTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -69,14 +70,17 @@ export VarSymbol* var_table_find_by_namespace(Namespace* ns, char* name)
     return nullptr;
 }
 
-export VarSymbol* var_table_find_by_scope(Scope* scope, char* name)
+export VarSymbol* var_table_find_by_scope(VarTable* table, Scope* scope,
+    char* name)
 {
+    assert(table != nullptr);
+
     assert(scope != nullptr);
 
     assert(name != nullptr);
 
     u64 index = hash_djb2(name) % VAR_TABLE_CAPACITY;
-    VarTableEntry* entry = var_table.entries[index];
+    VarTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -94,12 +98,14 @@ export VarSymbol* var_table_find_by_scope(Scope* scope, char* name)
     return nullptr;
 }
 
-export b8 var_table_insert(VarSymbol* symbol)
+export b8 var_table_insert(VarTable* table, VarSymbol* symbol)
 {
+    assert(table != nullptr);
+
     assert(symbol != nullptr);
 
     u64 index = hash_djb2(symbol->name) % VAR_TABLE_CAPACITY;
-    VarTableEntry* entry = var_table.entries[index];
+    VarTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -116,9 +122,9 @@ export b8 var_table_insert(VarSymbol* symbol)
 
     VarTableEntry* new_entry = malloc(sizeof(VarTableEntry));
     new_entry->symbol = symbol;
-    new_entry->next = var_table.entries[index];
+    new_entry->next = table->entries[index];
 
-    var_table.entries[index] = new_entry;
+    table->entries[index] = new_entry;
 
     return true;
 }

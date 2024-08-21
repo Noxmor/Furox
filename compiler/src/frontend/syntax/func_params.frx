@@ -12,8 +12,6 @@ ASTFuncParam* make_func_param(Arena* arena, ASTTypeSpecifier* type,
 
     var_symbol_init(&param->symbol, nullptr, type, scope, name, mutable);
 
-    param->is_redefinition = !var_table_insert(&param->symbol);
-
     return param;
 }
 
@@ -33,8 +31,12 @@ ASTFuncParam* parse_func_param(Parser* parser)
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-    return make_func_param(&parser->arena, type, parser->current_scope, name,
-        mutable);
+    ASTFuncParam* param = make_func_param(&parser->arena, type,
+        parser->current_scope, name, mutable);
+
+    param->is_redefinition = !var_table_insert(&parser->var_table, &param->symbol);
+
+    return param;
 }
 
 void print_func_param(ASTFuncParam* param, FILE* file, usize depth)

@@ -6,11 +6,13 @@ export void analyze_var(Parser* parser, ASTVar* var)
 
     if(var->ns == nullptr)
     {
-        var->symbol = var_table_find_by_scope(var->scope, var->name);
+        var->symbol = var_table_find_by_scope(&parser->var_table, var->scope,
+            var->name);
     }
     else
     {
-        var->symbol = var_table_find_by_namespace(var->ns, var->name);
+        var->symbol = var_table_find_by_namespace(&parser->var_table, var->ns,
+            var->name);
     }
 
     if(var->symbol == nullptr)
