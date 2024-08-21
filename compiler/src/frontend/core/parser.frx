@@ -27,7 +27,7 @@ export void parser_init(Parser* parser, char* filepath)
 
     parser->token = lexer_peek(&parser->lexer, 0);
 
-    parser->current_namespace = nullptr;
+    parser->current_namespace = namespace_create_global();
     parser->current_scope = scope_create(nullptr);
 
     parser->panic = false;

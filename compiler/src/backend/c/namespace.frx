@@ -21,7 +21,11 @@ export void transpile_namespace_resolution(Transpiler* transpiler,
 
     while(ns != nullptr)
     {
-        fprintf(transpiler->file, "%s_", ns->name);
+        if(strcmp(ns->name, "") != 0)
+        {
+            fprintf(transpiler->file, "%s_", ns->name);
+        }
+
         ns = ns->parent;
     }
 }

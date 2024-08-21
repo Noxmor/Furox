@@ -7,14 +7,14 @@ export struct ASTFuncDecl
     b8 is_redefinition;
 }
 
-ASTFuncDecl* make_func_decl(Arena* arena, char* name,
+ASTFuncDecl* make_func_decl(Arena* arena, Namespace* ns, char* name,
     ASTTypeSpecifier* return_type, Scope* scope)
 {
     assert(return_type != nullptr);
 
     ASTFuncDecl* func_decl = arena_alloc(arena, sizeof(ASTFuncDecl));
 
-    func_symbol_init(&func_decl->symbol, nullptr, name, scope, false);
+    func_symbol_init(&func_decl->symbol, ns, name, scope, false);
 
     func_decl->return_type = return_type;
     func_decl->params = nullptr;
@@ -34,8 +34,8 @@ export ASTFuncDecl* parse_func_decl(Parser* parser)
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-    ASTFuncDecl* func_decl = make_func_decl(&parser->arena, name, return_type,
-        parser->current_scope);
+    ASTFuncDecl* func_decl = make_func_decl(&parser->arena,
+        parser->current_namespace, name, return_type, parser->current_scope);
 
     func_decl->params = parse_func_params(parser);
 

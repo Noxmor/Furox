@@ -66,8 +66,18 @@ export void analyze_enum_count(Parser* parser, ASTEnumCount* enum_count,
 
     assert(enum_count != nullptr);
 
-    EnumSymbol* symbol = enum_table_find(enum_count->ns, enum_count->name,
-        enum_count->scope);
+    EnumSymbol* symbol = nullptr;
+
+    if(enum_count->ns == nullptr)
+    {
+        symbol = enum_table_find_r(parser->current_namespace, enum_count->name,
+            enum_count->scope);
+    }
+    else
+    {
+        symbol = enum_table_find(enum_count->ns, enum_count->name,
+            enum_count->scope);
+    }
 
     if(symbol == nullptr)
     {

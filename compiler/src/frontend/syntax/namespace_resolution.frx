@@ -2,9 +2,22 @@ export Namespace* parse_namespace_resolution(Parser* parser)
 {
     assert(parser != nullptr);
 
+    if(parser->token->type == TOKEN_TYPE_NAMESPACE_RESOLUTION)
+    {
+        parser_eat(parser, TOKEN_TYPE_NAMESPACE_RESOLUTION);
+
+        return namespace_create_global();
+    }
+
     Token* next = parser_peek(parser, 1);
 
     Namespace* ns = nullptr;
+    if(parser->token->type == TOKEN_TYPE_IDENTIFIER
+        && next->type == TOKEN_TYPE_NAMESPACE_RESOLUTION)
+    {
+        ns = namespace_create_global();
+    }
+
     while(parser->token->type == TOKEN_TYPE_IDENTIFIER
         && next->type == TOKEN_TYPE_NAMESPACE_RESOLUTION)
     {
