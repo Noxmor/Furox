@@ -93,7 +93,8 @@ export b8 enum_table_insert(EnumSymbol* symbol)
         EnumSymbol* existing_symbol = entry->symbol;
 
         if(strcmp(existing_symbol->name, symbol->name) == 0
-            && namespace_equals(existing_symbol->ns, symbol->ns))
+            && namespace_equals(existing_symbol->ns, symbol->ns)
+            && scope_same_root(existing_symbol->scope, symbol->scope))
         {
             return false;
         }
