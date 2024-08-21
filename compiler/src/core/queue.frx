@@ -1,0 +1,65 @@
+struct QueueNode
+{
+    void* data;
+    QueueNode* next;
+}
+
+export struct Queue
+{
+    QueueNode* front;
+    QueueNode* rear;
+}
+
+export void queue_init(Queue* queue)
+{
+    assert(queue != nullptr);
+
+    queue->front = nullptr;
+    queue->rear = nullptr;
+}
+
+export b8 queue_is_empty(Queue* queue)
+{
+    assert(queue != nullptr);
+
+    return queue->front == nullptr;
+}
+
+export void queue_enqueue(Queue* queue, void* data)
+{
+    assert(queue != nullptr);
+
+    QueueNode* node = malloc(sizeof(QueueNode));
+    node->data = data;
+    node->next = nullptr;
+
+    if(queue_is_empty(queue))
+    {
+        queue->front = node;
+        queue->rear = node;
+    }
+    else
+    {
+        queue->rear->next = node;
+        queue->rear = node;
+    }
+}
+
+export void* queue_dequeue(Queue* queue)
+{
+    assert(queue != nullptr);
+
+    if(queue_is_empty(queue))
+    {
+        return nullptr;
+    }
+
+    QueueNode* node = queue->front;
+    void* data = node->data;
+
+    queue->front = queue->front->next;
+
+    free(node);
+
+    return data;
+}
