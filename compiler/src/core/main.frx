@@ -3,15 +3,16 @@ b8 failed = false;
 
 void compile(char* filepath)
 {
-    if(!compile_table_mark_file_as_compiled(filepath))
+    if(parser_table_find(filepath) != nullptr)
     {
         return;
     }
 
-    Parser* parser = malloc(sizeof(Parser));
-    parser_init(parser, filepath);
+    parser_table_insert(filepath);
 
-    parser_table_insert(parser);
+    Parser* parser = parser_table_find(filepath);
+
+    assert(parser != nullptr);
 
     parser_parse(parser);
 

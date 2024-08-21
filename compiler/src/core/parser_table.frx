@@ -40,11 +40,11 @@ export Parser* parser_table_find(char* filepath)
     return nullptr;
 }
 
-export b8 parser_table_insert(Parser* parser)
+export b8 parser_table_insert(char* filepath)
 {
-    assert(parser != nullptr);
+    assert(filepath != nullptr);
 
-    char* fullpath = realpath(parser_source_file(parser), nullptr);
+    char* fullpath = realpath(filepath, nullptr);
 
     u64 index = hash_djb2(fullpath) % PARSER_TABLE_CAPACITY;
     ParserTableEntry* entry = parser_table.entries[index];
@@ -62,7 +62,8 @@ export b8 parser_table_insert(Parser* parser)
     }
 
     ParserTableEntry* new_entry = malloc(sizeof(ParserTableEntry));
-    new_entry->parser = parser;
+    new_entry->parser = malloc(sizeof(Parser));
+    parser_init(new_entry->parser, filepath);
     new_entry->fullpath = fullpath;
     new_entry->next = parser_table.entries[index];
 
