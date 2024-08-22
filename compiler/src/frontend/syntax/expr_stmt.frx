@@ -1,0 +1,38 @@
+export struct ASTExprStmt
+{
+    AST* expr;
+}
+
+ASTExprStmt* make_expr_stmt(Arena* arena, AST* expr)
+{
+    assert(expr != nullptr);
+
+    ASTExprStmt* expr_stmt = arena_alloc(arena, sizeof(ASTExprStmt));
+
+    expr_stmt->expr = expr;
+
+    return expr_stmt;
+}
+
+export ASTExprStmt* parse_expr_stmt(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    AST* expr = parse_expr(parser);
+
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+
+    return make_expr_stmt(&parser->arena, expr);
+}
+
+export void print_expr_stmt(ASTExprStmt* expr_stmt, FILE* file, usize depth)
+{
+    assert(expr_stmt != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_EXPR_STMT));
+    print_ast(expr_stmt->expr, file, depth + 1);
+}

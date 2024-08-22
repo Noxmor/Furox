@@ -1,0 +1,8 @@
+export void analyze_expr_stmt(Parser* parser, ASTExprStmt* expr_stmt)
+{
+    assert(parser != nullptr);
+
+    assert(expr_stmt != nullptr);
+
+    analyze_ast(parser, expr_stmt->expr);
+}

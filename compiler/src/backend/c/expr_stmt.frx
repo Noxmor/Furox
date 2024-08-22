@@ -1,0 +1,9 @@
+export void transpile_expr_stmt(Transpiler* transpiler, ASTExprStmt* expr_stmt)
+{
+    assert(transpiler != nullptr);
+
+    assert(expr_stmt != nullptr);
+
+    transpile_ast(transpiler, expr_stmt->expr);
+    fprintf(transpiler->file, ";\n");
+}

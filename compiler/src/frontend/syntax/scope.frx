@@ -193,7 +193,8 @@ export ASTScope* parse_scope(Parser* parser)
             }
             default:
             {
-                parser_panic(parser);
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AST_TYPE_EXPR_STMT, parse_expr_stmt(parser)));
 
                 break;
             }

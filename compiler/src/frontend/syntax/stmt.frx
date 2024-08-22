@@ -43,7 +43,8 @@ export AST* parse_statement(Parser* parser)
         }
         default:
         {
-            parser_panic(parser);
+            ast = make_ast(&parser->arena, AST_TYPE_EXPR_STMT,
+                parse_expr_stmt(parser));
 
             break;
         }
