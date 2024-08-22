@@ -1,3 +1,47 @@
+export struct ASTStructField
+{
+    ASTTypeSpecifier* type;
+    char* name;
+}
+
+ASTStructField* make_struct_field(Arena* arena, ASTTypeSpecifier* type,
+    char* name)
+{
+    assert(type != nullptr);
+
+    assert(name != nullptr);
+
+    ASTStructField* field = arena_alloc(arena, sizeof(ASTStructField));
+
+    field->type = type;
+    field->name = name;
+
+    return field;
+}
+
+ASTStructField* parse_struct_field(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    ASTTypeSpecifier* type = parse_type_specifier(parser);
+
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+
+    return make_struct_field(&parser->arena, type, name);
+}
+
+void print_struct_field(ASTStructField* field, FILE* file, usize depth)
+{
+    assert(field != nullptr);
+
+    assert(file != nullptr);
+
+    fprintf(file, "%s\n", field->name);
+}
+
 export struct ASTStructDef
 {
     StructSymbol symbol;
@@ -30,7 +74,10 @@ export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
 
     parser_eat(parser, TOKEN_TYPE_LBRACE);
 
-    //TODO: Parse fields of struct
+    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    {
+        list_push(&struct_def->symbol.fields, parse_struct_field(parser));
+    }
 
     parser_eat(parser, TOKEN_TYPE_RBRACE);
 
@@ -49,4 +96,11 @@ export void print_struct_def(ASTStructDef* struct_def, FILE* file, usize depth)
 
     fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_STRUCT_DEF),
         symbol->name);
+
+    usize i;
+    for(i = 0; i < list_size(&symbol->fields); i = i + 1)
+    {
+        ASTStructField* field = list_get(&symbol->fields, i);
+        print_struct_field(field, file, depth + 1);
+    }
 }

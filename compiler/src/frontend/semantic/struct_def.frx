@@ -1,3 +1,12 @@
+void analyze_struct_field(Parser* parser, ASTStructField* field)
+{
+    assert(parser != nullptr);
+
+    assert(field != nullptr);
+
+    analyze_type_specifier(parser, field->type);
+}
+
 export void analyze_struct_def(Parser* parser, ASTStructDef* struct_def)
 {
     assert(parser != nullptr);
@@ -28,5 +37,11 @@ export void analyze_struct_def(Parser* parser, ASTStructDef* struct_def)
             symbol->name);
 
         parser->failed = true;
+    }
+
+    for(i = 0; i < list_size(&symbol->fields); i = i + 1)
+    {
+        ASTStructField* field = list_get(&symbol->fields, i);
+        analyze_struct_field(parser, field);
     }
 }

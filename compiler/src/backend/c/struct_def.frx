@@ -1,3 +1,32 @@
+void transpile_struct_field(Transpiler* transpiler, ASTStructField* field)
+{
+    assert(transpiler != nullptr);
+
+    assert(field != nullptr);
+
+    ASTTypeSpecifier* type = field->type;
+
+    char* mangled_name = nullptr;
+    if(type->primitive_type != TOKEN_TYPE_ERROR)
+    {
+        mangled_name = token_type_to_str(type->primitive_type);
+    }
+    else if(type->enum_type != nullptr)
+    {
+        EnumSymbol* symbol = type->enum_type;
+        mangled_name = mangle_enum_name(symbol->scope, symbol->ns,
+            symbol->name);
+    }
+    else
+    {
+        StructSymbol* symbol = type->struct_type;
+        mangled_name = mangle_struct_name(symbol->scope, symbol->ns,
+            symbol->name);
+    }
+
+    fprintf(transpiler->file, "%s %s;\n", mangled_name, field->name);
+}
+
 export void transpile_struct_def(Transpiler* transpiler,
     ASTStructDef* struct_def)
 {
@@ -22,7 +51,12 @@ export void transpile_struct_def(Transpiler* transpiler,
         fprintf(transpiler->file, "\n");
         fprintf(transpiler->file, "{\n");
 
-        //TODO: Transpile fields
+        usize i;
+        for(i = 0; i < list_size(&symbol->fields); i = i + 1)
+        {
+            ASTStructField* field = list_get(&symbol->fields, i);
+            transpile_struct_field(transpiler, field);
+        }
 
         fprintf(transpiler->file, "};\n");
     }
