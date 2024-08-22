@@ -33,6 +33,20 @@ export ASTScope* parse_scope(Parser* parser)
 
                 break;
             }
+            case TOKEN_TYPE_KW_BREAK:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AST_TYPE_BREAK_STMT, parse_break_stmt(parser)));
+
+                break;
+            }
+            case TOKEN_TYPE_KW_CONTINUE:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AST_TYPE_CONTINUE_STMT, parse_continue_stmt(parser)));
+
+                break;
+            }
             case TOKEN_TYPE_KW_RETURN:
             {
                 list_push(&scope->stmts, make_ast(&parser->arena,
