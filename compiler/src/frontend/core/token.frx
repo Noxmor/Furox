@@ -492,6 +492,14 @@ export b8 token_type_is_binary_operator(TokenType type)
         }
         case TOKEN_TYPE_LEQ:
         {
+
+        }
+        case TOKEN_TYPE_ARROW:
+        {
+
+        }
+        case TOKEN_TYPE_DOT:
+        {
             return true;
         }
     }

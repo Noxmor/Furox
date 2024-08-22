@@ -1,0 +1,28 @@
+export struct ASTStructMember
+{
+    char* name;
+}
+
+export ASTStructMember* make_struct_member(Arena* arena, char* name)
+{
+    assert(name != nullptr);
+
+    ASTStructMember* member = arena_alloc(arena, sizeof(ASTStructMember));
+
+    member->name = name;
+
+    return member;
+}
+
+export void print_struct_member(ASTStructMember* member, FILE* file,
+    usize depth)
+{
+    assert(member != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_STRUCT_MEMBER),
+        member->name);
+}

@@ -1,0 +1,6 @@
+export void analyze_struct_member(Parser* parser, ASTStructMember* member)
+{
+    assert(parser != nullptr);
+
+    assert(member != nullptr);
+}

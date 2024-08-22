@@ -1,0 +1,9 @@
+export void transpile_struct_member(Transpiler* transpiler,
+    ASTStructMember* member)
+{
+    assert(transpiler != nullptr);
+
+    assert(member != nullptr);
+
+    fprintf(transpiler->file, "%s", member->name);
+}
