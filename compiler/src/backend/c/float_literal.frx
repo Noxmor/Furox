@@ -1,0 +1,12 @@
+export void transpile_float_literal(Transpiler* transpiler,
+    ASTFloatLiteral* literal)
+{
+    assert(transpiler != nullptr);
+
+    assert(literal != nullptr);
+
+    u64 integer = literal->value >> 32;
+    u64 decimal = literal->value & 0xFFFFFFFF;
+
+    fprintf(transpiler->file, "%zu.%zuf", integer, decimal);
+}

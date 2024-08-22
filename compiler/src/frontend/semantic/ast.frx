@@ -140,6 +140,10 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
+        case AST_TYPE_FLOAT_LITERAL:
+        {
+            break;
+        }
         case AST_TYPE_INT_LITERAL:
         {
             break;

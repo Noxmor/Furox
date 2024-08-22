@@ -80,6 +80,13 @@ export AST* parse_primary_expr(Parser* parser)
 
             break;
         }
+        case TOKEN_TYPE_FLOAT_LITERAL:
+        {
+            primary_expr = make_ast(&parser->arena, AST_TYPE_FLOAT_LITERAL,
+                parse_float_literal(parser));
+
+            break;
+        }
         case TOKEN_TYPE_INT_LITERAL:
         {
             primary_expr = make_ast(&parser->arena, AST_TYPE_INT_LITERAL,

@@ -136,6 +136,12 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
 
             break;
         }
+        case AST_TYPE_FLOAT_LITERAL:
+        {
+            transpile_float_literal(transpiler, node);
+
+            break;
+        }
         case AST_TYPE_INT_LITERAL:
         {
             transpile_int_literal(transpiler, node);
