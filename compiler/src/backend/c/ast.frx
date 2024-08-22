@@ -12,6 +12,8 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
         }
         case AST_TYPE_EXTERN_BLOCK:
         {
+            transpile_extern_block(transpiler, node);
+
             break;
         }
         case AST_TYPE_NAMESPACE:

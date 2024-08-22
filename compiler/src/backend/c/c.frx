@@ -35,11 +35,6 @@ export void c_generate_code(ASTProgram* program, char* filepath)
 
     fprintf(transpiler.file, "#include <stddef.h>\n");
     fprintf(transpiler.file, "#include <stdint.h>\n");
-    fprintf(transpiler.file, "#include <stdlib.h>\n");
-    fprintf(transpiler.file, "#include <stdio.h>\n");
-    fprintf(transpiler.file, "#include <string.h>\n");
-    fprintf(transpiler.file, "#include <ctype.h>\n");
-    fprintf(transpiler.file, "#include <limits.h>\n\n");
 
     fprintf(transpiler.file, "typedef size_t usize;\n");
     fprintf(transpiler.file, "typedef int64_t isize;\n");
