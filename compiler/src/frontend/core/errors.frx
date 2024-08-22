@@ -60,6 +60,11 @@ export void error_struct_redefinition(char* filepath, SourceLocation loc,
     log_error(filepath, loc, "Encountered redefinition of struct %s!", name);
 }
 
+export void error_not_a_struct_member(char* filepath, SourceLocation loc)
+{
+    log_error(filepath, loc, "Not a struct member!");
+}
+
 export void error_undefined_type_specifier(char* filepath, SourceLocation loc,
     char* name)
 {

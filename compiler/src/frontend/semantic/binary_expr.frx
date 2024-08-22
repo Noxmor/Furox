@@ -8,28 +8,62 @@ export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
     {
         case TOKEN_TYPE_ARROW:
         {
-            ASTVar* var = expr->right->node;
-            ASTStructMember* member = make_struct_member(&parser->arena,
-                var->name);
+            analyze_ast(parser, expr->left);
 
-            expr->right->type = AST_TYPE_STRUCT_MEMBER;
-            expr->right->node = member;
+            if(expr->right->type != AST_TYPE_VAR)
+            {
+                //FIXME: Print the correct location, this is only a placeholder
+                SourceLocation loc;
+                error_not_a_struct_member(parser_source_file(parser), loc);
+
+                parser->failed = true;
+            }
+            else
+            {
+                ASTVar* var = expr->right->node;
+                ASTStructMember* member = make_struct_member(&parser->arena,
+                    var->name);
+
+                expr->right->type = AST_TYPE_STRUCT_MEMBER;
+                expr->right->node = member;
+
+                analyze_struct_member(parser, member);
+            }
 
             break;
         }
         case TOKEN_TYPE_DOT:
         {
-            ASTVar* var = expr->right->node;
-            ASTStructMember* member = make_struct_member(&parser->arena,
-                var->name);
+            analyze_ast(parser, expr->left);
 
-            expr->right->type = AST_TYPE_STRUCT_MEMBER;
-            expr->right->node = member;
+            if(expr->right->type != AST_TYPE_VAR)
+            {
+                //FIXME: Print the correct location, this is only a placeholder
+                SourceLocation loc;
+                error_not_a_struct_member(parser_source_file(parser), loc);
+
+                parser->failed = true;
+            }
+            else
+            {
+                ASTVar* var = expr->right->node;
+                ASTStructMember* member = make_struct_member(&parser->arena,
+                    var->name);
+
+                expr->right->type = AST_TYPE_STRUCT_MEMBER;
+                expr->right->node = member;
+            
+                analyze_struct_member(parser, member);
+            }
+
+            break;
+        }
+        default:
+        {
+            analyze_ast(parser, expr->left);
+            analyze_ast(parser, expr->right);
 
             break;
         }
     }
-
-    analyze_ast(parser, expr->left);
-    analyze_ast(parser, expr->right);
 }
