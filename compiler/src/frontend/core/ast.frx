@@ -31,6 +31,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "if-statement",
     "for-loop",
     "while-loop",
+    "do-while-loop",
     "sizeof",
     "enum-count"
 };
@@ -79,6 +80,7 @@ export enum ASTType : u8
     AST_TYPE_IF_STMT,
     AST_TYPE_FOR_LOOP,
     AST_TYPE_WHILE_LOOP,
+    AST_TYPE_DO_WHILE_LOOP,
 
     AST_TYPE_SIZEOF,
     AST_TYPE_ENUM_COUNT,
@@ -285,6 +287,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_WHILE_LOOP:
         {
             print_while_loop(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_DO_WHILE_LOOP:
+        {
+            print_do_while_loop(node, file, depth);
 
             break;
         }

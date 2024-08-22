@@ -164,6 +164,12 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
+        case AST_TYPE_DO_WHILE_LOOP:
+        {
+            analyze_do_while_loop(parser, node);
+
+            break;
+        }
         case AST_TYPE_SIZEOF:
         {
             analyze_sizeof(parser, node, ast);

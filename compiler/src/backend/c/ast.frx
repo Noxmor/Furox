@@ -166,6 +166,12 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
 
             break;
         }
+        case AST_TYPE_DO_WHILE_LOOP:
+        {
+            transpile_do_while_loop(transpiler, node);
+
+            break;
+        }
         default:
         {
             assert(false);

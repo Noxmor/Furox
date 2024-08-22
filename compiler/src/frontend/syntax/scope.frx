@@ -75,6 +75,13 @@ export ASTScope* parse_scope(Parser* parser)
 
                 break;
             }
+            case TOKEN_TYPE_KW_DO:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AST_TYPE_DO_WHILE_LOOP, parse_do_while_loop(parser)));
+
+                break;
+            }
             case TOKEN_TYPE_KW_U8:
             {
 

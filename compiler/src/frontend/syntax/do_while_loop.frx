@@ -1,0 +1,51 @@
+export struct ASTDoWhileLoop
+{
+    ASTScope* scope;
+    AST* condition;
+}
+
+ASTDoWhileLoop* make_do_while_loop(Arena* arena, ASTScope* scope,
+    AST* condition)
+{
+    assert(scope != nullptr);
+
+    assert(condition != nullptr);
+
+    ASTDoWhileLoop* do_while_loop = arena_alloc(arena, sizeof(ASTDoWhileLoop));
+
+    do_while_loop->scope = scope;
+    do_while_loop->condition = condition;
+
+    return do_while_loop;
+}
+
+export ASTDoWhileLoop* parse_do_while_loop(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_KW_DO);
+
+    ASTScope* scope = parse_scope(parser);
+
+    parser_eat(parser, TOKEN_TYPE_KW_WHILE);
+    parser_eat(parser, TOKEN_TYPE_LPAREN);
+    AST* condition = parse_expr(parser);
+    parser_eat(parser, TOKEN_TYPE_RPAREN);
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+
+    return make_do_while_loop(&parser->arena, scope, condition);
+}
+
+export void print_do_while_loop(ASTDoWhileLoop* do_while_loop, FILE* file,
+    usize depth)
+{
+    assert(do_while_loop != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_DO_WHILE_LOOP));
+    print_scope(do_while_loop->scope, file, depth + 1);
+    print_ast(do_while_loop->condition, file, depth + 1);
+}
