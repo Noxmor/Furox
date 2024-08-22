@@ -1,3 +1,9 @@
+export void error_import_stmt_invalid_filepath(char* filepath,
+    SourceLocation loc, char* imported_filepath)
+{
+    log_error(filepath, loc, "Failed to import file %s!", imported_filepath);
+}
+
 export void error_enum_redefinition(char* filepath, SourceLocation loc,
     char* name)
 {

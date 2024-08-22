@@ -1,0 +1,19 @@
+export void analyze_import_stmt(Parser* parser, ASTImportStmt* import_stmt)
+{
+    assert(parser != nullptr);
+
+    assert(import_stmt != nullptr);
+
+    char* fullpath = realpath(import_stmt->filepath, nullptr);
+    if(fullpath == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_import_stmt_invalid_filepath(parser_source_file(parser), loc,
+            import_stmt->filepath);
+
+        parser->failed = true;
+    }
+
+    free(fullpath);
+}

@@ -22,7 +22,11 @@ ASTImportStmt* parse_import_stmt(Parser* parser)
     compile(import_stmt->filepath);
 
     Parser* imported_parser = parser_table_find(import_stmt->filepath);
-    parser_add_imported_parser(parser, imported_parser);
+
+    if(imported_parser != nullptr)
+    {
+        parser_add_imported_parser(parser, imported_parser);
+    }
 
     parser_eat(parser, TOKEN_TYPE_STRING_LITERAL);
 

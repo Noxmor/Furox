@@ -8,6 +8,8 @@ export void analyze_ast(Parser* parser, AST* ast)
     {
         case AST_TYPE_IMPORT_STMT:
         {
+            analyze_import_stmt(parser, node);
+
             break;
         }
         case AST_TYPE_EXTERN_BLOCK:

@@ -11,7 +11,10 @@ void compile(char* filepath)
         return;
     }
 
-    parser_table_insert(filepath);
+    if(!parser_table_insert(filepath))
+    {
+        return;
+    }
 
     Parser* parser = parser_table_find(filepath);
 

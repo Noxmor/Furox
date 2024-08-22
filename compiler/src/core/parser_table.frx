@@ -19,6 +19,10 @@ export Parser* parser_table_find(char* filepath)
     assert(filepath != nullptr);
 
     char* fullpath = realpath(filepath, nullptr);
+    if(fullpath == nullptr)
+    {
+        return nullptr;
+    }
 
     u64 index = hash_djb2(fullpath) % PARSER_TABLE_CAPACITY;
     ParserTableEntry* entry = parser_table.entries[index];
@@ -45,6 +49,10 @@ export b8 parser_table_insert(char* filepath)
     assert(filepath != nullptr);
 
     char* fullpath = realpath(filepath, nullptr);
+    if(fullpath == nullptr)
+    {
+        return false;
+    }
 
     u64 index = hash_djb2(fullpath) % PARSER_TABLE_CAPACITY;
     ParserTableEntry* entry = parser_table.entries[index];
