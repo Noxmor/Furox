@@ -1,0 +1,30 @@
+export struct ASTContinueStmt
+{
+    b8 value;
+}
+
+ASTContinueStmt* make_continue_stmt(Arena* arena)
+{
+    return arena_alloc(arena, sizeof(ASTContinueStmt));
+}
+
+export ASTContinueStmt* parse_continue_stmt(Parser* parser)
+{
+    parser_eat(parser, TOKEN_TYPE_KW_CONTINUE);
+
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+
+    return make_continue_stmt(&parser->arena);
+}
+
+export void print_continue_stmt(ASTContinueStmt* continue_stmt, FILE* file,
+    usize depth)
+{
+    assert(continue_stmt != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_CONTINUE_STMT));
+}

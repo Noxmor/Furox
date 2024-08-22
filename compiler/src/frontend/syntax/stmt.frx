@@ -13,6 +13,13 @@ export AST* parse_statement(Parser* parser)
 
             break;
         }
+        case TOKEN_TYPE_KW_CONTINUE:
+        {
+            ast = make_ast(&parser->arena, AST_TYPE_CONTINUE_STMT,
+                parse_continue_stmt(parser));
+
+            break;
+        }
         case TOKEN_TYPE_KW_RETURN:
         {
             ast = make_ast(&parser->arena, AST_TYPE_RETURN_STMT,

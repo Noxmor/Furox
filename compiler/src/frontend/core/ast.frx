@@ -22,6 +22,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "unary-expression",
     "binary-expression",
     "break-statement",
+    "continue-statement",
     "return-statement",
     "int-literal",
     "char-literal",
@@ -62,6 +63,7 @@ export enum ASTType : u8
     AST_TYPE_BINARY_EXPR,
 
     AST_TYPE_BREAK_STMT,
+    AST_TYPE_CONTINUE_STMT,
     AST_TYPE_RETURN_STMT,
 
     AST_TYPE_INT_LITERAL,
@@ -219,6 +221,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_BREAK_STMT:
         {
             print_break_stmt(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_CONTINUE_STMT:
+        {
+            print_continue_stmt(node, file, depth);
 
             break;
         }
