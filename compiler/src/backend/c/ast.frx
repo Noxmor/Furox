@@ -142,6 +142,12 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
 
             break;
         }
+        case AST_TYPE_IF_STMT:
+        {
+            transpile_if_stmt(transpiler, node);
+
+            break;
+        }
         default:
         {
             assert(false);

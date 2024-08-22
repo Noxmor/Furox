@@ -1,0 +1,14 @@
+export void analyze_if_stmt(Parser* parser, ASTIfStmt* if_stmt)
+{
+    assert(parser != nullptr);
+
+    assert(if_stmt != nullptr);
+
+    analyze_ast(parser, if_stmt->condition);
+    analyze_scope(parser, if_stmt->if_block);
+
+    if(if_stmt->else_block != nullptr)
+    {
+        analyze_scope(parser, if_stmt->else_block);
+    }
+}

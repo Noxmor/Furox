@@ -1,0 +1,58 @@
+export struct ASTIfStmt
+{
+    AST* condition;
+    ASTScope* if_block;
+    ASTScope* else_block;
+}
+
+ASTIfStmt* make_if_stmt(Arena* arena, AST* condition, ASTScope* if_block,
+    ASTScope* else_block)
+{
+    ASTIfStmt* if_stmt = arena_alloc(arena, sizeof(ASTIfStmt));
+
+    if_stmt->condition = condition;
+    if_stmt->if_block = if_block;
+    if_stmt->else_block = else_block;
+
+    return if_stmt;
+}
+
+export ASTIfStmt* parse_if_stmt(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_KW_IF);
+
+    parser_eat(parser, TOKEN_TYPE_LPAREN);
+    AST* condition = parse_expr(parser);
+    parser_eat(parser, TOKEN_TYPE_RPAREN);
+    ASTScope* if_block = parse_scope(parser);
+
+    ASTScope* else_block = nullptr;
+    if(parser->token->type == TOKEN_TYPE_KW_ELSE)
+    {
+        parser_eat(parser, TOKEN_TYPE_KW_ELSE);
+
+        else_block = parse_scope(parser);
+    }
+
+    return make_if_stmt(&parser->arena, condition, if_block, else_block);
+}
+
+export void print_if_stmt(ASTIfStmt* if_stmt, FILE* file, usize depth)
+{
+    assert(if_stmt != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_IF_STMT));
+    print_ast(if_stmt->condition, file, depth + 1);
+    print_scope(if_stmt->if_block, file, depth + 1);
+
+    if(if_stmt->else_block != nullptr)
+    {
+        print_scope(if_stmt->else_block, file, depth + 1);
+    }
+}

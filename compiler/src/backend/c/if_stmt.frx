@@ -1,0 +1,17 @@
+export void transpile_if_stmt(Transpiler* transpiler, ASTIfStmt* if_stmt)
+{
+    assert(transpiler != nullptr);
+
+    assert(if_stmt != nullptr);
+
+    fprintf(transpiler->file, "if(");
+    transpile_ast(transpiler, if_stmt->condition);
+    fprintf(transpiler->file, ")\n");
+    transpile_scope(transpiler, if_stmt->if_block);
+
+    if(if_stmt->else_block != nullptr)
+    {
+        fprintf(transpiler->file, "else\n");
+        transpile_scope(transpiler, if_stmt->else_block);
+    }
+}
