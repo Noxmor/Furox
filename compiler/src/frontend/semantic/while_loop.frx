@@ -1,0 +1,9 @@
+export void analyze_while_loop(Parser* parser, ASTWhileLoop* while_loop)
+{
+    assert(parser != nullptr);
+
+    assert(while_loop != nullptr);
+
+    analyze_ast(parser, while_loop->condition);
+    analyze_scope(parser, while_loop->scope);
+}

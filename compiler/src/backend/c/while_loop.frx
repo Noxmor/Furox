@@ -1,0 +1,12 @@
+export void transpile_while_loop(Transpiler* transpiler,
+    ASTWhileLoop* while_loop)
+{
+    assert(transpiler != nullptr);
+
+    assert(while_loop != nullptr);
+
+    fprintf(transpiler->file, "while(");
+    transpile_ast(transpiler, while_loop->condition);
+    fprintf(transpiler->file, ")\n");
+    transpile_scope(transpiler, while_loop->scope);
+}
