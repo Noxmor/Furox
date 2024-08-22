@@ -1,0 +1,11 @@
+export void analyze_for_loop(Parser* parser, ASTForLoop* for_loop)
+{
+    assert(parser != nullptr);
+
+    assert(for_loop != nullptr);
+
+    analyze_ast(parser, for_loop->initialization);
+    analyze_ast(parser, for_loop->condition);
+    analyze_ast(parser, for_loop->iteration);
+    analyze_scope(parser, for_loop->scope);
+}

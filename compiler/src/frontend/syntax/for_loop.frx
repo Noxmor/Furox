@@ -1,0 +1,65 @@
+export struct ASTForLoop
+{
+    AST* initialization;
+    AST* condition;
+    AST* iteration;
+    ASTScope* scope;
+}
+
+ASTForLoop* make_for_loop(Arena* arena, AST* initialization, AST* condition,
+    AST* iteration, ASTScope* scope)
+{
+    assert(initialization != nullptr);
+
+    assert(condition != nullptr);
+
+    assert(iteration != nullptr);
+
+    assert(scope != nullptr);
+
+    ASTForLoop* for_loop = arena_alloc(arena, sizeof(ASTForLoop));
+
+    for_loop->initialization = initialization;
+    for_loop->condition = condition;
+    for_loop->iteration = iteration;
+    for_loop->scope = scope;
+
+    return for_loop;
+}
+
+export ASTForLoop* parse_for_loop(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_KW_FOR);
+
+    parser_eat(parser, TOKEN_TYPE_LPAREN);
+
+    AST* initialization = parse_expr(parser);
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    AST* condition = parse_expr(parser);
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    AST* iteration = parse_expr(parser);
+
+    parser_eat(parser, TOKEN_TYPE_RPAREN);
+
+    ASTScope* scope = parse_scope(parser);
+
+    return make_for_loop(&parser->arena, initialization, condition, iteration,
+        scope);
+}
+
+export void print_for_loop(ASTForLoop* for_loop, FILE* file, usize depth)
+{
+    assert(for_loop != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_FOR_LOOP));
+
+    print_ast(for_loop->initialization, file, depth + 1);
+    print_ast(for_loop->condition, file, depth + 1);
+    print_ast(for_loop->iteration, file, depth + 1);
+}

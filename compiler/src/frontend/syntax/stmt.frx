@@ -34,6 +34,13 @@ export AST* parse_statement(Parser* parser)
 
             break;
         }
+        case TOKEN_TYPE_KW_FOR:
+        {
+            ast = make_ast(&parser->arena, AST_TYPE_FOR_LOOP,
+                parse_for_loop(parser));
+
+            break;
+        }
         case TOKEN_TYPE_KW_WHILE:
         {
             ast = make_ast(&parser->arena, AST_TYPE_WHILE_LOOP,

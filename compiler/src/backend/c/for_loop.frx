@@ -1,0 +1,15 @@
+export void transpile_for_loop(Transpiler* transpiler, ASTForLoop* for_loop)
+{
+    assert(transpiler != nullptr);
+
+    assert(for_loop != nullptr);
+
+    fprintf(transpiler->file, "for(");
+    transpile_ast(transpiler, for_loop->initialization);
+    fprintf(transpiler->file, "; ");
+    transpile_ast(transpiler, for_loop->condition);
+    fprintf(transpiler->file, "; ");
+    transpile_ast(transpiler, for_loop->iteration);
+    fprintf(transpiler->file, ")\n");
+    transpile_scope(transpiler, for_loop->scope);
+}
