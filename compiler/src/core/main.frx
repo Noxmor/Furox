@@ -21,14 +21,6 @@ void compile(char* filepath)
     assert(parser != nullptr);
 
     queue_enqueue(&syntax_queue, parser);
-
-    /*parser_parse(parser);
-
-    parser_analyze(parser);
-
-    failed = failed || parser->failed;
-
-    list_push(&program->translation_units, parser->translation_unit);*/
 }
 
 void parse_args(usize argc, char** argv)
