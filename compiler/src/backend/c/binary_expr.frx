@@ -4,9 +4,26 @@ export void transpile_binary_expr(Transpiler* transpiler, ASTBinaryExpr* expr)
 
     assert(expr != nullptr);
 
-    fprintf(transpiler->file, "(");
-    transpile_ast(transpiler, expr->left);
-    fprintf(transpiler->file, " %s ", token_type_to_str(expr->operator));
-    transpile_ast(transpiler, expr->right);
-    fprintf(transpiler->file, ")");
+    switch(expr->operator)
+    {
+        case TOKEN_TYPE_LBRACKET:
+        {
+            transpile_ast(transpiler, expr->left);
+            fprintf(transpiler->file, "[");
+            transpile_ast(transpiler, expr->right);
+            fprintf(transpiler->file, "]");
+
+            break;
+        }
+        default:
+        {
+            fprintf(transpiler->file, "(");
+            transpile_ast(transpiler, expr->left);
+            fprintf(transpiler->file, " %s ", token_type_to_str(expr->operator));
+            transpile_ast(transpiler, expr->right);
+            fprintf(transpiler->file, ")");
+
+            break;
+        }
+    }
 }

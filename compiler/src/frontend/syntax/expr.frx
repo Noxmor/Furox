@@ -154,6 +154,12 @@ export AST* parse_expr(Parser* parser)
 
     AST* left = expr;
     AST* right = parse_expr(parser);
+
+    if(operator == TOKEN_TYPE_LBRACKET)
+    {
+        parser_eat(parser, TOKEN_TYPE_RBRACKET);
+    }
+
     ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena, operator,
         left, right);
 

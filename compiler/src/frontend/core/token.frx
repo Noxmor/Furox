@@ -498,6 +498,10 @@ export b8 token_type_is_binary_operator(TokenType type)
         {
 
         }
+        case TOKEN_TYPE_LBRACKET:
+        {
+
+        }
         case TOKEN_TYPE_ARROW:
         {
 
