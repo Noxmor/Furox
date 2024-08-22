@@ -114,6 +114,10 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
+        case AST_TYPE_BREAK_STMT:
+        {
+            break;
+        }
         case AST_TYPE_RETURN_STMT:
         {
             analyze_return_stmt(parser, node);

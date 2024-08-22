@@ -106,6 +106,12 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
 
             break;
         }
+        case AST_TYPE_BREAK_STMT:
+        {
+            transpile_break_stmt(transpiler, node);
+
+            break;
+        }
         case AST_TYPE_RETURN_STMT:
         {
             transpile_return_stmt(transpiler, node);

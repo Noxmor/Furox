@@ -1,0 +1,29 @@
+export struct ASTBreakStmt
+{
+    b8 value;
+}
+
+ASTBreakStmt* make_break_stmt(Arena* arena)
+{
+    return arena_alloc(arena, sizeof(ASTBreakStmt));
+}
+
+export ASTBreakStmt* parse_break_stmt(Parser* parser)
+{
+    parser_eat(parser, TOKEN_TYPE_KW_BREAK);
+
+    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+
+    return make_break_stmt(&parser->arena);
+}
+
+export void print_break_stmt(ASTBreakStmt* break_stmt, FILE* file, usize depth)
+{
+    assert(break_stmt != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_BREAK_STMT));
+}

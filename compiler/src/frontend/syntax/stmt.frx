@@ -6,6 +6,13 @@ export AST* parse_statement(Parser* parser)
 
     switch(parser->token->type)
     {
+        case TOKEN_TYPE_KW_BREAK:
+        {
+            ast = make_ast(&parser->arena, AST_TYPE_BREAK_STMT,
+                parse_break_stmt(parser));
+
+            break;
+        }
         case TOKEN_TYPE_KW_RETURN:
         {
             ast = make_ast(&parser->arena, AST_TYPE_RETURN_STMT,
