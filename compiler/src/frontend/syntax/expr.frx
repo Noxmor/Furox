@@ -53,6 +53,33 @@ export AST* parse_primary_expr(Parser* parser)
 
             break;
         }
+        case TOKEN_TYPE_KW_NULLPTR:
+        {
+            parser_eat(parser, TOKEN_TYPE_KW_NULLPTR);
+
+            primary_expr = make_ast(&parser->arena, AST_TYPE_INT_LITERAL,
+                make_int_literal(&parser->arena, 0));
+
+            break;
+        }
+        case TOKEN_TYPE_KW_TRUE:
+        {
+            parser_eat(parser, TOKEN_TYPE_KW_TRUE);
+
+            primary_expr = make_ast(&parser->arena, AST_TYPE_INT_LITERAL,
+                make_int_literal(&parser->arena, 1));
+
+            break;
+        }
+        case TOKEN_TYPE_KW_FALSE:
+        {
+            parser_eat(parser, TOKEN_TYPE_KW_FALSE);
+
+            primary_expr = make_ast(&parser->arena, AST_TYPE_INT_LITERAL,
+                make_int_literal(&parser->arena, 0));
+
+            break;
+        }
         case TOKEN_TYPE_INT_LITERAL:
         {
             primary_expr = make_ast(&parser->arena, AST_TYPE_INT_LITERAL,
