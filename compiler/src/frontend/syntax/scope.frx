@@ -152,10 +152,6 @@ export ASTScope* parse_scope(Parser* parser)
             }
             case TOKEN_TYPE_KW_VOID:
             {
-
-            }
-            case TOKEN_TYPE_IDENTIFIER:
-            {
                 ASTTypeSpecifier* type = parse_type_specifier(parser);
 
                 Token* next = parser_peek(parser, 1);
@@ -164,14 +160,16 @@ export ASTScope* parse_scope(Parser* parser)
                     case TOKEN_TYPE_SEMICOLON:
                     {
                         list_push(&scope->stmts, make_ast(&parser->arena,
-                            AST_TYPE_VAR_DECL, parse_var_decl(parser, type, false)));
+                            AST_TYPE_VAR_DECL, parse_var_decl(parser, type,
+                            false)));
 
                         break;
                     }
                     case TOKEN_TYPE_EQ:
                     {
                         list_push(&scope->stmts, make_ast(&parser->arena,
-                            AST_TYPE_VAR_DEF, parse_var_def(parser, type, false)));
+                            AST_TYPE_VAR_DEF, parse_var_def(parser, type,
+                            false)));
 
                         break;
                     }
@@ -181,6 +179,76 @@ export ASTScope* parse_scope(Parser* parser)
 
                         break;
                     }
+                }
+
+                break;
+            }
+            case TOKEN_TYPE_IDENTIFIER:
+            {
+                Namespace* resolved_ns = parse_namespace_resolution(parser);
+
+                Token* next = parser_peek(parser, 1);
+                if(next->type == TOKEN_TYPE_STAR
+                    || next->type == TOKEN_TYPE_LBRACKET
+                    || next->type == TOKEN_TYPE_IDENTIFIER)
+                {
+                    ASTTypeSpecifier* type = parse_type_specifier(parser);
+                    type->ns = resolved_ns;
+
+                    Token* next = parser_peek(parser, 1);
+                    switch(next->type)
+                    {
+                        case TOKEN_TYPE_SEMICOLON:
+                        {
+                            list_push(&scope->stmts, make_ast(&parser->arena,
+                                AST_TYPE_VAR_DECL, parse_var_decl(parser, type,
+                                false)));
+
+                            break;
+                        }
+                        case TOKEN_TYPE_EQ:
+                        {
+                            list_push(&scope->stmts, make_ast(&parser->arena,
+                                AST_TYPE_VAR_DEF, parse_var_def(parser, type,
+                                false)));
+
+                            break;
+                        }
+                        default:
+                        {
+                            parser_panic(parser);
+
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    ASTExprStmt* expr_stmt = parse_expr_stmt(parser);
+                    AST* expr = expr_stmt->expr;
+
+                    switch(expr->type)
+                    {
+                        case AST_TYPE_FUNC_CALL:
+                        {
+                            ASTFuncCall* func_call = expr->node;
+                            func_call->ns = resolved_ns;
+
+                            break;
+                        }
+                        case AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR:
+                        {
+                            ASTEnumConstantOrGlobalVar* enum_constant_or_global_var
+                                = expr->node;
+
+                            enum_constant_or_global_var->ns = resolved_ns;
+
+                            break;
+                        }
+                    }
+
+                    list_push(&scope->stmts, make_ast(&parser->arena,
+                        AST_TYPE_EXPR_STMT, expr_stmt));
                 }
 
                 break;
