@@ -119,6 +119,46 @@ export AST* parse_primary_expr(Parser* parser)
     return primary_expr;
 }
 
+AST* parse_postfix_expr(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    AST* expr = parse_primary_expr(parser);
+
+    if(token_type_is_postfix_operator(parser->token->type))
+    {
+        TokenType operator = parser->token->type;
+
+        parser_eat(parser, operator);
+
+        switch(operator)
+        {
+            case TOKEN_TYPE_LBRACKET:
+            {
+                AST* subscript = parse_expr(parser);
+
+                parser_eat(parser, TOKEN_TYPE_RBRACKET);
+
+                ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena,
+                    operator, expr, subscript);
+
+                expr = make_ast(&parser->arena, AST_TYPE_BINARY_EXPR,
+                    binary_expr);
+
+                break;
+            }
+            default:
+            {
+                parser_panic(parser);
+
+                break;
+            }
+        }
+    }
+
+    return expr;
+}
+
 export AST* parse_expr(Parser* parser)
 {
     assert(parser != nullptr);
@@ -140,7 +180,7 @@ export AST* parse_expr(Parser* parser)
     }
     else
     {
-        expr = parse_primary_expr(parser);
+        expr = parse_postfix_expr(parser);
     }
 
     if(!token_type_is_binary_operator(parser->token->type))
@@ -154,11 +194,6 @@ export AST* parse_expr(Parser* parser)
 
     AST* left = expr;
     AST* right = parse_expr(parser);
-
-    if(operator == TOKEN_TYPE_LBRACKET)
-    {
-        parser_eat(parser, TOKEN_TYPE_RBRACKET);
-    }
 
     ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena, operator,
         left, right);

@@ -135,35 +135,15 @@ AST* parse_global_scope(Parser* parser)
             ASTTypeSpecifier* type_specifier = parse_type_specifier(parser);
 
             Token* next = parser_peek(parser, 1);
-            switch(next->type)
+            if(next->type == TOKEN_TYPE_LPAREN)
             {
-                case TOKEN_TYPE_SEMICOLON:
-                {
-                    ast = make_ast(&parser->arena, AST_TYPE_GLOBAL_VAR_DECL,
-                        parse_global_var_decl(parser, type_specifier, false));
-
-                    break;
-                }
-                case TOKEN_TYPE_EQ:
-                {
-                    ast = make_ast(&parser->arena, AST_TYPE_GLOBAL_VAR_DEF,
-                        parse_global_var_def(parser, type_specifier, false));
-
-                    break;
-                }
-                case TOKEN_TYPE_LPAREN:
-                {
-                    ast = make_ast(&parser->arena, AST_TYPE_FUNC_DEF,
-                        parse_func_def(parser, type_specifier, false));
-
-                    break;
-                }
-                default:
-                {
-                    parser_panic(parser);
-
-                    break;
-                }
+                ast = make_ast(&parser->arena, AST_TYPE_FUNC_DEF,
+                    parse_func_def(parser, type_specifier, false));
+            }
+            else
+            {
+                ast = parse_global_var_decl_or_def(parser, type_specifier,
+                    false);
             }
 
             break;
@@ -172,19 +152,9 @@ AST* parse_global_scope(Parser* parser)
         {
             parser_eat(parser, TOKEN_TYPE_KW_MUT);
 
-            ASTTypeSpecifier* type_specifier = parse_type_specifier(parser);
+            ASTTypeSpecifier* type = parse_type_specifier(parser);
 
-            Token* next = parser_peek(parser, 1);
-            if(next->type == TOKEN_TYPE_SEMICOLON)
-            {
-                ast = make_ast(&parser->arena, AST_TYPE_GLOBAL_VAR_DECL,
-                    parse_global_var_decl(parser, type_specifier, true));
-            }
-            else
-            {
-                ast = make_ast(&parser->arena, AST_TYPE_GLOBAL_VAR_DEF,
-                    parse_global_var_def(parser, type_specifier, true));
-            }
+            ast = parse_global_var_decl_or_def(parser, type, true);
 
             break;
         }

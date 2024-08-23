@@ -515,6 +515,21 @@ export b8 token_type_is_binary_operator(TokenType type)
     return false;
 }
 
+export b8 token_type_is_postfix_operator(TokenType type)
+{
+    assert(type < TOKEN_TYPE_COUNT);
+
+    switch(type)
+    {
+        case TOKEN_TYPE_LBRACKET:
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export enum Precedence : u8
 {
     PRECEDENCE_MAX,

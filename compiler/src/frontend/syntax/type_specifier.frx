@@ -1,3 +1,17 @@
+export void parse_array_dimensions(Parser* parser, ASTTypeSpecifier* type)
+{
+    assert(parser != nullptr);
+
+    assert(type != nullptr);
+
+    while(parser->token->type == TOKEN_TYPE_LBRACKET)
+    {
+        parser_eat(parser, TOKEN_TYPE_LBRACKET);
+        list_push(&type->array_dimensions, parse_expr(parser));
+        parser_eat(parser, TOKEN_TYPE_RBRACKET);
+    }
+}
+
 export struct ASTTypeSpecifier
 {
     Namespace* ns;
@@ -68,15 +82,6 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
 
     ASTTypeSpecifier* type_specifier = make_type_specifier(&parser->arena, ns,
         name, parser->current_scope, primitive_type, pointer_level);
-
-    while(parser->token->type == TOKEN_TYPE_LBRACKET)
-    {
-        parser_eat(parser, TOKEN_TYPE_LBRACKET);
-
-        list_push(&type_specifier->array_dimensions, parse_expr(parser));
-
-        parser_eat(parser, TOKEN_TYPE_RBRACKET);
-    }
 
     return type_specifier;
 }

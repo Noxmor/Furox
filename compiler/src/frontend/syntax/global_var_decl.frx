@@ -15,17 +15,14 @@ export ASTGlobalVarDecl* make_global_var_decl(Arena* arena, Namespace* ns,
 }
 
 export ASTGlobalVarDecl* parse_global_var_decl(Parser* parser,
-    ASTTypeSpecifier* type, b8 mutable)
+    ASTTypeSpecifier* type, char* name, b8 mutable)
 {
     assert(parser != nullptr);
 
     ASTGlobalVarDecl* var_decl = make_global_var_decl(&parser->arena,
-        parser->current_namespace, type, parser->current_scope,
-        parser->token->identifier, mutable);
+        parser->current_namespace, type, parser->current_scope, name, mutable);
 
     var_table_insert(&parser->var_table, &var_decl->symbol);
-
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
     parser_eat(parser, TOKEN_TYPE_SEMICOLON);
 

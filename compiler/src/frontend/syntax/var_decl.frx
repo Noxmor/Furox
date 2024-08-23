@@ -15,16 +15,14 @@ export ASTVarDecl* make_var_decl(Arena* arena, ASTTypeSpecifier* type,
 }
 
 export ASTVarDecl* parse_var_decl(Parser* parser, ASTTypeSpecifier* type,
-    b8 mutable)
+    char* name, b8 mutable)
 {
     assert(parser != nullptr);
 
     ASTVarDecl* var_decl = make_var_decl(&parser->arena, type,
-        parser->current_scope, parser->token->identifier, mutable);
+        parser->current_scope, name, mutable);
 
     var_table_insert(&parser->var_table, &var_decl->symbol);
-
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
     parser_eat(parser, TOKEN_TYPE_SEMICOLON);
 
