@@ -71,7 +71,7 @@ export void parse_command_line(usize argc, char** argv)
             char* equals = strchr(option_name, '=');
             if(equals != nullptr)
             {
-                //equals[0] = '\0';
+                //TODO: equals[0] = '\0';
                 char temp = equals[0] = '\0';
             }
 
