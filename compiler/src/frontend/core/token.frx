@@ -684,6 +684,14 @@ export Precedence token_type_to_binary_operator_precedence(TokenType type)
         {
             return PRECEDENCE_1;
         }
+        case TOKEN_TYPE_ARROW:
+        {
+            return PRECEDENCE_1;
+        }
+        case TOKEN_TYPE_DOT:
+        {
+            return PRECEDENCE_1;
+        }
     }
 
     return PRECEDENCE_1;
