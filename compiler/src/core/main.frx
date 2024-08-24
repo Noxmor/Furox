@@ -2,6 +2,7 @@ ASTProgram* program;
 b8 failed = false;
 
 Queue syntax_queue;
+Queue resolve_imports_queue;
 Queue semantic_queue;
 
 void compile(char* filepath)
@@ -52,6 +53,7 @@ usize Main(usize argc, char** argv)
     lexer_init_keyword_table();
 
     queue_init(&syntax_queue);
+    queue_init(&resolve_imports_queue);
     queue_init(&semantic_queue);
 
     program = make_program();
@@ -62,6 +64,13 @@ usize Main(usize argc, char** argv)
     {
         Parser* parser = queue_dequeue(&syntax_queue);
         parser_parse(parser);
+        queue_enqueue(&resolve_imports_queue, parser);
+    }
+
+    while(!queue_is_empty(&resolve_imports_queue))
+    {
+        Parser* parser = queue_dequeue(&resolve_imports_queue);
+        parser_resolve_imports(parser);
         queue_enqueue(&semantic_queue, parser);
     }
 

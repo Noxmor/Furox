@@ -45,6 +45,23 @@ export void* list_get(List* list, usize index)
     return list->items[index];
 }
 
+export b8 list_contains(List* list, void* item)
+{
+    assert(list != nullptr);
+
+    usize i;
+    for(i = 0; i < list_size(list); i = i + 1)
+    {
+        void* list_item = list_get(list, i);
+        if(list_item == item)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export usize list_size(List* list)
 {
     assert(list != nullptr);

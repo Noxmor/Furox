@@ -9,7 +9,7 @@ export struct Parser
     Namespace* current_namespace;
     Scope* current_scope;
 
-    List imported_parsers;
+    List visible_parsers;
 
     b8 panic;
     b8 failed;
@@ -37,7 +37,7 @@ export void parser_init(Parser* parser, char* filepath)
     parser->current_namespace = namespace_create_global();
     parser->current_scope = scope_create(nullptr);
 
-    list_init(&parser->imported_parsers);
+    list_init(&parser->visible_parsers);
 
     parser->panic = false;
     parser->failed = false;
@@ -119,6 +119,87 @@ export void parser_parse(Parser* parser)
     parser->translation_unit = parse_translation_unit(parser);
 }
 
+void parser_resolve_imports_recursive(List* visible_parsers, Parser* parser,
+    List* visited_parsers)
+{
+    assert(parser != nullptr);
+
+    assert(visible_parsers != nullptr);
+
+    assert(visited_parsers != nullptr);
+
+    usize i;
+    for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
+    {
+        AST* ast = list_get(&parser->translation_unit->nodes, i);
+        if(ast->type != AST_TYPE_IMPORT_STMT)
+        {
+            continue;
+        }
+
+        ASTImportStmt* import_stmt = ast->node;
+        Parser* imported_parser = parser_table_find(import_stmt->filepath);
+        if(imported_parser == nullptr)
+        {
+            continue;
+        }
+
+        if(import_stmt->exported && !list_contains(visible_parsers,
+            imported_parser))
+        {
+            list_push(visible_parsers, imported_parser);
+        }
+
+        if(!list_contains(visited_parsers, imported_parser))
+        {
+            list_push(visited_parsers, imported_parser);
+            parser_resolve_imports_recursive(visible_parsers, imported_parser,
+                visited_parsers);
+        }
+    }
+}
+
+export void parser_resolve_imports(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    List* visible_parsers = &parser->visible_parsers;
+
+    List visited_parsers;
+    list_init(&visited_parsers);
+
+    usize i;
+    for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
+    {
+        AST* ast = list_get(&parser->translation_unit->nodes, i);
+        if(ast->type != AST_TYPE_IMPORT_STMT)
+        {
+            continue;
+        }
+
+        ASTImportStmt* import_stmt = ast->node;
+        Parser* imported_parser = parser_table_find(import_stmt->filepath);
+        if(imported_parser == nullptr)
+        {
+            continue;
+        }
+
+        if(!list_contains(visible_parsers, imported_parser))
+        {
+            list_push(visible_parsers, imported_parser);
+        }
+
+        if(!list_contains(&visited_parsers, imported_parser))
+        {
+            list_push(&visited_parsers, imported_parser);
+            parser_resolve_imports_recursive(visible_parsers, imported_parser,
+                &visited_parsers);
+        }
+    }
+
+    list_destroy(&visited_parsers);
+}
+
 export void parser_analyze(Parser* parser)
 {
     assert(parser != nullptr);
@@ -136,15 +217,6 @@ export Token* parser_peek(Parser* parser, usize offset)
     assert(parser != nullptr);
 
     return lexer_peek(&parser->lexer, offset);
-}
-
-export void parser_add_imported_parser(Parser* parser, Parser* imported_parser)
-{
-    assert(parser != nullptr);
-
-    assert(imported_parser != nullptr);
-
-    list_push(&parser->imported_parsers, imported_parser);
 }
 
 export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, Namespace* ns,
@@ -172,11 +244,11 @@ export EnumSymbol* parser_find_enum_symbol(Parser* parser, Namespace* ns,
     }
 
     usize i;
-    for(i = 0; i < list_size(&parser->imported_parsers); i = i + 1)
+    for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
     {
-        Parser* imported_parser = list_get(&parser->imported_parsers, i);
+        Parser* visible_parser = list_get(&parser->visible_parsers, i);
 
-        symbol = enum_table_find(&imported_parser->enum_table, ns, name);
+        symbol = enum_table_find(&visible_parser->enum_table, ns, name);
         if(symbol != nullptr && symbol->exported)
         {
             return symbol;
@@ -211,11 +283,11 @@ export StructSymbol* parser_find_struct_symbol(Parser* parser, Namespace* ns,
     }
 
     usize i;
-    for(i = 0; i < list_size(&parser->imported_parsers); i = i + 1)
+    for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
     {
-        Parser* imported_parser = list_get(&parser->imported_parsers, i);
+        Parser* visible_parser = list_get(&parser->visible_parsers, i);
 
-        symbol = struct_table_find(&imported_parser->struct_table, ns, name);
+        symbol = struct_table_find(&visible_parser->struct_table, ns, name);
         if(symbol != nullptr && symbol->exported)
         {
             return symbol;
@@ -250,11 +322,11 @@ export FuncSymbol* parser_find_func_symbol(Parser* parser, Namespace* ns,
     }
 
     usize i;
-    for(i = 0; i < list_size(&parser->imported_parsers); i = i + 1)
+    for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
     {
-        Parser* imported_parser = list_get(&parser->imported_parsers, i);
+        Parser* visible_parser = list_get(&parser->visible_parsers, i);
 
-        symbol = func_table_find(&imported_parser->func_table, ns, name);
+        symbol = func_table_find(&visible_parser->func_table, ns, name);
         if(symbol != nullptr && symbol->exported)
         {
             return symbol;

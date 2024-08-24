@@ -1,32 +1,30 @@
 export struct ASTImportStmt
 {
     char* filepath;
+    b8 exported;
 }
 
-export ASTImportStmt* make_import_stmt(Arena* arena, char* filepath)
+export ASTImportStmt* make_import_stmt(Arena* arena, char* filepath,
+    b8 exported)
 {
     assert(filepath != nullptr);
 
     ASTImportStmt* import_stmt = arena_alloc(arena, sizeof(ASTImportStmt));
 
     import_stmt->filepath = filepath;
+    import_stmt->exported = exported;
+
+    return import_stmt;
 }
 
-ASTImportStmt* parse_import_stmt(Parser* parser)
+ASTImportStmt* parse_import_stmt(Parser* parser, b8 exported)
 {
     parser_eat(parser, TOKEN_TYPE_KW_IMPORT);
 
     ASTImportStmt* import_stmt = make_import_stmt(&parser->arena,
-        parser->token->identifier);
+        parser->token->identifier, exported);
 
     compile(import_stmt->filepath);
-
-    Parser* imported_parser = parser_table_find(import_stmt->filepath);
-
-    if(imported_parser != nullptr)
-    {
-        parser_add_imported_parser(parser, imported_parser);
-    }
 
     parser_eat(parser, TOKEN_TYPE_STRING_LITERAL);
 

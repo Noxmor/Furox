@@ -18,12 +18,12 @@ export void analyze_struct_def(Parser* parser, ASTStructDef* struct_def)
     b8 is_redefinition = false;
 
     usize i;
-    for(i = 0; i < list_size(&parser->imported_parsers) && !is_redefinition;
+    for(i = 0; i < list_size(&parser->visible_parsers) && !is_redefinition;
         i = i + 1)
     {
-        Parser* imported_parser = list_get(&parser->imported_parsers, i);
+        Parser* visible_parser = list_get(&parser->visible_parsers, i);
         StructSymbol* imported_symbol = struct_table_find(
-            &imported_parser->struct_table, symbol->ns, symbol->name);
+            &visible_parser->struct_table, symbol->ns, symbol->name);
 
         is_redefinition = imported_symbol != nullptr
             && imported_symbol->exported;
