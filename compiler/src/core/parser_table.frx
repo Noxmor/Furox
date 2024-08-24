@@ -1,7 +1,6 @@
 struct ParserTableEntry
 {
     Parser* parser;
-    char* fullpath;
     ParserTableEntry* next;
 }
 
@@ -18,51 +17,58 @@ export Parser* parser_table_find(char* filepath)
 {
     assert(filepath != nullptr);
 
-    char* fullpath = realpath(filepath, nullptr);
-    if(fullpath == nullptr)
-    {
-        return nullptr;
-    }
-
-    u64 index = hash_djb2(fullpath) % PARSER_TABLE_CAPACITY;
+    u64 index = hash_djb2(filepath) % PARSER_TABLE_CAPACITY;
     ParserTableEntry* entry = parser_table.entries[index];
 
     while(entry != nullptr)
     {
-        if(strcmp(entry->fullpath, fullpath) == 0)
-        {
-            free(fullpath);
+        Parser* parser = entry->parser;
 
-            return entry->parser;
+        if(strcmp(parser_source_file(parser), filepath) == 0)
+        {
+            return parser;
         }
 
         entry = entry->next;
     }
 
-    free(fullpath);
-
     return nullptr;
 }
 
-export b8 parser_table_insert(char* filepath)
+b8 is_real_path(char* filepath)
 {
     assert(filepath != nullptr);
 
-    char* fullpath = realpath(filepath, nullptr);
-    if(fullpath == nullptr)
+    if(filepath[0] != '/')
     {
         return false;
     }
 
-    u64 index = hash_djb2(fullpath) % PARSER_TABLE_CAPACITY;
+    while(filepath[0] != '\0')
+    {
+        if(strncmp(filepath, "/./",strlen("/./")) == 0
+            || strncmp(filepath, "/../", strlen("/../")) == 0)
+        {
+            return false;
+        }
+
+        filepath = filepath + 1;
+    }
+
+    return true;
+}
+
+export b8 parser_table_insert(char* filepath)
+{
+    assert(is_real_path(filepath));
+
+    u64 index = hash_djb2(filepath) % PARSER_TABLE_CAPACITY;
     ParserTableEntry* entry = parser_table.entries[index];
 
     while(entry != nullptr)
     {
-        if(strcmp(entry->fullpath, fullpath) == 0)
+        if(strcmp(parser_source_file(entry->parser), filepath) == 0)
         {
-            free(fullpath);
-
             return false;
         }
 
@@ -71,8 +77,7 @@ export b8 parser_table_insert(char* filepath)
 
     ParserTableEntry* new_entry = malloc(sizeof(ParserTableEntry));
     new_entry->parser = malloc(sizeof(Parser));
-    parser_init(new_entry->parser, filepath);
-    new_entry->fullpath = fullpath;
+    parser_init(new_entry->parser, string_table_insert(filepath));
     new_entry->next = parser_table.entries[index];
 
     parser_table.entries[index] = new_entry;

@@ -32,7 +32,9 @@ void parse_args(usize argc, char** argv)
         char* arg = argv[i];
         if(!is_option(arg))
         {
-            compile(arg);
+            char[4096] fullpath;
+            realpath(arg, fullpath);
+            compile(fullpath);
         }
     }
 }

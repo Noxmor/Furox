@@ -119,6 +119,45 @@ export void parser_parse(Parser* parser)
     parser->translation_unit = parse_translation_unit(parser);
 }
 
+b8 file_exists(char* filepath)
+{
+    assert(filepath != nullptr);
+
+    FILE* file = fopen(filepath, "r");
+    if(file == nullptr)
+    {
+        return false;
+    }
+
+    fclose(file);
+    return true;
+}
+
+export Parser* parser_compile(Parser* parser, char* filepath)
+{
+    assert(parser != nullptr);
+
+    assert(filepath != nullptr);
+
+    char[4096] directory;
+    strcpy(directory, parser_source_file(parser));
+    char* last_slash = strrchr(directory, '/');
+    char temp = last_slash[0] = '\0';
+
+    char[4096] resolved_filepath;
+    sprintf(resolved_filepath, "%s/%s", directory, filepath);
+
+    char[4096] fullpath;
+    realpath(resolved_filepath, fullpath);
+
+    if(file_exists(fullpath))
+    {
+        compile(fullpath);
+    }
+
+    return parser_table_find(fullpath);
+}
+
 void parser_resolve_imports_recursive(List* visible_parsers, Parser* parser,
     List* visited_parsers)
 {
@@ -138,7 +177,7 @@ void parser_resolve_imports_recursive(List* visible_parsers, Parser* parser,
         }
 
         ASTImportStmt* import_stmt = ast->node;
-        Parser* imported_parser = parser_table_find(import_stmt->filepath);
+        Parser* imported_parser = import_stmt->imported_parser;
         if(imported_parser == nullptr)
         {
             continue;
@@ -178,7 +217,7 @@ export void parser_resolve_imports(Parser* parser)
         }
 
         ASTImportStmt* import_stmt = ast->node;
-        Parser* imported_parser = parser_table_find(import_stmt->filepath);
+        Parser* imported_parser = import_stmt->imported_parser;
         if(imported_parser == nullptr)
         {
             continue;
