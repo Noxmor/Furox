@@ -1,4 +1,4 @@
-void log_error(char* filepath, SourceLocation location, char* format, ...)
+export void log_error(char* filepath, SourceLocation location, char* format, ...)
 {
     fprintf(stderr, "[ERROR]:%s:%zu:%zu: ", filepath, location.line,
         location.column);
