@@ -680,6 +680,10 @@ export Precedence token_type_to_binary_operator_precedence(TokenType type)
         {
             return PRECEDENCE_6;
         }
+        case TOKEN_TYPE_LBRACKET:
+        {
+            return PRECEDENCE_1;
+        }
     }
 
     return PRECEDENCE_1;
