@@ -10,21 +10,19 @@ export void analyze_func_decl(Parser* parser, ASTFuncDecl* func_decl)
 
     FuncSymbol* symbol = &func_decl->symbol;
 
-    b8 is_redefinition = false;
-
     usize i;
-    for(i = 0; i < list_size(&parser->visible_parsers) && !is_redefinition;
-        i = i + 1)
+    for(i = 0; i < list_size(&parser->visible_parsers)
+        && !func_decl->is_redefinition; i = i + 1)
     {
         Parser* visible_parser = list_get(&parser->visible_parsers, i);
         FuncSymbol* imported_symbol = func_table_find(
             &visible_parser->func_table, symbol->ns, symbol->name);
 
-        is_redefinition = imported_symbol != nullptr
+        func_decl->is_redefinition = imported_symbol != nullptr
             && imported_symbol->exported;
     }
 
-    if(is_redefinition)
+    if(func_decl->is_redefinition)
     {
         error_func_decl_redefinition(parser_source_file(parser),
             func_decl->range.start, symbol->name);

@@ -43,6 +43,8 @@ export struct ASTEnumDef
     SourceRange range;
 
     EnumSymbol symbol;
+
+    b8 is_redefinition;
 }
 
 void enum_def_add_constant(Arena* arena, ASTEnumDef* enum_def,
@@ -91,6 +93,8 @@ export ASTEnumDef* make_enum_def(Arena* arena, Scope* scope, Namespace* ns,
     ASTEnumDef* enum_def = arena_alloc(arena, sizeof(ASTEnumDef));
 
     enum_symbol_init(&enum_def->symbol, type, scope, ns, name, exported);
+
+    enum_def->is_redefinition = false;
 
     return enum_def;
 }
@@ -160,7 +164,8 @@ export ASTEnumDef* parse_enum_def(Parser* parser, b8 exported)
     ASTEnumDef* enum_def = make_enum_def(&parser->arena,
         parser->current_scope, parser->current_namespace, name, type, exported);
 
-    enum_table_insert(&parser->enum_table, &enum_def->symbol);
+    enum_def->is_redefinition = !enum_table_insert(&parser->enum_table,
+        &enum_def->symbol);
 
     parser_eat(parser, TOKEN_TYPE_LBRACE);
 

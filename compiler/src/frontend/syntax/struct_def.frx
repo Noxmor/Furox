@@ -50,6 +50,8 @@ export struct ASTStructDef
     SourceRange range;
 
     StructSymbol symbol;
+
+    b8 is_redefinition;
 }
 
 export ASTStructDef* make_struct_def(Arena* arena, Scope* scope, Namespace* ns,
@@ -58,6 +60,8 @@ export ASTStructDef* make_struct_def(Arena* arena, Scope* scope, Namespace* ns,
     ASTStructDef* struct_def = arena_alloc(arena, sizeof(ASTStructDef));
 
     struct_symbol_init(&struct_def->symbol, scope, ns, name, exported);
+
+    struct_def->is_redefinition = false;
 
     return struct_def;
 }
@@ -75,7 +79,8 @@ export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
     ASTStructDef* struct_def = make_struct_def(&parser->arena,
         parser->current_scope, parser->current_namespace, name, exported);
 
-    struct_table_insert(&parser->struct_table, &struct_def->symbol);
+    struct_def->is_redefinition = !struct_table_insert(&parser->struct_table,
+        &struct_def->symbol);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
