@@ -1,3 +1,5 @@
+import "source_range.frx";
+
 //TODO: Replace with C-like direct indexing: [TOKEN_TYPE] = "string" to be indepentent of the order of declaration in the enum
 char*[TOKEN_TYPE_COUNT] token_type_names = {
     "error",
@@ -695,19 +697,6 @@ export Precedence token_type_to_binary_operator_precedence(TokenType type)
     }
 
     return PRECEDENCE_1;
-}
-
-export struct SourceLocation
-{
-    usize pos;
-    usize line;
-    usize column;
-}
-
-export struct SourceRange
-{
-    SourceLocation start;
-    SourceLocation end;
 }
 
 export struct Token
