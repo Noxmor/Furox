@@ -6,6 +6,8 @@ import "../symbols/func.frx";
 
 export struct ASTFuncDef
 {
+    SourceRange range;
+
     ASTTypeSpecifier* return_type;
     FuncSymbol symbol;
     ASTFuncParams* params;
@@ -48,6 +50,9 @@ export ASTFuncDef* parse_func_def(Parser* parser, ASTTypeSpecifier* return_type,
     func_def->body = parse_scope(parser);
 
     parser_pop_scope(parser);
+
+    func_def->range.start = return_type->range.start;
+    func_def->range.end = func_def->body->range.end;
 
     return func_def;
 }

@@ -26,10 +26,8 @@ export void analyze_func_decl(Parser* parser, ASTFuncDecl* func_decl)
 
     if(is_redefinition)
     {
-        //FIXME: Print the correct location, this is only a placeholder
-        SourceLocation loc;
-        error_func_decl_redefinition(parser_source_file(parser), loc,
-            symbol->name);
+        error_func_decl_redefinition(parser_source_file(parser),
+            func_decl->range.start, symbol->name);
 
         parser->failed = true;
     }

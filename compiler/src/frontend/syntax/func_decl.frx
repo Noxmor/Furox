@@ -5,6 +5,8 @@ import "../symbols/func.frx";
 
 export struct ASTFuncDecl
 {
+    SourceRange range;
+
     ASTTypeSpecifier* return_type;
     FuncSymbol symbol;
     ASTFuncParams* params;
@@ -29,6 +31,8 @@ export ASTFuncDecl* parse_func_decl(Parser* parser)
 {
     assert(parser != nullptr);
 
+    SourceLocation start = parser_current_location(parser);
+
     ASTTypeSpecifier* return_type = parse_type_specifier(parser);
 
     char* name = parser->token->identifier;
@@ -45,6 +49,9 @@ export ASTFuncDecl* parse_func_decl(Parser* parser)
     func_decl->params = parse_func_params(parser);
 
     parser_pop_scope(parser);
+
+    func_decl->range.start = start;
+    func_decl->range.end = parser_current_location(parser);
 
     parser_eat(parser, TOKEN_TYPE_SEMICOLON);
 

@@ -3,6 +3,8 @@ import "../../core/list.frx";
 
 export struct ASTScope
 {
+    SourceRange range;
+
     List stmts;
 }
 
@@ -18,6 +20,8 @@ export ASTScope* make_scope(Arena* arena)
 export ASTScope* parse_scope(Parser* parser)
 {
     assert(parser != nullptr);
+
+    SourceLocation start = parser_current_location(parser);
 
     parser_eat(parser, TOKEN_TYPE_LBRACE);
 
@@ -225,6 +229,9 @@ export ASTScope* parse_scope(Parser* parser)
             }
         }
     }
+
+    scope->range.start = start;
+    scope->range.end = parser_current_location(parser);
 
     parser_eat(parser, TOKEN_TYPE_RBRACE);
 

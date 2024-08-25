@@ -18,6 +18,8 @@ export void parse_array_dimensions(Parser* parser, ASTTypeSpecifier* type)
 
 export struct ASTTypeSpecifier
 {
+    SourceRange range;
+
     Namespace* ns;
     char* name;
     Scope* scope;
@@ -57,6 +59,8 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
 {
     assert(parser != nullptr);
 
+    SourceLocation start = parser_current_location(parser);
+
     Namespace* ns = nullptr;
     char* name = nullptr;
     TokenType primitive_type = TOKEN_TYPE_ERROR;
@@ -77,15 +81,22 @@ export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
 
     usize pointer_level = 0;
 
+    SourceLocation end;
+
     while(parser->token->type == TOKEN_TYPE_STAR)
     {
         pointer_level = pointer_level + 1;
+
+        end = parser_current_location(parser);
 
         parser_eat(parser, TOKEN_TYPE_STAR);
     }
 
     ASTTypeSpecifier* type_specifier = make_type_specifier(&parser->arena, ns,
         name, parser->current_scope, primitive_type, pointer_level);
+
+    type_specifier->range.start = start;
+    type_specifier->range.end = end;
 
     return type_specifier;
 }
