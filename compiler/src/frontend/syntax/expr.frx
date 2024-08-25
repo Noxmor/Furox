@@ -198,7 +198,41 @@ export AST* parse_expr(Parser* parser)
     ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena, operator,
         left, right);
 
-    //TODO: Handle operator precedence
+    expr = make_ast(&parser->arena, AST_TYPE_BINARY_EXPR, binary_expr);
 
-    return make_ast(&parser->arena, AST_TYPE_BINARY_EXPR, binary_expr);
+    if(binary_expr->right->type != AST_TYPE_BINARY_EXPR)
+    {
+        return expr;
+    }
+
+    ASTBinaryExpr* right_child = binary_expr->right->node;
+    if(binary_expr->precedence <= right_child->precedence)
+    {
+        AST* lower_expr_wrapper = binary_expr->right;
+
+        AST* left_most_child_wrapper = lower_expr_wrapper;
+        ASTBinaryExpr* left_most_child = left_most_child_wrapper->node;
+
+        b8 has_higher_precedence_than_subtree = true;
+        while(left_most_child->left->type == AST_TYPE_BINARY_EXPR)
+        {
+            left_most_child_wrapper = left_most_child->left;
+            left_most_child = left_most_child_wrapper->node;
+
+            if(left_most_child->precedence < binary_expr->precedence)
+            {
+                has_higher_precedence_than_subtree = false;
+                break;
+            }
+        }
+
+        if(has_higher_precedence_than_subtree)
+        {
+            binary_expr->right = left_most_child->left;
+            left_most_child->left = expr;
+            expr = lower_expr_wrapper;
+        }
+    }
+
+    return expr;
 }
