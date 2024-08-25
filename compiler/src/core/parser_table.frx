@@ -1,3 +1,5 @@
+/*export*/ import "../frontend/core/parser.frx";
+
 struct ParserTableEntry
 {
     Parser* parser;

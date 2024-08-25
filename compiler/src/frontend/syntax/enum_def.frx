@@ -1,3 +1,6 @@
+import "../core/parser.frx";
+import "../symbols/enum.frx";
+
 export struct ASTEnumConstantDef
 {
     char* name;

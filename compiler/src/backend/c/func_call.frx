@@ -1,3 +1,7 @@
+import "c.frx";
+import "../core/mangling.frx";
+import "../../frontend/syntax/func_call.frx";
+
 export void transpile_func_call(Transpiler* transpiler, ASTFuncCall* func_call)
 {
     assert(transpiler != nullptr);

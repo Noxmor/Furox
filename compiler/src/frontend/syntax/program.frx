@@ -1,3 +1,6 @@
+import "../core/parser.frx";
+import "../../core/list.frx";
+
 export struct ASTProgram
 {
     List translation_units;

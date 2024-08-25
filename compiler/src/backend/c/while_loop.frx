@@ -1,3 +1,8 @@
+import "ast.frx";
+import "c.frx";
+import "scope.frx";
+import "../../frontend/syntax/while_loop.frx";
+
 export void transpile_while_loop(Transpiler* transpiler,
     ASTWhileLoop* while_loop)
 {

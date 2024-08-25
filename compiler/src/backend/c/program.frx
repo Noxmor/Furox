@@ -1,3 +1,7 @@
+import "c.frx";
+import "translation_unit.frx";
+import "../../frontend/syntax/program.frx";
+
 export void transpile_program(Transpiler* transpiler, ASTProgram* program)
 {
     assert(transpiler != nullptr);

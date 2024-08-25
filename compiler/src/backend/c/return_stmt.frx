@@ -1,3 +1,7 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/syntax/return_stmt.frx";
+
 export void transpile_return_stmt(Transpiler* transpiler,
     ASTReturnStmt* return_stmt)
 {

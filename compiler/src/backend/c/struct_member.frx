@@ -1,3 +1,6 @@
+import "c.frx";
+import "../../frontend/syntax/struct_member.frx";
+
 export void transpile_struct_member(Transpiler* transpiler,
     ASTStructMember* member)
 {

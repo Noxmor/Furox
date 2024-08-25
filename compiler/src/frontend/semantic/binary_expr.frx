@@ -1,3 +1,8 @@
+import "ast.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/binary_expr.frx";
+
 export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
 {
     assert(parser != nullptr);

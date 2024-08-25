@@ -1,3 +1,7 @@
+import "c.frx";
+import "../core/mangling.frx";
+import "../../frontend/syntax/enum_constant.frx";
+
 export void transpile_enum_constant(Transpiler* transpiler,
     ASTEnumConstant* constant)
 {

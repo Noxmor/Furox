@@ -1,3 +1,6 @@
+import "../core/ast.frx";
+import "../core/parser.frx";
+
 export struct ASTReturnStmt
 {
     AST* value;

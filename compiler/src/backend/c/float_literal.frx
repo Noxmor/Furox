@@ -1,3 +1,6 @@
+import "c.frx";
+import "../../frontend/syntax/float_literal.frx";
+
 export void transpile_float_literal(Transpiler* transpiler,
     ASTFloatLiteral* literal)
 {

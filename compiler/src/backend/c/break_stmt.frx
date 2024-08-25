@@ -1,3 +1,6 @@
+import "c.frx";
+import "../../frontend/syntax/break_stmt.frx";
+
 export void transpile_break_stmt(Transpiler* transpiler,
     ASTBreakStmt* break_stmt)
 {

@@ -1,3 +1,8 @@
+import "ast.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/func_call.frx";
+
 export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
 {
     assert(parser != nullptr);

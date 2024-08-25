@@ -1,3 +1,7 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/syntax/binary_expr.frx";
+
 export void transpile_binary_expr(Transpiler* transpiler, ASTBinaryExpr* expr)
 {
     assert(transpiler != nullptr);

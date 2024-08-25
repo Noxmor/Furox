@@ -1,3 +1,7 @@
+import "ast.frx";
+import "../core/parser.frx";
+import "../syntax/enum_constant_or_global_var.frx";
+
 export void analyze_enum_constant_or_global_var(Parser* parser,
     ASTEnumConstantOrGlobalVar* enum_constant_or_global_var, AST* ast)
 {

@@ -1,3 +1,7 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/syntax/translation_unit.frx";
+
 export void transpile_translation_unit(Transpiler* transpiler,
     ASTCompound* translation_unit)
 {

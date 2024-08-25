@@ -1,3 +1,5 @@
+import "../core/parser.frx";
+
 export struct ASTContinueStmt
 {
     b8 value;

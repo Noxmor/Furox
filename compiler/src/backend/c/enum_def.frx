@@ -1,3 +1,7 @@
+import "c.frx";
+import "../core/mangling.frx";
+import "../../frontend/syntax/enum_def.frx";
+
 export void transpile_enum_def(Transpiler* transpiler, ASTEnumDef* enum_def)
 {
     assert(transpiler != nullptr);

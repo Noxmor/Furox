@@ -1,3 +1,9 @@
+import "c.frx";
+import "func_params.frx";
+import "scope.frx";
+import "../core/mangling.frx";
+import "../../frontend/syntax/func_def.frx";
+
 export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
 {
     assert(transpiler != nullptr);

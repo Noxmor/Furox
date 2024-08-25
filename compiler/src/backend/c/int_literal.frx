@@ -1,3 +1,6 @@
+import "c.frx";
+import "../../frontend/syntax/int_literal.frx";
+
 export void transpile_int_literal(Transpiler* transpiler,
     ASTIntLiteral* literal)
 {

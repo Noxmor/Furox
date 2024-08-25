@@ -1,3 +1,32 @@
+import "binary_expr.frx";
+import "do_while_loop.frx";
+import "enum_constant.frx";
+import "enum_constant_or_global_var.frx";
+import "enum_def.frx";
+import "expr_stmt.frx";
+import "extern_block.frx";
+import "for_loop.frx";
+import "func_call.frx";
+import "func_decl.frx";
+import "func_def.frx";
+import "global_var_decl.frx";
+import "global_var_def.frx";
+import "if_stmt.frx";
+import "import_stmt.frx";
+import "internal_func_call.frx";
+import "namespace.frx";
+import "return_stmt.frx";
+import "scope.frx";
+import "struct_def.frx";
+import "struct_member.frx";
+import "unary_expr.frx";
+import "var.frx";
+import "var_decl.frx";
+import "var_def.frx";
+import "while_loop.frx";
+import "../core/ast.frx";
+import "../core/parser.frx";
+
 export void analyze_ast(Parser* parser, AST* ast)
 {
     assert(ast != nullptr);

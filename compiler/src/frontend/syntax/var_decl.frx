@@ -1,3 +1,6 @@
+import "../core/parser.frx";
+import "../symbols/var.frx";
+
 export struct ASTVarDecl
 {
     VarSymbol symbol;

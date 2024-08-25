@@ -1,3 +1,7 @@
+import "c.frx";
+import "type_specifier.frx";
+import "../../frontend/syntax/var_decl.frx";
+
 export void transpile_var_decl(Transpiler* transpiler, ASTVarDecl* var_decl)
 {
     assert(transpiler != nullptr);

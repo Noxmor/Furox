@@ -1,3 +1,7 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/syntax/unary_expr.frx";
+
 export void transpile_unary_expr(Transpiler* transpiler, ASTUnaryExpr* expr)
 {
     assert(transpiler != nullptr);

@@ -1,3 +1,9 @@
+import "options.frx";
+import "parser_table.frx";
+import "queue.frx";
+import "../backend/backend.frx";
+import "../frontend/syntax/program.frx";
+
 ASTProgram* program;
 b8 failed = false;
 

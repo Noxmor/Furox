@@ -1,3 +1,8 @@
+import "expr.frx";
+import "../core/parser.frx";
+import "../symbols/func.frx";
+import "../../core/list.frx";
+
 export struct ASTFuncCall
 {
     FuncSymbol* symbol;

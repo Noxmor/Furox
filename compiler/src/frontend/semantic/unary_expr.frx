@@ -1,3 +1,7 @@
+import "ast.frx";
+import "../core/parser.frx";
+import "../syntax/unary_expr.frx";
+
 export void analyze_unary_expr(Parser* parser, ASTUnaryExpr* expr)
 {
     assert(parser != nullptr);

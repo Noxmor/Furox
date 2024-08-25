@@ -1,3 +1,5 @@
+/*export*/ import "token.frx";
+
 struct LexerInfo
 {
     usize lines_processed;

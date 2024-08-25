@@ -1,3 +1,7 @@
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/func_decl.frx";
+
 export void analyze_func_decl(Parser* parser, ASTFuncDecl* func_decl)
 {
     assert(parser != nullptr);

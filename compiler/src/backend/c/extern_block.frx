@@ -1,3 +1,7 @@
+import "c.frx";
+import "func_decl.frx";
+import "../../frontend/syntax/extern_block.frx";
+
 export void transpile_extern_block(Transpiler* transpiler,
     ASTExternBlock* extern_block)
 {

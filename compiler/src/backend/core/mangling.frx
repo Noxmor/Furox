@@ -1,3 +1,6 @@
+/*export*/ import "../../frontend/core/namespace.frx";
+/*export*/ import "../../frontend/core/scope.frx";
+
 char* buffer = nullptr;
 usize buffer_size = 0;
 

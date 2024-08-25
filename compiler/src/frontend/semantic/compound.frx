@@ -1,3 +1,7 @@
+import "ast.frx";
+import "../core/parser.frx";
+import "../syntax/ast.frx";
+
 export void analyze_compound(Parser* parser, ASTCompound* compound)
 {
     assert(compound != nullptr);

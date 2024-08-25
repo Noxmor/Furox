@@ -1,3 +1,37 @@
+import "../syntax/binary_expr.frx";
+import "../syntax/break_stmt.frx";
+import "../syntax/char_literal.frx";
+import "../syntax/continue_stmt.frx";
+import "../syntax/do_while_loop.frx";
+import "../syntax/extern_block.frx";
+import "../syntax/enum_def.frx";
+import "../syntax/enum_constant.frx";
+import "../syntax/enum_constant_or_global_var.frx";
+import "../syntax/expr_stmt.frx";
+import "../syntax/float_literal.frx";
+import "../syntax/for_loop.frx";
+import "../syntax/func_decl.frx";
+import "../syntax/func_def.frx";
+import "../syntax/func_call.frx";
+import "../syntax/global_var_decl.frx";
+import "../syntax/global_var_def.frx";
+import "../syntax/if_stmt.frx";
+import "../syntax/import_stmt.frx";
+import "../syntax/int_literal.frx";
+import "../syntax/internal_func_call.frx";
+import "../syntax/namespace.frx";
+import "../syntax/return_stmt.frx";
+import "../syntax/scope.frx";
+import "../syntax/string_literal.frx";
+import "../syntax/struct_def.frx";
+import "../syntax/struct_member.frx";
+import "../syntax/unary_expr.frx";
+import "../syntax/var.frx";
+import "../syntax/var_decl.frx";
+import "../syntax/var_def.frx";
+import "../syntax/while_loop.frx";
+import "../../core/arena.frx";
+
 char*[AST_TYPE_COUNT] ast_type_names = {
     "program",
     "compound",

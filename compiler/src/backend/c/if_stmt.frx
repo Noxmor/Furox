@@ -1,3 +1,8 @@
+import "ast.frx";
+import "c.frx";
+import "scope.frx";
+import "../../frontend/syntax/if_stmt.frx";
+
 export void transpile_if_stmt(Transpiler* transpiler, ASTIfStmt* if_stmt)
 {
     assert(transpiler != nullptr);

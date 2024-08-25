@@ -1,3 +1,6 @@
+import "type_specifier.frx";
+import "../core/parser.frx";
+
 export struct ASTStructField
 {
     ASTTypeSpecifier* type;

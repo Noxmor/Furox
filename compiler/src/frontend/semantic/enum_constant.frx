@@ -1,3 +1,7 @@
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/enum_constant.frx";
+
 export void analyze_enum_constant(Parser* parser, ASTEnumConstant* constant)
 {
     assert(parser != nullptr);

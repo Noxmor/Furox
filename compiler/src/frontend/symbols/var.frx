@@ -1,3 +1,7 @@
+import "../core/namespace.frx";
+import "../core/scope.frx";
+import "../syntax/type_specifier.frx";
+
 export struct VarSymbol
 {
     Namespace* ns;

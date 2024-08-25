@@ -1,3 +1,8 @@
+import "c.frx";
+import "func_params.frx";
+import "type_specifier.frx";
+import "../../frontend/syntax/func_decl.frx";
+
 export void transpile_func_decl(Transpiler* transpiler, ASTFuncDecl* func_decl)
 {
     assert(transpiler != nullptr);

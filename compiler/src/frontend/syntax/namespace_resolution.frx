@@ -1,3 +1,5 @@
+import "../core/parser.frx";
+
 export Namespace* parse_namespace_resolution(Parser* parser)
 {
     assert(parser != nullptr);

@@ -1,3 +1,8 @@
+import "ast.frx";
+import "scope.frx";
+import "../core/parser.frx";
+import "../syntax/if_stmt.frx";
+
 export void analyze_if_stmt(Parser* parser, ASTIfStmt* if_stmt)
 {
     assert(parser != nullptr);

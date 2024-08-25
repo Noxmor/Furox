@@ -1,3 +1,7 @@
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/import_stmt.frx";
+
 export void analyze_import_stmt(Parser* parser, ASTImportStmt* import_stmt)
 {
     assert(parser != nullptr);

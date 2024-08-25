@@ -1,3 +1,6 @@
+import "c/c.frx";
+import "../frontend/syntax/program.frx";
+
 export enum BackendType : u8
 {
     BACKEND_TYPE_NATIVE,

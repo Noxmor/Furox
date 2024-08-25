@@ -1,3 +1,7 @@
+import "func_decl.frx";
+import "../core/parser.frx";
+import "../../core/list.frx";
+
 export struct ASTExternBlock
 {
     List func_decls;

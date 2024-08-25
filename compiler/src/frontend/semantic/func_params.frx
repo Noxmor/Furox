@@ -1,3 +1,7 @@
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/func_params.frx";
+
 void analyze_func_param(Parser* parser, ASTFuncParam* param)
 {
     assert(parser != nullptr);

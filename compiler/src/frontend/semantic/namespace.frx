@@ -1,3 +1,8 @@
+import "ast.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/namespace.frx";
+
 export void analyze_namespace(Parser* parser, ASTNamespace* namespace_node)
 {
     assert(parser != nullptr);

@@ -1,3 +1,7 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/syntax/expr_stmt.frx";
+
 export void transpile_expr_stmt(Transpiler* transpiler, ASTExprStmt* expr_stmt)
 {
     assert(transpiler != nullptr);

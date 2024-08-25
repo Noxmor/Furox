@@ -1,3 +1,7 @@
+import "scope.frx";
+import "../core/ast.frx";
+import "../core/parser.frx";
+
 export struct ASTIfStmt
 {
     AST* condition;

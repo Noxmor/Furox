@@ -1,3 +1,6 @@
+import "../core/namespace.frx";
+import "../core/scope.frx";
+
 export struct FuncSymbol
 {
     Scope* scope;

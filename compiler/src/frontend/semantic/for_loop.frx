@@ -1,3 +1,8 @@
+import "ast.frx";
+import "scope.frx";
+import "../core/parser.frx";
+import "../syntax/for_loop.frx";
+
 export void analyze_for_loop(Parser* parser, ASTForLoop* for_loop)
 {
     assert(parser != nullptr);

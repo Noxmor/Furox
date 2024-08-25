@@ -1,3 +1,6 @@
+import "c.frx";
+import "../../frontend/syntax/continue_stmt.frx";
+
 export void transpile_continue_stmt(Transpiler* transpiler,
     ASTContinueStmt* continue_stmt)
 {

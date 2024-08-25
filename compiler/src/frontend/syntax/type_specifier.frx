@@ -1,3 +1,7 @@
+import "../core/parser.frx";
+import "../symbols/enum.frx";
+import "../symbols/struct.frx";
+
 export void parse_array_dimensions(Parser* parser, ASTTypeSpecifier* type)
 {
     assert(parser != nullptr);

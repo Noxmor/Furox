@@ -1,3 +1,7 @@
+import "ast.frx";
+import "../core/parser.frx";
+import "../syntax/scope.frx";
+
 export void analyze_scope(Parser* parser, ASTScope* scope)
 {
     assert(parser != nullptr);

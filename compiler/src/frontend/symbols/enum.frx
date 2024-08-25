@@ -1,3 +1,8 @@
+import "../core/namespace.frx";
+import "../core/scope.frx";
+import "../core/token.frx";
+import "../../core/list.frx";
+
 export struct EnumSymbol
 {
     TokenType type;

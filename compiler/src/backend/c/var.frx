@@ -1,3 +1,7 @@
+import "c.frx";
+import "../core/mangling.frx";
+import "../../frontend/syntax/var.frx";
+
 export void transpile_var(Transpiler* transpiler, ASTVar* var)
 {
     assert(transpiler != nullptr);

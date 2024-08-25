@@ -1,3 +1,8 @@
+import "c.frx";
+import "type_specifier.frx";
+import "../core/mangling.frx";
+import "../../frontend/syntax/global_var_decl.frx";
+
 export void transpile_global_var_decl(Transpiler* transpiler,
     ASTGlobalVarDecl* var_decl)
 {

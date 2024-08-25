@@ -1,3 +1,7 @@
+import "c.frx";
+import "type_specifier.frx";
+import "../../frontend/syntax/func_params.frx";
+
 void transpile_func_param(Transpiler* transpiler, ASTFuncParam* param)
 {
     assert(transpiler != nullptr);

@@ -1,3 +1,6 @@
+import "namespace.frx";
+import "token.frx";
+
 export void error_import_stmt_invalid_filepath(char* filepath,
     SourceLocation loc, char* imported_filepath)
 {

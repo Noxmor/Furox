@@ -1,3 +1,8 @@
+import "type_specifier.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/struct_def.frx";
+
 void analyze_struct_field(Parser* parser, ASTStructField* field)
 {
     assert(parser != nullptr);

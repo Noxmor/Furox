@@ -1,3 +1,7 @@
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/var.frx";
+
 export void analyze_var(Parser* parser, ASTVar* var)
 {
     assert(parser != nullptr);

@@ -1,3 +1,14 @@
+import "ast.frx";
+/*export*/ import "lexer.frx";
+import "namespace.frx";
+import "scope.frx";
+import "../symbols/enum.frx";
+import "../symbols/func.frx";
+import "../symbols/struct.frx";
+import "../symbols/var.frx";
+/*export*/ import "../../core/arena.frx";
+import "../../core/list.frx";
+
 export struct Parser
 {
     Lexer lexer;

@@ -1,3 +1,6 @@
+import "../core/ast.frx";
+import "../core/parser.frx";
+
 export AST* parse_primary_expr(Parser* parser)
 {
     assert(parser != nullptr);

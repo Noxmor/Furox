@@ -1,3 +1,6 @@
+import "c.frx";
+import "../../frontend/syntax/char_literal.frx";
+
 export void transpile_char_literal(Transpiler* transpiler,
     ASTCharLiteral* char_literal)
 {

@@ -1,3 +1,7 @@
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/type_specifier.frx";
+
 export void analyze_type_specifier(Parser* parser,
     ASTTypeSpecifier* type_specifier)
 {

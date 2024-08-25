@@ -1,3 +1,8 @@
+import "../core/ast.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/internal_func_call.frx";
+
 export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
 {
     assert(parser != nullptr);

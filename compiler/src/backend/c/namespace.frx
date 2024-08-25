@@ -1,3 +1,6 @@
+import "c.frx";
+import "../../frontend/syntax/namespace.frx";
+
 export void transpile_namespace(Transpiler* transpiler,
     ASTNamespace* namespace_node)
 {

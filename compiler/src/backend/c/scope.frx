@@ -1,3 +1,7 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/syntax/scope.frx";
+
 export void transpile_scope(Transpiler* transpiler, ASTScope* scope)
 {
     assert(transpiler != nullptr);

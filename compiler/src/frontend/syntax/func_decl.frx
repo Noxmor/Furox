@@ -1,3 +1,8 @@
+import "func_params.frx";
+import "type_specifier.frx";
+import "../core/parser.frx";
+import "../symbols/func.frx";
+
 export struct ASTFuncDecl
 {
     ASTTypeSpecifier* return_type;

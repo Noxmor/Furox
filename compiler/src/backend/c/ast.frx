@@ -1,3 +1,6 @@
+import "c.frx";
+import "../../frontend/core/ast.frx";
+
 export void transpile_ast(Transpiler* transpiler, AST* ast)
 {
     assert(ast != nullptr);

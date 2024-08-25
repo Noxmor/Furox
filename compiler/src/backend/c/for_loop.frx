@@ -1,3 +1,7 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/syntax/for_loop.frx";
+
 export void transpile_for_loop(Transpiler* transpiler, ASTForLoop* for_loop)
 {
     assert(transpiler != nullptr);

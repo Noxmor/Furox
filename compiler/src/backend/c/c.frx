@@ -1,3 +1,6 @@
+import "../../frontend/core/namespace.frx";
+import "../../frontend/syntax/program.frx";
+
 export enum TranspilerMode : u8
 {
     TRANSPILER_MODE_MACROS,

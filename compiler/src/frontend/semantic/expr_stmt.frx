@@ -1,3 +1,7 @@
+import "ast.frx";
+import "../core/parser.frx";
+import "../syntax/expr_stmt.frx";
+
 export void analyze_expr_stmt(Parser* parser, ASTExprStmt* expr_stmt)
 {
     assert(parser != nullptr);
