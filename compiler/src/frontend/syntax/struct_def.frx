@@ -47,6 +47,8 @@ void print_struct_field(ASTStructField* field, FILE* file, usize depth)
 
 export struct ASTStructDef
 {
+    SourceRange range;
+
     StructSymbol symbol;
 }
 
@@ -63,6 +65,8 @@ export ASTStructDef* make_struct_def(Arena* arena, Scope* scope, Namespace* ns,
 export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
 {
     assert(parser != nullptr);
+
+    SourceLocation start = parser_current_location(parser);
 
     parser_eat(parser, TOKEN_TYPE_KW_STRUCT);
 
@@ -81,6 +85,9 @@ export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
     {
         list_push(&struct_def->symbol.fields, parse_struct_field(parser));
     }
+
+    struct_def->range.start = start;
+    struct_def->range.end = parser_current_location(parser);
 
     parser_eat(parser, TOKEN_TYPE_RBRACE);
 

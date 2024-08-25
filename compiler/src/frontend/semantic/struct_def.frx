@@ -36,10 +36,8 @@ export void analyze_struct_def(Parser* parser, ASTStructDef* struct_def)
 
     if(is_redefinition)
     {
-        //FIXME: Print the correct location, this is only a placeholder
-        SourceLocation loc;
-        error_struct_redefinition(parser_source_file(parser), loc,
-            symbol->name);
+        error_struct_redefinition(parser_source_file(parser),
+            struct_def->range.start, symbol->name);
 
         parser->failed = true;
     }
