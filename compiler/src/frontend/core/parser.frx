@@ -386,6 +386,13 @@ export FuncSymbol* parser_find_func_symbol(Parser* parser, Namespace* ns,
     return nullptr;
 }
 
+export SourceLocation parser_current_location(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    return parser->token->range.start;
+}
+
 export char* parser_source_file(Parser* parser)
 {
     assert(parser != nullptr);
