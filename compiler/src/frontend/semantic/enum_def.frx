@@ -26,9 +26,8 @@ export void analyze_enum_def(Parser* parser, ASTEnumDef* enum_def)
 
     if(is_redefinition)
     {
-        //FIXME: Print the correct location, this is only a placeholder
-        SourceLocation loc;
-        error_enum_redefinition(parser_source_file(parser), loc, symbol->name);
+        error_enum_redefinition(parser_source_file(parser),
+            enum_def->range.start, symbol->name);
 
         parser->failed = true;
     }

@@ -40,6 +40,8 @@ ASTEnumConstantDef* parse_enum_constant(Parser* parser)
 
 export struct ASTEnumDef
 {
+    SourceRange range;
+
     EnumSymbol symbol;
 }
 
@@ -97,10 +99,11 @@ export ASTEnumDef* parse_enum_def(Parser* parser, b8 exported)
 {
     assert(parser != nullptr);
 
+    SourceLocation start = parser_current_location(parser);
+
     parser_eat(parser, TOKEN_TYPE_KW_ENUM);
 
     char* name = parser->token->identifier;
-
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
@@ -176,6 +179,9 @@ export ASTEnumDef* parse_enum_def(Parser* parser, b8 exported)
             break;
         }
     }
+
+    enum_def->range.start = start;
+    enum_def->range.end = parser_current_location(parser);
 
     parser_eat(parser, TOKEN_TYPE_RBRACE);
 
