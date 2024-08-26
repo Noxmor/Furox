@@ -106,5 +106,5 @@ usize Main(usize argc, char** argv)
         backend_generate_code(BACKEND_TYPE_NATIVE, program, "output.c");
     }
 
-    return 0;
+    return !failed;
 }
