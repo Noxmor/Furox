@@ -15,7 +15,20 @@ export void analyze_enum_constant_or_global_var(Parser* parser,
 
     b8 is_enum_constant = parser_find_enum_symbol(parser, ns->parent, ns->name)
         != nullptr;
-    if(is_enum_constant)
+
+    b8 is_global_var = var_table_find_by_namespace(&parser->var_table, ns, name)
+        != nullptr;
+
+    b8 is_ambiguous = is_enum_constant && is_global_var;
+    if(is_ambiguous)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_ambiguous_enum_constant_or_global_var(parser_source_file(parser),
+            loc, ns, name);
+        parser->failed = true;
+    }
+    else if(is_enum_constant)
     {
         ast->type = AST_TYPE_ENUM_CONSTANT;
         ast->node = make_enum_constant(&parser->arena, ns->parent, ns->name,
@@ -28,5 +41,8 @@ export void analyze_enum_constant_or_global_var(Parser* parser,
             enum_constant_or_global_var->scope, name);
     }
 
-    analyze_ast(parser, ast);
+    if(!is_ambiguous)
+    {
+        analyze_ast(parser, ast);
+    }
 }
