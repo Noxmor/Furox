@@ -27,6 +27,8 @@ export ASTScope* parse_scope(Parser* parser)
 
     parser_push_scope(parser);
 
+    usize pushed_scopes = 1;
+
     ASTScope* scope = make_scope(&parser->arena);
 
     while(parser->token->type != TOKEN_TYPE_RBRACE)
@@ -37,6 +39,9 @@ export ASTScope* parse_scope(Parser* parser)
             {
                 list_push(&scope->stmts, make_ast(&parser->arena,
                     AST_TYPE_SCOPE, parse_scope(parser)));
+
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
 
                 break;
             }
@@ -66,12 +71,18 @@ export ASTScope* parse_scope(Parser* parser)
                 list_push(&scope->stmts, make_ast(&parser->arena,
                     AST_TYPE_IF_STMT, parse_if_stmt(parser)));
 
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
+
                 break;
             }
             case TOKEN_TYPE_KW_FOR:
             {
                 list_push(&scope->stmts, make_ast(&parser->arena,
                     AST_TYPE_FOR_LOOP, parse_for_loop(parser)));
+
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
 
                 break;
             }
@@ -80,12 +91,18 @@ export ASTScope* parse_scope(Parser* parser)
                 list_push(&scope->stmts, make_ast(&parser->arena,
                     AST_TYPE_WHILE_LOOP, parse_while_loop(parser)));
 
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
+
                 break;
             }
             case TOKEN_TYPE_KW_DO:
             {
                 list_push(&scope->stmts, make_ast(&parser->arena,
                     AST_TYPE_DO_WHILE_LOOP, parse_do_while_loop(parser)));
+
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
 
                 break;
             }
@@ -235,7 +252,11 @@ export ASTScope* parse_scope(Parser* parser)
 
     parser_eat(parser, TOKEN_TYPE_RBRACE);
 
-    parser_pop_scope(parser);
+    while(pushed_scopes > 0)
+    {
+        parser_pop_scope(parser);
+        pushed_scopes = pushed_scopes - 1;
+    }
 
     return scope;
 }
