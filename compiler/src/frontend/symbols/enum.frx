@@ -32,6 +32,25 @@ export void enum_symbol_init(EnumSymbol* symbol, TokenType type, Scope* scope,
     symbol->exported = exported;
 }
 
+b8 enum_symbol_has_constant(EnumSymbol* symbol, char* name)
+{
+    assert(symbol != nullptr);
+
+    assert(name != nullptr);
+
+    usize i;
+    for(i = 0; i < list_size(&symbol->constants); i = i + 1)
+    {
+        ASTEnumConstantDef* constant = list_get(&symbol->constants, i);
+        if(strcmp(constant->name, name) == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 struct EnumTableEntry
 {
     EnumSymbol* symbol;

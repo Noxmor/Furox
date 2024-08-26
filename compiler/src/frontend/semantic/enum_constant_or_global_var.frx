@@ -13,8 +13,11 @@ export void analyze_enum_constant_or_global_var(Parser* parser,
     char* name = enum_constant_or_global_var->name;
     Scope* scope = enum_constant_or_global_var->scope;
 
-    b8 is_enum_constant = parser_find_enum_symbol(parser, ns->parent, ns->name)
-        != nullptr;
+    EnumSymbol* enum_symbol = parser_find_enum_symbol(parser, ns->parent,
+        ns->name);
+
+    b8 is_enum_constant = enum_symbol != nullptr && enum_symbol_has_constant(
+        enum_symbol, name);
 
     b8 is_global_var = var_table_find_by_namespace(&parser->var_table, ns, name)
         != nullptr;
