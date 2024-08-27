@@ -12,11 +12,11 @@ export void transpile_unary_expr(Transpiler* transpiler, ASTUnaryExpr* expr)
     {
         fprintf(transpiler->file, "(");
         transpile_ast(transpiler, expr->operand);
-        fprintf(transpiler->file, ")%s", token_type_to_str(expr->operator));
+        fprintf(transpiler->file, "%s)", token_type_to_str(expr->operator));
     }
     else
     {
-        fprintf(transpiler->file, "%s(", token_type_to_str(expr->operator));
+        fprintf(transpiler->file, "(%s", token_type_to_str(expr->operator));
         transpile_ast(transpiler, expr->operand);
         fprintf(transpiler->file, ")");
     }
