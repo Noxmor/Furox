@@ -5,10 +5,11 @@ export struct ASTUnaryExpr
 {
     TokenType operator;
     AST* operand;
+    b8 is_postfix;
 }
 
 export ASTUnaryExpr* make_unary_expr(Arena* arena, TokenType operator,
-    AST* operand)
+    AST* operand, b8 is_postfix)
 {
     assert(token_type_is_unary_operator(operator)
         || operator == TOKEN_TYPE_ERROR);
@@ -19,6 +20,7 @@ export ASTUnaryExpr* make_unary_expr(Arena* arena, TokenType operator,
 
     unary_expr->operator = operator;
     unary_expr->operand = operand;
+    unary_expr->is_postfix = is_postfix;
 
     return unary_expr;
 }
@@ -49,7 +51,7 @@ export ASTUnaryExpr* parse_unary_expr(Parser* parser)
         operand = parse_primary_expr(parser);
     }
 
-    return make_unary_expr(&parser->arena, operator, operand);
+    return make_unary_expr(&parser->arena, operator, operand, false);
 }
 
 export void print_unary_expr(ASTUnaryExpr* expr, FILE* file, usize depth)

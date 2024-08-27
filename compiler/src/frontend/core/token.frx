@@ -537,6 +537,14 @@ export b8 token_type_is_postfix_operator(TokenType type)
 
     switch(type)
     {
+        case TOKEN_TYPE_PLUS_PLUS:
+        {
+
+        }
+        case TOKEN_TYPE_MINUS_MINUS:
+        {
+
+        }
         case TOKEN_TYPE_LBRACKET:
         {
             return true;

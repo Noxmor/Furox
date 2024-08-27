@@ -128,34 +128,48 @@ AST* parse_postfix_expr(Parser* parser)
 
     AST* expr = parse_primary_expr(parser);
 
-    if(token_type_is_postfix_operator(parser->token->type))
+    TokenType operator = parser->token->type;
+
+    if(!token_type_is_postfix_operator(operator))
     {
-        TokenType operator = parser->token->type;
+        return expr;
+    }
 
-        parser_eat(parser, operator);
+    parser_eat(parser, operator);
 
-        switch(operator)
+    switch(operator)
+    {
+        case TOKEN_TYPE_PLUS_PLUS:
         {
-            case TOKEN_TYPE_LBRACKET:
-            {
-                AST* subscript = parse_expr(parser);
 
-                parser_eat(parser, TOKEN_TYPE_RBRACKET);
+        }
+        case TOKEN_TYPE_MINUS_MINUS:
+        {
+            ASTUnaryExpr* unary_expr = make_unary_expr(&parser->arena,
+                operator, expr, true);
 
-                ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena,
-                    operator, expr, subscript);
+            expr = make_ast(&parser->arena, AST_TYPE_UNARY_EXPR, unary_expr);
 
-                expr = make_ast(&parser->arena, AST_TYPE_BINARY_EXPR,
-                    binary_expr);
+            break;
+        }
+        case TOKEN_TYPE_LBRACKET:
+        {
+            AST* subscript = parse_expr(parser);
 
-                break;
-            }
-            default:
-            {
-                parser_panic(parser);
+            parser_eat(parser, TOKEN_TYPE_RBRACKET);
 
-                break;
-            }
+            ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena,
+                operator, expr, subscript);
+
+            expr = make_ast(&parser->arena, AST_TYPE_BINARY_EXPR, binary_expr);
+
+            break;
+        }
+        default:
+        {
+            parser_panic(parser);
+
+            break;
         }
     }
 
