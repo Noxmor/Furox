@@ -631,9 +631,17 @@ export void lexer_read_token(Lexer* lexer, Token* token)
         case '+':
         {
             token->type = TOKEN_TYPE_PLUS;
-            if(lexer_peek_char(lexer, 1) == '=')
+
+            char next = lexer_peek_char(lexer, 1);
+
+            if(next == '=')
             {
                 token->type = TOKEN_TYPE_PLUS_EQ;
+                lexer_advance(lexer);
+            }
+            else if(next == '+')
+            {
+                token->type = TOKEN_TYPE_PLUS_PLUS;
                 lexer_advance(lexer);
             }
 
@@ -643,9 +651,16 @@ export void lexer_read_token(Lexer* lexer, Token* token)
         {
             token->type = TOKEN_TYPE_MINUS;
 
-            if(lexer_peek_char(lexer, 1) == '>')
+            char next = lexer_peek_char(lexer, 1);
+
+            if(next == '>')
             {
                 token->type = TOKEN_TYPE_ARROW;
+                lexer_advance(lexer);
+            }
+            else if(next == '-')
+            {
+                token->type = TOKEN_TYPE_MINUS_MINUS;
                 lexer_advance(lexer);
             }
 

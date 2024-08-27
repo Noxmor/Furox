@@ -102,6 +102,9 @@ char*[TOKEN_TYPE_COUNT] token_type_names = {
     "<",
     "<=",
 
+    "++",
+    "--",
+
     "(",
     ")",
 
@@ -224,6 +227,9 @@ export enum TokenType : u8
 
     TOKEN_TYPE_LT,
     TOKEN_TYPE_LEQ,
+
+    TOKEN_TYPE_PLUS_PLUS,
+    TOKEN_TYPE_MINUS_MINUS,
 
     TOKEN_TYPE_LPAREN,
     TOKEN_TYPE_RPAREN,
