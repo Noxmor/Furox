@@ -76,7 +76,7 @@ void enum_def_add_constant(Arena* arena, ASTEnumDef* enum_def,
             AST* right = make_ast(arena, AST_TYPE_INT_LITERAL, literal);
 
             ASTBinaryExpr* expr = make_binary_expr(arena, TOKEN_TYPE_PLUS,
-                left, right);
+                OP_ADD, left, right);
 
             new_value = make_ast(arena, AST_TYPE_BINARY_EXPR, expr);
         }

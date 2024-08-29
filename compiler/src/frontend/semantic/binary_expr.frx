@@ -11,7 +11,7 @@ export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
 
     switch(expr->operator)
     {
-        case TOKEN_TYPE_ARROW:
+        case OP_POINTER_MEMBER_ACCESS:
         {
             analyze_ast(parser, expr->left);
 
@@ -37,7 +37,7 @@ export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
 
             break;
         }
-        case TOKEN_TYPE_DOT:
+        case OP_MEMBER_ACCESS:
         {
             analyze_ast(parser, expr->left);
 
@@ -57,7 +57,7 @@ export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
 
                 expr->right->type = AST_TYPE_STRUCT_MEMBER;
                 expr->right->node = member;
-            
+
                 analyze_struct_member(parser, member);
             }
 

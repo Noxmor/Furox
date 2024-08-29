@@ -84,7 +84,6 @@ char*[TOKEN_TYPE_COUNT] token_type_names = {
     "^=",
 
     "~",
-    "~=",
 
     "<<",
     "<<=",
@@ -210,7 +209,6 @@ export enum TokenType : u8
     TOKEN_TYPE_BIN_XOR_EQ,
 
     TOKEN_TYPE_BIN_NEG,
-    TOKEN_TYPE_BIN_NEG_EQ,
 
     TOKEN_TYPE_BIN_LSHIFT,
     TOKEN_TYPE_BIN_LSHIFT_EQ,
@@ -349,46 +347,12 @@ export usize primitive_type_to_size(TokenType primitive_type)
     }
 }
 
-export b8 token_type_is_unary_operator(TokenType type)
+export b8 token_type_is_prefix_operator(TokenType type)
 {
-    assert(type < TOKEN_TYPE_COUNT);
-
-    switch(type)
-    {
-        case TOKEN_TYPE_MINUS:
-        {
-
-        }
-        case TOKEN_TYPE_STAR:
-        {
-
-        }
-        case TOKEN_TYPE_BIN_AND:
-        {
-
-        }
-        case TOKEN_TYPE_LOG_NEG:
-        {
-
-        }
-        case TOKEN_TYPE_BIN_NEG:
-        {
-
-        }
-        case TOKEN_TYPE_PLUS_PLUS:
-        {
-
-        }
-        case TOKEN_TYPE_MINUS_MINUS:
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return token_type_to_prefix_operator(type) != OP_INVALID;
 }
 
-export b8 token_type_is_binary_operator(TokenType type)
+export Operator token_type_to_prefix_operator(TokenType type)
 {
     assert(type < TOKEN_TYPE_COUNT);
 
@@ -396,142 +360,195 @@ export b8 token_type_is_binary_operator(TokenType type)
     {
         case TOKEN_TYPE_PLUS:
         {
-
-        }
-        case TOKEN_TYPE_PLUS_EQ:
-        {
-
+            return OP_SIGN_PLUS;
         }
         case TOKEN_TYPE_MINUS:
         {
-
-        }
-        case TOKEN_TYPE_MINUS_EQ:
-        {
-
+            return OP_SIGN_MINUS;
         }
         case TOKEN_TYPE_STAR:
         {
-
-        }
-        case TOKEN_TYPE_STAR_EQ:
-        {
-
-        }
-        case TOKEN_TYPE_DIVIDE:
-        {
-
-        }
-        case TOKEN_TYPE_DIVIDE_EQ:
-        {
-
-        }
-        case TOKEN_TYPE_MODULO:
-        {
-
-        }
-        case TOKEN_TYPE_MODULO_EQ:
-        {
-
-        }
-        case TOKEN_TYPE_LOG_AND:
-        {
-
-        }
-        case TOKEN_TYPE_LOG_OR:
-        {
-
+            return OP_DEREF;
         }
         case TOKEN_TYPE_BIN_AND:
         {
+            return OP_ADDRESS_OF;
+        }
+        case TOKEN_TYPE_LOG_NEG:
+        {
+            return OP_LOG_NEG;
+        }
+        case TOKEN_TYPE_BIN_NEG:
+        {
+            return OP_BIN_NEG;
+        }
+        case TOKEN_TYPE_PLUS_PLUS:
+        {
+            return OP_PREFIX_INC;
+        }
+        case TOKEN_TYPE_MINUS_MINUS:
+        {
+            return OP_PREFIX_DEC;
+        }
+        default:
+        {
+            return OP_INVALID;
+        }
+    }
+}
 
+export b8 token_type_is_infix_operator(TokenType type)
+{
+    return token_type_to_infix_operator(type) != OP_INVALID;
+}
+
+export Operator token_type_to_infix_operator(TokenType type)
+{
+    assert(type < TOKEN_TYPE_COUNT);
+
+    switch(type)
+    {
+        case TOKEN_TYPE_PLUS:
+        {
+            return OP_ADD;
+        }
+        case TOKEN_TYPE_PLUS_EQ:
+        {
+            return OP_ADD_ASSIGN;
+        }
+        case TOKEN_TYPE_MINUS:
+        {
+            return OP_SUB;
+        }
+        case TOKEN_TYPE_MINUS_EQ:
+        {
+            return OP_SUB_ASSIGN;
+        }
+        case TOKEN_TYPE_STAR:
+        {
+            return OP_MUL;
+        }
+        case TOKEN_TYPE_STAR_EQ:
+        {
+            return OP_MUL_ASSIGN;
+        }
+        case TOKEN_TYPE_DIVIDE:
+        {
+            return OP_DIV;
+        }
+        case TOKEN_TYPE_DIVIDE_EQ:
+        {
+            return OP_DIV_ASSIGN;
+        }
+        case TOKEN_TYPE_MODULO:
+        {
+            return OP_MOD;
+        }
+        case TOKEN_TYPE_MODULO_EQ:
+        {
+            return OP_MOD_ASSIGN;
+        }
+        case TOKEN_TYPE_LOG_AND:
+        {
+            return OP_LOG_AND;
+        }
+        case TOKEN_TYPE_LOG_OR:
+        {
+            return OP_LOG_OR;
+        }
+        case TOKEN_TYPE_BIN_AND:
+        {
+            return OP_BIN_AND;
         }
         case TOKEN_TYPE_BIN_AND_EQ:
         {
-
+            return OP_BIN_AND_ASSIGN;
         }
         case TOKEN_TYPE_BIN_OR:
         {
-
+            return OP_BIN_OR;
         }
         case TOKEN_TYPE_BIN_OR_EQ:
         {
-
+            return OP_BIN_OR_ASSIGN;
         }
         case TOKEN_TYPE_BIN_XOR:
         {
-
+            return OP_BIN_XOR;
         }
         case TOKEN_TYPE_BIN_XOR_EQ:
         {
-
-        }
-        case TOKEN_TYPE_BIN_NEG_EQ:
-        {
-
+            return OP_BIN_XOR_ASSIGN;
         }
         case TOKEN_TYPE_BIN_LSHIFT:
         {
-
+            return OP_BIN_LSHIFT;
         }
         case TOKEN_TYPE_BIN_LSHIFT_EQ:
         {
-
+            return OP_BIN_LSHIFT_ASSIGN;
         }
         case TOKEN_TYPE_BIN_RSHIFT:
         {
-
+            return OP_BIN_RSHIFT;
         }
         case TOKEN_TYPE_BIN_RSHIFT_EQ:
         {
-
+            return OP_BIN_RSHIFT_ASSIGN;
         }
         case TOKEN_TYPE_EQ:
         {
-
+            return OP_ASSIGN;
         }
         case TOKEN_TYPE_LOG_NEQ:
         {
-
+            return OP_LOG_NEQ;
         }
         case TOKEN_TYPE_LOG_EQ:
         {
-
+            return OP_LOG_EQ;
         }
         case TOKEN_TYPE_GT:
         {
-
+            return OP_GT;
         }
         case TOKEN_TYPE_GEQ:
         {
-
+            return OP_GEQ;
         }
         case TOKEN_TYPE_LT:
         {
-
+            return OP_LT;
         }
         case TOKEN_TYPE_LEQ:
         {
-
+            return OP_LEQ;
         }
         case TOKEN_TYPE_LBRACKET:
         {
-
+            return OP_ARRAY_SUBSCRIPT;
         }
         case TOKEN_TYPE_ARROW:
         {
-
+            return OP_POINTER_MEMBER_ACCESS;
         }
         case TOKEN_TYPE_DOT:
         {
-            return true;
+            return OP_MEMBER_ACCESS;
+        }
+        default:
+        {
+            return OP_INVALID;
         }
     }
-
-    return false;
 }
 
 export b8 token_type_is_postfix_operator(TokenType type)
+{
+    return token_type_to_postfix_operator(type) != OP_INVALID;
+}
+
+export Operator token_type_to_postfix_operator(TokenType type)
 {
     assert(type < TOKEN_TYPE_COUNT);
 
@@ -539,19 +556,272 @@ export b8 token_type_is_postfix_operator(TokenType type)
     {
         case TOKEN_TYPE_PLUS_PLUS:
         {
-
+            return OP_POSTFIX_INC;
         }
         case TOKEN_TYPE_MINUS_MINUS:
         {
-
+            return OP_POSTFIX_DEC;
         }
         case TOKEN_TYPE_LBRACKET:
         {
-            return true;
+            return OP_ARRAY_SUBSCRIPT;
+        }
+        default:
+        {
+            return OP_INVALID;
         }
     }
+}
 
-    return false;
+export enum Operator : u8
+{
+    OP_INVALID,
+
+    OP_POSTFIX_INC,
+    OP_POSTFIX_DEC,
+    OP_ARRAY_SUBSCRIPT,
+    OP_MEMBER_ACCESS,
+    OP_POINTER_MEMBER_ACCESS,
+
+    OP_PREFIX_INC,
+    OP_PREFIX_DEC,
+    OP_SIGN_PLUS,
+    OP_SIGN_MINUS,
+    OP_LOG_NEG,
+    OP_BIN_NEG,
+    OP_DEREF,
+    OP_ADDRESS_OF,
+
+    OP_MUL,
+    OP_DIV,
+    OP_MOD,
+
+    OP_ADD,
+    OP_SUB,
+
+    OP_BIN_LSHIFT,
+    OP_BIN_RSHIFT,
+
+    OP_LT,
+    OP_LEQ,
+    OP_GT,
+    OP_GEQ,
+
+    OP_LOG_EQ,
+    OP_LOG_NEQ,
+
+    OP_BIN_AND,
+
+    OP_BIN_XOR,
+
+    OP_BIN_OR,
+
+    OP_LOG_AND,
+
+    OP_LOG_OR,
+
+    OP_TERNARY,
+
+    OP_ASSIGN,
+    OP_ADD_ASSIGN,
+    OP_SUB_ASSIGN,
+    OP_MUL_ASSIGN,
+    OP_DIV_ASSIGN,
+    OP_MOD_ASSIGN,
+    OP_BIN_LSHIFT_ASSIGN,
+    OP_BIN_RSHIFT_ASSIGN,
+    OP_BIN_AND_ASSIGN,
+    OP_BIN_XOR_ASSIGN,
+    OP_BIN_OR_ASSIGN,
+
+    OP_COUNT
+}
+
+export Precedence operator_to_precedence(Operator op)
+{
+    assert(op < OP_COUNT);
+
+    switch(op)
+    {
+        case OP_POSTFIX_INC:
+        {
+
+        }
+        case OP_POSTFIX_DEC:
+        {
+
+        }
+        case OP_ARRAY_SUBSCRIPT:
+        {
+
+        }
+        case OP_POINTER_MEMBER_ACCESS:
+        {
+
+        }
+        case OP_MEMBER_ACCESS:
+        {
+            return PRECEDENCE_1;
+        }
+        case OP_PREFIX_INC:
+        {
+
+        }
+        case OP_PREFIX_DEC:
+        {
+
+        }
+        case OP_SIGN_PLUS:
+        {
+
+        }
+        case OP_SIGN_MINUS:
+        {
+
+        }
+        case OP_LOG_NEG:
+        {
+
+        }
+        case OP_BIN_NEG:
+        {
+
+        }
+        case OP_DEREF:
+        {
+
+        }
+        case OP_ADDRESS_OF:
+        {
+            return PRECEDENCE_2;
+        }
+        case OP_MUL:
+        {
+
+        }
+        case OP_DIV:
+        {
+
+        }
+        case OP_MOD:
+        {
+            return PRECEDENCE_3;
+        }
+        case OP_ADD:
+        {
+
+        }
+        case OP_SUB:
+        {
+            return PRECEDENCE_4;
+        }
+        case OP_BIN_LSHIFT:
+        {
+
+        }
+        case OP_BIN_RSHIFT:
+        {
+            return PRECEDENCE_5;
+        }
+        case OP_LT:
+        {
+
+        }
+        case OP_LEQ:
+        {
+
+        }
+        case OP_GT:
+        {
+
+        }
+        case OP_GEQ:
+        {
+            return PRECEDENCE_6;
+        }
+        case OP_LOG_EQ:
+        {
+
+        }
+        case OP_LOG_NEQ:
+        {
+            return PRECEDENCE_7;
+        }
+        case OP_BIN_AND:
+        {
+            return PRECEDENCE_8;
+        }
+        case OP_BIN_XOR:
+        {
+            return PRECEDENCE_9;
+        }
+        case OP_BIN_OR:
+        {
+            return PRECEDENCE_10;
+        }
+        case OP_LOG_AND:
+        {
+            return PRECEDENCE_11;
+        }
+        case OP_LOG_OR:
+        {
+            return PRECEDENCE_12;
+        }
+        case OP_TERNARY:
+        {
+            return PRECEDENCE_13;
+        }
+        case OP_ASSIGN:
+        {
+
+        }
+        case OP_ADD_ASSIGN:
+        {
+
+        }
+        case OP_SUB_ASSIGN:
+        {
+
+        }
+        case OP_MUL_ASSIGN:
+        {
+
+        }
+        case OP_DIV_ASSIGN:
+        {
+
+        }
+        case OP_MOD_ASSIGN:
+        {
+
+        }
+        case OP_BIN_LSHIFT_ASSIGN:
+        {
+
+        }
+        case OP_BIN_RSHIFT_ASSIGN:
+        {
+
+        }
+        case OP_BIN_AND_ASSIGN:
+        {
+
+        }
+        case OP_BIN_XOR_ASSIGN:
+        {
+
+        }
+        case OP_BIN_OR_ASSIGN:
+        {
+            return PRECEDENCE_14;
+        }
+        default:
+        {
+            assert(false);
+
+            return PRECEDENCE_MIN;
+        }
+    }
 }
 
 export enum Precedence : u8
@@ -576,149 +846,6 @@ export enum Precedence : u8
     PRECEDENCE_MIN,
 
     PRECEDENCE_COUNT
-}
-
-export Precedence token_type_to_binary_operator_precedence(TokenType type)
-{
-    assert(token_type_is_binary_operator(type));
-
-    switch(type)
-    {
-        case TOKEN_TYPE_PLUS:
-        {
-            return PRECEDENCE_4;
-        }
-        case TOKEN_TYPE_PLUS_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_MINUS:
-        {
-            return PRECEDENCE_4;
-        }
-        case TOKEN_TYPE_MINUS_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_STAR:
-        {
-            return PRECEDENCE_3;
-        }
-        case TOKEN_TYPE_STAR_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_DIVIDE:
-        {
-            return PRECEDENCE_3;
-        }
-        case TOKEN_TYPE_DIVIDE_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_MODULO:
-        {
-            return PRECEDENCE_3;
-        }
-        case TOKEN_TYPE_MODULO_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_LOG_AND:
-        {
-            return PRECEDENCE_11;
-        }
-        case TOKEN_TYPE_LOG_OR:
-        {
-            return PRECEDENCE_12;
-        }
-        case TOKEN_TYPE_BIN_AND:
-        {
-            return PRECEDENCE_8;
-        }
-        case TOKEN_TYPE_BIN_AND_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_BIN_OR:
-        {
-            return PRECEDENCE_10;
-        }
-        case TOKEN_TYPE_BIN_OR_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_BIN_XOR:
-        {
-            return PRECEDENCE_9;
-        }
-        case TOKEN_TYPE_BIN_XOR_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_BIN_NEG_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_BIN_LSHIFT:
-        {
-            return PRECEDENCE_5;
-        }
-        case TOKEN_TYPE_BIN_LSHIFT_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_BIN_RSHIFT:
-        {
-            return PRECEDENCE_5;
-        }
-        case TOKEN_TYPE_BIN_RSHIFT_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_EQ:
-        {
-            return PRECEDENCE_14;
-        }
-        case TOKEN_TYPE_LOG_NEQ:
-        {
-            return PRECEDENCE_7;
-        }
-        case TOKEN_TYPE_LOG_EQ:
-        {
-            return PRECEDENCE_7;
-        }
-        case TOKEN_TYPE_GT:
-        {
-            return PRECEDENCE_6;
-        }
-        case TOKEN_TYPE_GEQ:
-        {
-            return PRECEDENCE_6;
-        }
-        case TOKEN_TYPE_LT:
-        {
-            return PRECEDENCE_6;
-        }
-        case TOKEN_TYPE_LEQ:
-        {
-            return PRECEDENCE_6;
-        }
-        case TOKEN_TYPE_LBRACKET:
-        {
-            return PRECEDENCE_1;
-        }
-        case TOKEN_TYPE_ARROW:
-        {
-            return PRECEDENCE_1;
-        }
-        case TOKEN_TYPE_DOT:
-        {
-            return PRECEDENCE_1;
-        }
-    }
-
-    return PRECEDENCE_1;
 }
 
 export struct Token

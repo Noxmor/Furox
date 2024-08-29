@@ -8,16 +8,61 @@ export void transpile_unary_expr(Transpiler* transpiler, ASTUnaryExpr* expr)
 
     assert(expr != nullptr);
 
-    if(expr->is_postfix)
+    switch(expr->operator)
     {
-        fprintf(transpiler->file, "(");
-        transpile_ast(transpiler, expr->operand);
-        fprintf(transpiler->file, "%s)", token_type_to_str(expr->operator));
-    }
-    else
-    {
-        fprintf(transpiler->file, "(%s", token_type_to_str(expr->operator));
-        transpile_ast(transpiler, expr->operand);
-        fprintf(transpiler->file, ")");
+        case OP_PREFIX_INC:
+        {
+
+        }
+        case OP_PREFIX_DEC:
+        {
+
+        }
+        case OP_SIGN_PLUS:
+        {
+
+        }
+        case OP_SIGN_MINUS:
+        {
+
+        }
+        case OP_LOG_NEG:
+        {
+
+        }
+        case OP_BIN_NEG:
+        {
+
+        }
+        case OP_DEREF:
+        {
+
+        }
+        case OP_ADDRESS_OF:
+        {
+            fprintf(transpiler->file, "(%s", token_type_to_str(expr->type));
+            transpile_ast(transpiler, expr->operand);
+            fprintf(transpiler->file, ")");
+
+            break;
+        }
+        case OP_POSTFIX_INC:
+        {
+
+        }
+        case OP_POSTFIX_DEC:
+        {
+            fprintf(transpiler->file, "(");
+            transpile_ast(transpiler, expr->operand);
+            fprintf(transpiler->file, "%s)", token_type_to_str(expr->type));
+
+            break;
+        }
+        default:
+        {
+            assert(false);
+
+            break;
+        }
     }
 }

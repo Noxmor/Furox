@@ -10,7 +10,7 @@ export void transpile_binary_expr(Transpiler* transpiler, ASTBinaryExpr* expr)
 
     switch(expr->operator)
     {
-        case TOKEN_TYPE_LBRACKET:
+        case OP_ARRAY_SUBSCRIPT:
         {
             transpile_ast(transpiler, expr->left);
             fprintf(transpiler->file, "[");
@@ -23,7 +23,7 @@ export void transpile_binary_expr(Transpiler* transpiler, ASTBinaryExpr* expr)
         {
             fprintf(transpiler->file, "(");
             transpile_ast(transpiler, expr->left);
-            fprintf(transpiler->file, " %s ", token_type_to_str(expr->operator));
+            fprintf(transpiler->file, " %s ", token_type_to_str(expr->type));
             transpile_ast(transpiler, expr->right);
             fprintf(transpiler->file, ")");
 

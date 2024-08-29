@@ -3,21 +3,21 @@ import "../core/parser.frx";
 
 export struct ASTBinaryExpr
 {
-    TokenType operator;
-    Precedence precedence;
+    TokenType type;
+    Operator operator;
 
     AST* left;
     AST* right;
 }
 
-export ASTBinaryExpr* make_binary_expr(Arena* arena, TokenType operator,
-    AST* left, AST* right)
+export ASTBinaryExpr* make_binary_expr(Arena* arena, TokenType type,
+    Operator operator, AST* left, AST* right)
 {
     assert(arena != nullptr);
 
-    assert(operator < TOKEN_TYPE_COUNT);
+    assert(token_type_is_infix_operator(type));
 
-    assert(token_type_is_binary_operator(operator));
+    assert(operator != OP_INVALID && operator < OP_COUNT);
 
     assert(left != nullptr);
 
@@ -25,8 +25,8 @@ export ASTBinaryExpr* make_binary_expr(Arena* arena, TokenType operator,
 
     ASTBinaryExpr* expr = arena_alloc(arena, sizeof(ASTBinaryExpr));
 
+    expr->type = type;
     expr->operator = operator;
-    expr->precedence = token_type_to_binary_operator_precedence(operator);
     expr->left = left;
     expr->right = right;
 
@@ -42,7 +42,7 @@ export void print_binary_expr(ASTBinaryExpr* expr, FILE* file, usize depth)
     print_ast_depth(file, depth);
 
     fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_BINARY_EXPR),
-        token_type_to_str(expr->operator));
+        token_type_to_str(expr->type));
 
     print_ast(expr->left, file, depth + 1);
     print_ast(expr->right, file, depth + 1);

@@ -786,12 +786,6 @@ export void lexer_read_token(Lexer* lexer, Token* token)
         {
             token->type = TOKEN_TYPE_BIN_NEG;
 
-            if(lexer_peek_char(lexer, 1) == '=')
-            {
-                token->type = TOKEN_TYPE_BIN_NEG_EQ;
-                lexer_advance(lexer);
-            }
-
             break;
         }
         case '<':

@@ -5,12 +5,6 @@ export AST* parse_primary_expr(Parser* parser)
 {
     assert(parser != nullptr);
 
-    if(token_type_is_unary_operator(parser->token->type))
-    {
-        return make_ast(&parser->arena, AST_TYPE_UNARY_EXPR,
-            parse_unary_expr(parser));
-    }
-
     AST* primary_expr = nullptr;
 
     switch(parser->token->type)
@@ -122,61 +116,13 @@ export AST* parse_primary_expr(Parser* parser)
     return primary_expr;
 }
 
-AST* parse_postfix_expr(Parser* parser)
+export AST* parse_expr(Parser* parser)
 {
-    assert(parser != nullptr);
-
-    AST* expr = parse_primary_expr(parser);
-
-    TokenType operator = parser->token->type;
-
-    if(!token_type_is_postfix_operator(operator))
-    {
-        return expr;
-    }
-
-    parser_eat(parser, operator);
-
-    switch(operator)
-    {
-        case TOKEN_TYPE_PLUS_PLUS:
-        {
-
-        }
-        case TOKEN_TYPE_MINUS_MINUS:
-        {
-            ASTUnaryExpr* unary_expr = make_unary_expr(&parser->arena,
-                operator, expr, true);
-
-            expr = make_ast(&parser->arena, AST_TYPE_UNARY_EXPR, unary_expr);
-
-            break;
-        }
-        case TOKEN_TYPE_LBRACKET:
-        {
-            AST* subscript = parse_expr(parser);
-
-            parser_eat(parser, TOKEN_TYPE_RBRACKET);
-
-            ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena,
-                operator, expr, subscript);
-
-            expr = make_ast(&parser->arena, AST_TYPE_BINARY_EXPR, binary_expr);
-
-            break;
-        }
-        default:
-        {
-            parser_panic(parser);
-
-            break;
-        }
-    }
-
-    return expr;
+    return parse_expr_with_precedence(parser, PRECEDENCE_MIN);
 }
 
-export AST* parse_expr(Parser* parser)
+export AST* parse_expr_with_precedence(Parser* parser,
+    Precedence min_precedence)
 {
     assert(parser != nullptr);
 
@@ -185,70 +131,82 @@ export AST* parse_expr(Parser* parser)
     if(parser->token->type == TOKEN_TYPE_LPAREN)
     {
         parser_eat(parser, TOKEN_TYPE_LPAREN);
-
         expr = parse_expr(parser);
-        if(expr->type == AST_TYPE_BINARY_EXPR)
-        {
-            ASTBinaryExpr* binary_expr = expr->node;
-            binary_expr->precedence = PRECEDENCE_MAX;
-        }
-
         parser_eat(parser, TOKEN_TYPE_RPAREN);
+    }
+    else if(token_type_is_prefix_operator(parser->token->type))
+    {
+        TokenType type = parser->token->type;
+
+        parser_eat(parser, type);
+
+        Operator operator = token_type_to_prefix_operator(type);
+        Precedence precedence = operator_to_precedence(operator);
+        ASTUnaryExpr* unary_expr = make_unary_expr(&parser->arena, type,
+            operator, parse_expr_with_precedence(parser, precedence));
+        expr = make_ast(&parser->arena, AST_TYPE_UNARY_EXPR, unary_expr);
     }
     else
     {
-        expr = parse_postfix_expr(parser);
+        expr = parse_primary_expr(parser);
     }
 
-    if(!token_type_is_binary_operator(parser->token->type))
+    assert(expr != nullptr);
+
+    while(true)
     {
-        return expr;
-    }
+        TokenType type = parser->token->type;
 
-    TokenType operator = parser->token->type;
-
-    parser_eat(parser, parser->token->type);
-
-    AST* left = expr;
-    AST* right = parse_expr(parser);
-
-    ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena, operator,
-        left, right);
-
-    expr = make_ast(&parser->arena, AST_TYPE_BINARY_EXPR, binary_expr);
-
-    if(binary_expr->right->type != AST_TYPE_BINARY_EXPR)
-    {
-        return expr;
-    }
-
-    ASTBinaryExpr* right_child = binary_expr->right->node;
-    if(binary_expr->precedence <= right_child->precedence)
-    {
-        AST* lower_expr_wrapper = binary_expr->right;
-
-        AST* left_most_child_wrapper = lower_expr_wrapper;
-        ASTBinaryExpr* left_most_child = left_most_child_wrapper->node;
-
-        b8 has_higher_precedence_than_subtree = true;
-        while(left_most_child->left->type == AST_TYPE_BINARY_EXPR)
+        if(token_type_is_postfix_operator(type))
         {
-            left_most_child_wrapper = left_most_child->left;
-            left_most_child = left_most_child_wrapper->node;
-
-            if(left_most_child->precedence < binary_expr->precedence)
+            Operator operator = token_type_to_postfix_operator(type);
+            Precedence precedence = operator_to_precedence(operator);
+            if(precedence > min_precedence)
             {
-                has_higher_precedence_than_subtree = false;
                 break;
             }
+
+            parser_eat(parser, type);
+
+            if(operator == OP_ARRAY_SUBSCRIPT)
+            {
+                AST* index = parse_expr(parser);
+                parser_eat(parser, TOKEN_TYPE_RBRACKET);
+
+                ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena,
+                    type, operator, expr, index);
+                expr = make_ast(&parser->arena, AST_TYPE_BINARY_EXPR,
+                    binary_expr);
+            }
+            else
+            {
+                ASTUnaryExpr* unary_expr = make_unary_expr(&parser->arena, type,
+                    operator, expr);
+                expr = make_ast(&parser->arena, AST_TYPE_UNARY_EXPR,
+                    unary_expr);
+            }
+
+            continue;
+        }
+        else if(token_type_is_infix_operator(type))
+        {
+            Operator operator = token_type_to_infix_operator(type);
+            Precedence precedence = operator_to_precedence(operator);
+            if(precedence > min_precedence)
+            {
+                break;
+            }
+
+            parser_eat(parser, type);
+
+            ASTBinaryExpr* binary_expr = make_binary_expr(&parser->arena, type,
+                operator, expr, parse_expr_with_precedence(parser, precedence));
+            expr = make_ast(&parser->arena, AST_TYPE_BINARY_EXPR, binary_expr);
+
+            continue;
         }
 
-        if(has_higher_precedence_than_subtree)
-        {
-            binary_expr->right = left_most_child->left;
-            left_most_child->left = expr;
-            expr = lower_expr_wrapper;
-        }
+        break;
     }
 
     return expr;
