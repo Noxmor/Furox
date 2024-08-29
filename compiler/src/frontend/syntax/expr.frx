@@ -161,7 +161,7 @@ export AST* parse_expr_with_precedence(Parser* parser,
         {
             Operator operator = token_type_to_postfix_operator(type);
             Precedence precedence = operator_to_precedence(operator);
-            if(precedence > min_precedence)
+            if(precedence >= min_precedence)
             {
                 break;
             }
@@ -192,7 +192,7 @@ export AST* parse_expr_with_precedence(Parser* parser,
         {
             Operator operator = token_type_to_infix_operator(type);
             Precedence precedence = operator_to_precedence(operator);
-            if(precedence > min_precedence)
+            if(precedence >= min_precedence)
             {
                 break;
             }
