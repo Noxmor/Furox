@@ -15,7 +15,7 @@ export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
         {
             analyze_ast(parser, expr->left);
 
-            if(expr->right->type != AST_TYPE_VAR)
+            if(expr->right->type != AST_TYPE_UNRESOLVED_NAME)
             {
                 //FIXME: Print the correct location, this is only a placeholder
                 SourceLocation loc;
@@ -25,9 +25,9 @@ export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
             }
             else
             {
-                ASTVar* var = expr->right->node;
+                ASTUnresolvedName* unresolved_name = expr->right->node;
                 ASTStructMember* member = make_struct_member(&parser->arena,
-                    var->name);
+                    unresolved_name->name);
 
                 expr->right->type = AST_TYPE_STRUCT_MEMBER;
                 expr->right->node = member;
@@ -41,7 +41,7 @@ export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
         {
             analyze_ast(parser, expr->left);
 
-            if(expr->right->type != AST_TYPE_VAR)
+            if(expr->right->type != AST_TYPE_UNRESOLVED_NAME)
             {
                 //FIXME: Print the correct location, this is only a placeholder
                 SourceLocation loc;
@@ -51,9 +51,9 @@ export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
             }
             else
             {
-                ASTVar* var = expr->right->node;
+                ASTUnresolvedName* unresolved_name = expr->right->node;
                 ASTStructMember* member = make_struct_member(&parser->arena,
-                    var->name);
+                    unresolved_name->name);
 
                 expr->right->type = AST_TYPE_STRUCT_MEMBER;
                 expr->right->node = member;

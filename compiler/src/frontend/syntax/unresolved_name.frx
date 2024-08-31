@@ -1,0 +1,46 @@
+import "../core/parser.frx";
+
+export struct ASTUnresolvedName
+{
+    char* name;
+    Scope* scope;
+}
+
+ASTUnresolvedName* make_unresolved_name(Arena* arena, char* name, Scope* scope)
+{
+    assert(name != nullptr);
+
+    ASTUnresolvedName* unresolved_name = arena_alloc(arena,
+        sizeof(ASTUnresolvedName));
+
+    unresolved_name->name = name;
+    unresolved_name->scope = scope;
+
+    return unresolved_name;
+}
+
+export ASTUnresolvedName* parse_unresolved_name(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    char* name = parser->token->identifier;
+    Scope* scope = parser->current_scope;
+
+    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+
+    return make_unresolved_name(&parser->arena, name, scope);
+}
+
+export void print_unresolved_name(ASTUnresolvedName* unresolved_name,
+    FILE* file, usize depth)
+{
+    assert(unresolved_name != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_UNRESOLVED_NAME),
+        unresolved_name->name);
+}
+

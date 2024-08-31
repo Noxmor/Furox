@@ -1,7 +1,6 @@
 import "binary_expr.frx";
 import "do_while_loop.frx";
 import "enum_constant.frx";
-import "enum_constant_or_global_var.frx";
 import "enum_def.frx";
 import "expr_stmt.frx";
 import "extern_block.frx";
@@ -20,6 +19,8 @@ import "scope.frx";
 import "struct_def.frx";
 import "struct_member.frx";
 import "unary_expr.frx";
+import "unresolved_name.frx";
+import "unresolved_namespaced_name.frx";
 import "var.frx";
 import "var_decl.frx";
 import "var_def.frx";
@@ -131,12 +132,6 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
-        case AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR:
-        {
-            analyze_enum_constant_or_global_var(parser, node, ast);
-
-            break;
-        }
         case AST_TYPE_UNARY_EXPR:
         {
             analyze_unary_expr(parser, node);
@@ -218,6 +213,18 @@ export void analyze_ast(Parser* parser, AST* ast)
         case AST_TYPE_ENUM_COUNT:
         {
             analyze_enum_count(parser, node, ast);
+
+            break;
+        }
+        case AST_TYPE_UNRESOLVED_NAME:
+        {
+            analyze_unresolved_name(parser, node, ast);
+
+            break;
+        }
+        case AST_TYPE_UNRESOLVED_NAMESPACED_NAME:
+        {
+            analyze_unresolved_namespaced_name(parser, node, ast);
 
             break;
         }

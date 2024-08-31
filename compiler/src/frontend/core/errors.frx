@@ -20,7 +20,14 @@ export void error_undefined_enum_constant(char* filepath, SourceLocation loc,
         constant_name, enum_name);
 }
 
-export void error_ambiguous_enum_constant_or_global_var(char* filepath,
+export void error_ambiguous_unresolved_name(char* filepath, SourceLocation loc,
+    char* name)
+{
+    log_error(filepath, loc, "Encountered ambiguous %s %s!",
+        ast_type_to_str(AST_TYPE_UNRESOLVED_NAME), name);
+}
+
+export void error_ambiguous_unresolved_namespaced_name(char* filepath,
     SourceLocation loc, Namespace* ns, char* name)
 {
     usize size = 1 + strlen(ns->name);
@@ -46,8 +53,8 @@ export void error_ambiguous_enum_constant_or_global_var(char* filepath,
         ns = ns->parent;
     }
 
-    log_error(filepath, loc, "Encountered ambiguous enum-constant or global-variable %s%s!",
-        ns_str, name);
+    log_error(filepath, loc, "Encountered ambiguous %s %s%s!",
+        ast_type_to_str(AST_TYPE_UNRESOLVED_NAMESPACED_NAME), ns_str, name);
 }
 
 export void error_namespace_is_reserved(char* filepath, SourceLocation loc,
@@ -146,4 +153,40 @@ export void error_enum_count_invalid_arg(char* filepath, SourceLocation loc,
 {
     log_error(filepath, loc, "Invalid argument %s to internal function enum_count!",
         name);
+}
+
+export void error_unresolved_name(char* filepath, SourceLocation loc,
+    char* name)
+{
+    log_error(filepath, loc, "Could not resolve name %s!", name);
+}
+
+export void error_unresolved_namespaced_name(char* filepath, SourceLocation loc,
+    Namespace* ns, char* name)
+{
+    usize size = 1 + strlen(ns->name);
+
+    Namespace* temp = ns->parent;
+    while(temp != nullptr)
+    {
+        size = size + strlen(token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION))
+            + strlen(temp->name);
+        temp = temp->parent;
+    }
+
+    char[size] ns_str;
+    strcpy(ns_str, ns->name);
+
+    ns = ns->parent;
+
+    while(ns != nullptr)
+    {
+        strcat(ns_str, token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION));
+        strcat(ns_str, ns->name);
+
+        ns = ns->parent;
+    }
+
+    log_error(filepath, loc, "Could not resolve namespaced name %s%s%s!",
+        ns_str, token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION), name);
 }

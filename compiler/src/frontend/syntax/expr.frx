@@ -30,13 +30,13 @@ export AST* parse_primary_expr(Parser* parser)
             else if(resolved_ns == nullptr)
             {
                 primary_expr = make_ast(&parser->arena,
-                    AST_TYPE_VAR, parse_var(parser, nullptr));
+                    AST_TYPE_UNRESOLVED_NAME, parse_unresolved_name(parser));
             }
             else
             {
                 primary_expr = make_ast(&parser->arena,
-                    AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR,
-                    parse_enum_constant_or_global_var(parser, resolved_ns));
+                    AST_TYPE_UNRESOLVED_NAMESPACED_NAME,
+                    parse_unresolved_namespaced_name(parser, resolved_ns));
             }
 
             break;

@@ -6,7 +6,6 @@ import "../syntax/do_while_loop.frx";
 import "../syntax/extern_block.frx";
 import "../syntax/enum_def.frx";
 import "../syntax/enum_constant.frx";
-import "../syntax/enum_constant_or_global_var.frx";
 import "../syntax/expr_stmt.frx";
 import "../syntax/float_literal.frx";
 import "../syntax/for_loop.frx";
@@ -26,6 +25,8 @@ import "../syntax/string_literal.frx";
 import "../syntax/struct_def.frx";
 import "../syntax/struct_member.frx";
 import "../syntax/unary_expr.frx";
+import "../syntax/unresolved_name.frx";
+import "../syntax/unresolved_namespaced_name.frx";
 import "../syntax/var.frx";
 import "../syntax/var_decl.frx";
 import "../syntax/var_def.frx";
@@ -53,7 +54,6 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "variable-declaration",
     "variable-definition",
     "variable",
-    "enum-constant-or-global-var",
     "unary-expression",
     "binary-expression",
     "expression-statement",
@@ -69,7 +69,9 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "while-loop",
     "do-while-loop",
     "sizeof",
-    "enum-count"
+    "enum-count",
+    "unresolved-name",
+    "unresolved-namespaced-name",
 };
 
 export enum ASTType : u8
@@ -99,8 +101,6 @@ export enum ASTType : u8
     AST_TYPE_VAR_DEF,
     AST_TYPE_VAR,
 
-    AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR,
-
     AST_TYPE_UNARY_EXPR,
     AST_TYPE_BINARY_EXPR,
 
@@ -122,6 +122,9 @@ export enum ASTType : u8
 
     AST_TYPE_SIZEOF,
     AST_TYPE_ENUM_COUNT,
+
+    AST_TYPE_UNRESOLVED_NAME,
+    AST_TYPE_UNRESOLVED_NAMESPACED_NAME,
 
     AST_TYPE_COUNT
 }
@@ -256,12 +259,6 @@ export void print_ast(AST* ast, FILE* file, usize depth)
 
             break;
         }
-        case AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR:
-        {
-            print_enum_constant_or_global_var(node, file, depth);
-
-            break;
-        }
         case AST_TYPE_UNARY_EXPR:
         {
             print_unary_expr(node, file, depth);
@@ -355,6 +352,18 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_ENUM_COUNT:
         {
             print_enum_count(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_UNRESOLVED_NAME:
+        {
+            print_unresolved_name(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_UNRESOLVED_NAMESPACED_NAME:
+        {
+            print_unresolved_namespaced_name(node, file, depth);
 
             break;
         }

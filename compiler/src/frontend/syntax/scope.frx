@@ -210,12 +210,12 @@ export ASTScope* parse_scope(Parser* parser)
 
                             break;
                         }
-                        case AST_TYPE_ENUM_CONSTANT_OR_GLOBAL_VAR:
+                        case AST_TYPE_UNRESOLVED_NAMESPACED_NAME:
                         {
-                            ASTEnumConstantOrGlobalVar* enum_constant_or_global_var
+                            ASTUnresolvedNamespacedName* unresolved_namespaced_name
                                 = expr->node;
 
-                            enum_constant_or_global_var->ns = resolved_ns;
+                            unresolved_namespaced_name->ns = resolved_ns;
 
                             break;
                         }

@@ -1,0 +1,118 @@
+import "../core/namespace.frx";
+import "../core/scope.frx";
+
+export struct MacroSymbol
+{
+    Scope* scope;
+    Namespace* ns;
+    char* name;
+    AST* value;
+    b8 exported;
+}
+
+export void macro_symbol_init(MacroSymbol* symbol, Scope* scope, Namespace* ns,
+    char* name, AST* value, b8 exported)
+{
+    assert(symbol != nullptr);
+
+    assert(scope != nullptr);
+
+    assert(name != nullptr);
+
+    assert(value != nullptr);
+
+    symbol->scope = scope;
+    symbol->ns = ns;
+    symbol->name = name;
+    symbol->value = value;
+    symbol->exported = exported;
+}
+
+struct MacroTableEntry
+{
+    MacroSymbol* symbol;
+    MacroTableEntry* next;
+}
+
+macro MACRO_TABLE_CAPACITY = 128;
+
+export struct MacroTable
+{
+    MacroTableEntry*[MACRO_TABLE_CAPACITY] entries;
+}
+
+export void macro_table_init(MacroTable* table)
+{
+    assert(table != nullptr);
+
+    memset(table, 0, sizeof(MacroTable));
+}
+
+export MacroSymbol* macro_table_find_r(MacroTable* table, Namespace* ns,
+    char* name)
+{
+    MacroSymbol* symbol = macro_table_find(table, ns, name);
+    while(symbol == nullptr && ns != nullptr)
+    {
+        ns = ns->parent;
+        symbol = macro_table_find(table, ns, name);
+    }
+
+    return symbol;
+}
+
+export MacroSymbol* macro_table_find(MacroTable* table, Namespace* ns,
+    char* name)
+{
+    assert(table != nullptr);
+
+    assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % MACRO_TABLE_CAPACITY;
+    MacroTableEntry* entry = table->entries[index];
+
+    while(entry != nullptr)
+    {
+        MacroSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        {
+            return symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    return nullptr;
+}
+
+export b8 macro_table_insert(MacroTable* table, MacroSymbol* symbol)
+{
+    assert(table != nullptr);
+
+    assert(symbol != nullptr);
+
+    u64 index = hash_djb2(symbol->name) % MACRO_TABLE_CAPACITY;
+    MacroTableEntry* entry = table->entries[index];
+
+    while(entry != nullptr)
+    {
+        MacroSymbol* existing_symbol = entry->symbol;
+
+        if(strcmp(existing_symbol->name, symbol->name) == 0
+            && namespace_equals(existing_symbol->ns, symbol->ns))
+        {
+            return false;
+        }
+
+        entry = entry->next;
+    }
+
+    MacroTableEntry* new_entry = malloc(sizeof(MacroTableEntry));
+    new_entry->symbol = symbol;
+    new_entry->next = table->entries[index];
+
+    table->entries[index] = new_entry;
+
+    return true;
+}
