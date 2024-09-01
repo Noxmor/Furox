@@ -9,10 +9,11 @@ export struct StructSymbol
     char* name;
     List fields;
     b8 exported;
+    b8 external;
 }
 
 export void struct_symbol_init(StructSymbol* symbol, Scope* scope,
-    Namespace* ns, char* name, b8 exported)
+    Namespace* ns, char* name, b8 exported, b8 external)
 {
     assert(symbol != nullptr);
 
@@ -25,6 +26,7 @@ export void struct_symbol_init(StructSymbol* symbol, Scope* scope,
     symbol->name = name;
     list_init(&symbol->fields);
     symbol->exported = exported;
+    symbol->external = external;
 }
 
 struct StructTableEntry

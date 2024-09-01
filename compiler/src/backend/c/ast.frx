@@ -37,6 +37,12 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
 
             break;
         }
+        case AST_TYPE_STRUCT_DECL:
+        {
+            transpile_struct_decl(transpiler, node);
+
+            break;
+        }
         case AST_TYPE_STRUCT_DEF:
         {
             transpile_struct_def(transpiler, node);

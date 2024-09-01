@@ -23,8 +23,14 @@ export void transpile_type_specifier(Transpiler* transpiler,
     else if(type_specifier->struct_type != nullptr)
     {
         StructSymbol* struct_symbol = type_specifier->struct_type;
-        fprintf(transpiler->file, "%s", mangle_struct_name(struct_symbol->scope,
-            struct_symbol->ns, struct_symbol->name));
+        char* name = struct_symbol->name;
+        if(!struct_symbol->external)
+        {
+            name = mangle_struct_name(struct_symbol->scope, struct_symbol->ns,
+                struct_symbol->name);
+        }
+
+        fprintf(transpiler->file, "%s", name);
     }
 
     usize i;

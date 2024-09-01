@@ -22,6 +22,7 @@ import "../syntax/namespace.frx";
 import "../syntax/return_stmt.frx";
 import "../syntax/scope.frx";
 import "../syntax/string_literal.frx";
+import "../syntax/struct_decl.frx";
 import "../syntax/struct_def.frx";
 import "../syntax/struct_member.frx";
 import "../syntax/unary_expr.frx";
@@ -42,6 +43,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "namespace",
     "enum-definition",
     "enum-constant",
+    "struct-declaration",
     "struct-definition",
     "struct-member",
     "function-declaration",
@@ -86,6 +88,7 @@ export enum ASTType : u8
     AST_TYPE_NAMESPACE,
     AST_TYPE_ENUM_DEF,
     AST_TYPE_ENUM_CONSTANT,
+    AST_TYPE_STRUCT_DECL,
     AST_TYPE_STRUCT_DEF,
     AST_TYPE_STRUCT_MEMBER,
     AST_TYPE_FUNC_DECL,
@@ -190,6 +193,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_ENUM_CONSTANT:
         {
             print_enum_constant(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_STRUCT_DECL:
+        {
+            print_struct_decl(node, file, depth);
 
             break;
         }

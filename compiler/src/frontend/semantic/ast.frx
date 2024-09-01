@@ -16,6 +16,7 @@ import "internal_func_call.frx";
 import "namespace.frx";
 import "return_stmt.frx";
 import "scope.frx";
+import "struct_decl.frx";
 import "struct_def.frx";
 import "struct_member.frx";
 import "unary_expr.frx";
@@ -63,6 +64,12 @@ export void analyze_ast(Parser* parser, AST* ast)
         case AST_TYPE_ENUM_CONSTANT:
         {
             analyze_enum_constant(parser, node);
+
+            break;
+        }
+        case AST_TYPE_STRUCT_DECL:
+        {
+            analyze_struct_decl(parser, node);
 
             break;
         }

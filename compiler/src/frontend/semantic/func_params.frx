@@ -17,6 +17,8 @@ void analyze_func_param(Parser* parser, ASTFuncParam* param)
 
         parser->failed = true;
     }
+
+    analyze_type_specifier(parser, param->symbol.type);
 }
 
 export void analyze_func_params(Parser* parser, ASTFuncParams* params)

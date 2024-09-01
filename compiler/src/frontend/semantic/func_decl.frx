@@ -8,6 +8,8 @@ export void analyze_func_decl(Parser* parser, ASTFuncDecl* func_decl)
 
     assert(func_decl != nullptr);
 
+    analyze_type_specifier(parser, func_decl->return_type);
+
     FuncSymbol* symbol = &func_decl->symbol;
 
     usize i;
