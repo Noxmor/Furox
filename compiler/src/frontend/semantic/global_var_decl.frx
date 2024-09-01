@@ -10,6 +10,8 @@ export void analyze_global_var_decl(Parser* parser, ASTGlobalVarDecl* var_decl)
 
     VarSymbol* symbol = &var_decl->symbol;
 
+    analyze_type_specifier(parser, symbol->type);
+
     b8 is_redefinition = var_table_find_by_scope(&parser->var_table,
         symbol->scope, symbol->name) != symbol;
 
