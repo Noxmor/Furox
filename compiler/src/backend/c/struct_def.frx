@@ -28,7 +28,9 @@ void transpile_struct_field(Transpiler* transpiler, ASTStructField* field)
             symbol->name);
     }
 
-    fprintf(transpiler->file, "%s %s;\n", mangled_name, field->name);
+    fprintf(transpiler->file, "%s %s", mangled_name, field->name);
+    transpile_type_specifier_array_dimensions(transpiler, type);
+    fprintf(transpiler->file, ";\n");
 }
 
 export void transpile_struct_def(Transpiler* transpiler,
