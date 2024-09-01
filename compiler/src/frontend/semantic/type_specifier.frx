@@ -40,4 +40,11 @@ export void analyze_type_specifier(Parser* parser,
         error_undefined_type_specifier(parser_source_file(parser), loc, name);
         parser->failed = true;
     }
+
+    usize i;
+    for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
+    {
+        AST* array_dimension = list_get(&type_specifier->array_dimensions, i);
+        analyze_ast(parser, array_dimension);
+    }
 }
