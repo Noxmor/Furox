@@ -17,6 +17,11 @@ export void transpile_global_var_decl(Transpiler* transpiler,
 
     VarSymbol* symbol = &var_decl->symbol;
 
+    if(!symbol->mutable)
+    {
+        fprintf(transpiler->file, "const ");
+    }
+
     transpile_type_specifier(transpiler, symbol->type);
 
     char* mangled_name = mangle_global_var_name(symbol->scope, symbol->ns,
