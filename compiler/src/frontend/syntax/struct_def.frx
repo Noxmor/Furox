@@ -31,6 +31,7 @@ ASTStructField* parse_struct_field(Parser* parser)
     char* name = parser->token->identifier;
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parse_array_dimensions(parser, type);
     parser_eat(parser, TOKEN_TYPE_SEMICOLON);
 
     return make_struct_field(&parser->arena, type, name);
