@@ -1,0 +1,20 @@
+export void transpile_initializer_list(Transpiler* transpiler,
+    ASTInitializerList* list)
+{
+    assert(transpiler != nullptr);
+
+    assert(list != nullptr);
+
+    fprintf(transpiler->file, "{\n");
+
+    usize i;
+    for(i = 0; i < list_size(&list->values); i = i + 1)
+    {
+        AST* value = list_get(&list->values, i);
+        transpile_ast(transpiler, value);
+
+        fprintf(transpiler->file, ",\n");
+    }
+
+    fprintf(transpiler->file, "}");
+}

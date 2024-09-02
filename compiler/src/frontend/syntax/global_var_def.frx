@@ -31,7 +31,15 @@ export ASTGlobalVarDef* parse_global_var_def(Parser* parser,
 
     parser_eat(parser, TOKEN_TYPE_EQ);
 
-    var_def->value = parse_expr(parser);
+    if(parser->token->type == TOKEN_TYPE_LBRACE)
+    {
+        var_def->value = make_ast(&parser->arena, AST_TYPE_INITIALIZER_LIST,
+            parse_initializer_list(parser));
+    }
+    else
+    {
+        var_def->value = parse_expr(parser);
+    }
 
     parser_eat(parser, TOKEN_TYPE_SEMICOLON);
 

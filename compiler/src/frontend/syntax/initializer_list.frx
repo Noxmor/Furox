@@ -1,0 +1,56 @@
+export struct ASTInitializerList
+{
+    List values;
+}
+
+ASTInitializerList* make_initializer_list(Arena* arena)
+{
+    ASTInitializerList* list = arena_alloc(arena, sizeof(ASTInitializerList));
+
+    list_init(&list->values);
+
+    return list;
+}
+
+export ASTInitializerList* parse_initializer_list(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_LBRACE);
+
+    ASTInitializerList* list = make_initializer_list(&parser->arena);
+
+    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    {
+        if(list_size(&list->values) > 0)
+        {
+            parser_eat(parser, TOKEN_TYPE_COMMA);
+        }
+
+        AST* value = parse_expr(parser);
+        list_push(&list->values, value);
+    }
+
+    parser_eat(parser, TOKEN_TYPE_RBRACE);
+
+    return list;
+}
+
+export void print_initializer_list(ASTInitializerList* list, FILE* file,
+    usize depth)
+{
+    assert(list != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_INITIALIZER_LIST));
+
+    usize i;
+    for(i = 0; i < list_size(&list->values); i = i + 1)
+    {
+        AST* value = list_get(&list->values, i);
+        print_ast(value, file, depth);
+    }
+}
