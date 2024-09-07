@@ -87,7 +87,7 @@ export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
 
     parser_eat(parser, TOKEN_TYPE_LBRACE);
 
-    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    while(parser_loop_until(parser, TOKEN_TYPE_RBRACE))
     {
         list_push(&struct_def->symbol.fields, parse_struct_field(parser));
     }
