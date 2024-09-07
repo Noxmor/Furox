@@ -72,18 +72,15 @@ export void parser_eat(Parser* parser, TokenType type)
 {
     if(parser->token->type != type)
     {
-        if(!parser->panic)
-        {
-            log_error(parser_source_file(parser), parser_current_location(parser),
-                "Expected '%s', but found '%s'!", token_type_to_str(type),
-                token_type_to_str(parser->token->type));
-        }
+        log_error(parser_source_file(parser), parser_current_location(parser),
+            "Expected '%s', but found '%s'!", token_type_to_str(type),
+            token_type_to_str(parser->token->type));
 
         parser->failed = true;
+        parser_panic(parser);
         return;
     }
 
-    parser->panic = false;
     parser_advance(parser);
 }
 
@@ -101,8 +98,6 @@ export b8 parser_loop_until(Parser* parser, TokenType type)
 void parser_panic(Parser* parser)
 {
     assert(parser != nullptr);
-
-    parser->panic = true;
 
     while(true)
     {

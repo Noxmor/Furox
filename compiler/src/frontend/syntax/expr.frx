@@ -107,7 +107,8 @@ export AST* parse_primary_expr(Parser* parser)
         }
         default:
         {
-            parser_panic(parser);
+            primary_expr = make_ast(&parser->arena, AST_TYPE_ERROR,
+                parse_error(parser));
 
             break;
         }

@@ -6,6 +6,7 @@ import "../syntax/do_while_loop.frx";
 import "../syntax/extern_block.frx";
 import "../syntax/enum_def.frx";
 import "../syntax/enum_constant.frx";
+import "../syntax/error.frx";
 import "../syntax/expr_stmt.frx";
 import "../syntax/float_literal.frx";
 import "../syntax/for_loop.frx";
@@ -35,6 +36,7 @@ import "../syntax/while_loop.frx";
 import "../../core/arena.frx";
 
 char*[AST_TYPE_COUNT] ast_type_names = {
+    "error",
     "program",
     "compound",
     "type-specifier",
@@ -79,6 +81,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
 
 export enum ASTType : u8
 {
+    AST_TYPE_ERROR,
     AST_TYPE_PROGRAM,
     AST_TYPE_COMPOUND,
 
