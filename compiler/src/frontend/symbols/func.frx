@@ -32,7 +32,10 @@ struct FuncTableEntry
     FuncTableEntry* next;
 }
 
-macro FUNC_TABLE_CAPACITY = 128;
+enum Constants : u64
+{
+    FUNC_TABLE_CAPACITY = 128
+}
 
 export struct FuncTable
 {

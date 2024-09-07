@@ -34,7 +34,10 @@ struct MacroTableEntry
     MacroTableEntry* next;
 }
 
-macro MACRO_TABLE_CAPACITY = 128;
+enum Constants : u64
+{
+    MACRO_TABLE_CAPACITY = 128
+}
 
 export struct MacroTable
 {

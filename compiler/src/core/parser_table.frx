@@ -6,7 +6,10 @@ struct ParserTableEntry
     ParserTableEntry* next;
 }
 
-macro PARSER_TABLE_CAPACITY = 1024;
+enum Constants : u64
+{
+    PARSER_TABLE_CAPACITY = 1024
+}
 
 struct ParserTable
 {

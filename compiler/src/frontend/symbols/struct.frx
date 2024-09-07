@@ -35,7 +35,10 @@ struct StructTableEntry
     StructTableEntry* next;
 }
 
-macro STRUCT_TABLE_CAPACITY = 128;
+enum Constants : u64
+{
+    STRUCT_TABLE_CAPACITY = 128
+}
 
 export struct StructTable
 {

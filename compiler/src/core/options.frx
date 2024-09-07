@@ -24,8 +24,11 @@ export struct Option
     char* arg;
 }
 
-macro SHORT_OPTIONS_COUNT = 0xFF;
-macro LONG_OPTIONS_COUNT = 16;
+enum Constants : u64
+{
+    SHORT_OPTIONS_COUNT = 0xFF,
+    LONG_OPTIONS_COUNT = 16
+}
 
 struct Config
 {

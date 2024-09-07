@@ -57,7 +57,10 @@ struct EnumTableEntry
     EnumTableEntry* next;
 }
 
-macro ENUM_TABLE_CAPACITY = 128;
+enum Constants : u64
+{
+    ENUM_TABLE_CAPACITY = 128
+}
 
 export struct EnumTable
 {

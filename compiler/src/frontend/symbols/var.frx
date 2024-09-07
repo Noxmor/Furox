@@ -37,7 +37,10 @@ struct VarTableEntry
     VarTableEntry* next;
 }
 
-macro VAR_TABLE_CAPACITY = 128;
+enum Constants : u64
+{
+    VAR_TABLE_CAPACITY = 128
+}
 
 struct VarTable
 {

@@ -13,7 +13,13 @@ struct KeywordTableEntry
     TokenType type;
 }
 
-macro KEYWORD_TABLE_SIZE = 512;
+enum Constants : u64
+{
+    KEYWORD_TABLE_SIZE = 512,
+    LEXER_BUFFER_CAPACITY = 1024,
+    LEXER_TOKEN_CAPACITY = 8,
+    LEXER_IDENTIFIER_START_SIZE = 4 //Needs to be at least 3 in order to store char literals
+}
 
 struct KeywordTable
 {
@@ -55,12 +61,6 @@ export void lexer_init_keyword_table()
         register_keyword(token_type_to_str(type), type);
     }
 }
-
-export macro LEXER_BUFFER_CAPACITY = 1024;
-export macro LEXER_TOKEN_CAPACITY = 8;
-
-//Needs to be at least 3 in order to store char literals
-macro LEXER_IDENTIFIER_START_SIZE = 4;
 
 export struct Lexer
 {
