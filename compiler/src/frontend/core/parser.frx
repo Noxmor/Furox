@@ -87,6 +87,17 @@ export void parser_eat(Parser* parser, TokenType type)
     parser_advance(parser);
 }
 
+export b8 parser_loop_until(Parser* parser, TokenType type)
+{
+    assert(parser != nullptr);
+
+    assert(type < TOKEN_TYPE_COUNT);
+
+    return parser->token->type != type
+        && parser->token->type != TOKEN_TYPE_ERROR
+        && parser->token->type != TOKEN_TYPE_EOF;
+}
+
 void parser_panic(Parser* parser)
 {
     assert(parser != nullptr);
