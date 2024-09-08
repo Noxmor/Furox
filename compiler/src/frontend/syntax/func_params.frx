@@ -81,7 +81,7 @@ export ASTFuncParams* parse_func_params(Parser* parser)
 
     parser_eat(parser, TOKEN_TYPE_LPAREN);
 
-    while(parser->token->type != TOKEN_TYPE_RPAREN)
+    while(parser_loop_until(parser, TOKEN_TYPE_RPAREN))
     {
         if(list_size(&func_params->params) > 0)
         {

@@ -46,7 +46,7 @@ export ASTFuncCall* parse_func_call(Parser* parser, Namespace* ns)
 
     parser_eat(parser, TOKEN_TYPE_LPAREN);
 
-    while(parser->token->type != TOKEN_TYPE_RPAREN)
+    while(parser_loop_until(parser, TOKEN_TYPE_RPAREN))
     {
         if(list_size(&func_call->args) > 0)
         {

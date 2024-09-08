@@ -26,7 +26,7 @@ export ASTExternBlock* parse_extern_block(Parser* parser)
 
     parser_eat(parser, TOKEN_TYPE_LBRACE);
 
-    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    while(parser_loop_until(parser, TOKEN_TYPE_RBRACE))
     {
         list_push(&extern_block->func_decls, parse_func_decl(parser));
     }

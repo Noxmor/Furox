@@ -31,7 +31,7 @@ export ASTScope* parse_scope(Parser* parser)
 
     ASTScope* scope = make_scope(&parser->arena);
 
-    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    while(parser_loop_until(parser, TOKEN_TYPE_RBRACE))
     {
         switch(parser->token->type)
         {

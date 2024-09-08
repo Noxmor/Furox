@@ -169,7 +169,7 @@ export ASTEnumDef* parse_enum_def(Parser* parser, b8 exported)
 
     parser_eat(parser, TOKEN_TYPE_LBRACE);
 
-    while(parser->token->type != TOKEN_TYPE_RBRACE)
+    while(parser_loop_until(parser, TOKEN_TYPE_RBRACE))
     {
         ASTEnumConstantDef* constant = parse_enum_constant(parser);
 
