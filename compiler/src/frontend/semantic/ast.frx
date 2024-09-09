@@ -37,6 +37,12 @@ export void analyze_ast(Parser* parser, AST* ast)
 
     switch(ast->type)
     {
+        case AST_TYPE_ERROR:
+        {
+            parser->failed = true;
+
+            break;
+        }
         case AST_TYPE_IMPORT_STMT:
         {
             analyze_import_stmt(parser, node);
