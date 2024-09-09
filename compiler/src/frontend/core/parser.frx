@@ -90,9 +90,12 @@ export b8 parser_loop_until(Parser* parser, TokenType type)
 
     assert(type < TOKEN_TYPE_COUNT);
 
-    return parser->token->type != type
-        && parser->token->type != TOKEN_TYPE_ERROR
-        && parser->token->type != TOKEN_TYPE_EOF;
+    TokenType current_type = parser->token->type;
+
+    return current_type != type
+        && current_type != TOKEN_TYPE_ERROR
+        && current_type != TOKEN_TYPE_EOF
+        && !token_type_is_synchronizing(current_type);
 }
 
 void parser_panic(Parser* parser)
@@ -101,31 +104,12 @@ void parser_panic(Parser* parser)
 
     while(true)
     {
-        switch(parser->token->type)
+        if(token_type_is_synchronizing(parser->token->type))
         {
-            case TOKEN_TYPE_EOF:
-            {
-
-            }
-            case TOKEN_TYPE_ERROR:
-            {
-
-            }
-            case TOKEN_TYPE_SEMICOLON:
-            {
-
-            }
-            case TOKEN_TYPE_RBRACE:
-            {
-                return;
-            }
-            default:
-            {
-                parser_advance(parser);
-
-                break;
-            }
+            return;
         }
+
+        parser_advance(parser);
     }
 }
 

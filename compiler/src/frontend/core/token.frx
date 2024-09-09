@@ -347,6 +347,33 @@ export usize primitive_type_to_size(TokenType primitive_type)
     }
 }
 
+export b8 token_type_is_synchronizing(TokenType type)
+{
+    assert(type < TOKEN_TYPE_COUNT);
+
+    switch(type)
+    {
+        case TOKEN_TYPE_ERROR:
+        {
+
+        }
+        case TOKEN_TYPE_EOF:
+        {
+
+        }
+        case TOKEN_TYPE_RBRACE:
+        {
+
+        }
+        case TOKEN_TYPE_SEMICOLON:
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export b8 token_type_is_prefix_operator(TokenType type)
 {
     return token_type_to_prefix_operator(type) != OP_INVALID;
