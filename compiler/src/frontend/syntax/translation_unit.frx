@@ -206,6 +206,8 @@ ASTCompound* parse_translation_unit(Parser* parser)
             {
                 parser_panic(parser);
 
+                parser_advance(parser);
+
                 break;
             }
         }
