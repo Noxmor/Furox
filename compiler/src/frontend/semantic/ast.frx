@@ -211,6 +211,12 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
+        case AST_TYPE_SWITCH_STMT:
+        {
+            analyze_switch_stmt(parser, node);
+
+            break;
+        }
         case AST_TYPE_INITIALIZER_LIST:
         {
             analyze_initializer_list(parser, node);

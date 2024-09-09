@@ -1,0 +1,38 @@
+void transpile_switch_case(Transpiler* transpiler, ASTSwitchCase* switch_case)
+{
+    assert(transpiler != nullptr);
+
+    assert(switch_case != nullptr);
+
+    fprintf(transpiler->file, "case ");
+    transpile_ast(transpiler, switch_case->value);
+    fprintf(transpiler->file, ":\n");
+    transpile_scope(transpiler, switch_case->scope);
+}
+
+export void transpile_switch_stmt(Transpiler* transpiler,
+    ASTSwitchStmt* switch_stmt)
+{
+    assert(transpiler != nullptr);
+
+    assert(switch_stmt != nullptr);
+
+    fprintf(transpiler->file, "switch(");
+    transpile_ast(transpiler, switch_stmt->value);
+    fprintf(transpiler->file, ")\n{\n");
+
+    usize i;
+    for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
+    {
+        ASTSwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+        transpile_switch_case(transpiler, switch_case);
+    }
+
+    if(switch_stmt->default_scope != nullptr)
+    {
+        fprintf(transpiler->file, "default:\n");
+        transpile_scope(transpiler, switch_stmt->default_scope);
+    }
+
+    fprintf(transpiler->file, "}\n");
+}

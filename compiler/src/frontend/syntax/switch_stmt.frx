@@ -1,0 +1,122 @@
+export struct ASTSwitchCase
+{
+    AST* value;
+    ASTScope* scope;
+}
+
+ASTSwitchCase* make_switch_case(Arena* arena, AST* value, ASTScope* scope)
+{
+    assert(value != nullptr);
+
+    assert(scope != nullptr);
+
+    ASTSwitchCase* switch_case = arena_alloc(arena, sizeof(ASTSwitchCase));
+
+    switch_case->value = value;
+    switch_case->scope = scope;
+
+    return switch_case;
+}
+
+ASTSwitchCase* parse_switch_case(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_KW_CASE);
+    AST* value = parse_expr(parser);
+    parser_eat(parser, TOKEN_TYPE_COLON);
+    ASTScope* scope = parse_scope(parser);
+
+    return make_switch_case(&parser->arena, value, scope);
+}
+
+void print_switch_case(ASTSwitchCase* switch_case, FILE* file, usize depth)
+{
+    assert(switch_case != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "case\n");
+
+    print_ast(switch_case->value, file, depth + 1);
+    print_scope(switch_case->scope, file, depth + 1);
+}
+
+export struct ASTSwitchStmt
+{
+    AST* value;
+    List cases;
+    ASTScope* default_scope;
+}
+
+ASTSwitchStmt* make_switch_stmt(Arena* arena, AST* value)
+{
+    assert(value != nullptr);
+
+    ASTSwitchStmt* switch_stmt = arena_alloc(arena, sizeof(ASTSwitchStmt));
+
+    switch_stmt->value = value;
+    list_init(&switch_stmt->cases);
+    switch_stmt->default_scope = nullptr;
+
+    return switch_stmt;
+}
+
+export ASTSwitchStmt* parse_switch_stmt(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    parser_eat(parser, TOKEN_TYPE_KW_SWITCH);
+    parser_eat(parser, TOKEN_TYPE_LPAREN);
+    AST* value = parse_expr(parser);
+    parser_eat(parser, TOKEN_TYPE_RPAREN);
+
+    ASTSwitchStmt* switch_stmt = make_switch_stmt(&parser->arena, value);
+
+    parser_eat(parser, TOKEN_TYPE_LBRACE);
+    while(parser->token->type == TOKEN_TYPE_KW_CASE)
+    {
+        ASTSwitchCase* switch_case = parse_switch_case(parser);
+        list_push(&switch_stmt->cases, switch_case);
+    }
+
+    if(parser->token->type == TOKEN_TYPE_KW_DEFAULT)
+    {
+        parser_eat(parser, TOKEN_TYPE_KW_DEFAULT);
+        parser_eat(parser, TOKEN_TYPE_COLON);
+
+        switch_stmt->default_scope = parse_scope(parser);
+    }
+
+    parser_eat(parser, TOKEN_TYPE_RBRACE);
+
+    return switch_stmt;
+}
+
+export void print_switch_stmt(ASTSwitchStmt* switch_stmt, FILE* file,
+    usize depth)
+{
+    assert(switch_stmt != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_SWITCH_STMT));
+
+    print_ast(switch_stmt->value, file, depth + 1);
+
+    usize i;
+    for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
+    {
+        ASTSwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+        print_switch_case(switch_case, file, depth + 1);
+    }
+
+    if(switch_stmt->default_scope != nullptr)
+    {
+        print_scope(switch_stmt->default_scope, file, depth + 1);
+    }
+}

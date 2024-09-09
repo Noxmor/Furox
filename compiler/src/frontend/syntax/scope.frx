@@ -106,6 +106,13 @@ export ASTScope* parse_scope(Parser* parser)
 
                 break;
             }
+            case TOKEN_TYPE_KW_SWITCH:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AST_TYPE_SWITCH_STMT, parse_switch_stmt(parser)));
+
+                break;
+            }
             case TOKEN_TYPE_KW_U8:
             {
 

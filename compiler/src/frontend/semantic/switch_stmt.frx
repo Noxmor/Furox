@@ -1,0 +1,30 @@
+void analyze_switch_case(Parser* parser, ASTSwitchCase* switch_case)
+{
+    assert(parser != nullptr);
+
+    assert(switch_case != nullptr);
+
+    analyze_ast(parser, switch_case->value);
+    analyze_scope(parser, switch_case->scope);
+}
+
+export void analyze_switch_stmt(Parser* parser, ASTSwitchStmt* switch_stmt)
+{
+    assert(parser != nullptr);
+
+    assert(switch_stmt != nullptr);
+
+    analyze_ast(parser, switch_stmt->value);
+
+    usize i;
+    for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
+    {
+        ASTSwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+        analyze_switch_case(parser, switch_case);
+    }
+
+    if(switch_stmt->default_scope != nullptr)
+    {
+        analyze_scope(parser, switch_stmt->default_scope);
+    }
+}
