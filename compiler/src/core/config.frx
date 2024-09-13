@@ -5,13 +5,15 @@ export enum OptionID : u8
     HELP,
     OUTPUT,
     TARGET,
-    EMIT_AST
+    EMIT_AST,
+    LINK
 }
 
 struct Config
 {
     char* output;
     b8 emit_ast;
+    List link_targets;
 }
 
 Config config;
@@ -19,6 +21,7 @@ Config config;
 export void config_init()
 {
     config.output = "a.out";
+    list_init(&config.link_targets);
 }
 
 export Config* get_config()

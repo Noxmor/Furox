@@ -42,7 +42,7 @@ usize Main(usize argc, char** argv)
 
     program = make_program();
 
-    Option[5] options;
+    Option[6] options;
 
     //TODO: Remove tmp
     Option tmp;
@@ -50,18 +50,31 @@ usize Main(usize argc, char** argv)
     tmp = options[1] = create_option(OUTPUT, REQ_ARG, 'o', "output");
     tmp = options[2] = create_long_option(TARGET, REQ_ARG, "target");
     tmp = options[3] = create_long_option(EMIT_AST, NO_ARG, "emit-ast");
-    tmp = options[4] = create_option(NONE, NO_ARG, '\0', nullptr);
+    tmp = options[4] = create_short_option(LINK, REQ_ARG, 'l');
+    tmp = options[5] = create_option(NONE, NO_ARG, '\0', nullptr);
 
     b8 emit_ast = false;
+
+    Config* config = get_config();
 
     OptionID opt;
     while((opt = parse_command_line(argc, argv, options)) != 0)
     {
         switch(opt)
         {
+            case OUTPUT:
+            {
+                config->output = get_arg();
+                break;
+            }
             case EMIT_AST:
             {
                 emit_ast = true;
+                break;
+            }
+            case LINK:
+            {
+                list_push(&config->link_targets, get_arg());
                 break;
             }
         }
@@ -110,7 +123,7 @@ usize Main(usize argc, char** argv)
 
     if(!failed)
     {
-        backend_generate_code(BACKEND_TYPE_NATIVE, program, "output.c");
+        backend_generate_code(BACKEND_TYPE_NATIVE, program);
     }
 
     return failed;

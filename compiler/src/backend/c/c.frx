@@ -22,12 +22,10 @@ export struct Transpiler
     Namespace* current_namespace;
 }
 
-export void c_generate_code(ASTProgram* program, char* filepath)
+export void c_generate_code(ASTProgram* program)
 {
-    assert(filepath != nullptr);
-
     Transpiler transpiler;
-    transpiler.file = fopen(filepath, "w");
+    transpiler.file = fopen("/tmp/output.c", "w");
 
     if(transpiler.file == nullptr)
     {
@@ -59,4 +57,20 @@ export void c_generate_code(ASTProgram* program, char* filepath)
     transpile_program(&transpiler, program);
 
     fclose(transpiler.file);
+
+    Config* config = get_config();
+
+    char[4096] command;
+    strcpy(command, "gcc /tmp/output.c -o ");
+    strcat(command, config->output);
+
+    usize i;
+    for(i = 0; i < list_size(&config->link_targets); i = i + 1)
+    {
+        char* link_target = list_get(&config->link_targets, i);
+        strcat(command, " ");
+        strcat(command, link_target);
+    }
+
+    system(command);
 }

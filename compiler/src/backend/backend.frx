@@ -9,8 +9,7 @@ export enum BackendType : u8
     BACKEND_TYPE_COUNT
 }
 
-export void backend_generate_code(BackendType backend, ASTProgram* program,
-    char* filepath)
+export void backend_generate_code(BackendType backend, ASTProgram* program)
 {
     assert(backend < BACKEND_TYPE_COUNT);
 
@@ -18,7 +17,7 @@ export void backend_generate_code(BackendType backend, ASTProgram* program,
     {
         case BACKEND_TYPE_NATIVE:
         {
-            c_generate_code(program, filepath);
+            c_generate_code(program);
 
             break;
         }
