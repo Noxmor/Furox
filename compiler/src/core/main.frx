@@ -30,34 +30,18 @@ void compile(char* filepath)
     queue_enqueue(&syntax_queue, parser);
 }
 
-void parse_args(usize argc, char** argv)
+enum OptionID : u8
 {
-    usize i;
-    for(i = 1; i < argc; i = i + 1)
-    {
-        char* arg = argv[i];
-        if(!is_option(arg))
-        {
-            char[4096] fullpath;
-            realpath(arg, fullpath);
-            compile(fullpath);
-        }
-    }
-}
-
-void register_command_line_options()
-{
-    register_option('h', "help", OPTION_TYPE_NO_ARG);
-    register_option('o', "output", OPTION_TYPE_REQ_ARG);
-    register_option('\0', "target", OPTION_TYPE_REQ_ARG);
-    register_option('\0', "emit-ast", OPTION_TYPE_NO_ARG);
+    NONE,
+    POS_ARG,
+    HELP,
+    OUTPUT,
+    TARGET,
+    EMIT_AST
 }
 
 usize Main(usize argc, char** argv)
 {
-    register_command_line_options();
-    parse_command_line(argc, argv);
-
     lexer_init_keyword_table();
 
     queue_init(&syntax_queue);
@@ -66,7 +50,39 @@ usize Main(usize argc, char** argv)
 
     program = make_program();
 
-    parse_args(argc, argv);
+    Option[5] options;
+
+    //TODO: Remove tmp
+    Option tmp;
+    tmp = options[0] = create_option(HELP, OPT_ARG, 'h', "help");
+    tmp = options[1] = create_option(OUTPUT, REQ_ARG, 'o', "output");
+    tmp = options[2] = create_long_option(TARGET, REQ_ARG, "target");
+    tmp = options[3] = create_long_option(EMIT_AST, NO_ARG, "emit-ast");
+    tmp = options[4] = create_option(NONE, NO_ARG, '\0', nullptr);
+
+    b8 emit_ast = false;
+
+    OptionID opt;
+    while((opt = parse_command_line(argc, argv, options)) != 0)
+    {
+        switch(opt)
+        {
+            case EMIT_AST:
+            {
+                emit_ast = true;
+                break;
+            }
+        }
+    }
+
+    usize i;
+    for(i = 0; i < get_positional_argc(); i = i + 1)
+    {
+        char* arg = argv[i + 1];
+        char[4096] fullpath;
+        realpath(arg, fullpath);
+        compile(fullpath);
+    }
 
     while(!queue_is_empty(&syntax_queue))
     {
@@ -90,8 +106,7 @@ usize Main(usize argc, char** argv)
         list_push(&program->translation_units, parser->translation_unit);
     }
 
-    Option* emit_ast = find_long_option("emit-ast");
-    if(emit_ast->arg != nullptr)
+    if(emit_ast)
     {
         FILE* file = fopen("frx.ast", "w");
         if(file != nullptr)

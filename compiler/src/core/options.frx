@@ -1,282 +1,189 @@
-struct ShortOption
+extern
 {
-    Option* option;
-}
-
-struct LongOption
-{
-    char* name;
-
-    Option* option;
+    i32 strcmp(char* str1, char* str2);
+    char* strchr(char* str, i32 c);
 }
 
 export enum OptionType : u8
 {
-    OPTION_TYPE_NO_ARG,
-    OPTION_TYPE_OPT_ARG,
-    OPTION_TYPE_REQ_ARG
+    NO_ARG,
+    OPT_ARG,
+    REQ_ARG
 }
 
 export struct Option
 {
+    u16 id;
     OptionType type;
-
-    char* arg;
+    char short_name;
+    char* long_name;
 }
 
-enum Constants : u64
+export Option create_option(u16 id, OptionType type, char short_name,
+    char* long_name)
 {
-    SHORT_OPTIONS_COUNT = 0xFF,
-    LONG_OPTIONS_COUNT = 16
+    Option opt;
+
+    opt.id = id;
+    opt.type = type;
+    opt.short_name = short_name;
+    opt.long_name = long_name;
+
+    return opt;
 }
 
-struct Config
+export Option create_short_option(u16 id, OptionType type, char short_name)
 {
-    ShortOption[SHORT_OPTIONS_COUNT] short_options;
-    LongOption[LONG_OPTIONS_COUNT] long_options;
-
-    Option[SHORT_OPTIONS_COUNT + LONG_OPTIONS_COUNT] options;
-
-    usize next_free_option_index;
+    return create_option(id, type, short_name, nullptr);
 }
 
-Config config;
-
-export b8 is_option(char* arg)
+export Option create_long_option(u16 id, OptionType type, char* long_name)
 {
-    return arg[0] == '-';
+    return create_option(id, type, '\0', long_name);
 }
 
-b8 is_long_option(char* option)
-{
-    assert(option[0] != '\0');
+char* current_option = nullptr;
+char* arg = nullptr;
+usize pos = 0;
+usize current_option_index = 1;
+usize next_positional_arg_index = 1;
+b8 demarcated_options = false;
 
-    return option[1] == '-';
-}
-
-export void parse_command_line(usize argc, char** argv)
+Option* find_option_by_short_name(Option* options, char short_name)
 {
     usize i;
-    for(i = 1; i < argc; i = i + 1)
+    for(i = 0; options[i].id != 0; i = i + 1)
     {
-        char* option_name = argv[i];
-        if(!is_option(option_name))
+        if(options[i].short_name == short_name)
         {
-            continue;
-        }
-
-        if(is_long_option(option_name))
-        {
-            option_name = option_name + 2;
-
-            char* long_name = option_name;
-
-            char* equals = strchr(option_name, '=');
-            if(equals != nullptr)
-            {
-                //TODO: equals[0] = '\0';
-                char temp = equals[0] = '\0';
-            }
-
-            Option* option = find_long_option(option_name);
-            if(option == nullptr)
-            {
-                printf("%s: unrecognized command-line option --%s\n", argv[0], long_name);
-                continue;
-            }
-
-            switch(option->type)
-            {
-                case OPTION_TYPE_NO_ARG:
-                {
-                    option->arg = "";
-                    break;
-                }
-                case OPTION_TYPE_OPT_ARG:
-                {
-                    if(equals != nullptr)
-                    {
-                        if(equals[1] != '\0')
-                        {
-                            option->arg = equals + 1;
-                        }
-                        else
-                        {
-                            printf("%s: --%s specified without requiered argument!\n", argv[0], option_name);
-                            exit(1);
-                        }
-                    }
-
-                    break;
-                }
-                case OPTION_TYPE_REQ_ARG:
-                {
-                    if(equals != nullptr)
-                    {
-                        if(equals[1] != '\0')
-                        {
-                            option->arg = equals + 1;
-                        }
-                        else
-                        {
-                            printf("%s: --%s specified without requiered argument!\n", argv[0], option_name);
-                            exit(1);
-                        }
-                    }
-                    else
-                    {
-                        if(i < argc - 1)
-                        {
-                            option->arg = argv[i + 1];
-                            i = i + 1;
-                        }
-                        else
-                        {
-                            printf("%s: --%s specified without requiered argument!\n", argv[0], option_name);
-                            exit(1);
-                        }
-                    }
-
-                    break;
-                }
-            }
-        }
-        else
-        {
-            option_name = option_name + 1;
-
-            b8 finished_parsing = false;
-            while(option_name[0] != '\0' && !finished_parsing)
-            {
-                char short_name = option_name[0];
-
-                Option* option = find_short_option(short_name);
-                if(option == nullptr)
-                {
-                    printf("%s: unrecognized command-line option -%c\n", argv[0], short_name);
-                    option_name = option_name + 1;
-                    continue;
-                }
-
-                switch(option->type)
-                {
-                    case OPTION_TYPE_NO_ARG:
-                    {
-                        option->arg = "";
-                        option_name = option_name + 1;
-
-                        break;
-                    }
-                    case OPTION_TYPE_OPT_ARG:
-                    {
-                        if(option_name[1] != '\0')
-                        {
-                            option->arg = option_name + 1;
-                            finished_parsing = true;
-                        }
-
-                        break;
-                    }
-                    case OPTION_TYPE_REQ_ARG:
-                    {
-                        if(option_name[1] != '\0')
-                        {
-                            option->arg = option_name + 1;
-                        }
-                        else if(i == argc - 1)
-                        {
-                            printf("%s: -%c specified without requiered argument!\n", argv[0], short_name);
-                            exit(1);
-                        }
-                        else
-                        {
-                            option->arg = argv[i + 1];
-                            i = i + 1;
-                        }
-
-                        finished_parsing = true;
-
-                        break;
-                    }
-                    default:
-                    {
-                        //Unreachable
-                        assert(false);
-                    }
-                }
-            }
+            return &options[i];
         }
     }
+
+    return &options[i];
 }
 
-export Option* find_short_option(char name)
+Option* find_option_by_long_name(Option* options, char* long_name)
 {
-    return config.short_options[name].option;
-}
-
-export Option* find_long_option(char* name)
-{
-    u64 index = hash_djb2(name) % LONG_OPTIONS_COUNT;
-    LongOption* long_option = &config.long_options[index];
-
-    if(strcmp(long_option->name, name) != 0)
-    {
-        return nullptr;
-    }
-
-    return long_option->option;
-}
-
-export Option* register_option(char short_name, char* long_name, OptionType type)
-{
-    Option* option = &config.options[config.next_free_option_index];
-    config.next_free_option_index = config.next_free_option_index + 1;
-
-    if(short_name != '\0')
-    {
-        ShortOption* short_option = &config.short_options[short_name];
-        short_option->option = option;
-    }
-
-    if(long_name != nullptr)
-    {
-        u64 index = hash_djb2(long_name) % LONG_OPTIONS_COUNT;
-        LongOption* long_option = &config.long_options[index];
-        long_option->name = long_name;
-        long_option->option = option;
-    }
-
-    option->type = type;
-
-    return option;
-}
-
-export void options_debug_print()
-{
-    char c;
-    for(c = 0; c < SHORT_OPTIONS_COUNT; c = c + 1)
-    {
-        Option* option = config.short_options[c].option;
-
-        if(option == nullptr)
-        {
-            continue;
-        }
-
-        printf("Short option: '%c', arg: %s\n", c, option->arg);
-    }
-
     usize i;
-    for(i = 0; i < LONG_OPTIONS_COUNT; i = i + 1)
+    for(i = 0; options[i].id != 0; i = i + 1)
     {
-        Option* option = config.long_options[i].option;
-        char* name = config.long_options[i].name;
-
-        if(option == nullptr)
+        if(strcmp(options[i].long_name, long_name) == 0)
         {
-            continue;
+            return &options[i];
+        }
+    }
+
+    return &options[i];
+}
+
+export char* get_arg()
+{
+    return arg;
+}
+
+export usize get_positional_argc()
+{
+    return next_positional_arg_index - 1;
+}
+
+//TODO: Remove tmp, only needed at the moment in order for the bootstrap
+//compiler to compile this correctly.
+void* tmp;
+
+export u16 parse_command_line(usize argc, char** argv, Option* options)
+{
+    if(current_option != nullptr)
+    {
+        pos = pos + 1;
+        char short_name = current_option[pos];
+
+        if(short_name != '\0')
+        {
+            Option* opt = find_option_by_short_name(options, short_name);
+
+            if(opt->type == NO_ARG)
+            {
+                return opt->id;
+            }
+
+            if(current_option[pos + 1] != '\0')
+            {
+                arg = &current_option[pos + 1];
+                current_option = nullptr;
+            }
+
+            if(opt->type == REQ_ARG && current_option != nullptr)
+            {
+                arg = argv[current_option_index];
+                current_option_index = current_option_index + 1;
+            }
+
+            return opt->id;
         }
 
-        printf("Long option: %s, arg: %s\n", name, option->arg);
+        current_option = nullptr;
     }
+
+    if(current_option_index >= argc)
+    {
+        return 0;
+    }
+
+    char* option = argv[current_option_index];
+    current_option_index = current_option_index + 1;
+
+    if(option[0] != '-')
+    {
+        arg = option;
+
+        char* temp = argv[next_positional_arg_index];
+        tmp = argv[next_positional_arg_index] = argv[current_option_index - 1];
+        tmp = argv[current_option_index - 1] = temp;
+        next_positional_arg_index = next_positional_arg_index + 1;
+
+        return 1;
+    }
+
+    if(option[1] != '-')
+    {
+        current_option = option;
+        arg = nullptr;
+        pos = 0;
+        return parse_command_line(argc, argv, options);
+    }
+
+    if(option[2] != '\0' && !demarcated_options)
+    {
+        char* long_name = option + 2;
+
+        char* equals = strchr(option, '=');
+        if(equals != nullptr)
+        {
+            tmp = equals[0] = '\0';
+            arg = equals + 1;
+        }
+
+        Option* opt = find_option_by_long_name(options, long_name);
+
+        if(opt->type == NO_ARG)
+        {
+            return opt->id;
+        }
+
+        if(opt->type == REQ_ARG && equals == nullptr)
+        {
+            arg = argv[current_option_index];
+            current_option_index = current_option_index + 1;
+        }
+
+        return opt->id;
+    }
+
+    if(option[2] == '\0' && !demarcated_options)
+    {
+        demarcated_options = true;
+    }
+
+    return 0;
 }
