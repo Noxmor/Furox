@@ -1,0 +1,27 @@
+export enum OptionID : u8
+{
+    NONE,
+    POS_ARG,
+    HELP,
+    OUTPUT,
+    TARGET,
+    EMIT_AST
+}
+
+struct Config
+{
+    char* output;
+    b8 emit_ast;
+}
+
+Config config;
+
+export void config_init()
+{
+    config.output = "a.out";
+}
+
+export Config* get_config()
+{
+    return &config;
+}

@@ -1,3 +1,4 @@
+import "config.frx";
 import "options.frx";
 import "parser_table.frx";
 import "queue.frx";
@@ -30,18 +31,9 @@ void compile(char* filepath)
     queue_enqueue(&syntax_queue, parser);
 }
 
-enum OptionID : u8
-{
-    NONE,
-    POS_ARG,
-    HELP,
-    OUTPUT,
-    TARGET,
-    EMIT_AST
-}
-
 usize Main(usize argc, char** argv)
 {
+    config_init();
     lexer_init_keyword_table();
 
     queue_init(&syntax_queue);
