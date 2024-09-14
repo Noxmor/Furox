@@ -22,14 +22,14 @@ export struct Transpiler
     Namespace* current_namespace;
 }
 
-export void c_generate_code(ASTProgram* program)
+export i32 c_generate_code(ASTProgram* program)
 {
     Transpiler transpiler;
     transpiler.file = fopen("/tmp/output.c", "w");
 
     if(transpiler.file == nullptr)
     {
-        return;
+        return 1;
     }
 
     transpiler.current_namespace = nullptr;
@@ -72,5 +72,5 @@ export void c_generate_code(ASTProgram* program)
         strcat(command, link_target);
     }
 
-    system(command);
+    return system(command);
 }

@@ -123,7 +123,7 @@ usize Main(usize argc, char** argv)
 
     if(!failed)
     {
-        backend_generate_code(BACKEND_TYPE_NATIVE, program);
+        return backend_generate_code(BACKEND_TYPE_NATIVE, program);
     }
 
     return failed;
