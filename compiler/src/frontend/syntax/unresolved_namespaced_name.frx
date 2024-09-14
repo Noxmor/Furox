@@ -2,6 +2,8 @@ import "../core/parser.frx";
 
 export struct ASTUnresolvedNamespacedName
 {
+    SourceRange range;
+
     Namespace* ns;
     char* name;
     Scope* scope;
@@ -25,16 +27,24 @@ ASTUnresolvedNamespacedName* make_unresolved_namespaced_name(Arena* arena,
 }
 
 export ASTUnresolvedNamespacedName* parse_unresolved_namespaced_name(
-    Parser* parser, Namespace* ns)
+    Parser* parser, Namespace* ns, SourceLocation start)
 {
     assert(parser != nullptr);
 
     char* name = parser->token->identifier;
     Scope* scope = parser->current_scope;
 
+    SourceLocation end = parser_current_location(parser);
+
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-    return make_unresolved_namespaced_name(&parser->arena, ns, name, scope);
+    ASTUnresolvedNamespacedName* unresolved_namespaced_name =
+        make_unresolved_namespaced_name(&parser->arena, ns, name, scope);
+
+    unresolved_namespaced_name->range.start = start;
+    unresolved_namespaced_name->range.end = end;
+
+    return unresolved_namespaced_name;
 }
 
 export void print_unresolved_namespaced_name(

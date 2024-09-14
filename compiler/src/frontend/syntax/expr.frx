@@ -11,6 +11,7 @@ export AST* parse_primary_expr(Parser* parser)
     {
         case TOKEN_TYPE_IDENTIFIER:
         {
+            SourceLocation start = parser_current_location(parser);
             Namespace* resolved_ns = parse_namespace_resolution(parser);
 
             Token* next = parser_peek(parser, 1);
@@ -36,7 +37,8 @@ export AST* parse_primary_expr(Parser* parser)
             {
                 primary_expr = make_ast(&parser->arena,
                     AST_TYPE_UNRESOLVED_NAMESPACED_NAME,
-                    parse_unresolved_namespaced_name(parser, resolved_ns));
+                    parse_unresolved_namespaced_name(parser, resolved_ns,
+                    start));
             }
 
             break;

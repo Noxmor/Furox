@@ -2,6 +2,8 @@ import "../core/parser.frx";
 
 export struct ASTUnresolvedName
 {
+    SourceRange range;
+
     char* name;
     Scope* scope;
 }
@@ -23,12 +25,22 @@ export ASTUnresolvedName* parse_unresolved_name(Parser* parser)
 {
     assert(parser != nullptr);
 
+    SourceLocation start = parser_current_location(parser);
+
     char* name = parser->token->identifier;
     Scope* scope = parser->current_scope;
 
+    SourceLocation end = parser_current_location(parser);
+
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 
-    return make_unresolved_name(&parser->arena, name, scope);
+    ASTUnresolvedName* unresolved_name = make_unresolved_name(&parser->arena,
+        name, scope);
+
+    unresolved_name->range.start = start;
+    unresolved_name->range.end = end;
+
+    return unresolved_name;
 }
 
 export void print_unresolved_name(ASTUnresolvedName* unresolved_name,

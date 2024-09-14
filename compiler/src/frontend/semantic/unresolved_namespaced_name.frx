@@ -27,10 +27,8 @@ export void analyze_unresolved_namespaced_name(Parser* parser,
 
     if(is_ambiguous)
     {
-        //FIXME: Print the correct location, this is only a placeholder
-        SourceLocation loc;
         error_ambiguous_unresolved_namespaced_name(parser_source_file(parser),
-            loc, ns, name);
+            unresolved_namespaced_name->range.start, ns, name);
         parser->failed = true;
     }
     else if(is_enum_constant)
@@ -46,10 +44,8 @@ export void analyze_unresolved_namespaced_name(Parser* parser,
     }
     else
     {
-        //FIXME: Print the correct location, this is only a placeholder
-        SourceLocation loc;
         error_unresolved_namespaced_name(parser_source_file(parser),
-            loc, ns, name);
+            unresolved_namespaced_name->range.start, ns, name);
         parser->failed = true;
     }
 

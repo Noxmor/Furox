@@ -23,9 +23,8 @@ export void analyze_unresolved_name(Parser* parser,
 
     if(is_ambiguous)
     {
-        //FIXME: Print the correct location, this is only a placeholder
-        SourceLocation loc;
-        error_ambiguous_unresolved_name(parser_source_file(parser), loc, name);
+        error_ambiguous_unresolved_name(parser_source_file(parser),
+            unresolved_name->range.start, name);
         parser->failed = true;
     }
     else if(is_var)
@@ -35,9 +34,8 @@ export void analyze_unresolved_name(Parser* parser,
     }
     else
     {
-        //FIXME: Print the correct location, this is only a placeholder
-        SourceLocation loc;
-        error_unresolved_name(parser_source_file(parser), loc, name);
+        error_unresolved_name(parser_source_file(parser),
+            unresolved_name->range.start, name);
         parser->failed = true;
     }
 
