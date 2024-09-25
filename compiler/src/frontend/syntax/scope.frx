@@ -191,7 +191,13 @@ export ASTScope* parse_scope(Parser* parser)
             }
             case TOKEN_TYPE_IDENTIFIER:
             {
-                Namespace* resolved_ns = parse_namespace_resolution(parser);
+                Namespace* resolved_ns = nullptr;
+
+                if(parser->token->type != TOKEN_TYPE_IDENTIFIER ||
+                    strcmp(parser->token->identifier, "frx") != 0)
+                {
+                    resolved_ns = parse_namespace_resolution(parser);
+                }
 
                 Token* next = parser_peek(parser, 1);
                 if(next->type == TOKEN_TYPE_STAR

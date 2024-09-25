@@ -229,6 +229,12 @@ export void analyze_ast(Parser* parser, AST* ast)
 
             break;
         }
+        case AST_TYPE_ASSERT:
+        {
+            analyze_assert(parser, node);
+
+            break;
+        }
         case AST_TYPE_SIZEOF:
         {
             analyze_sizeof(parser, node, ast);

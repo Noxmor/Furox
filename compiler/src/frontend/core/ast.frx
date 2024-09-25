@@ -74,6 +74,7 @@ char*[AST_TYPE_COUNT] ast_type_names = {
     "do-while-loop",
     "switch-statement",
     "initializer-list",
+    "assert",
     "sizeof",
     "enum-count",
     "unresolved-name",
@@ -131,6 +132,7 @@ export enum ASTType : u8
 
     AST_TYPE_INITIALIZER_LIST,
 
+    AST_TYPE_ASSERT,
     AST_TYPE_SIZEOF,
     AST_TYPE_ENUM_COUNT,
 
@@ -369,6 +371,12 @@ export void print_ast(AST* ast, FILE* file, usize depth)
         case AST_TYPE_INITIALIZER_LIST:
         {
             print_initializer_list(node, file, depth);
+
+            break;
+        }
+        case AST_TYPE_ASSERT:
+        {
+            print_assert(node, file, depth);
 
             break;
         }

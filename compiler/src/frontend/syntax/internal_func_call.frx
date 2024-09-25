@@ -1,5 +1,57 @@
 import "../core/parser.frx";
 
+export struct ASTAssert
+{
+    SourceRange range;
+    char* filepath;
+    AST* expr;
+}
+
+ASTAssert* make_assert(Arena* arena, char* filepath, AST* expr)
+{
+    assert(filepath != nullptr);
+
+    assert(expr != nullptr);
+
+    ASTAssert* assert_node = arena_alloc(arena, sizeof(ASTAssert));
+
+    assert_node->filepath = filepath;
+    assert_node->expr = expr;
+
+    return assert_node;
+}
+
+ASTAssert* parse_assert(Parser* parser)
+{
+    assert(parser != nullptr);
+
+    SourceLocation start = parser_current_location(parser);
+
+    AST* expr = parse_expr(parser);
+    ASTAssert* assert_node = make_assert(&parser->arena,
+        parser_source_file(parser), expr);
+
+    SourceLocation end = parser_current_location(parser);
+
+    assert_node->range.start = start;
+    assert_node->range.end = end;
+
+    return assert_node;
+}
+
+export ASTAssert* print_assert(ASTAssert* assert_node, FILE* file, usize depth)
+{
+    assert(assert_node != nullptr);
+
+    assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_ASSERT));
+
+    print_ast(assert_node->expr, file, depth + 1);
+}
+
 export struct ASTSizeof
 {
     Namespace* ns;
@@ -136,7 +188,11 @@ export AST* parse_internal_func_call(Parser* parser)
 
     parser_eat(parser, TOKEN_TYPE_LPAREN);
 
-    if(strcmp(name, "sizeof") == 0)
+    if(strcmp(name, "assert") == 0)
+    {
+        ast = make_ast(&parser->arena, AST_TYPE_ASSERT, parse_assert(parser));
+    }
+    else if(strcmp(name, "sizeof") == 0)
     {
         ast = make_ast(&parser->arena, AST_TYPE_SIZEOF, parse_sizeof(parser));
     }
