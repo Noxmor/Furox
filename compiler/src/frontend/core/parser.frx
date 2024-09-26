@@ -159,12 +159,14 @@ export Parser* parser_compile(Parser* parser, char* filepath)
     return parser_table_find(fullpath);
 }
 
-void parser_resolve_imports_recursive(List* visible_parsers, Parser* parser,
-    List* visited_parsers)
+void parser_resolve_imports_recursive(Parser* main_parser,
+    List* visible_parsers, Parser* parser, List* visited_parsers)
 {
-    assert(parser != nullptr);
+    assert(main_parser != nullptr);
 
     assert(visible_parsers != nullptr);
+
+    assert(parser != nullptr);
 
     assert(visited_parsers != nullptr);
 
@@ -179,7 +181,7 @@ void parser_resolve_imports_recursive(List* visible_parsers, Parser* parser,
 
         ASTImportStmt* import_stmt = ast->node;
         Parser* imported_parser = import_stmt->imported_parser;
-        if(imported_parser == nullptr)
+        if(imported_parser == nullptr || imported_parser == main_parser)
         {
             continue;
         }
@@ -193,8 +195,8 @@ void parser_resolve_imports_recursive(List* visible_parsers, Parser* parser,
         if(!list_contains(visited_parsers, imported_parser))
         {
             list_push(visited_parsers, imported_parser);
-            parser_resolve_imports_recursive(visible_parsers, imported_parser,
-                visited_parsers);
+            parser_resolve_imports_recursive(main_parser, visible_parsers,
+                imported_parser, visited_parsers);
         }
     }
 }
@@ -219,7 +221,7 @@ export void parser_resolve_imports(Parser* parser)
 
         ASTImportStmt* import_stmt = ast->node;
         Parser* imported_parser = import_stmt->imported_parser;
-        if(imported_parser == nullptr)
+        if(imported_parser == nullptr || imported_parser == parser)
         {
             continue;
         }
@@ -232,12 +234,18 @@ export void parser_resolve_imports(Parser* parser)
         if(!list_contains(&visited_parsers, imported_parser))
         {
             list_push(&visited_parsers, imported_parser);
-            parser_resolve_imports_recursive(visible_parsers, imported_parser,
-                &visited_parsers);
+            parser_resolve_imports_recursive(parser, visible_parsers,
+                imported_parser, &visited_parsers);
         }
     }
 
     list_destroy(&visited_parsers);
+
+    for(i = 0; i < list_size(visible_parsers); i = i + 1)
+    {
+        Parser* visible_parser = list_get(visible_parsers, i);
+        assert(visible_parser != parser);
+    }
 }
 
 export void parser_analyze(Parser* parser)
