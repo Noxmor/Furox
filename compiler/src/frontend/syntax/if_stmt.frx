@@ -37,7 +37,15 @@ export ASTIfStmt* parse_if_stmt(Parser* parser)
     {
         parser_eat(parser, TOKEN_TYPE_KW_ELSE);
 
-        else_block = parse_scope(parser);
+        if(parser->token->type == TOKEN_TYPE_KW_IF)
+        {
+            else_block = make_scope(&parser->arena);
+            list_push(&else_block->stmts, parse_if_stmt(parser));
+        }
+        else
+        {
+            else_block = parse_scope(parser);
+        }
     }
 
     return make_if_stmt(&parser->arena, condition, if_block, else_block);
