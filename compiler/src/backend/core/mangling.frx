@@ -6,7 +6,8 @@ usize buffer_size = 0;
 
 void realloc_buffer(usize size)
 {
-    buffer = realloc(buffer, size * sizeof(char));
+    buffer_size = size;
+    buffer = realloc(buffer, buffer_size * sizeof(char));
 }
 
 void mangle_namespace(Namespace* ns)
@@ -20,6 +21,12 @@ void mangle_namespace(Namespace* ns)
 
     if(strcmp(ns->name, "") != 0)
     {
+        usize size = strlen(buffer) + strlen(ns->name) + strlen("_");
+        if(size > buffer_size)
+        {
+            realloc_buffer(size);
+        }
+
         strcat(buffer, ns->name);
         strcat(buffer, "_");
     }
