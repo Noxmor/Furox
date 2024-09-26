@@ -40,7 +40,8 @@ export ASTIfStmt* parse_if_stmt(Parser* parser)
         if(parser->token->type == TOKEN_TYPE_KW_IF)
         {
             else_block = make_scope(&parser->arena);
-            list_push(&else_block->stmts, parse_if_stmt(parser));
+            list_push(&else_block->stmts, make_ast(&parser->arena,
+                AST_TYPE_IF_STMT, parse_if_stmt(parser)));
         }
         else
         {
