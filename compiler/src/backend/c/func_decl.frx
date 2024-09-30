@@ -16,6 +16,12 @@ export void transpile_func_decl(Transpiler* transpiler, ASTFuncDecl* func_decl)
 
     FuncSymbol* symbol = &func_decl->symbol;
 
+    if(strcmp(symbol->name, "va_start") == 0
+        || strcmp(symbol->name, "va_end") == 0)
+    {
+        return;
+    }
+
     transpile_type_specifier(transpiler, func_decl->return_type);
     fprintf(transpiler->file, "%s", symbol->name);
     transpile_func_params(transpiler, func_decl->params);

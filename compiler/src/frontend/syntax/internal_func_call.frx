@@ -57,6 +57,8 @@ export struct ASTSizeof
     Namespace* ns;
     char* name;
     TokenType primitive_type;
+    StructSymbol* struct_type;
+    EnumSymbol* enum_type;
     Scope* scope;
 }
 
@@ -72,6 +74,8 @@ ASTSizeof* make_sizeof(Arena* arena, Namespace* ns, char* name,
     sizeof_node->ns = ns;
     sizeof_node->name = name;
     sizeof_node->primitive_type = primitive_type;
+    sizeof_node->struct_type = nullptr;
+    sizeof_node->enum_type = nullptr;
     sizeof_node->scope = scope;
 
     return sizeof_node;

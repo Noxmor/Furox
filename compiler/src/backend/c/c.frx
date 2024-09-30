@@ -20,6 +20,9 @@ export struct Transpiler
     FILE* file;
 
     Namespace* current_namespace;
+
+    Queue untranspiled_structs;
+    List transpiled_symbols;
 }
 
 export i32 c_generate_code(ASTProgram* program)
@@ -34,8 +37,12 @@ export i32 c_generate_code(ASTProgram* program)
 
     transpiler.current_namespace = nullptr;
 
+    queue_init(&transpiler.untranspiled_structs);
+    list_init(&transpiler.transpiled_symbols);
+
     fprintf(transpiler.file, "#include <stddef.h>\n");
     fprintf(transpiler.file, "#include <stdint.h>\n");
+    fprintf(transpiler.file, "#include <stdarg.h>\n");
 
     fprintf(transpiler.file, "typedef size_t usize;\n");
     fprintf(transpiler.file, "typedef int64_t isize;\n");

@@ -12,7 +12,7 @@ export void analyze_assert(Parser* parser, ASTAssert* assert_node)
     analyze_ast(parser, assert_node->expr);
 }
 
-export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
+export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node)
 {
     assert(parser != nullptr);
 
@@ -20,49 +20,29 @@ export void analyze_sizeof(Parser* parser, ASTSizeof* sizeof_node, AST* ast)
 
     if(sizeof_node->primitive_type != TOKEN_TYPE_ERROR)
     {
-        ast->type = AST_TYPE_INT_LITERAL;
-
-        usize size = primitive_type_to_size(sizeof_node->primitive_type);
-        ast->node = make_int_literal(&parser->arena, size);
-
         return;
     }
 
-    StructSymbol* struct_symbol = nullptr;
-    EnumSymbol* enum_symbol = nullptr;
-
     if(sizeof_node->ns == nullptr)
     {
-        struct_symbol = parser_find_struct_symbol_r(parser,
+        sizeof_node->struct_type = parser_find_struct_symbol_r(parser,
             parser->current_namespace, sizeof_node->name);
 
-        enum_symbol = parser_find_enum_symbol_r(parser,
+        sizeof_node->enum_type = parser_find_enum_symbol_r(parser,
             parser->current_namespace, sizeof_node->name);
     }
     else
     {
-        struct_symbol = parser_find_struct_symbol(parser, sizeof_node->ns,
-            sizeof_node->name);
-        enum_symbol = parser_find_enum_symbol(parser, sizeof_node->ns,
-            sizeof_node->name);
+        sizeof_node->struct_type = parser_find_struct_symbol(parser,
+            sizeof_node->ns, sizeof_node->name);
+
+        sizeof_node->enum_type = parser_find_enum_symbol(parser,
+            sizeof_node->ns, sizeof_node->name);
     }
 
-    if(struct_symbol != nullptr)
-    {
-        ast->type = AST_TYPE_INT_LITERAL;
-
-        //TODO: Calculate size of the struct
-        usize size = 0;
-        ast->node = make_int_literal(&parser->arena, size);
-    }
-    else if(enum_symbol != nullptr)
-    {
-        ast->type = AST_TYPE_INT_LITERAL;
-
-        usize size = primitive_type_to_size(enum_symbol->type);
-        ast->node = make_int_literal(&parser->arena, size);
-    }
-    else
+    if(sizeof_node->primitive_type != TOKEN_TYPE_ERROR
+        && sizeof_node->enum_type == nullptr
+        && sizeof_node->struct_type == nullptr)
     {
         //FIXME: Print the correct location, this is only a placeholder
         SourceLocation loc;

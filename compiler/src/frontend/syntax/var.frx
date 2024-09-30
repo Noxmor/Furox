@@ -3,6 +3,7 @@ import "../symbols/var.frx";
 
 export struct ASTVar
 {
+    SourceRange range;
     VarSymbol* symbol;
 
     Namespace* ns;
@@ -28,6 +29,10 @@ export ASTVar* parse_var(Parser* parser, Namespace* ns)
 
     ASTVar* var = make_var(&parser->arena, ns, parser->current_scope,
         parser->token->identifier);
+
+    var->range.start = parser_current_location(parser);
+    var->range.end = parser_current_location(parser);
+    var->range.end.column = var->range.end.column + strlen(var->name);
 
     parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
 

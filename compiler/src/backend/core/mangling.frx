@@ -110,6 +110,18 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
 
     usize size = strlen(name);
 
+    if(namespace_is_global(ns) && strcmp(name, "main") == 0)
+    {
+        if(size > buffer_size)
+        {
+            realloc_buffer(size);
+        }
+
+        strcpy(buffer, name);
+
+        return buffer;
+    }
+
     Namespace* temp = ns;
     while(temp != nullptr)
     {

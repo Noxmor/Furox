@@ -25,6 +25,24 @@ export b8 queue_is_empty(Queue* queue)
     return queue->front == nullptr;
 }
 
+export b8 queue_contains(Queue* queue, void* data)
+{
+    assert(queue != nullptr);
+
+    QueueNode* node = queue->front;
+    while(node != nullptr)
+    {
+        if(node->data == data)
+        {
+            return true;
+        }
+
+        node = node->next;
+    }
+
+    return false;
+}
+
 export void queue_enqueue(Queue* queue, void* data)
 {
     assert(queue != nullptr);

@@ -63,6 +63,39 @@ export void analyze_binary_expr(Parser* parser, ASTBinaryExpr* expr)
 
             break;
         }
+        case OP_ASSIGN:
+        {
+            analyze_ast(parser, expr->left);
+            analyze_ast(parser, expr->right);
+
+            AST* left = expr->left;
+            while(left->type == AST_TYPE_BINARY_EXPR)
+            {
+                ASTBinaryExpr* binary_expr = left->node;
+                if(binary_expr->operator != OP_POINTER_MEMBER_ACCESS
+                    && binary_expr->operator != OP_MEMBER_ACCESS)
+                {
+                    break;
+                }
+
+                left = binary_expr->left;
+            }
+
+            if(left->type == AST_TYPE_VAR)
+            {
+                ASTVar* var = left->node;
+                VarSymbol* symbol = var->symbol;
+
+                if(!symbol->mutable)
+                {
+                    error_assignment_const_var(parser_source_file(parser),
+                        var->range.start, var->name);
+                    parser->failed = true;
+                }
+            }
+
+            break;
+        }
         default:
         {
             analyze_ast(parser, expr->left);

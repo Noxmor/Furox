@@ -21,5 +21,16 @@ export void transpile_program(Transpiler* transpiler, ASTProgram* program)
 
             transpile_translation_unit(transpiler, translation_unit);
         }
+
+        if(transpiler->mode == TRANSPILER_MODE_STRUCT_IMPL)
+        {
+            while(!queue_is_empty(&transpiler->untranspiled_structs))
+            {
+                ASTStructDef* struct_def = queue_dequeue(
+                    &transpiler->untranspiled_structs);
+
+                transpile_struct_def(transpiler, struct_def);
+            }
+        }
     }
 }
