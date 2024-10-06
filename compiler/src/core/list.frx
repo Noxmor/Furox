@@ -1,3 +1,9 @@
+extern
+{
+    void* realloc(mut void* ptr, usize size);
+    void free(void* ptr);
+}
+
 export struct List
 {
     void** items;
@@ -5,17 +11,17 @@ export struct List
     usize capacity;
 }
 
-export void list_init(List* list)
+export void list_init(mut List* list)
 {
-    assert(list != nullptr);
+    frx::assert(list != nullptr);
 
     list->items = nullptr;
-    list->size = list->capacity = 0;
+    list->size = (list->capacity = 0);
 }
 
-export void list_push(List* list, void* item)
+export void list_push(mut List* list, void* item)
 {
-    assert(list != nullptr);
+    frx::assert(list != nullptr);
 
     if(list->size >= list->capacity)
     {
@@ -29,7 +35,7 @@ export void list_push(List* list, void* item)
         }
 
         //TODO: Change sizeof to use void* instead of usize
-        list->items = realloc(list->items, list->capacity * sizeof(usize));
+        list->items = realloc(list->items, list->capacity * frx::sizeof(usize));
     }
 
     list->items[list->size] = item;
@@ -38,18 +44,18 @@ export void list_push(List* list, void* item)
 
 export void* list_get(List* list, usize index)
 {
-    assert(list != nullptr);
+    frx::assert(list != nullptr);
 
-    assert(index < list->size);
+    frx::assert(index < list->size);
 
     return list->items[index];
 }
 
 export b8 list_contains(List* list, void* item)
 {
-    assert(list != nullptr);
+    frx::assert(list != nullptr);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(list); i = i + 1)
     {
         void* list_item = list_get(list, i);
@@ -64,14 +70,14 @@ export b8 list_contains(List* list, void* item)
 
 export usize list_size(List* list)
 {
-    assert(list != nullptr);
+    frx::assert(list != nullptr);
 
     return list->size;
 }
 
 export void list_destroy(List* list)
 {
-    assert(list != nullptr);
+    frx::assert(list != nullptr);
 
     free(list->items);
 }

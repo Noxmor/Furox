@@ -1,18 +1,22 @@
+import "func_params.frx";
+import "type_specifier.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
+import "../symbols/func.frx";
 import "../syntax/func_decl.frx";
+import "../../core/list.frx";
 
-export void analyze_func_decl(Parser* parser, ASTFuncDecl* func_decl)
+export void analyze_func_decl(mut Parser* parser, mut ASTFuncDecl* func_decl)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(func_decl != nullptr);
+    frx::assert(func_decl != nullptr);
 
     analyze_type_specifier(parser, func_decl->return_type);
 
     FuncSymbol* symbol = &func_decl->symbol;
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&parser->visible_parsers)
         && !func_decl->is_redefinition; i = i + 1)
     {

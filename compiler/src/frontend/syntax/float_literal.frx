@@ -1,4 +1,12 @@
+import "../core/ast.frx";
 import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTFloatLiteral
 {
@@ -7,7 +15,8 @@ export struct ASTFloatLiteral
 
 ASTFloatLiteral* make_float_literal(Arena* arena, f64 value)
 {
-    ASTFloatLiteral* literal = arena_alloc(arena, sizeof(ASTFloatLiteral));
+    mut ASTFloatLiteral* literal = arena_alloc(arena,
+        frx::sizeof(ASTFloatLiteral));
 
     literal->value = value;
 
@@ -16,12 +25,12 @@ ASTFloatLiteral* make_float_literal(Arena* arena, f64 value)
 
 export ASTFloatLiteral* parse_float_literal(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     ASTFloatLiteral* literal = make_float_literal(&parser->arena,
         parser->token->float_literal);
 
-    parser_eat(parser, TOKEN_TYPE_FLOAT_LITERAL);
+    parser_eat(parser, TokenType::FLOAT_LITERAL);
 
     return literal;
 }
@@ -29,15 +38,15 @@ export ASTFloatLiteral* parse_float_literal(Parser* parser)
 export void print_float_literal(ASTFloatLiteral* literal, FILE* file,
     usize depth)
 {
-    assert(literal != nullptr);
+    frx::assert(literal != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
     u64 integer = literal->value >> 32;
     u64 decimal = literal->value & 0xFFFFFFFF;
 
-    fprintf(file, "%s (%zu.%zuf)\n", ast_type_to_str(AST_TYPE_FLOAT_LITERAL),
+    fprintf(file, "%s (%zu.%zuf)\n", ast_type_to_str(AstType::FLOAT_LITERAL),
         integer, decimal);
 }

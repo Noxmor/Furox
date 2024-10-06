@@ -1,5 +1,17 @@
 import "type_specifier.frx";
+import "../core/ast.frx";
+import "../core/namespace.frx";
 import "../core/parser.frx";
+import "../core/scope.frx";
+import "../symbols/struct.frx";
+import "../../core/list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTStructField
 {
@@ -10,11 +22,11 @@ export struct ASTStructField
 ASTStructField* make_struct_field(Arena* arena, ASTTypeSpecifier* type,
     char* name)
 {
-    assert(type != nullptr);
+    frx::assert(type != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    ASTStructField* field = arena_alloc(arena, sizeof(ASTStructField));
+    mut ASTStructField* field = arena_alloc(arena, frx::sizeof(ASTStructField));
 
     field->type = type;
     field->name = name;
@@ -24,24 +36,24 @@ ASTStructField* make_struct_field(Arena* arena, ASTTypeSpecifier* type,
 
 ASTStructField* parse_struct_field(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     ASTTypeSpecifier* type = parse_type_specifier(parser);
 
     char* name = parser->token->identifier;
 
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
     parse_array_dimensions(parser, type);
-    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
     return make_struct_field(&parser->arena, type, name);
 }
 
 void print_struct_field(ASTStructField* field, FILE* file, usize depth)
 {
-    assert(field != nullptr);
+    frx::assert(field != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     fprintf(file, "%s\n", field->name);
 }
@@ -58,7 +70,8 @@ export struct ASTStructDef
 export ASTStructDef* make_struct_def(Arena* arena, Scope* scope, Namespace* ns,
     char* name, b8 exported)
 {
-    ASTStructDef* struct_def = arena_alloc(arena, sizeof(ASTStructDef));
+    mut ASTStructDef* struct_def = arena_alloc(arena,
+        frx::sizeof(ASTStructDef));
 
     struct_symbol_init(&struct_def->symbol, scope, ns, name, exported, false);
 
@@ -69,25 +82,25 @@ export ASTStructDef* make_struct_def(Arena* arena, Scope* scope, Namespace* ns,
 
 export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     SourceLocation start = parser_current_location(parser);
 
-    parser_eat(parser, TOKEN_TYPE_KW_STRUCT);
+    parser_eat(parser, TokenType::KW_STRUCT);
 
     char* name = parser->token->identifier;
 
-    ASTStructDef* struct_def = make_struct_def(&parser->arena,
+    mut ASTStructDef* struct_def = make_struct_def(&parser->arena,
         parser->current_scope, parser->current_namespace, name, exported);
 
     struct_def->is_redefinition = !struct_table_insert(&parser->struct_table,
         &struct_def->symbol);
 
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
-    parser_eat(parser, TOKEN_TYPE_LBRACE);
+    parser_eat(parser, TokenType::LBRACE);
 
-    while(parser_loop_until(parser, TOKEN_TYPE_RBRACE))
+    while(parser_loop_until(parser, TokenType::RBRACE))
     {
         list_push(&struct_def->symbol.fields, parse_struct_field(parser));
     }
@@ -95,25 +108,25 @@ export ASTStructDef* parse_struct_def(Parser* parser, b8 exported)
     struct_def->range.start = start;
     struct_def->range.end = parser_current_location(parser);
 
-    parser_eat(parser, TOKEN_TYPE_RBRACE);
+    parser_eat(parser, TokenType::RBRACE);
 
     return struct_def;
 }
 
 export void print_struct_def(ASTStructDef* struct_def, FILE* file, usize depth)
 {
-    assert(struct_def != nullptr);
+    frx::assert(struct_def != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
     StructSymbol* symbol = &struct_def->symbol;
 
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_STRUCT_DEF),
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::STRUCT_DEF),
         symbol->name);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&symbol->fields); i = i + 1)
     {
         ASTStructField* field = list_get(&symbol->fields, i);

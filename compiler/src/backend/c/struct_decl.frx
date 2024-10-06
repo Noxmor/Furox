@@ -1,14 +1,26 @@
+import "c.frx";
+import "../../frontend/symbols/struct.frx";
+import "../../frontend/syntax/struct_decl.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+    i32 strcmp(char* str1, char* str2);
+}
+
 export void transpile_struct_decl(Transpiler* transpiler,
     ASTStructDecl* struct_decl)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(struct_decl != nullptr);
+    frx::assert(struct_decl != nullptr);
 
     StructSymbol* symbol = &struct_decl->symbol;
     char* name = symbol->name;
 
-    if(transpiler->mode == TRANSPILER_MODE_STRUCT_DECL)
+    if(transpiler->mode == TranspilerMode::STRUCT_DECL)
     {
         if(strcmp(name, "va_list") != 0)
         {

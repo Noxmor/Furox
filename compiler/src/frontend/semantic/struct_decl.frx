@@ -1,12 +1,19 @@
-export void analyze_struct_decl(Parser* parser, ASTStructDecl* struct_decl)
-{
-    assert(parser != nullptr);
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../symbols/struct.frx";
+import "../syntax/struct_decl.frx";
+import "../../core/list.frx";
 
-    assert(struct_decl != nullptr);
+export void analyze_struct_decl(mut Parser* parser,
+    mut ASTStructDecl* struct_decl)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(struct_decl != nullptr);
 
     StructSymbol* symbol = &struct_decl->symbol;
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&parser->visible_parsers)
         && !struct_decl->is_redefinition; i = i + 1)
     {

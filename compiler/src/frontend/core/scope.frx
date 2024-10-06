@@ -1,14 +1,19 @@
+extern
+{
+    void* malloc(usize size);
+}
+
 export struct Scope
 {
     Scope* parent;
     usize id;
 }
 
-usize next_scope_id;
+mut usize next_scope_id;
 
 export Scope* scope_create(Scope* parent)
 {
-    Scope* scope = malloc(sizeof(Scope));
+    mut Scope* scope = malloc(frx::sizeof(Scope));
 
     scope->parent = parent;
     scope->id = next_scope_id;
@@ -20,7 +25,7 @@ export Scope* scope_create(Scope* parent)
 
 export b8 scope_is_child_of(Scope* child, Scope* parent)
 {
-    assert(child != nullptr && parent != nullptr);
+    frx::assert(child != nullptr && parent != nullptr);
 
     if(child->id == parent->id)
     {
@@ -35,11 +40,11 @@ export b8 scope_is_child_of(Scope* child, Scope* parent)
     return scope_is_child_of(child->parent, parent);
 }
 
-export b8 scope_same_root(Scope* left, Scope* right)
+export b8 scope_same_root(mut Scope* left, mut Scope* right)
 {
-    assert(left != nullptr);
+    frx::assert(left != nullptr);
 
-    assert(right != nullptr);
+    frx::assert(right != nullptr);
 
     while(left->parent != nullptr)
     {

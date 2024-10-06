@@ -1,8 +1,19 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/syntax/internal_func_call.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_assert(Transpiler* transpiler, ASTAssert* assert_node)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(assert_node != nullptr);
+    frx::assert(assert_node != nullptr);
 
     SourceLocation loc = assert_node->range.start;
 

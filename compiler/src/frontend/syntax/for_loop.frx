@@ -1,6 +1,14 @@
+import "expr.frx";
 import "scope.frx";
 import "../core/ast.frx";
 import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTForLoop
 {
@@ -13,15 +21,15 @@ export struct ASTForLoop
 ASTForLoop* make_for_loop(Arena* arena, AST* initialization, AST* condition,
     AST* iteration, ASTScope* scope)
 {
-    assert(initialization != nullptr);
+    frx::assert(initialization != nullptr);
 
-    assert(condition != nullptr);
+    frx::assert(condition != nullptr);
 
-    assert(iteration != nullptr);
+    frx::assert(iteration != nullptr);
 
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    ASTForLoop* for_loop = arena_alloc(arena, sizeof(ASTForLoop));
+    mut ASTForLoop* for_loop = arena_alloc(arena, frx::sizeof(ASTForLoop));
 
     for_loop->initialization = initialization;
     for_loop->condition = condition;
@@ -33,19 +41,19 @@ ASTForLoop* make_for_loop(Arena* arena, AST* initialization, AST* condition,
 
 export ASTForLoop* parse_for_loop(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    parser_eat(parser, TOKEN_TYPE_KW_FOR);
+    parser_eat(parser, TokenType::KW_FOR);
 
-    parser_eat(parser, TOKEN_TYPE_LPAREN);
+    parser_eat(parser, TokenType::LPAREN);
 
     AST* initialization = parse_expr(parser);
-    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
     AST* condition = parse_expr(parser);
-    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
     AST* iteration = parse_expr(parser);
 
-    parser_eat(parser, TOKEN_TYPE_RPAREN);
+    parser_eat(parser, TokenType::RPAREN);
 
     ASTScope* scope = parse_scope(parser);
 
@@ -55,13 +63,13 @@ export ASTForLoop* parse_for_loop(Parser* parser)
 
 export void print_for_loop(ASTForLoop* for_loop, FILE* file, usize depth)
 {
-    assert(for_loop != nullptr);
+    frx::assert(for_loop != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_FOR_LOOP));
+    fprintf(file, "%s\n", ast_type_to_str(AstType::FOR_LOOP));
 
     print_ast(for_loop->initialization, file, depth + 1);
     print_ast(for_loop->condition, file, depth + 1);

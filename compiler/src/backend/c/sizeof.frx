@@ -1,12 +1,25 @@
+import "c.frx";
+import "../core/mangling.frx";
+import "../../frontend/symbols/enum.frx";
+import "../../frontend/symbols/struct.frx";
+import "../../frontend/syntax/internal_func_call.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_sizeof(Transpiler* transpiler, ASTSizeof* sizeof_node)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(sizeof_node != nullptr);
+    frx::assert(sizeof_node != nullptr);
 
     fprintf(transpiler->file, "sizeof(");
 
-    if(sizeof_node->primitive_type != TOKEN_TYPE_ERROR)
+    if(sizeof_node->primitive_type != TokenType::ERROR)
     {
         fprintf(transpiler->file, "%s",
             token_type_to_str(sizeof_node->primitive_type));

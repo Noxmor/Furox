@@ -4,9 +4,9 @@ import "../syntax/return_stmt.frx";
 
 export void analyze_return_stmt(Parser* parser, ASTReturnStmt* return_stmt)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(return_stmt != nullptr);
+    frx::assert(return_stmt != nullptr);
 
     if(return_stmt->value != nullptr)
     {

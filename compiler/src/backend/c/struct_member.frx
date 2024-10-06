@@ -1,12 +1,19 @@
 import "c.frx";
 import "../../frontend/syntax/struct_member.frx";
 
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_struct_member(Transpiler* transpiler,
     ASTStructMember* member)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(member != nullptr);
+    frx::assert(member != nullptr);
 
     fprintf(transpiler->file, "%s", member->name);
 }

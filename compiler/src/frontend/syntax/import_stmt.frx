@@ -1,4 +1,12 @@
+import "../core/ast.frx";
 import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTImportStmt
 {
@@ -10,9 +18,10 @@ export struct ASTImportStmt
 export ASTImportStmt* make_import_stmt(Arena* arena, Parser* imported_parser,
     char* filepath, b8 exported)
 {
-    assert(filepath != nullptr);
+    frx::assert(filepath != nullptr);
 
-    ASTImportStmt* import_stmt = arena_alloc(arena, sizeof(ASTImportStmt));
+    mut ASTImportStmt* import_stmt = arena_alloc(arena,
+        frx::sizeof(ASTImportStmt));
 
     import_stmt->imported_parser = imported_parser;
     import_stmt->filepath = filepath;
@@ -21,20 +30,20 @@ export ASTImportStmt* make_import_stmt(Arena* arena, Parser* imported_parser,
     return import_stmt;
 }
 
-ASTImportStmt* parse_import_stmt(Parser* parser, b8 exported)
+export ASTImportStmt* parse_import_stmt(Parser* parser, b8 exported)
 {
-    parser_eat(parser, TOKEN_TYPE_KW_IMPORT);
+    parser_eat(parser, TokenType::KW_IMPORT);
 
     char* filepath = parser->token->identifier;
 
-    parser_eat(parser, TOKEN_TYPE_STRING_LITERAL);
+    parser_eat(parser, TokenType::STRING_LITERAL);
 
     Parser* imported_parser = parser_compile(parser, filepath);
 
     ASTImportStmt* import_stmt = make_import_stmt(&parser->arena,
         imported_parser, filepath, exported);
 
-    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
     return import_stmt;
 }
@@ -42,12 +51,12 @@ ASTImportStmt* parse_import_stmt(Parser* parser, b8 exported)
 export void print_import_stmt(ASTImportStmt* import_stmt, FILE* file,
     usize depth)
 {
-    assert(import_stmt != nullptr);
+    frx::assert(import_stmt != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_IMPORT_STMT),
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::IMPORT_STMT),
         import_stmt->filepath);
 }

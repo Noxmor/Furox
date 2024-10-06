@@ -1,5 +1,14 @@
 import "namespace.frx";
 import "token.frx";
+import "../core/ast.frx";
+import "../../core/log.frx";
+
+extern
+{
+    char* strcpy(mut char* dest, char* src);
+    char* strcat(mut char* dest, char* src);
+    usize strlen(char* str);
+}
 
 export void error_import_stmt_invalid_filepath(char* filepath,
     SourceLocation loc, char* imported_filepath)
@@ -24,60 +33,60 @@ export void error_ambiguous_unresolved_name(char* filepath, SourceLocation loc,
     char* name)
 {
     log_error(filepath, loc, "Encountered ambiguous %s %s!",
-        ast_type_to_str(AST_TYPE_UNRESOLVED_NAME), name);
+        ast_type_to_str(AstType::UNRESOLVED_NAME), name);
 }
 
 export void error_ambiguous_unresolved_namespaced_name(char* filepath,
-    SourceLocation loc, Namespace* ns, char* name)
+    SourceLocation loc, mut Namespace* ns, char* name)
 {
-    usize size = 1 + strlen(ns->name);
+    mut usize size = 1 + strlen(ns->name);
 
-    Namespace* temp = ns->parent;
+    mut Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + strlen(token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION))
+        size = size + strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
             + strlen(temp->name);
         temp = temp->parent;
     }
 
-    char[size] ns_str;
+    char ns_str[size];
     strcpy(ns_str, ns->name);
 
     ns = ns->parent;
 
     while(ns != nullptr)
     {
-        strcat(ns_str, token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION));
+        strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
         strcat(ns_str, ns->name);
 
         ns = ns->parent;
     }
 
     log_error(filepath, loc, "Encountered ambiguous %s %s%s!",
-        ast_type_to_str(AST_TYPE_UNRESOLVED_NAMESPACED_NAME), ns_str, name);
+        ast_type_to_str(AstType::UNRESOLVED_NAMESPACED_NAME), ns_str, name);
 }
 
 export void error_namespace_is_reserved(char* filepath, SourceLocation loc,
-    Namespace* ns)
+    mut Namespace* ns)
 {
-    usize size = 1 + strlen(ns->name);
+    mut usize size = 1 + strlen(ns->name);
 
-    Namespace* temp = ns->parent;
+    mut Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + strlen(token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION))
+        size = size + strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
             + strlen(temp->name);
         temp = temp->parent;
     }
 
-    char[size] ns_str;
+    char ns_str[size];
     strcpy(ns_str, ns->name);
 
     ns = ns->parent;
 
     while(ns != nullptr)
     {
-        strcat(ns_str, token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION));
+        strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
         strcat(ns_str, ns->name);
 
         ns = ns->parent;
@@ -175,31 +184,31 @@ export void error_unresolved_name(char* filepath, SourceLocation loc,
 }
 
 export void error_unresolved_namespaced_name(char* filepath, SourceLocation loc,
-    Namespace* ns, char* name)
+    mut Namespace* ns, char* name)
 {
-    usize size = 1 + strlen(ns->name);
+    mut usize size = 1 + strlen(ns->name);
 
-    Namespace* temp = ns->parent;
+    mut Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + strlen(token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION))
+        size = size + strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
             + strlen(temp->name);
         temp = temp->parent;
     }
 
-    char[size] ns_str;
+    char ns_str[size];
     strcpy(ns_str, ns->name);
 
     ns = ns->parent;
 
     while(ns != nullptr)
     {
-        strcat(ns_str, token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION));
+        strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
         strcat(ns_str, ns->name);
 
         ns = ns->parent;
     }
 
     log_error(filepath, loc, "Could not resolve namespaced name %s%s%s!",
-        ns_str, token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION), name);
+        ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION), name);
 }

@@ -1,12 +1,23 @@
 import "c.frx";
+import "type_specifier.frx";
 import "../core/mangling.frx";
+import "../../core/queue.frx";
+import "../../frontend/symbols/struct.frx";
 import "../../frontend/syntax/struct_def.frx";
+import "../../frontend/syntax/type_specifier.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 void transpile_struct_field(Transpiler* transpiler, ASTStructField* field)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(field != nullptr);
+    frx::assert(field != nullptr);
 
     ASTTypeSpecifier* type = field->type;
 
@@ -19,26 +30,26 @@ void transpile_struct_field(Transpiler* transpiler, ASTStructField* field)
 export void transpile_struct_def(Transpiler* transpiler,
     ASTStructDef* struct_def)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(struct_def != nullptr);
+    frx::assert(struct_def != nullptr);
 
     StructSymbol* symbol = &struct_def->symbol;
 
     char* mangled_name = mangle_struct_name(symbol->scope, symbol->ns,
         symbol->name);
 
-    if(transpiler->mode == TRANSPILER_MODE_STRUCT_DECL)
+    if(transpiler->mode == TranspilerMode::STRUCT_DECL)
     {
         fprintf(transpiler->file, "typedef struct %s", mangled_name);
         fprintf(transpiler->file, " ");
         fprintf(transpiler->file, "%s;\n", mangled_name);
     }
-    else if(transpiler->mode == TRANSPILER_MODE_STRUCT_IMPL)
+    else if(transpiler->mode == TranspilerMode::STRUCT_IMPL)
     {
-        b8 should_transpile = true;
+        mut b8 should_transpile = true;
 
-        usize i;
+        mut usize i;
         for(i = 0; i < list_size(&symbol->fields); i = i + 1)
         {
             ASTStructField* field = list_get(&symbol->fields, i);
@@ -53,9 +64,11 @@ export void transpile_struct_def(Transpiler* transpiler,
             {
                 should_transpile = false;
 
-                if(!queue_contains(&transpiler->untranspiled_structs, struct_def))
+                if(!queue_contains(&transpiler->untranspiled_structs,
+                    struct_def))
                 {
-                    queue_enqueue(&transpiler->untranspiled_structs, struct_def);
+                    queue_enqueue(&transpiler->untranspiled_structs,
+                        struct_def);
                 }
             }
         }

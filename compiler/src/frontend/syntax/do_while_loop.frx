@@ -1,6 +1,14 @@
+import "expr.frx";
 import "scope.frx";
 import "../core/ast.frx";
 import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTDoWhileLoop
 {
@@ -11,11 +19,12 @@ export struct ASTDoWhileLoop
 ASTDoWhileLoop* make_do_while_loop(Arena* arena, ASTScope* scope,
     AST* condition)
 {
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(condition != nullptr);
+    frx::assert(condition != nullptr);
 
-    ASTDoWhileLoop* do_while_loop = arena_alloc(arena, sizeof(ASTDoWhileLoop));
+    mut ASTDoWhileLoop* do_while_loop = arena_alloc(arena,
+        frx::sizeof(ASTDoWhileLoop));
 
     do_while_loop->scope = scope;
     do_while_loop->condition = condition;
@@ -25,17 +34,17 @@ ASTDoWhileLoop* make_do_while_loop(Arena* arena, ASTScope* scope,
 
 export ASTDoWhileLoop* parse_do_while_loop(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    parser_eat(parser, TOKEN_TYPE_KW_DO);
+    parser_eat(parser, TokenType::KW_DO);
 
     ASTScope* scope = parse_scope(parser);
 
-    parser_eat(parser, TOKEN_TYPE_KW_WHILE);
-    parser_eat(parser, TOKEN_TYPE_LPAREN);
+    parser_eat(parser, TokenType::KW_WHILE);
+    parser_eat(parser, TokenType::LPAREN);
     AST* condition = parse_expr(parser);
-    parser_eat(parser, TOKEN_TYPE_RPAREN);
-    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    parser_eat(parser, TokenType::RPAREN);
+    parser_eat(parser, TokenType::SEMICOLON);
 
     return make_do_while_loop(&parser->arena, scope, condition);
 }
@@ -43,13 +52,13 @@ export ASTDoWhileLoop* parse_do_while_loop(Parser* parser)
 export void print_do_while_loop(ASTDoWhileLoop* do_while_loop, FILE* file,
     usize depth)
 {
-    assert(do_while_loop != nullptr);
+    frx::assert(do_while_loop != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_DO_WHILE_LOOP));
+    fprintf(file, "%s\n", ast_type_to_str(AstType::DO_WHILE_LOOP));
     print_scope(do_while_loop->scope, file, depth + 1);
     print_ast(do_while_loop->condition, file, depth + 1);
 }

@@ -1,13 +1,25 @@
+import "ast.frx";
 import "c.frx";
 import "../core/mangling.frx";
+import "../../core/list.frx";
+import "../../frontend/core/ast.frx";
+import "../../frontend/symbols/enum.frx";
+import "../../frontend/symbols/struct.frx";
 import "../../frontend/syntax/type_specifier.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export void transpile_type_specifier(Transpiler* transpiler,
     ASTTypeSpecifier* type_specifier)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(type_specifier != nullptr);
+    frx::assert(type_specifier != nullptr);
 
     if(type_specifier->primitive_type != 0)
     {
@@ -23,7 +35,7 @@ export void transpile_type_specifier(Transpiler* transpiler,
     else if(type_specifier->struct_type != nullptr)
     {
         StructSymbol* struct_symbol = type_specifier->struct_type;
-        char* name = struct_symbol->name;
+        mut char* name = struct_symbol->name;
         if(!struct_symbol->external)
         {
             name = mangle_struct_name(struct_symbol->scope, struct_symbol->ns,
@@ -33,7 +45,7 @@ export void transpile_type_specifier(Transpiler* transpiler,
         fprintf(transpiler->file, "%s", name);
     }
 
-    usize i;
+    mut usize i;
     for(i = 0; i < type_specifier->pointer_level; i = i + 1)
     {
         fprintf(transpiler->file, "*");
@@ -42,14 +54,14 @@ export void transpile_type_specifier(Transpiler* transpiler,
     fprintf(transpiler->file, " ");
 }
 
-void transpile_type_specifier_array_dimensions(Transpiler* transpiler,
+export void transpile_type_specifier_array_dimensions(Transpiler* transpiler,
     ASTTypeSpecifier* type_specifier)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(type_specifier != nullptr);
+    frx::assert(type_specifier != nullptr);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
     {
         fprintf(transpiler->file, "[");

@@ -1,7 +1,17 @@
 import "func_params.frx";
 import "type_specifier.frx";
+import "../core/ast.frx";
+import "../core/namespace.frx";
 import "../core/parser.frx";
+import "../core/scope.frx";
 import "../symbols/func.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTFuncDecl
 {
@@ -17,9 +27,9 @@ export struct ASTFuncDecl
 ASTFuncDecl* make_func_decl(Arena* arena, Scope* scope, Namespace* ns,
     char* name, ASTTypeSpecifier* return_type)
 {
-    assert(return_type != nullptr);
+    frx::assert(return_type != nullptr);
 
-    ASTFuncDecl* func_decl = arena_alloc(arena, sizeof(ASTFuncDecl));
+    mut ASTFuncDecl* func_decl = arena_alloc(arena, frx::sizeof(ASTFuncDecl));
 
     func_symbol_init(&func_decl->symbol, scope, ns, name, false, true);
 
@@ -32,7 +42,7 @@ ASTFuncDecl* make_func_decl(Arena* arena, Scope* scope, Namespace* ns,
 
 export ASTFuncDecl* parse_func_decl(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     SourceLocation start = parser_current_location(parser);
 
@@ -40,9 +50,9 @@ export ASTFuncDecl* parse_func_decl(Parser* parser)
 
     char* name = parser->token->identifier;
 
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
-    ASTFuncDecl* func_decl = make_func_decl(&parser->arena,
+    mut ASTFuncDecl* func_decl = make_func_decl(&parser->arena,
         parser->current_scope, parser->current_namespace, name, return_type);
 
     func_decl->is_redefinition = !func_table_insert(&parser->func_table,
@@ -57,22 +67,22 @@ export ASTFuncDecl* parse_func_decl(Parser* parser)
     func_decl->range.start = start;
     func_decl->range.end = parser_current_location(parser);
 
-    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
     return func_decl;
 }
 
 export void print_func_decl(ASTFuncDecl* func_decl, FILE* file, usize depth)
 {
-    assert(func_decl != nullptr);
+    frx::assert(func_decl != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
     FuncSymbol* symbol = &func_decl->symbol;
 
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_FUNC_DECL),
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::FUNC_DECL),
         symbol->name);
 
     print_type_specifier(func_decl->return_type, file, depth + 1);

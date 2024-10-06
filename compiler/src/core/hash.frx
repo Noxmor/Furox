@@ -1,10 +1,10 @@
-export u64 hash_djb2(char* str)
+export u64 hash_djb2(mut char* str)
 {
-    assert(str != nullptr);
+    frx::assert(str != nullptr);
 
-    u64 hash = 5381;
+    mut u64 hash = 5381;
 
-    char c;
+    mut char c;
     do
     {
         c = *str;

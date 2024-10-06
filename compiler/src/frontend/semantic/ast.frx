@@ -12,6 +12,7 @@ import "global_var_decl.frx";
 import "global_var_def.frx";
 import "if_stmt.frx";
 import "import_stmt.frx";
+import "initializer_list.frx";
 import "internal_func_call.frx";
 import "namespace.frx";
 import "return_stmt.frx";
@@ -19,6 +20,7 @@ import "scope.frx";
 import "struct_decl.frx";
 import "struct_def.frx";
 import "struct_member.frx";
+import "switch_stmt.frx";
 import "unary_expr.frx";
 import "unresolved_name.frx";
 import "unresolved_namespaced_name.frx";
@@ -29,231 +31,231 @@ import "while_loop.frx";
 import "../core/ast.frx";
 import "../core/parser.frx";
 
-export void analyze_ast(Parser* parser, AST* ast)
+export void analyze_ast(mut Parser* parser, AST* ast)
 {
-    assert(ast != nullptr);
+    frx::assert(ast != nullptr);
 
     void* node = ast->node;
 
     switch(ast->type)
     {
-        case AST_TYPE_ERROR:
+        case AstType::ERROR:
         {
             parser->failed = true;
 
             break;
         }
-        case AST_TYPE_IMPORT_STMT:
+        case AstType::IMPORT_STMT:
         {
             analyze_import_stmt(parser, node);
 
             break;
         }
-        case AST_TYPE_EXTERN_BLOCK:
+        case AstType::EXTERN_BLOCK:
         {
             analyze_extern_block(parser, node);
 
             break;
         }
-        case AST_TYPE_NAMESPACE:
+        case AstType::NAMESPACE:
         {
             analyze_namespace(parser, node);
 
             break;
         }
-        case AST_TYPE_ENUM_DEF:
+        case AstType::ENUM_DEF:
         {
             analyze_enum_def(parser, node);
 
             break;
         }
-        case AST_TYPE_ENUM_CONSTANT:
+        case AstType::ENUM_CONSTANT:
         {
             analyze_enum_constant(parser, node);
 
             break;
         }
-        case AST_TYPE_STRUCT_DECL:
+        case AstType::STRUCT_DECL:
         {
             analyze_struct_decl(parser, node);
 
             break;
         }
-        case AST_TYPE_STRUCT_DEF:
+        case AstType::STRUCT_DEF:
         {
             analyze_struct_def(parser, node);
 
             break;
         }
-        case AST_TYPE_STRUCT_MEMBER:
+        case AstType::STRUCT_MEMBER:
         {
             analyze_struct_member(parser, node);
 
             break;
         }
-        case AST_TYPE_FUNC_DECL:
+        case AstType::FUNC_DECL:
         {
             analyze_func_decl(parser, node);
 
             break;
         }
-        case AST_TYPE_FUNC_DEF:
+        case AstType::FUNC_DEF:
         {
             analyze_func_def(parser, node);
 
             break;
         }
-        case AST_TYPE_FUNC_CALL:
+        case AstType::FUNC_CALL:
         {
             analyze_func_call(parser, node);
 
             break;
         }
-        case AST_TYPE_SCOPE:
+        case AstType::SCOPE:
         {
             analyze_scope(parser, node);
 
             break;
         }
-        case AST_TYPE_GLOBAL_VAR_DECL:
+        case AstType::GLOBAL_VAR_DECL:
         {
             analyze_global_var_decl(parser, node);
 
             break;
         }
-        case AST_TYPE_GLOBAL_VAR_DEF:
+        case AstType::GLOBAL_VAR_DEF:
         {
             analyze_global_var_def(parser, node);
 
             break;
         }
-        case AST_TYPE_VAR_DECL:
+        case AstType::VAR_DECL:
         {
             analyze_var_decl(parser, node);
 
             break;
         }
-        case AST_TYPE_VAR_DEF:
+        case AstType::VAR_DEF:
         {
             analyze_var_def(parser, node);
 
             break;
         }
-        case AST_TYPE_VAR:
+        case AstType::VAR:
         {
             analyze_var(parser, node);
 
             break;
         }
-        case AST_TYPE_UNARY_EXPR:
+        case AstType::UNARY_EXPR:
         {
             analyze_unary_expr(parser, node);
 
             break;
         }
-        case AST_TYPE_BINARY_EXPR:
+        case AstType::BINARY_EXPR:
         {
             analyze_binary_expr(parser, node);
 
             break;
         }
-        case AST_TYPE_EXPR_STMT:
+        case AstType::EXPR_STMT:
         {
             analyze_expr_stmt(parser, node);
 
             break;
         }
-        case AST_TYPE_BREAK_STMT:
+        case AstType::BREAK_STMT:
         {
             break;
         }
-        case AST_TYPE_CONTINUE_STMT:
+        case AstType::CONTINUE_STMT:
         {
             break;
         }
-        case AST_TYPE_RETURN_STMT:
+        case AstType::RETURN_STMT:
         {
             analyze_return_stmt(parser, node);
 
             break;
         }
-        case AST_TYPE_FLOAT_LITERAL:
+        case AstType::FLOAT_LITERAL:
         {
             break;
         }
-        case AST_TYPE_INT_LITERAL:
+        case AstType::INT_LITERAL:
         {
             break;
         }
-        case AST_TYPE_CHAR_LITERAL:
+        case AstType::CHAR_LITERAL:
         {
             break;
         }
-        case AST_TYPE_STRING_LITERAL:
+        case AstType::STRING_LITERAL:
         {
             break;
         }
-        case AST_TYPE_IF_STMT:
+        case AstType::IF_STMT:
         {
             analyze_if_stmt(parser, node);
 
             break;
         }
-        case AST_TYPE_FOR_LOOP:
+        case AstType::FOR_LOOP:
         {
             analyze_for_loop(parser, node);
 
             break;
         }
-        case AST_TYPE_WHILE_LOOP:
+        case AstType::WHILE_LOOP:
         {
             analyze_while_loop(parser, node);
 
             break;
         }
-        case AST_TYPE_DO_WHILE_LOOP:
+        case AstType::DO_WHILE_LOOP:
         {
             analyze_do_while_loop(parser, node);
 
             break;
         }
-        case AST_TYPE_SWITCH_STMT:
+        case AstType::SWITCH_STMT:
         {
             analyze_switch_stmt(parser, node);
 
             break;
         }
-        case AST_TYPE_INITIALIZER_LIST:
+        case AstType::INITIALIZER_LIST:
         {
             analyze_initializer_list(parser, node);
 
             break;
         }
-        case AST_TYPE_ASSERT:
+        case AstType::ASSERT:
         {
             analyze_assert(parser, node);
 
             break;
         }
-        case AST_TYPE_SIZEOF:
+        case AstType::SIZEOF:
         {
             analyze_sizeof(parser, node);
 
             break;
         }
-        case AST_TYPE_ENUM_COUNT:
+        case AstType::ENUM_COUNT:
         {
             analyze_enum_count(parser, node, ast);
 
             break;
         }
-        case AST_TYPE_UNRESOLVED_NAME:
+        case AstType::UNRESOLVED_NAME:
         {
             analyze_unresolved_name(parser, node, ast);
 
             break;
         }
-        case AST_TYPE_UNRESOLVED_NAMESPACED_NAME:
+        case AstType::UNRESOLVED_NAMESPACED_NAME:
         {
             analyze_unresolved_namespaced_name(parser, node, ast);
 
@@ -261,7 +263,7 @@ export void analyze_ast(Parser* parser, AST* ast)
         }
         default:
         {
-            assert(false);
+            frx::assert(false);
 
             break;
         }

@@ -3,7 +3,7 @@ import "../syntax/struct_member.frx";
 
 export void analyze_struct_member(Parser* parser, ASTStructMember* member)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(member != nullptr);
+    frx::assert(member != nullptr);
 }

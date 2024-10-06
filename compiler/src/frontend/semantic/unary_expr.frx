@@ -4,9 +4,9 @@ import "../syntax/unary_expr.frx";
 
 export void analyze_unary_expr(Parser* parser, ASTUnaryExpr* expr)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(expr != nullptr);
+    frx::assert(expr != nullptr);
 
     analyze_ast(parser, expr->operand);
 }

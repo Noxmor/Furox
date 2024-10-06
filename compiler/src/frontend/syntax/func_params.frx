@@ -1,5 +1,16 @@
+import "type_specifier.frx";
+import "../../core/list.frx";
+import "../core/ast.frx";
 import "../core/parser.frx";
+import "../core/scope.frx";
 import "../symbols/var.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTFuncParam
 {
@@ -11,7 +22,7 @@ export struct ASTFuncParam
 ASTFuncParam* make_func_param(Arena* arena, ASTTypeSpecifier* type,
     Scope* scope, char* name, b8 mutable)
 {
-    ASTFuncParam* param = arena_alloc(arena, sizeof(ASTFuncParam));
+    ASTFuncParam* param = arena_alloc(arena, frx::sizeof(ASTFuncParam));
 
     var_symbol_init(&param->symbol, nullptr, type, scope, name, false, mutable);
 
@@ -20,21 +31,21 @@ ASTFuncParam* make_func_param(Arena* arena, ASTTypeSpecifier* type,
 
 ASTFuncParam* parse_func_param(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    b8 mutable = false;
-    if(parser->token->type == TOKEN_TYPE_KW_MUT)
+    mut b8 mutable = false;
+    if(parser->token->type == TokenType::KW_MUT)
     {
         mutable = true;
-        parser_eat(parser, TOKEN_TYPE_KW_MUT);
+        parser_eat(parser, TokenType::KW_MUT);
     }
 
     ASTTypeSpecifier* type = parse_type_specifier(parser);
     char* name = parser->token->identifier;
 
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
-    ASTFuncParam* param = make_func_param(&parser->arena, type,
+    mut ASTFuncParam* param = make_func_param(&parser->arena, type,
         parser->current_scope, name, mutable);
 
     param->is_redefinition = !var_table_insert(&parser->var_table, &param->symbol);
@@ -44,9 +55,9 @@ ASTFuncParam* parse_func_param(Parser* parser)
 
 void print_func_param(ASTFuncParam* param, FILE* file, usize depth)
 {
-    assert(param != nullptr);
+    frx::assert(param != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     VarSymbol* symbol = &param->symbol;
 
@@ -65,7 +76,7 @@ export struct ASTFuncParams
 
 export ASTFuncParams* make_func_params(Arena* arena)
 {
-    ASTFuncParams* func_params = arena_alloc(arena, sizeof(ASTFuncParams));
+    mut ASTFuncParams* func_params = arena_alloc(arena, frx::sizeof(ASTFuncParams));
 
     func_params->variadic = false;
     list_init(&func_params->params);
@@ -75,21 +86,21 @@ export ASTFuncParams* make_func_params(Arena* arena)
 
 export ASTFuncParams* parse_func_params(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    ASTFuncParams* func_params = make_func_params(&parser->arena);
+    mut ASTFuncParams* func_params = make_func_params(&parser->arena);
 
-    parser_eat(parser, TOKEN_TYPE_LPAREN);
+    parser_eat(parser, TokenType::LPAREN);
 
-    while(parser_loop_until(parser, TOKEN_TYPE_RPAREN))
+    while(parser_loop_until(parser, TokenType::RPAREN))
     {
         if(list_size(&func_params->params) > 0)
         {
-            parser_eat(parser, TOKEN_TYPE_COMMA);
+            parser_eat(parser, TokenType::COMMA);
 
-            if(parser->token->type == TOKEN_TYPE_ELLIPSIS)
+            if(parser->token->type == TokenType::ELLIPSIS)
             {
-                parser_eat(parser, TOKEN_TYPE_ELLIPSIS);
+                parser_eat(parser, TokenType::ELLIPSIS);
 
                 func_params->variadic = true;
 
@@ -100,7 +111,7 @@ export ASTFuncParams* parse_func_params(Parser* parser)
         list_push(&func_params->params, parse_func_param(parser));
     }
 
-    parser_eat(parser, TOKEN_TYPE_RPAREN);
+    parser_eat(parser, TokenType::RPAREN);
 
     return func_params;
 }
@@ -108,17 +119,17 @@ export ASTFuncParams* parse_func_params(Parser* parser)
 export void print_func_params(ASTFuncParams* func_params, FILE* file,
     usize depth)
 {
-    assert(func_params != nullptr);
+    frx::assert(func_params != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_FUNC_PARAMS));
+    fprintf(file, "%s\n", ast_type_to_str(AstType::FUNC_PARAMS));
 
     print_ast_depth(file, depth + 1);
     fprintf(file, "variadic: %d\n", func_params->variadic);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&func_params->params); i = i + 1)
     {
         ASTFuncParam* param = list_get(&func_params->params, i);

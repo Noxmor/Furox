@@ -1,12 +1,19 @@
 import "c.frx";
 import "../../frontend/syntax/break_stmt.frx";
 
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_break_stmt(Transpiler* transpiler,
     ASTBreakStmt* break_stmt)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(break_stmt != nullptr);
+    frx::assert(break_stmt != nullptr);
 
     fprintf(transpiler->file, "break;\n");
 }

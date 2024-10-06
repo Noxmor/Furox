@@ -3,12 +3,19 @@ import "c.frx";
 import "scope.frx";
 import "../../frontend/syntax/while_loop.frx";
 
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_while_loop(Transpiler* transpiler,
     ASTWhileLoop* while_loop)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(while_loop != nullptr);
+    frx::assert(while_loop != nullptr);
 
     fprintf(transpiler->file, "while(");
     transpile_ast(transpiler, while_loop->condition);

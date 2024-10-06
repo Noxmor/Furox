@@ -1,7 +1,7 @@
-/*export*/ import "source_range.frx";
+export import "source_range.frx";
 
 //TODO: Replace with C-like direct indexing: [TOKEN_TYPE] = "string" to be indepentent of the order of declaration in the enum
-char*[TOKEN_TYPE_COUNT] token_type_names = {
+char* token_type_names[TokenType::COUNT] = {
     "error",
     "eof",
 
@@ -126,221 +126,221 @@ char*[TOKEN_TYPE_COUNT] token_type_names = {
 
 export enum TokenType : u8
 {
-    TOKEN_TYPE_ERROR = 0,
-    TOKEN_TYPE_EOF,
+    ERROR = 0,
+    EOF,
 
-    TOKEN_TYPE_IDENTIFIER,
-    TOKEN_TYPE_INT_LITERAL,
-    TOKEN_TYPE_FLOAT_LITERAL,
+    IDENTIFIER,
+    INT_LITERAL,
+    FLOAT_LITERAL,
 
     /* All keywords must be contiguous */
-    TOKEN_TYPE_KW_U8,
-    TOKEN_TYPE_KW_U16,
-    TOKEN_TYPE_KW_U32,
-    TOKEN_TYPE_KW_U64,
-    TOKEN_TYPE_KW_USIZE,
-    TOKEN_TYPE_KW_I8,
-    TOKEN_TYPE_KW_I16,
-    TOKEN_TYPE_KW_I32,
-    TOKEN_TYPE_KW_I64,
-    TOKEN_TYPE_KW_ISIZE,
-    TOKEN_TYPE_KW_B8,
-    TOKEN_TYPE_KW_B16,
-    TOKEN_TYPE_KW_B32,
-    TOKEN_TYPE_KW_B64,
-    TOKEN_TYPE_KW_CHAR,
-    TOKEN_TYPE_KW_F32,
-    TOKEN_TYPE_KW_F64,
-    TOKEN_TYPE_KW_VOID,
+    KW_U8,
+    KW_U16,
+    KW_U32,
+    KW_U64,
+    KW_USIZE,
+    KW_I8,
+    KW_I16,
+    KW_I32,
+    KW_I64,
+    KW_ISIZE,
+    KW_B8,
+    KW_B16,
+    KW_B32,
+    KW_B64,
+    KW_CHAR,
+    KW_F32,
+    KW_F64,
+    KW_VOID,
 
-    TOKEN_TYPE_KW_NULLPTR,
-    TOKEN_TYPE_KW_TRUE,
-    TOKEN_TYPE_KW_FALSE,
-    TOKEN_TYPE_KW_IMPORT,
-    TOKEN_TYPE_KW_EXPORT,
-    TOKEN_TYPE_KW_MUT,
-    TOKEN_TYPE_KW_RETURN,
-    TOKEN_TYPE_KW_NAMESPACE,
-    TOKEN_TYPE_KW_EXTERN,
-    TOKEN_TYPE_KW_STRUCT,
-    TOKEN_TYPE_KW_ENUM,
-    TOKEN_TYPE_KW_IF,
-    TOKEN_TYPE_KW_ELSE,
-    TOKEN_TYPE_KW_SWITCH,
-    TOKEN_TYPE_KW_CASE,
-    TOKEN_TYPE_KW_DEFAULT,
-    TOKEN_TYPE_KW_BREAK,
-    TOKEN_TYPE_KW_CONTINUE,
-    TOKEN_TYPE_KW_FOR,
-    TOKEN_TYPE_KW_WHILE,
-    TOKEN_TYPE_KW_DO,
-    TOKEN_TYPE_KW_DEFER,
-    TOKEN_TYPE_KW_MACRO,
+    KW_NULLPTR,
+    KW_TRUE,
+    KW_FALSE,
+    KW_IMPORT,
+    KW_EXPORT,
+    KW_MUT,
+    KW_RETURN,
+    KW_NAMESPACE,
+    KW_EXTERN,
+    KW_STRUCT,
+    KW_ENUM,
+    KW_IF,
+    KW_ELSE,
+    KW_SWITCH,
+    KW_CASE,
+    KW_DEFAULT,
+    KW_BREAK,
+    KW_CONTINUE,
+    KW_FOR,
+    KW_WHILE,
+    KW_DO,
+    KW_DEFER,
+    KW_MACRO,
 
-    TOKEN_TYPE_CHAR_LITERAL,
-    TOKEN_TYPE_STRING_LITERAL,
+    CHAR_LITERAL,
+    STRING_LITERAL,
 
-    TOKEN_TYPE_PLUS,
-    TOKEN_TYPE_PLUS_EQ,
+    PLUS,
+    PLUS_EQ,
 
-    TOKEN_TYPE_MINUS,
-    TOKEN_TYPE_MINUS_EQ,
+    MINUS,
+    MINUS_EQ,
 
-    TOKEN_TYPE_STAR,
-    TOKEN_TYPE_STAR_EQ,
+    STAR,
+    STAR_EQ,
 
-    TOKEN_TYPE_DIVIDE,
-    TOKEN_TYPE_DIVIDE_EQ,
+    DIVIDE,
+    DIVIDE_EQ,
 
-    TOKEN_TYPE_MODULO,
-    TOKEN_TYPE_MODULO_EQ,
+    MODULO,
+    MODULO_EQ,
 
-    TOKEN_TYPE_LOG_AND,
-    TOKEN_TYPE_LOG_OR,
-    TOKEN_TYPE_LOG_NEG,
+    LOG_AND,
+    LOG_OR,
+    LOG_NEG,
 
-    TOKEN_TYPE_BIN_AND,
-    TOKEN_TYPE_BIN_AND_EQ,
+    BIN_AND,
+    BIN_AND_EQ,
 
-    TOKEN_TYPE_BIN_OR,
-    TOKEN_TYPE_BIN_OR_EQ,
+    BIN_OR,
+    BIN_OR_EQ,
 
-    TOKEN_TYPE_BIN_XOR,
-    TOKEN_TYPE_BIN_XOR_EQ,
+    BIN_XOR,
+    BIN_XOR_EQ,
 
-    TOKEN_TYPE_BIN_NEG,
+    BIN_NEG,
 
-    TOKEN_TYPE_BIN_LSHIFT,
-    TOKEN_TYPE_BIN_LSHIFT_EQ,
+    BIN_LSHIFT,
+    BIN_LSHIFT_EQ,
 
-    TOKEN_TYPE_BIN_RSHIFT,
-    TOKEN_TYPE_BIN_RSHIFT_EQ,
+    BIN_RSHIFT,
+    BIN_RSHIFT_EQ,
 
-    TOKEN_TYPE_EQ,
-    TOKEN_TYPE_LOG_NEQ,
-    TOKEN_TYPE_LOG_EQ,
+    EQ,
+    LOG_NEQ,
+    LOG_EQ,
 
-    TOKEN_TYPE_GT,
-    TOKEN_TYPE_GEQ,
+    GT,
+    GEQ,
 
-    TOKEN_TYPE_LT,
-    TOKEN_TYPE_LEQ,
+    LT,
+    LEQ,
 
-    TOKEN_TYPE_PLUS_PLUS,
-    TOKEN_TYPE_MINUS_MINUS,
+    PLUS_PLUS,
+    MINUS_MINUS,
 
-    TOKEN_TYPE_LPAREN,
-    TOKEN_TYPE_RPAREN,
+    LPAREN,
+    RPAREN,
 
-    TOKEN_TYPE_LBRACKET,
-    TOKEN_TYPE_RBRACKET,
+    LBRACKET,
+    RBRACKET,
 
-    TOKEN_TYPE_LBRACE,
-    TOKEN_TYPE_RBRACE,
+    LBRACE,
+    RBRACE,
 
-    TOKEN_TYPE_ARROW,
-    TOKEN_TYPE_DOT,
-    TOKEN_TYPE_COMMA,
-    TOKEN_TYPE_COLON,
-    TOKEN_TYPE_SEMICOLON,
+    ARROW,
+    DOT,
+    COMMA,
+    COLON,
+    SEMICOLON,
 
-    TOKEN_TYPE_ELLIPSIS,
+    ELLIPSIS,
 
-    TOKEN_TYPE_NAMESPACE_RESOLUTION,
+    NAMESPACE_RESOLUTION,
 
-    TOKEN_TYPE_COUNT
+    COUNT
 }
 
 export TokenType token_type_first_keyword()
 {
-    return TOKEN_TYPE_KW_U8;
+    return TokenType::KW_U8;
 }
 
 export TokenType token_type_last_keyword()
 {
-    return TOKEN_TYPE_KW_MACRO;
+    return TokenType::KW_MACRO;
 }
 
 export b8 token_type_is_primitive(TokenType type)
 {
-    assert(type < TOKEN_TYPE_COUNT);
+    frx::assert(type < TokenType::COUNT);
 
-    return type >= TOKEN_TYPE_KW_U8 && type <= TOKEN_TYPE_KW_VOID;
+    return type >= TokenType::KW_U8 && type <= TokenType::KW_VOID;
 }
 
 export usize primitive_type_to_size(TokenType primitive_type)
 {
-    assert(token_type_is_primitive(primitive_type));
+    frx::assert(token_type_is_primitive(primitive_type));
 
     switch(primitive_type)
     {
-        case TOKEN_TYPE_KW_U8:
+        case TokenType::KW_U8:
         {
             return 1;
         }
-        case TOKEN_TYPE_KW_U16:
+        case TokenType::KW_U16:
         {
             return 2;
         }
-        case TOKEN_TYPE_KW_U32:
+        case TokenType::KW_U32:
         {
             return 4;
         }
-        case TOKEN_TYPE_KW_U64:
+        case TokenType::KW_U64:
         {
             return 8;
         }
-        case TOKEN_TYPE_KW_USIZE:
+        case TokenType::KW_USIZE:
         {
             //TODO: Depends on the target architecture
             return 8;
         }
-        case TOKEN_TYPE_KW_I8:
+        case TokenType::KW_I8:
         {
             return 1;
         }
-        case TOKEN_TYPE_KW_I16:
+        case TokenType::KW_I16:
         {
             return 2;
         }
-        case TOKEN_TYPE_KW_I32:
+        case TokenType::KW_I32:
         {
             return 4;
         }
-        case TOKEN_TYPE_KW_I64:
+        case TokenType::KW_I64:
         {
             return 8;
         }
-        case TOKEN_TYPE_KW_ISIZE:
+        case TokenType::KW_ISIZE:
         {
             //TODO: Depends on the target architecture
             return 8;
         }
-        case TOKEN_TYPE_KW_B8:
+        case TokenType::KW_B8:
         {
             return 1;
         }
-        case TOKEN_TYPE_KW_B16:
+        case TokenType::KW_B16:
         {
             return 2;
         }
-        case TOKEN_TYPE_KW_B32:
+        case TokenType::KW_B32:
         {
             return 4;
         }
-        case TOKEN_TYPE_KW_B64:
+        case TokenType::KW_B64:
         {
             return 8;
         }
-        case TOKEN_TYPE_KW_CHAR:
+        case TokenType::KW_CHAR:
         {
             return 1;
         }
-        case TOKEN_TYPE_KW_F32:
+        case TokenType::KW_F32:
         {
             return 4;
         }
-        case TOKEN_TYPE_KW_F64:
+        case TokenType::KW_F64:
         {
             return 8;
         }
@@ -349,23 +349,23 @@ export usize primitive_type_to_size(TokenType primitive_type)
 
 export b8 token_type_is_synchronizing(TokenType type)
 {
-    assert(type < TOKEN_TYPE_COUNT);
+    frx::assert(type < TokenType::COUNT);
 
     switch(type)
     {
-        case TOKEN_TYPE_ERROR:
+        case TokenType::ERROR:
         {
 
         }
-        case TOKEN_TYPE_EOF:
+        case TokenType::EOF:
         {
 
         }
-        case TOKEN_TYPE_RBRACE:
+        case TokenType::RBRACE:
         {
 
         }
-        case TOKEN_TYPE_SEMICOLON:
+        case TokenType::SEMICOLON:
         {
             return true;
         }
@@ -376,503 +376,503 @@ export b8 token_type_is_synchronizing(TokenType type)
 
 export b8 token_type_is_prefix_operator(TokenType type)
 {
-    return token_type_to_prefix_operator(type) != OP_INVALID;
+    return token_type_to_prefix_operator(type) != Operator::INVALID;
 }
 
 export Operator token_type_to_prefix_operator(TokenType type)
 {
-    assert(type < TOKEN_TYPE_COUNT);
+    frx::assert(type < TokenType::COUNT);
 
     switch(type)
     {
-        case TOKEN_TYPE_PLUS:
+        case TokenType::PLUS:
         {
-            return OP_SIGN_PLUS;
+            return Operator::SIGN_PLUS;
         }
-        case TOKEN_TYPE_MINUS:
+        case TokenType::MINUS:
         {
-            return OP_SIGN_MINUS;
+            return Operator::SIGN_MINUS;
         }
-        case TOKEN_TYPE_STAR:
+        case TokenType::STAR:
         {
-            return OP_DEREF;
+            return Operator::DEREF;
         }
-        case TOKEN_TYPE_BIN_AND:
+        case TokenType::BIN_AND:
         {
-            return OP_ADDRESS_OF;
+            return Operator::ADDRESS_OF;
         }
-        case TOKEN_TYPE_LOG_NEG:
+        case TokenType::LOG_NEG:
         {
-            return OP_LOG_NEG;
+            return Operator::LOG_NEG;
         }
-        case TOKEN_TYPE_BIN_NEG:
+        case TokenType::BIN_NEG:
         {
-            return OP_BIN_NEG;
+            return Operator::BIN_NEG;
         }
-        case TOKEN_TYPE_PLUS_PLUS:
+        case TokenType::PLUS_PLUS:
         {
-            return OP_PREFIX_INC;
+            return Operator::PREFIX_INC;
         }
-        case TOKEN_TYPE_MINUS_MINUS:
+        case TokenType::MINUS_MINUS:
         {
-            return OP_PREFIX_DEC;
+            return Operator::PREFIX_DEC;
         }
         default:
         {
-            return OP_INVALID;
+            return Operator::INVALID;
         }
     }
 }
 
 export b8 token_type_is_infix_operator(TokenType type)
 {
-    return token_type_to_infix_operator(type) != OP_INVALID;
+    return token_type_to_infix_operator(type) != Operator::INVALID;
 }
 
 export Operator token_type_to_infix_operator(TokenType type)
 {
-    assert(type < TOKEN_TYPE_COUNT);
+    frx::assert(type < TokenType::COUNT);
 
     switch(type)
     {
-        case TOKEN_TYPE_PLUS:
+        case TokenType::PLUS:
         {
-            return OP_ADD;
+            return Operator::ADD;
         }
-        case TOKEN_TYPE_PLUS_EQ:
+        case TokenType::PLUS_EQ:
         {
-            return OP_ADD_ASSIGN;
+            return Operator::ADD_ASSIGN;
         }
-        case TOKEN_TYPE_MINUS:
+        case TokenType::MINUS:
         {
-            return OP_SUB;
+            return Operator::SUB;
         }
-        case TOKEN_TYPE_MINUS_EQ:
+        case TokenType::MINUS_EQ:
         {
-            return OP_SUB_ASSIGN;
+            return Operator::SUB_ASSIGN;
         }
-        case TOKEN_TYPE_STAR:
+        case TokenType::STAR:
         {
-            return OP_MUL;
+            return Operator::MUL;
         }
-        case TOKEN_TYPE_STAR_EQ:
+        case TokenType::STAR_EQ:
         {
-            return OP_MUL_ASSIGN;
+            return Operator::MUL_ASSIGN;
         }
-        case TOKEN_TYPE_DIVIDE:
+        case TokenType::DIVIDE:
         {
-            return OP_DIV;
+            return Operator::DIV;
         }
-        case TOKEN_TYPE_DIVIDE_EQ:
+        case TokenType::DIVIDE_EQ:
         {
-            return OP_DIV_ASSIGN;
+            return Operator::DIV_ASSIGN;
         }
-        case TOKEN_TYPE_MODULO:
+        case TokenType::MODULO:
         {
-            return OP_MOD;
+            return Operator::MOD;
         }
-        case TOKEN_TYPE_MODULO_EQ:
+        case TokenType::MODULO_EQ:
         {
-            return OP_MOD_ASSIGN;
+            return Operator::MOD_ASSIGN;
         }
-        case TOKEN_TYPE_LOG_AND:
+        case TokenType::LOG_AND:
         {
-            return OP_LOG_AND;
+            return Operator::LOG_AND;
         }
-        case TOKEN_TYPE_LOG_OR:
+        case TokenType::LOG_OR:
         {
-            return OP_LOG_OR;
+            return Operator::LOG_OR;
         }
-        case TOKEN_TYPE_BIN_AND:
+        case TokenType::BIN_AND:
         {
-            return OP_BIN_AND;
+            return Operator::BIN_AND;
         }
-        case TOKEN_TYPE_BIN_AND_EQ:
+        case TokenType::BIN_AND_EQ:
         {
-            return OP_BIN_AND_ASSIGN;
+            return Operator::BIN_AND_ASSIGN;
         }
-        case TOKEN_TYPE_BIN_OR:
+        case TokenType::BIN_OR:
         {
-            return OP_BIN_OR;
+            return Operator::BIN_OR;
         }
-        case TOKEN_TYPE_BIN_OR_EQ:
+        case TokenType::BIN_OR_EQ:
         {
-            return OP_BIN_OR_ASSIGN;
+            return Operator::BIN_OR_ASSIGN;
         }
-        case TOKEN_TYPE_BIN_XOR:
+        case TokenType::BIN_XOR:
         {
-            return OP_BIN_XOR;
+            return Operator::BIN_XOR;
         }
-        case TOKEN_TYPE_BIN_XOR_EQ:
+        case TokenType::BIN_XOR_EQ:
         {
-            return OP_BIN_XOR_ASSIGN;
+            return Operator::BIN_XOR_ASSIGN;
         }
-        case TOKEN_TYPE_BIN_LSHIFT:
+        case TokenType::BIN_LSHIFT:
         {
-            return OP_BIN_LSHIFT;
+            return Operator::BIN_LSHIFT;
         }
-        case TOKEN_TYPE_BIN_LSHIFT_EQ:
+        case TokenType::BIN_LSHIFT_EQ:
         {
-            return OP_BIN_LSHIFT_ASSIGN;
+            return Operator::BIN_LSHIFT_ASSIGN;
         }
-        case TOKEN_TYPE_BIN_RSHIFT:
+        case TokenType::BIN_RSHIFT:
         {
-            return OP_BIN_RSHIFT;
+            return Operator::BIN_RSHIFT;
         }
-        case TOKEN_TYPE_BIN_RSHIFT_EQ:
+        case TokenType::BIN_RSHIFT_EQ:
         {
-            return OP_BIN_RSHIFT_ASSIGN;
+            return Operator::BIN_RSHIFT_ASSIGN;
         }
-        case TOKEN_TYPE_EQ:
+        case TokenType::EQ:
         {
-            return OP_ASSIGN;
+            return Operator::ASSIGN;
         }
-        case TOKEN_TYPE_LOG_NEQ:
+        case TokenType::LOG_NEQ:
         {
-            return OP_LOG_NEQ;
+            return Operator::LOG_NEQ;
         }
-        case TOKEN_TYPE_LOG_EQ:
+        case TokenType::LOG_EQ:
         {
-            return OP_LOG_EQ;
+            return Operator::LOG_EQ;
         }
-        case TOKEN_TYPE_GT:
+        case TokenType::GT:
         {
-            return OP_GT;
+            return Operator::GT;
         }
-        case TOKEN_TYPE_GEQ:
+        case TokenType::GEQ:
         {
-            return OP_GEQ;
+            return Operator::GEQ;
         }
-        case TOKEN_TYPE_LT:
+        case TokenType::LT:
         {
-            return OP_LT;
+            return Operator::LT;
         }
-        case TOKEN_TYPE_LEQ:
+        case TokenType::LEQ:
         {
-            return OP_LEQ;
+            return Operator::LEQ;
         }
-        case TOKEN_TYPE_LBRACKET:
+        case TokenType::LBRACKET:
         {
-            return OP_ARRAY_SUBSCRIPT;
+            return Operator::ARRAY_SUBSCRIPT;
         }
-        case TOKEN_TYPE_ARROW:
+        case TokenType::ARROW:
         {
-            return OP_POINTER_MEMBER_ACCESS;
+            return Operator::POINTER_MEMBER_ACCESS;
         }
-        case TOKEN_TYPE_DOT:
+        case TokenType::DOT:
         {
-            return OP_MEMBER_ACCESS;
+            return Operator::MEMBER_ACCESS;
         }
         default:
         {
-            return OP_INVALID;
+            return Operator::INVALID;
         }
     }
 }
 
 export b8 token_type_is_postfix_operator(TokenType type)
 {
-    return token_type_to_postfix_operator(type) != OP_INVALID;
+    return token_type_to_postfix_operator(type) != Operator::INVALID;
 }
 
 export Operator token_type_to_postfix_operator(TokenType type)
 {
-    assert(type < TOKEN_TYPE_COUNT);
+    frx::assert(type < TokenType::COUNT);
 
     switch(type)
     {
-        case TOKEN_TYPE_PLUS_PLUS:
+        case TokenType::PLUS_PLUS:
         {
-            return OP_POSTFIX_INC;
+            return Operator::POSTFIX_INC;
         }
-        case TOKEN_TYPE_MINUS_MINUS:
+        case TokenType::MINUS_MINUS:
         {
-            return OP_POSTFIX_DEC;
+            return Operator::POSTFIX_DEC;
         }
-        case TOKEN_TYPE_LBRACKET:
+        case TokenType::LBRACKET:
         {
-            return OP_ARRAY_SUBSCRIPT;
+            return Operator::ARRAY_SUBSCRIPT;
         }
         default:
         {
-            return OP_INVALID;
+            return Operator::INVALID;
         }
     }
 }
 
 export enum Operator : u8
 {
-    OP_INVALID,
+    INVALID,
 
-    OP_POSTFIX_INC,
-    OP_POSTFIX_DEC,
-    OP_ARRAY_SUBSCRIPT,
-    OP_MEMBER_ACCESS,
-    OP_POINTER_MEMBER_ACCESS,
+    POSTFIX_INC,
+    POSTFIX_DEC,
+    ARRAY_SUBSCRIPT,
+    MEMBER_ACCESS,
+    POINTER_MEMBER_ACCESS,
 
-    OP_PREFIX_INC,
-    OP_PREFIX_DEC,
-    OP_SIGN_PLUS,
-    OP_SIGN_MINUS,
-    OP_LOG_NEG,
-    OP_BIN_NEG,
-    OP_DEREF,
-    OP_ADDRESS_OF,
+    PREFIX_INC,
+    PREFIX_DEC,
+    SIGN_PLUS,
+    SIGN_MINUS,
+    LOG_NEG,
+    BIN_NEG,
+    DEREF,
+    ADDRESS_OF,
 
-    OP_MUL,
-    OP_DIV,
-    OP_MOD,
+    MUL,
+    DIV,
+    MOD,
 
-    OP_ADD,
-    OP_SUB,
+    ADD,
+    SUB,
 
-    OP_BIN_LSHIFT,
-    OP_BIN_RSHIFT,
+    BIN_LSHIFT,
+    BIN_RSHIFT,
 
-    OP_LT,
-    OP_LEQ,
-    OP_GT,
-    OP_GEQ,
+    LT,
+    LEQ,
+    GT,
+    GEQ,
 
-    OP_LOG_EQ,
-    OP_LOG_NEQ,
+    LOG_EQ,
+    LOG_NEQ,
 
-    OP_BIN_AND,
+    BIN_AND,
 
-    OP_BIN_XOR,
+    BIN_XOR,
 
-    OP_BIN_OR,
+    BIN_OR,
 
-    OP_LOG_AND,
+    LOG_AND,
 
-    OP_LOG_OR,
+    LOG_OR,
 
-    OP_TERNARY,
+    TERNARY,
 
-    OP_ASSIGN,
-    OP_ADD_ASSIGN,
-    OP_SUB_ASSIGN,
-    OP_MUL_ASSIGN,
-    OP_DIV_ASSIGN,
-    OP_MOD_ASSIGN,
-    OP_BIN_LSHIFT_ASSIGN,
-    OP_BIN_RSHIFT_ASSIGN,
-    OP_BIN_AND_ASSIGN,
-    OP_BIN_XOR_ASSIGN,
-    OP_BIN_OR_ASSIGN,
+    ASSIGN,
+    ADD_ASSIGN,
+    SUB_ASSIGN,
+    MUL_ASSIGN,
+    DIV_ASSIGN,
+    MOD_ASSIGN,
+    BIN_LSHIFT_ASSIGN,
+    BIN_RSHIFT_ASSIGN,
+    BIN_AND_ASSIGN,
+    BIN_XOR_ASSIGN,
+    BIN_OR_ASSIGN,
 
-    OP_COUNT
+    COUNT
 }
 
 export Precedence operator_to_precedence(Operator op)
 {
-    assert(op < OP_COUNT);
+    frx::assert(op < Operator::COUNT);
 
     switch(op)
     {
-        case OP_POSTFIX_INC:
+        case Operator::POSTFIX_INC:
         {
 
         }
-        case OP_POSTFIX_DEC:
+        case Operator::POSTFIX_DEC:
         {
 
         }
-        case OP_ARRAY_SUBSCRIPT:
+        case Operator::ARRAY_SUBSCRIPT:
         {
 
         }
-        case OP_POINTER_MEMBER_ACCESS:
+        case Operator::POINTER_MEMBER_ACCESS:
         {
 
         }
-        case OP_MEMBER_ACCESS:
+        case Operator::MEMBER_ACCESS:
         {
-            return PRECEDENCE_1;
+            return Precedence::P1;
         }
-        case OP_PREFIX_INC:
+        case Operator::PREFIX_INC:
         {
 
         }
-        case OP_PREFIX_DEC:
+        case Operator::PREFIX_DEC:
         {
 
         }
-        case OP_SIGN_PLUS:
+        case Operator::SIGN_PLUS:
         {
 
         }
-        case OP_SIGN_MINUS:
+        case Operator::SIGN_MINUS:
         {
 
         }
-        case OP_LOG_NEG:
+        case Operator::LOG_NEG:
         {
 
         }
-        case OP_BIN_NEG:
+        case Operator::BIN_NEG:
         {
 
         }
-        case OP_DEREF:
+        case Operator::DEREF:
         {
 
         }
-        case OP_ADDRESS_OF:
+        case Operator::ADDRESS_OF:
         {
-            return PRECEDENCE_2;
+            return Precedence::P2;
         }
-        case OP_MUL:
+        case Operator::MUL:
         {
 
         }
-        case OP_DIV:
+        case Operator::DIV:
         {
 
         }
-        case OP_MOD:
+        case Operator::MOD:
         {
-            return PRECEDENCE_3;
+            return Precedence::P3;
         }
-        case OP_ADD:
+        case Operator::ADD:
         {
 
         }
-        case OP_SUB:
+        case Operator::SUB:
         {
-            return PRECEDENCE_4;
+            return Precedence::P4;
         }
-        case OP_BIN_LSHIFT:
+        case Operator::BIN_LSHIFT:
         {
 
         }
-        case OP_BIN_RSHIFT:
+        case Operator::BIN_RSHIFT:
         {
-            return PRECEDENCE_5;
+            return Precedence::P5;
         }
-        case OP_LT:
+        case Operator::LT:
         {
 
         }
-        case OP_LEQ:
+        case Operator::LEQ:
         {
 
         }
-        case OP_GT:
+        case Operator::GT:
         {
 
         }
-        case OP_GEQ:
+        case Operator::GEQ:
         {
-            return PRECEDENCE_6;
+            return Precedence::P6;
         }
-        case OP_LOG_EQ:
+        case Operator::LOG_EQ:
         {
 
         }
-        case OP_LOG_NEQ:
+        case Operator::LOG_NEQ:
         {
-            return PRECEDENCE_7;
+            return Precedence::P7;
         }
-        case OP_BIN_AND:
+        case Operator::BIN_AND:
         {
-            return PRECEDENCE_8;
+            return Precedence::P8;
         }
-        case OP_BIN_XOR:
+        case Operator::BIN_XOR:
         {
-            return PRECEDENCE_9;
+            return Precedence::P9;
         }
-        case OP_BIN_OR:
+        case Operator::BIN_OR:
         {
-            return PRECEDENCE_10;
+            return Precedence::P10;
         }
-        case OP_LOG_AND:
+        case Operator::LOG_AND:
         {
-            return PRECEDENCE_11;
+            return Precedence::P11;
         }
-        case OP_LOG_OR:
+        case Operator::LOG_OR:
         {
-            return PRECEDENCE_12;
+            return Precedence::P12;
         }
-        case OP_TERNARY:
+        case Operator::TERNARY:
         {
-            return PRECEDENCE_13;
+            return Precedence::P13;
         }
-        case OP_ASSIGN:
+        case Operator::ASSIGN:
         {
 
         }
-        case OP_ADD_ASSIGN:
+        case Operator::ADD_ASSIGN:
         {
 
         }
-        case OP_SUB_ASSIGN:
+        case Operator::SUB_ASSIGN:
         {
 
         }
-        case OP_MUL_ASSIGN:
+        case Operator::MUL_ASSIGN:
         {
 
         }
-        case OP_DIV_ASSIGN:
+        case Operator::DIV_ASSIGN:
         {
 
         }
-        case OP_MOD_ASSIGN:
+        case Operator::MOD_ASSIGN:
         {
 
         }
-        case OP_BIN_LSHIFT_ASSIGN:
+        case Operator::BIN_LSHIFT_ASSIGN:
         {
 
         }
-        case OP_BIN_RSHIFT_ASSIGN:
+        case Operator::BIN_RSHIFT_ASSIGN:
         {
 
         }
-        case OP_BIN_AND_ASSIGN:
+        case Operator::BIN_AND_ASSIGN:
         {
 
         }
-        case OP_BIN_XOR_ASSIGN:
+        case Operator::BIN_XOR_ASSIGN:
         {
 
         }
-        case OP_BIN_OR_ASSIGN:
+        case Operator::BIN_OR_ASSIGN:
         {
-            return PRECEDENCE_14;
+            return Precedence::P14;
         }
         default:
         {
-            assert(false);
+            frx::assert(false);
 
-            return PRECEDENCE_MIN;
+            return Precedence::MIN;
         }
     }
 }
 
 export enum Precedence : u8
 {
-    PRECEDENCE_MAX,
+    MAX,
 
-    PRECEDENCE_1,
-    PRECEDENCE_2,
-    PRECEDENCE_3,
-    PRECEDENCE_4,
-    PRECEDENCE_5,
-    PRECEDENCE_6,
-    PRECEDENCE_7,
-    PRECEDENCE_8,
-    PRECEDENCE_9,
-    PRECEDENCE_10,
-    PRECEDENCE_11,
-    PRECEDENCE_12,
-    PRECEDENCE_13,
-    PRECEDENCE_14,
+    P1,
+    P2,
+    P3,
+    P4,
+    P5,
+    P6,
+    P7,
+    P8,
+    P9,
+    P10,
+    P11,
+    P12,
+    P13,
+    P14,
 
-    PRECEDENCE_MIN,
+    MIN,
 
-    PRECEDENCE_COUNT
+    COUNT
 }
 
 export struct Token
@@ -888,7 +888,7 @@ export struct Token
 
 export char* token_type_to_str(TokenType type)
 {
-    assert(type < TOKEN_TYPE_COUNT);
+    frx::assert(type < TokenType::COUNT);
 
     return token_type_names[type];
 }

@@ -1,5 +1,8 @@
 import "../core/namespace.frx";
 import "../core/scope.frx";
+import "../../core/hash.frx";
+
+extern i32 strcmp(char* str1, char* str2);
 
 export struct MacroSymbol
 {
@@ -10,16 +13,16 @@ export struct MacroSymbol
     b8 exported;
 }
 
-export void macro_symbol_init(MacroSymbol* symbol, Scope* scope, Namespace* ns,
-    char* name, AST* value, b8 exported)
+export void macro_symbol_init(mut MacroSymbol* symbol, Scope* scope,
+    Namespace* ns, char* name, AST* value, b8 exported)
 {
-    assert(symbol != nullptr);
+    frx::assert(symbol != nullptr);
 
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    assert(value != nullptr);
+    frx::assert(value != nullptr);
 
     symbol->scope = scope;
     symbol->ns = ns;
@@ -41,14 +44,14 @@ enum Constants : u64
 
 export struct MacroTable
 {
-    MacroTableEntry*[MACRO_TABLE_CAPACITY] entries;
+    MacroTableEntry* entries[Constants::MACRO_TABLE_CAPACITY];
 }
 
 export void macro_table_init(MacroTable* table)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    memset(table, 0, sizeof(MacroTable));
+    memset(table, 0, frx::sizeof(MacroTable));
 }
 
 export MacroSymbol* macro_table_find_r(MacroTable* table, Namespace* ns,
@@ -67,12 +70,12 @@ export MacroSymbol* macro_table_find_r(MacroTable* table, Namespace* ns,
 export MacroSymbol* macro_table_find(MacroTable* table, Namespace* ns,
     char* name)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    u64 index = hash_djb2(name) % MACRO_TABLE_CAPACITY;
-    MacroTableEntry* entry = table->entries[index];
+    u64 index = hash_djb2(name) % Constants::MACRO_TABLE_CAPACITY;
+    mut MacroTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -91,12 +94,12 @@ export MacroSymbol* macro_table_find(MacroTable* table, Namespace* ns,
 
 export b8 macro_table_insert(MacroTable* table, MacroSymbol* symbol)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    assert(symbol != nullptr);
+    frx::assert(symbol != nullptr);
 
-    u64 index = hash_djb2(symbol->name) % MACRO_TABLE_CAPACITY;
-    MacroTableEntry* entry = table->entries[index];
+    u64 index = hash_djb2(symbol->name) % Constants::MACRO_TABLE_CAPACITY;
+    mut MacroTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -111,7 +114,7 @@ export b8 macro_table_insert(MacroTable* table, MacroSymbol* symbol)
         entry = entry->next;
     }
 
-    MacroTableEntry* new_entry = malloc(sizeof(MacroTableEntry));
+    mut MacroTableEntry* new_entry = malloc(frx::sizeof(MacroTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

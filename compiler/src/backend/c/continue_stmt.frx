@@ -1,12 +1,19 @@
 import "c.frx";
 import "../../frontend/syntax/continue_stmt.frx";
 
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_continue_stmt(Transpiler* transpiler,
     ASTContinueStmt* continue_stmt)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(continue_stmt != nullptr);
+    frx::assert(continue_stmt != nullptr);
 
     fprintf(transpiler->file, "continue;\n");
 }

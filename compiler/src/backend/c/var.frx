@@ -1,16 +1,24 @@
 import "c.frx";
 import "../core/mangling.frx";
+import "../../frontend/symbols/var.frx";
 import "../../frontend/syntax/var.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export void transpile_var(Transpiler* transpiler, ASTVar* var)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(var != nullptr);
+    frx::assert(var != nullptr);
 
     VarSymbol* symbol = var->symbol;
 
-    char* mangled_name = symbol->name;
+    mut char* mangled_name = symbol->name;
     if(symbol->global)
     {
         mangled_name = mangle_global_var_name(symbol->scope, symbol->ns,

@@ -1,28 +1,30 @@
 import "type_specifier.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
+import "../symbols/struct.frx";
 import "../syntax/struct_def.frx";
+import "../../core/list.frx";
 
 void analyze_struct_field(Parser* parser, ASTStructField* field)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(field != nullptr);
+    frx::assert(field != nullptr);
 
     analyze_type_specifier(parser, field->type);
 }
 
-export void analyze_struct_def(Parser* parser, ASTStructDef* struct_def)
+export void analyze_struct_def(mut Parser* parser, mut ASTStructDef* struct_def)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(struct_def != nullptr);
+    frx::assert(struct_def != nullptr);
 
     StructSymbol* symbol = &struct_def->symbol;
 
     b8 is_redefinition = false;
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&parser->visible_parsers)
         && !struct_def->is_redefinition; i = i + 1)
     {

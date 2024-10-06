@@ -1,13 +1,24 @@
-/*export*/ import "../../frontend/core/namespace.frx";
-/*export*/ import "../../frontend/core/scope.frx";
+export import "../../frontend/core/namespace.frx";
+export import "../../frontend/core/scope.frx";
 
-char* buffer = nullptr;
-usize buffer_size = 0;
+extern
+{
+    void* realloc(mut void* ptr, usize size);
+    char* strcat(mut char* dest_str, char* src_str);
+    i32 strcmp(char* str1, char* str2);
+    char* strcpy(mut char* dest, char* src);
+    char* strrchr(char* str, i32 c);
+    usize strlen(char* str);
+    i32 sprintf(mut char* str, char* format, ...);
+}
+
+mut char* buffer = nullptr;
+mut usize buffer_size = 0;
 
 void realloc_buffer(usize size)
 {
     buffer_size = size;
-    buffer = realloc(buffer, buffer_size * sizeof(char));
+    buffer = realloc(buffer, buffer_size * frx::sizeof(char));
 }
 
 void mangle_namespace(Namespace* ns)
@@ -34,13 +45,13 @@ void mangle_namespace(Namespace* ns)
 
 export char* mangle_enum_name(Scope* scope, Namespace* ns, char* name)
 {
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    usize size = strlen(name);
+    mut usize size = strlen(name);
 
-    Namespace* temp = ns;
+    mut Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + strlen(ns->name) + 1;
@@ -69,13 +80,13 @@ export char* mangle_enum_name(Scope* scope, Namespace* ns, char* name)
 
 export char* mangle_struct_name(Scope* scope, Namespace* ns, char* name)
 {
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    usize size = strlen(name);
+    mut usize size = strlen(name);
 
-    Namespace* temp = ns;
+    mut Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + strlen(ns->name) + 1;
@@ -104,11 +115,11 @@ export char* mangle_struct_name(Scope* scope, Namespace* ns, char* name)
 
 export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
 {
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    usize size = strlen(name);
+    mut usize size = strlen(name);
 
     if(namespace_is_global(ns) && strcmp(name, "main") == 0)
     {
@@ -122,7 +133,7 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
         return buffer;
     }
 
-    Namespace* temp = ns;
+    mut Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + strlen(ns->name) + 1;
@@ -157,13 +168,13 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
 
 export char* mangle_global_var_name(Scope* scope, Namespace* ns, char* name)
 {
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    usize size = strlen(name);
+    mut usize size = strlen(name);
 
-    Namespace* temp = ns;
+    mut Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + strlen(ns->name) + 1;

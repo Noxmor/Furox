@@ -1,13 +1,26 @@
+import "ast.frx";
+import "c.frx";
+import "../../core/list.frx";
+import "../../frontend/core/ast.frx";
+import "../../frontend/syntax/initializer_list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_initializer_list(Transpiler* transpiler,
     ASTInitializerList* list)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(list != nullptr);
+    frx::assert(list != nullptr);
 
     fprintf(transpiler->file, "{\n");
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&list->values); i = i + 1)
     {
         AST* value = list_get(&list->values, i);

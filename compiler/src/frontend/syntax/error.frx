@@ -1,3 +1,6 @@
+import "../core/ast.frx";
+import "../core/parser.frx";
+
 export struct ASTError
 {
     SourceRange range;
@@ -5,20 +8,20 @@ export struct ASTError
 
 ASTError* make_error(Arena* arena)
 {
-    ASTError* error = arena_alloc(arena, sizeof(ASTError));
+    ASTError* error = arena_alloc(arena, frx::sizeof(ASTError));
 
     return error;
 }
 
 export ASTError* parse_error(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     SourceLocation start = parser_current_location(parser);
 
     parser_panic(parser);
 
-    ASTError* error = make_error(&parser->arena);
+    mut ASTError* error = make_error(&parser->arena);
 
     error->range.start = start;
     error->range.end = parser_current_location(parser);

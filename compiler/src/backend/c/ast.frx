@@ -1,217 +1,252 @@
+import "assert.frx";
+import "binary_expr.frx";
+import "break_stmt.frx";
 import "c.frx";
+import "char_literal.frx";
+import "continue_stmt.frx";
+import "do_while_loop.frx";
+import "enum_constant.frx";
+import "enum_def.frx";
+import "expr_stmt.frx";
+import "extern_block.frx";
+import "float_literal.frx";
+import "for_loop.frx";
+import "func_call.frx";
+import "func_decl.frx";
+import "func_def.frx";
+import "func_params.frx";
+import "global_var_decl.frx";
+import "global_var_def.frx";
+import "if_stmt.frx";
+import "initializer_list.frx";
+import "int_literal.frx";
+import "namespace.frx";
+import "return_stmt.frx";
+import "scope.frx";
+import "sizeof.frx";
+import "string_literal.frx";
+import "struct_decl.frx";
+import "struct_def.frx";
+import "struct_member.frx";
+import "switch_stmt.frx";
+import "unary_expr.frx";
+import "var.frx";
+import "var_decl.frx";
+import "var_def.frx";
+import "while_loop.frx";
 import "../../frontend/core/ast.frx";
 
 export void transpile_ast(Transpiler* transpiler, AST* ast)
 {
-    assert(ast != nullptr);
+    frx::assert(ast != nullptr);
 
     void* node = ast->node;
 
     switch(ast->type)
     {
-        case AST_TYPE_IMPORT_STMT:
+        case AstType::IMPORT_STMT:
         {
             break;
         }
-        case AST_TYPE_EXTERN_BLOCK:
+        case AstType::EXTERN_BLOCK:
         {
             transpile_extern_block(transpiler, node);
 
             break;
         }
-        case AST_TYPE_NAMESPACE:
+        case AstType::NAMESPACE:
         {
             transpile_namespace(transpiler, node);
 
             break;
         }
-        case AST_TYPE_ENUM_DEF:
+        case AstType::ENUM_DEF:
         {
             transpile_enum_def(transpiler, node);
 
             break;
         }
-        case AST_TYPE_ENUM_CONSTANT:
+        case AstType::ENUM_CONSTANT:
         {
             transpile_enum_constant(transpiler, node);
 
             break;
         }
-        case AST_TYPE_STRUCT_DECL:
+        case AstType::STRUCT_DECL:
         {
             transpile_struct_decl(transpiler, node);
 
             break;
         }
-        case AST_TYPE_STRUCT_DEF:
+        case AstType::STRUCT_DEF:
         {
             transpile_struct_def(transpiler, node);
 
             break;
         }
-        case AST_TYPE_STRUCT_MEMBER:
+        case AstType::STRUCT_MEMBER:
         {
             transpile_struct_member(transpiler, node);
 
             break;
         }
-        case AST_TYPE_FUNC_DECL:
+        case AstType::FUNC_DECL:
         {
             transpile_func_decl(transpiler, node);
 
             break;
         }
-        case AST_TYPE_FUNC_DEF:
+        case AstType::FUNC_DEF:
         {
             transpile_func_def(transpiler, node);
 
             break;
         }
-        case AST_TYPE_FUNC_CALL:
+        case AstType::FUNC_CALL:
         {
             transpile_func_call(transpiler, node);
 
             break;
         }
-        case AST_TYPE_SCOPE:
+        case AstType::SCOPE:
         {
             transpile_scope(transpiler, node);
 
             break;
         }
-        case AST_TYPE_GLOBAL_VAR_DECL:
+        case AstType::GLOBAL_VAR_DECL:
         {
             transpile_global_var_decl(transpiler, node);
 
             break;
         }
-        case AST_TYPE_GLOBAL_VAR_DEF:
+        case AstType::GLOBAL_VAR_DEF:
         {
             transpile_global_var_def(transpiler, node);
 
             break;
         }
-        case AST_TYPE_VAR_DECL:
+        case AstType::VAR_DECL:
         {
             transpile_var_decl(transpiler, node);
 
             break;
         }
-        case AST_TYPE_VAR_DEF:
+        case AstType::VAR_DEF:
         {
             transpile_var_def(transpiler, node);
 
             break;
         }
-        case AST_TYPE_VAR:
+        case AstType::VAR:
         {
             transpile_var(transpiler, node);
 
             break;
         }
-        case AST_TYPE_UNARY_EXPR:
+        case AstType::UNARY_EXPR:
         {
             transpile_unary_expr(transpiler, node);
 
             break;
         }
-        case AST_TYPE_BINARY_EXPR:
+        case AstType::BINARY_EXPR:
         {
             transpile_binary_expr(transpiler, node);
 
             break;
         }
-        case AST_TYPE_EXPR_STMT:
+        case AstType::EXPR_STMT:
         {
             transpile_expr_stmt(transpiler, node);
 
             break;
         }
-        case AST_TYPE_BREAK_STMT:
+        case AstType::BREAK_STMT:
         {
             transpile_break_stmt(transpiler, node);
 
             break;
         }
-        case AST_TYPE_CONTINUE_STMT:
+        case AstType::CONTINUE_STMT:
         {
             transpile_continue_stmt(transpiler, node);
 
             break;
         }
-        case AST_TYPE_RETURN_STMT:
+        case AstType::RETURN_STMT:
         {
             transpile_return_stmt(transpiler, node);
 
             break;
         }
-        case AST_TYPE_FLOAT_LITERAL:
+        case AstType::FLOAT_LITERAL:
         {
             transpile_float_literal(transpiler, node);
 
             break;
         }
-        case AST_TYPE_INT_LITERAL:
+        case AstType::INT_LITERAL:
         {
             transpile_int_literal(transpiler, node);
 
             break;
         }
-        case AST_TYPE_CHAR_LITERAL:
+        case AstType::CHAR_LITERAL:
         {
             transpile_char_literal(transpiler, node);
 
             break;
         }
-        case AST_TYPE_STRING_LITERAL:
+        case AstType::STRING_LITERAL:
         {
             transpile_string_literal(transpiler, node);
 
             break;
         }
-        case AST_TYPE_IF_STMT:
+        case AstType::IF_STMT:
         {
             transpile_if_stmt(transpiler, node);
 
             break;
         }
-        case AST_TYPE_FOR_LOOP:
+        case AstType::FOR_LOOP:
         {
             transpile_for_loop(transpiler, node);
 
             break;
         }
-        case AST_TYPE_WHILE_LOOP:
+        case AstType::WHILE_LOOP:
         {
             transpile_while_loop(transpiler, node);
 
             break;
         }
-        case AST_TYPE_DO_WHILE_LOOP:
+        case AstType::DO_WHILE_LOOP:
         {
             transpile_do_while_loop(transpiler, node);
 
             break;
         }
-        case AST_TYPE_SWITCH_STMT:
+        case AstType::SWITCH_STMT:
         {
             transpile_switch_stmt(transpiler, node);
 
             break;
         }
-        case AST_TYPE_INITIALIZER_LIST:
+        case AstType::INITIALIZER_LIST:
         {
             transpile_initializer_list(transpiler, node);
 
             break;
         }
-        case AST_TYPE_ASSERT:
+        case AstType::ASSERT:
         {
             transpile_assert(transpiler, node);
 
             break;
         }
-        case AST_TYPE_SIZEOF:
+        case AstType::SIZEOF:
         {
             transpile_sizeof(transpiler, node);
 
@@ -219,7 +254,7 @@ export void transpile_ast(Transpiler* transpiler, AST* ast)
         }
         default:
         {
-            assert(false);
+            frx::assert(false);
 
             break;
         }

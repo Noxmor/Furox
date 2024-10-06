@@ -1,4 +1,13 @@
+import "../core/ast.frx";
 import "../core/parser.frx";
+import "../core/scope.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTUnresolvedName
 {
@@ -10,10 +19,10 @@ export struct ASTUnresolvedName
 
 ASTUnresolvedName* make_unresolved_name(Arena* arena, char* name, Scope* scope)
 {
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    ASTUnresolvedName* unresolved_name = arena_alloc(arena,
-        sizeof(ASTUnresolvedName));
+    mut ASTUnresolvedName* unresolved_name = arena_alloc(arena,
+        frx::sizeof(ASTUnresolvedName));
 
     unresolved_name->name = name;
     unresolved_name->scope = scope;
@@ -23,7 +32,7 @@ ASTUnresolvedName* make_unresolved_name(Arena* arena, char* name, Scope* scope)
 
 export ASTUnresolvedName* parse_unresolved_name(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     SourceLocation start = parser_current_location(parser);
 
@@ -32,10 +41,10 @@ export ASTUnresolvedName* parse_unresolved_name(Parser* parser)
 
     SourceLocation end = parser_current_location(parser);
 
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
-    ASTUnresolvedName* unresolved_name = make_unresolved_name(&parser->arena,
-        name, scope);
+    mut ASTUnresolvedName* unresolved_name =
+        make_unresolved_name(&parser->arena, name, scope);
 
     unresolved_name->range.start = start;
     unresolved_name->range.end = end;
@@ -46,13 +55,13 @@ export ASTUnresolvedName* parse_unresolved_name(Parser* parser)
 export void print_unresolved_name(ASTUnresolvedName* unresolved_name,
     FILE* file, usize depth)
 {
-    assert(unresolved_name != nullptr);
+    frx::assert(unresolved_name != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_UNRESOLVED_NAME),
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::UNRESOLVED_NAME),
         unresolved_name->name);
 }
 

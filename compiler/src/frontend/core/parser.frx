@@ -1,13 +1,32 @@
 import "ast.frx";
-/*export*/ import "lexer.frx";
+export import "lexer.frx";
 import "namespace.frx";
 import "scope.frx";
+import "../semantic/compound.frx";
 import "../symbols/enum.frx";
 import "../symbols/func.frx";
 import "../symbols/struct.frx";
 import "../symbols/var.frx";
-/*export*/ import "../../core/arena.frx";
+import "../syntax/import_stmt.frx";
+import "../syntax/translation_unit.frx";
+export import "../../core/arena.frx";
 import "../../core/list.frx";
+import "../../core/log.frx";
+import "../../core/main.frx";
+import "../../core/parser_table.frx";
+
+extern struct FILE;
+
+extern
+{
+    char* realpath(char* filename, mut char* resolved_name);
+    i32 sprintf(mut char* str, char* format, ...);
+    char* strrchr(char* str, i32 c);
+    char* strcpy(mut char* dest, char* src);
+    i32 fprintf(mut FILE* stream, char* format, ...);
+    FILE* fopen(char* filepath, char* mode);
+    void fclose(mut FILE* stream);
+}
 
 export struct Parser
 {
@@ -33,11 +52,11 @@ export struct Parser
     VarTable var_table;
 }
 
-export void parser_init(Parser* parser, char* filepath)
+export void parser_init(mut Parser* parser, char* filepath)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(filepath != nullptr);
+    frx::assert(filepath != nullptr);
 
     lexer_init(&parser->lexer, filepath);
 
@@ -61,14 +80,14 @@ export void parser_init(Parser* parser, char* filepath)
     var_table_init(&parser->var_table);
 }
 
-void parser_advance(Parser* parser)
+export void parser_advance(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     lexer_next_token(&parser->lexer);
 }
 
-export void parser_eat(Parser* parser, TokenType type)
+export void parser_eat(mut Parser* parser, TokenType type)
 {
     if(parser->token->type != type)
     {
@@ -86,21 +105,21 @@ export void parser_eat(Parser* parser, TokenType type)
 
 export b8 parser_loop_until(Parser* parser, TokenType type)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(type < TOKEN_TYPE_COUNT);
+    frx::assert(type < TokenType::COUNT);
 
     TokenType current_type = parser->token->type;
 
     return current_type != type
-        && current_type != TOKEN_TYPE_ERROR
-        && current_type != TOKEN_TYPE_EOF
+        && current_type != TokenType::ERROR
+        && current_type != TokenType::EOF
         && !token_type_is_synchronizing(current_type);
 }
 
-void parser_panic(Parser* parser)
+export void parser_panic(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     while(true)
     {
@@ -113,16 +132,16 @@ void parser_panic(Parser* parser)
     }
 }
 
-export void parser_parse(Parser* parser)
+export void parser_parse(mut Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     parser->translation_unit = parse_translation_unit(parser);
 }
 
 b8 file_exists(char* filepath)
 {
-    assert(filepath != nullptr);
+    frx::assert(filepath != nullptr);
 
     FILE* file = fopen(filepath, "r");
     if(file == nullptr)
@@ -136,19 +155,19 @@ b8 file_exists(char* filepath)
 
 export Parser* parser_compile(Parser* parser, char* filepath)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(filepath != nullptr);
+    frx::assert(filepath != nullptr);
 
-    char[4096] directory;
+    char directory[4096];
     strcpy(directory, parser_source_file(parser));
-    char* last_slash = strrchr(directory, '/');
-    char temp = last_slash[0] = '\0';
+    mut char* last_slash = strrchr(directory, '/');
+    char temp = (last_slash[0] = '\0');
 
-    char[4096] resolved_filepath;
+    char resolved_filepath[4096];
     sprintf(resolved_filepath, "%s/%s", directory, filepath);
 
-    char[4096] fullpath;
+    char fullpath[4096];
     realpath(resolved_filepath, fullpath);
 
     if(file_exists(fullpath))
@@ -162,19 +181,19 @@ export Parser* parser_compile(Parser* parser, char* filepath)
 void parser_resolve_imports_recursive(Parser* main_parser,
     List* visible_parsers, Parser* parser, List* visited_parsers)
 {
-    assert(main_parser != nullptr);
+    frx::assert(main_parser != nullptr);
 
-    assert(visible_parsers != nullptr);
+    frx::assert(visible_parsers != nullptr);
 
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(visited_parsers != nullptr);
+    frx::assert(visited_parsers != nullptr);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
     {
         AST* ast = list_get(&parser->translation_unit->nodes, i);
-        if(ast->type != AST_TYPE_IMPORT_STMT)
+        if(ast->type != AstType::IMPORT_STMT)
         {
             continue;
         }
@@ -203,18 +222,18 @@ void parser_resolve_imports_recursive(Parser* main_parser,
 
 export void parser_resolve_imports(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     List* visible_parsers = &parser->visible_parsers;
 
     List visited_parsers;
     list_init(&visited_parsers);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
     {
         AST* ast = list_get(&parser->translation_unit->nodes, i);
-        if(ast->type != AST_TYPE_IMPORT_STMT)
+        if(ast->type != AstType::IMPORT_STMT)
         {
             continue;
         }
@@ -244,13 +263,13 @@ export void parser_resolve_imports(Parser* parser)
     for(i = 0; i < list_size(visible_parsers); i = i + 1)
     {
         Parser* visible_parser = list_get(visible_parsers, i);
-        assert(visible_parser != parser);
+        frx::assert(visible_parser != parser);
     }
 }
 
 export void parser_analyze(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     analyze_compound(parser, parser->translation_unit);
 }
@@ -262,15 +281,15 @@ export void parser_next_token(Parser* parser)
 
 export Token* parser_peek(Parser* parser, usize offset)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     return lexer_peek(&parser->lexer, offset);
 }
 
-export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, Namespace* ns,
+export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, mut Namespace* ns,
     char* name)
 {
-    EnumSymbol* symbol = parser_find_enum_symbol(parser, ns, name);
+    mut EnumSymbol* symbol = parser_find_enum_symbol(parser, ns, name);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
@@ -283,15 +302,15 @@ export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, Namespace* ns,
 export EnumSymbol* parser_find_enum_symbol(Parser* parser, Namespace* ns,
     char* name)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    EnumSymbol* symbol = enum_table_find(&parser->enum_table, ns, name);
+    mut EnumSymbol* symbol = enum_table_find(&parser->enum_table, ns, name);
     if(symbol != nullptr)
     {
         return symbol;
     }
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
     {
         Parser* visible_parser = list_get(&parser->visible_parsers, i);
@@ -306,10 +325,10 @@ export EnumSymbol* parser_find_enum_symbol(Parser* parser, Namespace* ns,
     return nullptr;
 }
 
-export StructSymbol* parser_find_struct_symbol_r(Parser* parser, Namespace* ns,
-    char* name)
+export StructSymbol* parser_find_struct_symbol_r(Parser* parser,
+    mut Namespace* ns, char* name)
 {
-    StructSymbol* symbol = parser_find_struct_symbol(parser, ns, name);
+    mut StructSymbol* symbol = parser_find_struct_symbol(parser, ns, name);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
@@ -322,15 +341,15 @@ export StructSymbol* parser_find_struct_symbol_r(Parser* parser, Namespace* ns,
 export StructSymbol* parser_find_struct_symbol(Parser* parser, Namespace* ns,
     char* name)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    StructSymbol* symbol = struct_table_find(&parser->struct_table, ns, name);
+    mut StructSymbol* symbol = struct_table_find(&parser->struct_table, ns, name);
     if(symbol != nullptr)
     {
         return symbol;
     }
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
     {
         Parser* visible_parser = list_get(&parser->visible_parsers, i);
@@ -345,10 +364,10 @@ export StructSymbol* parser_find_struct_symbol(Parser* parser, Namespace* ns,
     return nullptr;
 }
 
-export FuncSymbol* parser_find_func_symbol_r(Parser* parser, Namespace* ns,
+export FuncSymbol* parser_find_func_symbol_r(Parser* parser, mut Namespace* ns,
     char* name)
 {
-    FuncSymbol* symbol = parser_find_func_symbol(parser, ns, name);
+    mut FuncSymbol* symbol = parser_find_func_symbol(parser, ns, name);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
@@ -361,15 +380,15 @@ export FuncSymbol* parser_find_func_symbol_r(Parser* parser, Namespace* ns,
 export FuncSymbol* parser_find_func_symbol(Parser* parser, Namespace* ns,
     char* name)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    FuncSymbol* symbol = func_table_find(&parser->func_table, ns, name);
+    mut FuncSymbol* symbol = func_table_find(&parser->func_table, ns, name);
     if(symbol != nullptr)
     {
         return symbol;
     }
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
     {
         Parser* visible_parser = list_get(&parser->visible_parsers, i);
@@ -386,52 +405,52 @@ export FuncSymbol* parser_find_func_symbol(Parser* parser, Namespace* ns,
 
 export SourceLocation parser_current_location(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     return parser->token->range.start;
 }
 
 export char* parser_source_file(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     return lexer_source_file(&parser->lexer);
 }
 
 export void parser_destroy(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     lexer_destroy(&parser->lexer);
 }
 
-void parser_push_namespace(Parser* parser, char* name)
+export void parser_push_namespace(mut Parser* parser, char* name)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     parser->current_namespace = namespace_create(parser->current_namespace,
         name);
 }
 
-void parser_pop_namespace(Parser* parser)
+export void parser_pop_namespace(mut Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(parser->current_namespace != nullptr);
+    frx::assert(parser->current_namespace != nullptr);
 
     parser->current_namespace = parser->current_namespace->parent;
 }
 
-void parser_push_scope(Parser* parser)
+export void parser_push_scope(mut Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     parser->current_scope = scope_create(parser->current_scope);
 }
 
-void parser_pop_scope(Parser* parser)
+export void parser_pop_scope(mut Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     parser->current_scope = parser->current_scope->parent;
 }

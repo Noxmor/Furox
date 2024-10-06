@@ -1,4 +1,14 @@
-/*export*/ import "../frontend/core/parser.frx";
+import "hash.frx";
+export import "../frontend/core/parser.frx";
+import "../frontend/core/string_table.frx";
+
+extern
+{
+    void* malloc(usize size);
+    i32 strcmp(char* str1, char* str2);
+    i32 strncmp(char* str1, char* str2, usize n);
+    usize strlen(char* str);
+}
 
 struct ParserTableEntry
 {
@@ -13,17 +23,17 @@ enum Constants : u64
 
 struct ParserTable
 {
-    ParserTableEntry*[PARSER_TABLE_CAPACITY] entries;
+    ParserTableEntry* entries[Constants::PARSER_TABLE_CAPACITY];
 }
 
-ParserTable parser_table;
+mut ParserTable parser_table;
 
 export Parser* parser_table_find(char* filepath)
 {
-    assert(filepath != nullptr);
+    frx::assert(filepath != nullptr);
 
-    u64 index = hash_djb2(filepath) % PARSER_TABLE_CAPACITY;
-    ParserTableEntry* entry = parser_table.entries[index];
+    u64 index = hash_djb2(filepath) % Constants::PARSER_TABLE_CAPACITY;
+    mut ParserTableEntry* entry = parser_table.entries[index];
 
     while(entry != nullptr)
     {
@@ -40,9 +50,9 @@ export Parser* parser_table_find(char* filepath)
     return nullptr;
 }
 
-b8 is_real_path(char* filepath)
+b8 is_real_path(mut char* filepath)
 {
-    assert(filepath != nullptr);
+    frx::assert(filepath != nullptr);
 
     if(filepath[0] != '/')
     {
@@ -65,10 +75,10 @@ b8 is_real_path(char* filepath)
 
 export b8 parser_table_insert(char* filepath)
 {
-    assert(is_real_path(filepath));
+    frx::assert(is_real_path(filepath));
 
-    u64 index = hash_djb2(filepath) % PARSER_TABLE_CAPACITY;
-    ParserTableEntry* entry = parser_table.entries[index];
+    u64 index = hash_djb2(filepath) % Constants::PARSER_TABLE_CAPACITY;
+    mut ParserTableEntry* entry = parser_table.entries[index];
 
     while(entry != nullptr)
     {
@@ -80,8 +90,8 @@ export b8 parser_table_insert(char* filepath)
         entry = entry->next;
     }
 
-    ParserTableEntry* new_entry = malloc(sizeof(ParserTableEntry));
-    new_entry->parser = malloc(sizeof(Parser));
+    mut ParserTableEntry* new_entry = malloc(frx::sizeof(ParserTableEntry));
+    new_entry->parser = malloc(frx::sizeof(Parser));
     parser_init(new_entry->parser, string_table_insert(filepath));
     new_entry->next = parser_table.entries[index];
 

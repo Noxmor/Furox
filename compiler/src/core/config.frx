@@ -1,3 +1,5 @@
+export import "list.frx";
+
 export enum OptionID : u8
 {
     NONE,
@@ -9,14 +11,14 @@ export enum OptionID : u8
     LINK
 }
 
-struct Config
+export struct Config
 {
     char* output;
     b8 emit_ast;
     List link_targets;
 }
 
-Config config;
+mut Config config;
 
 export void config_init()
 {

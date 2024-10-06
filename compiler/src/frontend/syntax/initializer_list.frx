@@ -1,3 +1,15 @@
+import "expr.frx";
+import "../core/ast.frx";
+import "../core/parser.frx";
+import "../../core/list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export struct ASTInitializerList
 {
     List values;
@@ -5,7 +17,8 @@ export struct ASTInitializerList
 
 ASTInitializerList* make_initializer_list(Arena* arena)
 {
-    ASTInitializerList* list = arena_alloc(arena, sizeof(ASTInitializerList));
+    ASTInitializerList* list = arena_alloc(arena,
+        frx::sizeof(ASTInitializerList));
 
     list_init(&list->values);
 
@@ -14,24 +27,24 @@ ASTInitializerList* make_initializer_list(Arena* arena)
 
 export ASTInitializerList* parse_initializer_list(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    parser_eat(parser, TOKEN_TYPE_LBRACE);
+    parser_eat(parser, TokenType::LBRACE);
 
     ASTInitializerList* list = make_initializer_list(&parser->arena);
 
-    while(parser_loop_until(parser, TOKEN_TYPE_RBRACE))
+    while(parser_loop_until(parser, TokenType::RBRACE))
     {
         if(list_size(&list->values) > 0)
         {
-            parser_eat(parser, TOKEN_TYPE_COMMA);
+            parser_eat(parser, TokenType::COMMA);
         }
 
         AST* value = parse_expr(parser);
         list_push(&list->values, value);
     }
 
-    parser_eat(parser, TOKEN_TYPE_RBRACE);
+    parser_eat(parser, TokenType::RBRACE);
 
     return list;
 }
@@ -39,15 +52,15 @@ export ASTInitializerList* parse_initializer_list(Parser* parser)
 export void print_initializer_list(ASTInitializerList* list, FILE* file,
     usize depth)
 {
-    assert(list != nullptr);
+    frx::assert(list != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_INITIALIZER_LIST));
+    fprintf(file, "%s\n", ast_type_to_str(AstType::INITIALIZER_LIST));
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&list->values); i = i + 1)
     {
         AST* value = list_get(&list->values, i);

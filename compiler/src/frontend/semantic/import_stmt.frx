@@ -2,11 +2,11 @@ import "../core/errors.frx";
 import "../core/parser.frx";
 import "../syntax/import_stmt.frx";
 
-export void analyze_import_stmt(Parser* parser, ASTImportStmt* import_stmt)
+export void analyze_import_stmt(mut Parser* parser, ASTImportStmt* import_stmt)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(import_stmt != nullptr);
+    frx::assert(import_stmt != nullptr);
 
     if(import_stmt->imported_parser == nullptr)
     {

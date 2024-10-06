@@ -1,18 +1,27 @@
 import "c.frx";
 import "func_params.frx";
 import "scope.frx";
+import "type_specifier.frx";
 import "../core/mangling.frx";
+import "../../frontend/symbols/func.frx";
 import "../../frontend/syntax/func_def.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(func_def != nullptr);
+    frx::assert(func_def != nullptr);
 
     FuncSymbol* symbol = &func_def->symbol;
 
-    if(transpiler->mode == TRANSPILER_MODE_FUNC_DECL)
+    if(transpiler->mode == TranspilerMode::FUNC_DECL)
     {
         transpile_type_specifier(transpiler, func_def->return_type);
 
@@ -21,7 +30,7 @@ export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
         transpile_func_params(transpiler, func_def->params);
         fprintf(transpiler->file, ";\n");
     }
-    else if(transpiler->mode == TRANSPILER_MODE_FUNC_IMPL)
+    else if(transpiler->mode == TranspilerMode::FUNC_IMPL)
     {
         transpile_type_specifier(transpiler, func_def->return_type);
 

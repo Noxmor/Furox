@@ -1,4 +1,12 @@
+import "../core/ast.frx";
 import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTContinueStmt
 {
@@ -7,14 +15,14 @@ export struct ASTContinueStmt
 
 ASTContinueStmt* make_continue_stmt(Arena* arena)
 {
-    return arena_alloc(arena, sizeof(ASTContinueStmt));
+    return arena_alloc(arena, frx::sizeof(ASTContinueStmt));
 }
 
 export ASTContinueStmt* parse_continue_stmt(Parser* parser)
 {
-    parser_eat(parser, TOKEN_TYPE_KW_CONTINUE);
+    parser_eat(parser, TokenType::KW_CONTINUE);
 
-    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
     return make_continue_stmt(&parser->arena);
 }
@@ -22,11 +30,11 @@ export ASTContinueStmt* parse_continue_stmt(Parser* parser)
 export void print_continue_stmt(ASTContinueStmt* continue_stmt, FILE* file,
     usize depth)
 {
-    assert(continue_stmt != nullptr);
+    frx::assert(continue_stmt != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_CONTINUE_STMT));
+    fprintf(file, "%s\n", ast_type_to_str(AstType::CONTINUE_STMT));
 }

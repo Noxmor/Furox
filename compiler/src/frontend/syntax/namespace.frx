@@ -1,4 +1,15 @@
+import "global_scope.frx";
+import "../core/ast.frx";
+import "../core/namespace.frx";
 import "../core/parser.frx";
+import "../../core/list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTNamespace
 {
@@ -9,9 +20,10 @@ export struct ASTNamespace
 
 export ASTNamespace* make_namespace(Arena* arena, Namespace* ns)
 {
-    assert(ns != nullptr);
+    frx::assert(ns != nullptr);
 
-    ASTNamespace* namespace_node = arena_alloc(arena, sizeof(ASTNamespace));
+    mut ASTNamespace* namespace_node = arena_alloc(arena,
+        frx::sizeof(ASTNamespace));
 
     namespace_node->ns = ns;
 
@@ -20,35 +32,35 @@ export ASTNamespace* make_namespace(Arena* arena, Namespace* ns)
     return namespace_node;
 }
 
-ASTNamespace* parse_namespace(Parser* parser)
+export ASTNamespace* parse_namespace(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     Namespace* old_namespace = parser->current_namespace;
 
-    parser_eat(parser, TOKEN_TYPE_KW_NAMESPACE);
+    parser_eat(parser, TokenType::KW_NAMESPACE);
 
     parser_push_namespace(parser, parser->token->identifier);
 
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
     ASTNamespace* namespace_root = make_namespace(&parser->arena,
         parser->current_namespace);
 
-    ASTNamespace* current_namespace = namespace_root;
+    mut ASTNamespace* current_namespace = namespace_root;
 
-    while(parser->token->type == TOKEN_TYPE_NAMESPACE_RESOLUTION)
+    while(parser->token->type == TokenType::NAMESPACE_RESOLUTION)
     {
-        parser_eat(parser, TOKEN_TYPE_NAMESPACE_RESOLUTION);
+        parser_eat(parser, TokenType::NAMESPACE_RESOLUTION);
 
         parser_push_namespace(parser, parser->token->identifier);
 
-        parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+        parser_eat(parser, TokenType::IDENTIFIER);
 
         ASTNamespace* child_namespace = make_namespace(&parser->arena,
             parser->current_namespace);
 
-        AST* ast = make_ast(&parser->arena, AST_TYPE_NAMESPACE,
+        AST* ast = make_ast(&parser->arena, AstType::NAMESPACE,
             child_namespace);
 
         list_push(&current_namespace->global_scope, ast);
@@ -56,17 +68,17 @@ ASTNamespace* parse_namespace(Parser* parser)
         current_namespace = child_namespace;
     }
 
-    parser_eat(parser, TOKEN_TYPE_LBRACE);
+    parser_eat(parser, TokenType::LBRACE);
 
     parser_push_scope(parser);
 
-    while(parser_loop_until(parser, TOKEN_TYPE_RBRACE))
+    while(parser_loop_until(parser, TokenType::RBRACE))
     {
         AST* child = parse_global_scope(parser);
         list_push(&current_namespace->global_scope, child);
     }
 
-    parser_eat(parser, TOKEN_TYPE_RBRACE);
+    parser_eat(parser, TokenType::RBRACE);
 
     pop_back_namespace_until(parser, old_namespace);
     parser_pop_scope(parser);
@@ -77,16 +89,16 @@ ASTNamespace* parse_namespace(Parser* parser)
 export void print_namespace(ASTNamespace* namespace_node, FILE* file,
 usize depth)
 {
-    assert(namespace_node != nullptr);
+    frx::assert(namespace_node != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_NAMESPACE),
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::NAMESPACE),
         namespace_node->ns->name);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&namespace_node->global_scope); i = i + 1)
     {
         AST* ast = list_get(&namespace_node->global_scope, i);
@@ -94,22 +106,9 @@ usize depth)
     }
 }
 
-export void print_namespace_resolution(FILE* file, Namespace* ns)
-{
-    assert(file != nullptr);
-
-    while(ns != nullptr)
-    {
-        fprintf(file, "%s%s", ns->name,
-            token_type_to_str(TOKEN_TYPE_NAMESPACE_RESOLUTION));
-
-        ns = ns->parent;
-    }
-}
-
 void pop_back_namespace_until(Parser* parser, Namespace* old_namespace)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     while(parser->current_namespace != old_namespace)
     {

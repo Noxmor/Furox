@@ -1,13 +1,19 @@
 import "ast.frx";
+import "../core/ast.frx";
+import "../core/errors.frx";
+import "../core/namespace.frx";
 import "../core/parser.frx";
+import "../core/scope.frx";
+import "../symbols/var.frx";
 import "../syntax/unresolved_name.frx";
+import "../syntax/var.frx";
 
-export void analyze_unresolved_name(Parser* parser,
-    ASTUnresolvedName* unresolved_name, AST* ast)
+export void analyze_unresolved_name(mut Parser* parser,
+    ASTUnresolvedName* unresolved_name, mut AST* ast)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(unresolved_name != nullptr);
+    frx::assert(unresolved_name != nullptr);
 
     Namespace* ns = parser->current_namespace;
     char* name = unresolved_name->name;
@@ -29,7 +35,7 @@ export void analyze_unresolved_name(Parser* parser,
     }
     else if(is_var)
     {
-        ast->type = AST_TYPE_VAR;
+        ast->type = AstType::VAR;
         ast->node = make_var(&parser->arena, nullptr, scope, name);
     }
     else

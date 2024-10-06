@@ -5,14 +5,23 @@ import "queue.frx";
 import "../backend/backend.frx";
 import "../frontend/syntax/program.frx";
 
-ASTProgram* program;
-b8 failed = false;
+extern struct FILE;
 
-Queue syntax_queue;
-Queue resolve_imports_queue;
-Queue semantic_queue;
+extern
+{
+    char* realpath(char* filename, mut char* resolved_name);
+    FILE* fopen(char* filepath, char* mode);
+    void fclose(mut FILE* stream);
+}
 
-void compile(char* filepath)
+mut ASTProgram* program;
+mut b8 failed = false;
+
+mut Queue syntax_queue;
+mut Queue resolve_imports_queue;
+mut Queue semantic_queue;
+
+export void compile(char* filepath)
 {
     if(parser_table_find(filepath) != nullptr)
     {
@@ -26,12 +35,12 @@ void compile(char* filepath)
 
     Parser* parser = parser_table_find(filepath);
 
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     queue_enqueue(&syntax_queue, parser);
 }
 
-usize Main(usize argc, char** argv)
+i32 main(usize argc, char** argv)
 {
     config_init();
     lexer_init_keyword_table();
@@ -42,37 +51,37 @@ usize Main(usize argc, char** argv)
 
     program = make_program();
 
-    Option[6] options;
+    mut Option options[6];
 
     //TODO: Remove tmp
-    Option tmp;
-    tmp = options[0] = create_option(HELP, OPT_ARG, 'h', "help");
-    tmp = options[1] = create_option(OUTPUT, REQ_ARG, 'o', "output");
-    tmp = options[2] = create_long_option(TARGET, REQ_ARG, "target");
-    tmp = options[3] = create_long_option(EMIT_AST, NO_ARG, "emit-ast");
-    tmp = options[4] = create_short_option(LINK, REQ_ARG, 'l');
-    tmp = options[5] = create_option(NONE, NO_ARG, '\0', nullptr);
+    mut Option tmp;
+    tmp = (options[0] = create_option(OptionID::HELP, OptionType::OPT_ARG, 'h', "help"));
+    tmp = (options[1] = create_option(OptionID::OUTPUT, OptionType::REQ_ARG, 'o', "output"));
+    tmp = (options[2] = create_long_option(OptionID::TARGET, OptionType::REQ_ARG, "target"));
+    tmp = (options[3] = create_long_option(OptionID::EMIT_AST, OptionType::NO_ARG, "emit-ast"));
+    tmp = (options[4] = create_short_option(OptionID::LINK, OptionType::REQ_ARG, 'l'));
+    tmp = (options[5] = create_option(OptionID::NONE, OptionType::NO_ARG, '\0', nullptr));
 
-    b8 emit_ast = false;
+    mut b8 emit_ast = false;
 
-    Config* config = get_config();
+    mut Config* config = get_config();
 
-    OptionID opt;
+    mut OptionID opt;
     while((opt = parse_command_line(argc, argv, options)) != 0)
     {
         switch(opt)
         {
-            case OUTPUT:
+            case OptionID::OUTPUT:
             {
                 config->output = get_arg();
                 break;
             }
-            case EMIT_AST:
+            case OptionID::EMIT_AST:
             {
                 emit_ast = true;
                 break;
             }
-            case LINK:
+            case OptionID::LINK:
             {
                 list_push(&config->link_targets, get_arg());
                 break;
@@ -80,11 +89,11 @@ usize Main(usize argc, char** argv)
         }
     }
 
-    usize i;
+    mut usize i;
     for(i = 0; i < get_positional_argc(); i = i + 1)
     {
         char* arg = argv[i + 1];
-        char[4096] fullpath;
+        char fullpath[4096];
         realpath(arg, fullpath);
         compile(fullpath);
     }
@@ -123,7 +132,7 @@ usize Main(usize argc, char** argv)
 
     if(!failed)
     {
-        return backend_generate_code(BACKEND_TYPE_NATIVE, program);
+        return backend_generate_code(BackendType::NATIVE, program);
     }
 
     return failed;

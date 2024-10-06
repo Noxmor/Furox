@@ -1,5 +1,13 @@
 import "../core/namespace.frx";
 import "../core/scope.frx";
+import "../../core/hash.frx";
+
+extern
+{
+    void* malloc(usize size);
+    void* memset(mut char* str, i32 c, usize n);
+    i32 strcmp(char* str1, char* str2);
+}
 
 export struct FuncSymbol
 {
@@ -10,14 +18,14 @@ export struct FuncSymbol
     b8 external;
 }
 
-export void func_symbol_init(FuncSymbol* symbol, Scope* scope, Namespace* ns,
-    char* name, b8 exported, b8 external)
+export void func_symbol_init(mut FuncSymbol* symbol, Scope* scope,
+    Namespace* ns, char* name, b8 exported, b8 external)
 {
-    assert(symbol != nullptr);
+    frx::assert(symbol != nullptr);
 
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
     symbol->scope = scope;
     symbol->ns = ns;
@@ -39,20 +47,20 @@ enum Constants : u64
 
 export struct FuncTable
 {
-    FuncTableEntry*[FUNC_TABLE_CAPACITY] entries;
+    FuncTableEntry* entries[Constants::FUNC_TABLE_CAPACITY];
 }
 
 export void func_table_init(FuncTable* table)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    memset(table, 0, sizeof(FuncTable));
+    memset(table, 0, frx::sizeof(FuncTable));
 }
 
-export FuncSymbol* func_table_find_r(FuncTable* table, Namespace* ns,
+export FuncSymbol* func_table_find_r(FuncTable* table, mut Namespace* ns,
     char* name)
 {
-    FuncSymbol* symbol = func_table_find(table, ns, name);
+    mut FuncSymbol* symbol = func_table_find(table, ns, name);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
@@ -64,12 +72,12 @@ export FuncSymbol* func_table_find_r(FuncTable* table, Namespace* ns,
 
 export FuncSymbol* func_table_find(FuncTable* table, Namespace* ns, char* name)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    u64 index = hash_djb2(name) % FUNC_TABLE_CAPACITY;
-    FuncTableEntry* entry = table->entries[index];
+    u64 index = hash_djb2(name) % Constants::FUNC_TABLE_CAPACITY;
+    mut FuncTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -88,12 +96,12 @@ export FuncSymbol* func_table_find(FuncTable* table, Namespace* ns, char* name)
 
 export b8 func_table_insert(FuncTable* table, FuncSymbol* symbol)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    assert(symbol != nullptr);
+    frx::assert(symbol != nullptr);
 
-    u64 index = hash_djb2(symbol->name) % FUNC_TABLE_CAPACITY;
-    FuncTableEntry* entry = table->entries[index];
+    u64 index = hash_djb2(symbol->name) % Constants::FUNC_TABLE_CAPACITY;
+    mut FuncTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -108,7 +116,7 @@ export b8 func_table_insert(FuncTable* table, FuncSymbol* symbol)
         entry = entry->next;
     }
 
-    FuncTableEntry* new_entry = malloc(sizeof(FuncTableEntry));
+    mut FuncTableEntry* new_entry = malloc(frx::sizeof(FuncTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

@@ -1,17 +1,33 @@
+import "program.frx";
+import "../../core/config.frx";
+import "../../core/list.frx";
+import "../../core/queue.frx";
 import "../../frontend/core/namespace.frx";
 import "../../frontend/syntax/program.frx";
 
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+    FILE* fopen(char* filepath, char* mode);
+    void fclose(mut FILE* stream);
+    char* strcat(mut char* dest, char* src);
+    char* strcpy(mut char* dest, char* src);
+    i32 system(char* command);
+}
+
 export enum TranspilerMode : u8
 {
-    TRANSPILER_MODE_MACROS,
-    TRANSPILER_MODE_ENUMS,
-    TRANSPILER_MODE_STRUCT_DECL,
-    TRANSPILER_MODE_FUNC_DECL,
-    TRANSPILER_MODE_GLOBAL_VARS,
-    TRANSPILER_MODE_STRUCT_IMPL,
-    TRANSPILER_MODE_FUNC_IMPL,
+    MACROS,
+    ENUMS,
+    STRUCT_DECL,
+    FUNC_DECL,
+    GLOBAL_VARS,
+    STRUCT_IMPL,
+    FUNC_IMPL,
 
-    TRANSPILER_MODE_COUNT
+    COUNT
 }
 
 export struct Transpiler
@@ -27,7 +43,7 @@ export struct Transpiler
 
 export i32 c_generate_code(ASTProgram* program)
 {
-    Transpiler transpiler;
+    mut Transpiler transpiler;
     transpiler.file = fopen("/tmp/output.c", "w");
 
     if(transpiler.file == nullptr)
@@ -67,11 +83,11 @@ export i32 c_generate_code(ASTProgram* program)
 
     Config* config = get_config();
 
-    char[4096] command;
+    char command[4096];
     strcpy(command, "gcc /tmp/output.c -o ");
     strcat(command, config->output);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&config->link_targets); i = i + 1)
     {
         char* link_target = list_get(&config->link_targets, i);

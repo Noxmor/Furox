@@ -1,5 +1,13 @@
+import "expr.frx";
 import "../core/ast.frx";
 import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTExprStmt
 {
@@ -8,9 +16,9 @@ export struct ASTExprStmt
 
 ASTExprStmt* make_expr_stmt(Arena* arena, AST* expr)
 {
-    assert(expr != nullptr);
+    frx::assert(expr != nullptr);
 
-    ASTExprStmt* expr_stmt = arena_alloc(arena, sizeof(ASTExprStmt));
+    mut ASTExprStmt* expr_stmt = arena_alloc(arena, frx::sizeof(ASTExprStmt));
 
     expr_stmt->expr = expr;
 
@@ -19,23 +27,23 @@ ASTExprStmt* make_expr_stmt(Arena* arena, AST* expr)
 
 export ASTExprStmt* parse_expr_stmt(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     AST* expr = parse_expr(parser);
 
-    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
     return make_expr_stmt(&parser->arena, expr);
 }
 
 export void print_expr_stmt(ASTExprStmt* expr_stmt, FILE* file, usize depth)
 {
-    assert(expr_stmt != nullptr);
+    frx::assert(expr_stmt != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_EXPR_STMT));
+    fprintf(file, "%s\n", ast_type_to_str(AstType::EXPR_STMT));
     print_ast(expr_stmt->expr, file, depth + 1);
 }

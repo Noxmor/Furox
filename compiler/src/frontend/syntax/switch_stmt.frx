@@ -1,3 +1,16 @@
+import "expr.frx";
+import "scope.frx";
+import "../core/ast.frx";
+import "../core/parser.frx";
+import "../../core/list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export struct ASTSwitchCase
 {
     AST* value;
@@ -6,11 +19,12 @@ export struct ASTSwitchCase
 
 ASTSwitchCase* make_switch_case(Arena* arena, AST* value, ASTScope* scope)
 {
-    assert(value != nullptr);
+    frx::assert(value != nullptr);
 
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    ASTSwitchCase* switch_case = arena_alloc(arena, sizeof(ASTSwitchCase));
+    mut ASTSwitchCase* switch_case = arena_alloc(arena,
+        frx::sizeof(ASTSwitchCase));
 
     switch_case->value = value;
     switch_case->scope = scope;
@@ -20,11 +34,11 @@ ASTSwitchCase* make_switch_case(Arena* arena, AST* value, ASTScope* scope)
 
 ASTSwitchCase* parse_switch_case(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    parser_eat(parser, TOKEN_TYPE_KW_CASE);
+    parser_eat(parser, TokenType::KW_CASE);
     AST* value = parse_expr(parser);
-    parser_eat(parser, TOKEN_TYPE_COLON);
+    parser_eat(parser, TokenType::COLON);
     ASTScope* scope = parse_scope(parser);
 
     return make_switch_case(&parser->arena, value, scope);
@@ -32,9 +46,9 @@ ASTSwitchCase* parse_switch_case(Parser* parser)
 
 void print_switch_case(ASTSwitchCase* switch_case, FILE* file, usize depth)
 {
-    assert(switch_case != nullptr);
+    frx::assert(switch_case != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
@@ -53,9 +67,10 @@ export struct ASTSwitchStmt
 
 ASTSwitchStmt* make_switch_stmt(Arena* arena, AST* value)
 {
-    assert(value != nullptr);
+    frx::assert(value != nullptr);
 
-    ASTSwitchStmt* switch_stmt = arena_alloc(arena, sizeof(ASTSwitchStmt));
+    mut ASTSwitchStmt* switch_stmt = arena_alloc(arena,
+        frx::sizeof(ASTSwitchStmt));
 
     switch_stmt->value = value;
     list_init(&switch_stmt->cases);
@@ -66,31 +81,31 @@ ASTSwitchStmt* make_switch_stmt(Arena* arena, AST* value)
 
 export ASTSwitchStmt* parse_switch_stmt(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    parser_eat(parser, TOKEN_TYPE_KW_SWITCH);
-    parser_eat(parser, TOKEN_TYPE_LPAREN);
+    parser_eat(parser, TokenType::KW_SWITCH);
+    parser_eat(parser, TokenType::LPAREN);
     AST* value = parse_expr(parser);
-    parser_eat(parser, TOKEN_TYPE_RPAREN);
+    parser_eat(parser, TokenType::RPAREN);
 
-    ASTSwitchStmt* switch_stmt = make_switch_stmt(&parser->arena, value);
+    mut ASTSwitchStmt* switch_stmt = make_switch_stmt(&parser->arena, value);
 
-    parser_eat(parser, TOKEN_TYPE_LBRACE);
-    while(parser->token->type == TOKEN_TYPE_KW_CASE)
+    parser_eat(parser, TokenType::LBRACE);
+    while(parser->token->type == TokenType::KW_CASE)
     {
         ASTSwitchCase* switch_case = parse_switch_case(parser);
         list_push(&switch_stmt->cases, switch_case);
     }
 
-    if(parser->token->type == TOKEN_TYPE_KW_DEFAULT)
+    if(parser->token->type == TokenType::KW_DEFAULT)
     {
-        parser_eat(parser, TOKEN_TYPE_KW_DEFAULT);
-        parser_eat(parser, TOKEN_TYPE_COLON);
+        parser_eat(parser, TokenType::KW_DEFAULT);
+        parser_eat(parser, TokenType::COLON);
 
         switch_stmt->default_scope = parse_scope(parser);
     }
 
-    parser_eat(parser, TOKEN_TYPE_RBRACE);
+    parser_eat(parser, TokenType::RBRACE);
 
     return switch_stmt;
 }
@@ -98,17 +113,17 @@ export ASTSwitchStmt* parse_switch_stmt(Parser* parser)
 export void print_switch_stmt(ASTSwitchStmt* switch_stmt, FILE* file,
     usize depth)
 {
-    assert(switch_stmt != nullptr);
+    frx::assert(switch_stmt != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_SWITCH_STMT));
+    fprintf(file, "%s\n", ast_type_to_str(AstType::SWITCH_STMT));
 
     print_ast(switch_stmt->value, file, depth + 1);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
     {
         ASTSwitchCase* switch_case = list_get(&switch_stmt->cases, i);

@@ -2,12 +2,19 @@ import "ast.frx";
 import "c.frx";
 import "../../frontend/syntax/return_stmt.frx";
 
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_return_stmt(Transpiler* transpiler,
     ASTReturnStmt* return_stmt)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(return_stmt != nullptr);
+    frx::assert(return_stmt != nullptr);
 
     if(return_stmt->value != nullptr)
     {

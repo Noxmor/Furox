@@ -1,4 +1,15 @@
+import "namespace_resolution.frx";
+import "../core/ast.frx";
+import "../core/namespace.frx";
 import "../core/parser.frx";
+import "../core/scope.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTUnresolvedNamespacedName
 {
@@ -12,12 +23,12 @@ export struct ASTUnresolvedNamespacedName
 ASTUnresolvedNamespacedName* make_unresolved_namespaced_name(Arena* arena,
     Namespace* ns, char* name, Scope* scope)
 {
-    assert(ns != nullptr);
+    frx::assert(ns != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    ASTUnresolvedNamespacedName* unresolved_namespaced_name = arena_alloc(arena,
-        sizeof(ASTUnresolvedNamespacedName));
+    mut ASTUnresolvedNamespacedName* unresolved_namespaced_name =
+        arena_alloc(arena, frx::sizeof(ASTUnresolvedNamespacedName));
 
     unresolved_namespaced_name->ns = ns;
     unresolved_namespaced_name->name = name;
@@ -29,16 +40,16 @@ ASTUnresolvedNamespacedName* make_unresolved_namespaced_name(Arena* arena,
 export ASTUnresolvedNamespacedName* parse_unresolved_namespaced_name(
     Parser* parser, Namespace* ns, SourceLocation start)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
     char* name = parser->token->identifier;
     Scope* scope = parser->current_scope;
 
     SourceLocation end = parser_current_location(parser);
 
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
-    ASTUnresolvedNamespacedName* unresolved_namespaced_name =
+    mut ASTUnresolvedNamespacedName* unresolved_namespaced_name =
         make_unresolved_namespaced_name(&parser->arena, ns, name, scope);
 
     unresolved_namespaced_name->range.start = start;
@@ -51,14 +62,14 @@ export void print_unresolved_namespaced_name(
     ASTUnresolvedNamespacedName* unresolved_namespaced_name, FILE* file,
     usize depth)
 {
-    assert(unresolved_namespaced_name != nullptr);
+    frx::assert(unresolved_namespaced_name != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
     fprintf(file, "%s (",
-        ast_type_to_str(AST_TYPE_UNRESOLVED_NAMESPACED_NAME));
+        ast_type_to_str(AstType::UNRESOLVED_NAMESPACED_NAME));
 
     print_namespace_resolution(file, unresolved_namespaced_name->ns);
 

@@ -1,6 +1,14 @@
 import "../core/namespace.frx";
 import "../core/scope.frx";
 import "../syntax/type_specifier.frx";
+import "../../core/hash.frx";
+
+extern
+{
+    void* malloc(usize size);
+    void* memset(char* str, i32 c, usize n);
+    i32 strcmp(mut char* str1, char* str2);
+}
 
 export struct VarSymbol
 {
@@ -12,16 +20,16 @@ export struct VarSymbol
     b8 mutable;
 }
 
-export void var_symbol_init(VarSymbol* symbol, Namespace* ns,
+export void var_symbol_init(mut VarSymbol* symbol, Namespace* ns,
     ASTTypeSpecifier* type, Scope* scope, char* name, b8 global, b8 mutable)
 {
-    assert(symbol != nullptr);
+    frx::assert(symbol != nullptr);
 
-    assert(type != nullptr);
+    frx::assert(type != nullptr);
 
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
     symbol->ns = ns;
     symbol->type = type;
@@ -42,27 +50,27 @@ enum Constants : u64
     VAR_TABLE_CAPACITY = 128
 }
 
-struct VarTable
+export struct VarTable
 {
-    VarTableEntry*[VAR_TABLE_CAPACITY] entries;
+    VarTableEntry* entries[Constants::VAR_TABLE_CAPACITY];
 }
 
 export void var_table_init(VarTable* table)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    memset(table, 0, sizeof(VarTable));
+    memset(table, 0, frx::sizeof(VarTable));
 }
 
 export VarSymbol* var_table_find_by_namespace(VarTable* table, Namespace* ns,
     char* name)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    u64 index = hash_djb2(name) % VAR_TABLE_CAPACITY;
-    VarTableEntry* entry = table->entries[index];
+    u64 index = hash_djb2(name) % Constants::VAR_TABLE_CAPACITY;
+    mut VarTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -82,14 +90,14 @@ export VarSymbol* var_table_find_by_namespace(VarTable* table, Namespace* ns,
 export VarSymbol* var_table_find_by_scope(VarTable* table, Scope* scope,
     char* name)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    u64 index = hash_djb2(name) % VAR_TABLE_CAPACITY;
-    VarTableEntry* entry = table->entries[index];
+    u64 index = hash_djb2(name) % Constants::VAR_TABLE_CAPACITY;
+    mut VarTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -109,12 +117,12 @@ export VarSymbol* var_table_find_by_scope(VarTable* table, Scope* scope,
 
 export b8 var_table_insert(VarTable* table, VarSymbol* symbol)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    assert(symbol != nullptr);
+    frx::assert(symbol != nullptr);
 
-    u64 index = hash_djb2(symbol->name) % VAR_TABLE_CAPACITY;
-    VarTableEntry* entry = table->entries[index];
+    u64 index = hash_djb2(symbol->name) % Constants::VAR_TABLE_CAPACITY;
+    mut VarTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -129,7 +137,7 @@ export b8 var_table_insert(VarTable* table, VarSymbol* symbol)
         entry = entry->next;
     }
 
-    VarTableEntry* new_entry = malloc(sizeof(VarTableEntry));
+    mut VarTableEntry* new_entry = malloc(frx::sizeof(VarTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

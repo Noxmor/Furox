@@ -22,7 +22,7 @@ export struct Option
 export Option create_option(u16 id, OptionType type, char short_name,
     char* long_name)
 {
-    Option opt;
+    mut Option opt;
 
     opt.id = id;
     opt.type = type;
@@ -42,16 +42,16 @@ export Option create_long_option(u16 id, OptionType type, char* long_name)
     return create_option(id, type, '\0', long_name);
 }
 
-char* current_option = nullptr;
-char* arg = nullptr;
-usize pos = 0;
-usize current_option_index = 1;
-usize next_positional_arg_index = 1;
-b8 demarcated_options = false;
+mut char* current_option = nullptr;
+mut char* arg = nullptr;
+mut usize pos = 0;
+mut usize current_option_index = 1;
+mut usize next_positional_arg_index = 1;
+mut b8 demarcated_options = false;
 
 Option* find_option_by_short_name(Option* options, char short_name)
 {
-    usize i;
+    mut usize i;
     for(i = 0; options[i].id != 0; i = i + 1)
     {
         if(options[i].short_name == short_name)
@@ -65,7 +65,7 @@ Option* find_option_by_short_name(Option* options, char short_name)
 
 Option* find_option_by_long_name(Option* options, char* long_name)
 {
-    usize i;
+    mut usize i;
     for(i = 0; options[i].id != 0; i = i + 1)
     {
         if(strcmp(options[i].long_name, long_name) == 0)
@@ -89,7 +89,7 @@ export usize get_positional_argc()
 
 //TODO: Remove tmp, only needed at the moment in order for the bootstrap
 //compiler to compile this correctly.
-void* tmp;
+mut void* tmp;
 
 export u16 parse_command_line(usize argc, char** argv, Option* options)
 {
@@ -102,7 +102,7 @@ export u16 parse_command_line(usize argc, char** argv, Option* options)
         {
             Option* opt = find_option_by_short_name(options, short_name);
 
-            if(opt->type == NO_ARG)
+            if(opt->type == OptionType::NO_ARG)
             {
                 return opt->id;
             }
@@ -113,7 +113,7 @@ export u16 parse_command_line(usize argc, char** argv, Option* options)
                 current_option = nullptr;
             }
 
-            if(opt->type == REQ_ARG && current_option != nullptr)
+            if(opt->type == OptionType::REQ_ARG && current_option != nullptr)
             {
                 arg = argv[current_option_index];
                 current_option_index = current_option_index + 1;
@@ -138,8 +138,8 @@ export u16 parse_command_line(usize argc, char** argv, Option* options)
         arg = option;
 
         char* temp = argv[next_positional_arg_index];
-        tmp = argv[next_positional_arg_index] = argv[current_option_index - 1];
-        tmp = argv[current_option_index - 1] = temp;
+        tmp = (argv[next_positional_arg_index] = argv[current_option_index - 1]);
+        tmp = (argv[current_option_index - 1] = temp);
         next_positional_arg_index = next_positional_arg_index + 1;
 
         return 1;
@@ -157,21 +157,21 @@ export u16 parse_command_line(usize argc, char** argv, Option* options)
     {
         char* long_name = option + 2;
 
-        char* equals = strchr(option, '=');
+        mut char* equals = strchr(option, '=');
         if(equals != nullptr)
         {
-            tmp = equals[0] = '\0';
+            tmp = (equals[0] = '\0');
             arg = equals + 1;
         }
 
         Option* opt = find_option_by_long_name(options, long_name);
 
-        if(opt->type == NO_ARG)
+        if(opt->type == OptionType::NO_ARG)
         {
             return opt->id;
         }
 
-        if(opt->type == REQ_ARG && equals == nullptr)
+        if(opt->type == OptionType::REQ_ARG && equals == nullptr)
         {
             arg = argv[current_option_index];
             current_option_index = current_option_index + 1;

@@ -1,22 +1,27 @@
+import "ast.frx";
+import "../core/ast.frx";
 import "../core/errors.frx";
+import "../core/namespace.frx";
 import "../core/parser.frx";
+import "../core/scope.frx";
 import "../syntax/type_specifier.frx";
+import "../../core/list.frx";
 
-export void analyze_type_specifier(Parser* parser,
-    ASTTypeSpecifier* type_specifier)
+export void analyze_type_specifier(mut Parser* parser,
+    mut ASTTypeSpecifier* type_specifier)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(type_specifier != nullptr);
+    frx::assert(type_specifier != nullptr);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
     {
         AST* array_dimension = list_get(&type_specifier->array_dimensions, i);
         analyze_ast(parser, array_dimension);
     }
 
-    if(type_specifier->primitive_type != TOKEN_TYPE_ERROR)
+    if(type_specifier->primitive_type != TokenType::ERROR)
     {
         return;
     }

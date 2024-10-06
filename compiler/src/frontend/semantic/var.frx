@@ -1,12 +1,13 @@
 import "../core/errors.frx";
 import "../core/parser.frx";
+import "../symbols/var.frx";
 import "../syntax/var.frx";
 
-export void analyze_var(Parser* parser, ASTVar* var)
+export void analyze_var(mut Parser* parser, mut ASTVar* var)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(var != nullptr);
+    frx::assert(var != nullptr);
 
     if(var->ns == nullptr)
     {

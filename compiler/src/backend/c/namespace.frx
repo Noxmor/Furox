@@ -1,13 +1,24 @@
+import "ast.frx";
 import "c.frx";
+import "../../core/list.frx";
+import "../../frontend/core/ast.frx";
 import "../../frontend/syntax/namespace.frx";
 
-export void transpile_namespace(Transpiler* transpiler,
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+    i32 strcmp(char* str1, char* str2);
+}
+
+export void transpile_namespace(mut Transpiler* transpiler,
     ASTNamespace* namespace_node)
 {
     Namespace* old_namespace = transpiler->current_namespace;
     transpiler->current_namespace = namespace_node->ns;
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&namespace_node->global_scope); i = i + 1)
     {
         AST* ast = list_get(&namespace_node->global_scope, i);
@@ -18,9 +29,9 @@ export void transpile_namespace(Transpiler* transpiler,
 }
 
 export void transpile_namespace_resolution(Transpiler* transpiler,
-    Namespace* ns)
+    mut Namespace* ns)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
     while(ns != nullptr)
     {

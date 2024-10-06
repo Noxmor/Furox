@@ -1,14 +1,22 @@
 import "c.frx";
 import "type_specifier.frx";
+import "../../frontend/symbols/var.frx";
 import "../../frontend/syntax/var_decl.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export void transpile_var_decl(Transpiler* transpiler, ASTVarDecl* var_decl)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(var_decl != nullptr);
+    frx::assert(var_decl != nullptr);
 
-    if(transpiler->mode != TRANSPILER_MODE_FUNC_IMPL)
+    if(transpiler->mode != TranspilerMode::FUNC_IMPL)
     {
         return;
     }

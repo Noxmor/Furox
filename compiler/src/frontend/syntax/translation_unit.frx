@@ -1,91 +1,101 @@
+import "enum_def.frx";
+import "extern_block.frx";
+import "func_decl.frx";
+import "func_def.frx";
+import "global_var_decl_or_def.frx";
+import "import_stmt.frx";
+import "namespace.frx";
+import "struct_decl.frx";
+import "struct_def.frx";
+import "type_specifier.frx";
 import "../core/ast.frx";
 import "../core/parser.frx";
 
-ASTCompound* parse_translation_unit(Parser* parser)
+export ASTCompound* parse_translation_unit(Parser* parser)
 {
     ASTCompound* translation_unit = make_compound(&parser->arena);
 
-    while(parser->token->type != TOKEN_TYPE_EOF
-        && parser->token->type != TOKEN_TYPE_ERROR)
+    while(parser->token->type != TokenType::EOF
+        && parser->token->type != TokenType::ERROR)
     {
-        AST* ast = nullptr;
+        mut AST* ast = nullptr;
 
         switch(parser->token->type)
         {
-            case TOKEN_TYPE_KW_IMPORT:
+            case TokenType::KW_IMPORT:
             {
-                ast = make_ast(&parser->arena, AST_TYPE_IMPORT_STMT,
+                ast = make_ast(&parser->arena, AstType::IMPORT_STMT,
                     parse_import_stmt(parser, false));
 
                 break;
             }
-            case TOKEN_TYPE_KW_NAMESPACE:
+            case TokenType::KW_NAMESPACE:
             {
-                ast = make_ast(&parser->arena, AST_TYPE_NAMESPACE,
+                ast = make_ast(&parser->arena, AstType::NAMESPACE,
                     parse_namespace(parser));
 
                 break;
             }
-            case TOKEN_TYPE_KW_ENUM:
+            case TokenType::KW_ENUM:
             {
-                ast = make_ast(&parser->arena, AST_TYPE_ENUM_DEF,
+                ast = make_ast(&parser->arena, AstType::ENUM_DEF,
                     parse_enum_def(parser, false));
 
                 break;
             }
-            case TOKEN_TYPE_KW_STRUCT:
+            case TokenType::KW_STRUCT:
             {
-                ast = make_ast(&parser->arena, AST_TYPE_STRUCT_DEF,
+                ast = make_ast(&parser->arena, AstType::STRUCT_DEF,
                     parse_struct_def(parser, false));
 
                 break;
             }
-            case TOKEN_TYPE_KW_EXTERN:
+            case TokenType::KW_EXTERN:
             {
                 Token* next = parser_peek(parser, 1);
-                if(next->type == TOKEN_TYPE_LBRACE)
+                if(next->type == TokenType::LBRACE)
                 {
-                    ast = make_ast(&parser->arena, AST_TYPE_EXTERN_BLOCK,
+                    ast = make_ast(&parser->arena, AstType::EXTERN_BLOCK,
                         parse_extern_block(parser));
                 }
-                else if(next->type == TOKEN_TYPE_KW_STRUCT)
+                else if(next->type == TokenType::KW_STRUCT)
                 {
-                    ast = make_ast(&parser->arena, AST_TYPE_STRUCT_DECL,
+                    ast = make_ast(&parser->arena, AstType::STRUCT_DECL,
                         parse_struct_decl(parser));
                 }
                 else
                 {
-                    parser_eat(parser, TOKEN_TYPE_KW_EXTERN);
+                    parser_eat(parser, TokenType::KW_EXTERN);
 
-                    ast = make_ast(&parser->arena, AST_TYPE_FUNC_DECL,
+                    ast = make_ast(&parser->arena, AstType::FUNC_DECL,
                         parse_func_decl(parser));
                 }
 
                 break;
             }
-            case TOKEN_TYPE_KW_EXPORT:
+            case TokenType::KW_EXPORT:
             {
-                parser_eat(parser, TOKEN_TYPE_KW_EXPORT);
+                parser_eat(parser, TokenType::KW_EXPORT);
 
                 switch(parser->token->type)
                 {
-                    case TOKEN_TYPE_KW_IMPORT:
+                    case TokenType::KW_IMPORT:
                     {
-                        ast = make_ast(&parser->arena, AST_TYPE_IMPORT_STMT,
+                        ast = make_ast(&parser->arena, AstType::IMPORT_STMT,
                             parse_import_stmt(parser, true));
 
                         break;
                     }
-                    case TOKEN_TYPE_KW_ENUM:
+                    case TokenType::KW_ENUM:
                     {
-                        ast = make_ast(&parser->arena, AST_TYPE_ENUM_DEF,
+                        ast = make_ast(&parser->arena, AstType::ENUM_DEF,
                             parse_enum_def(parser, true));
 
                         break;
                     }
-                    case TOKEN_TYPE_KW_STRUCT:
+                    case TokenType::KW_STRUCT:
                     {
-                        ast = make_ast(&parser->arena, AST_TYPE_STRUCT_DEF,
+                        ast = make_ast(&parser->arena, AstType::STRUCT_DEF,
                             parse_struct_def(parser, true));
 
                         break;
@@ -94,7 +104,7 @@ ASTCompound* parse_translation_unit(Parser* parser)
                     {
                         ASTTypeSpecifier* type_specifier =
                             parse_type_specifier(parser);
-                        ast = make_ast(&parser->arena, AST_TYPE_FUNC_DEF,
+                        ast = make_ast(&parser->arena, AstType::FUNC_DEF,
                             parse_func_def(parser, type_specifier, true));
 
                         break;
@@ -103,86 +113,86 @@ ASTCompound* parse_translation_unit(Parser* parser)
 
                 break;
             }
-            case TOKEN_TYPE_KW_U8:
+            case TokenType::KW_U8:
             {
 
             }
-            case TOKEN_TYPE_KW_U16:
+            case TokenType::KW_U16:
             {
 
             }
-            case TOKEN_TYPE_KW_U32:
+            case TokenType::KW_U32:
             {
 
             }
-            case TOKEN_TYPE_KW_U64:
+            case TokenType::KW_U64:
             {
 
             }
-            case TOKEN_TYPE_KW_USIZE:
+            case TokenType::KW_USIZE:
             {
 
             }
-            case TOKEN_TYPE_KW_I8:
+            case TokenType::KW_I8:
             {
 
             }
-            case TOKEN_TYPE_KW_I16:
+            case TokenType::KW_I16:
             {
 
             }
-            case TOKEN_TYPE_KW_I32:
+            case TokenType::KW_I32:
             {
 
             }
-            case TOKEN_TYPE_KW_I64:
+            case TokenType::KW_I64:
             {
 
             }
-            case TOKEN_TYPE_KW_ISIZE:
+            case TokenType::KW_ISIZE:
             {
 
             }
-            case TOKEN_TYPE_KW_B8:
+            case TokenType::KW_B8:
             {
 
             }
-            case TOKEN_TYPE_KW_B16:
+            case TokenType::KW_B16:
             {
 
             }
-            case TOKEN_TYPE_KW_B32:
+            case TokenType::KW_B32:
             {
 
             }
-            case TOKEN_TYPE_KW_B64:
+            case TokenType::KW_B64:
             {
 
             }
-            case TOKEN_TYPE_KW_CHAR:
+            case TokenType::KW_CHAR:
             {
 
             }
-            case TOKEN_TYPE_KW_F32:
+            case TokenType::KW_F32:
             {
 
             }
-            case TOKEN_TYPE_KW_F64:
+            case TokenType::KW_F64:
             {
 
             }
-            case TOKEN_TYPE_KW_VOID:
+            case TokenType::KW_VOID:
             {
 
             }
-            case TOKEN_TYPE_IDENTIFIER:
+            case TokenType::IDENTIFIER:
             {
                 ASTTypeSpecifier* type_specifier = parse_type_specifier(parser);
 
                 Token* next = parser_peek(parser, 1);
-                if(next->type == TOKEN_TYPE_LPAREN)
+                if(next->type == TokenType::LPAREN)
                 {
-                    ast = make_ast(&parser->arena, AST_TYPE_FUNC_DEF,
+                    ast = make_ast(&parser->arena, AstType::FUNC_DEF,
                         parse_func_def(parser, type_specifier, false));
                 }
                 else
@@ -193,9 +203,9 @@ ASTCompound* parse_translation_unit(Parser* parser)
 
                 break;
             }
-            case TOKEN_TYPE_KW_MUT:
+            case TokenType::KW_MUT:
             {
-                parser_eat(parser, TOKEN_TYPE_KW_MUT);
+                parser_eat(parser, TokenType::KW_MUT);
 
                 ASTTypeSpecifier* type = parse_type_specifier(parser);
                 ast = parse_global_var_decl_or_def(parser, type, true);

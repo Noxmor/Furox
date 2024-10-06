@@ -1,4 +1,4 @@
-/*export*/ import "source_location.frx";
+export import "source_location.frx";
 
 export struct SourceRange
 {

@@ -1,5 +1,13 @@
+import "expr.frx";
 import "../core/ast.frx";
 import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTReturnStmt
 {
@@ -8,7 +16,8 @@ export struct ASTReturnStmt
 
 export ASTReturnStmt* make_return_stmt(Arena* arena, AST* value)
 {
-    ASTReturnStmt* return_stmt = arena_alloc(arena, sizeof(ASTReturnStmt));
+    mut ASTReturnStmt* return_stmt = arena_alloc(arena,
+        frx::sizeof(ASTReturnStmt));
 
     return_stmt->value = value;
 
@@ -17,18 +26,18 @@ export ASTReturnStmt* make_return_stmt(Arena* arena, AST* value)
 
 export ASTReturnStmt* parse_return_stmt(Parser* parser)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    parser_eat(parser, TOKEN_TYPE_KW_RETURN);
+    parser_eat(parser, TokenType::KW_RETURN);
 
-    AST* value = nullptr;
+    mut AST* value = nullptr;
 
-    if(parser->token->type != TOKEN_TYPE_SEMICOLON)
+    if(parser->token->type != TokenType::SEMICOLON)
     {
         value = parse_expr(parser);
     }
 
-    parser_eat(parser, TOKEN_TYPE_SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
     return make_return_stmt(&parser->arena, value);
 }
@@ -36,13 +45,13 @@ export ASTReturnStmt* parse_return_stmt(Parser* parser)
 export void print_return_stmt(ASTReturnStmt* return_stmt, FILE* file,
     usize depth)
 {
-    assert(return_stmt != nullptr);
+    frx::assert(return_stmt != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s\n", ast_type_to_str(AST_TYPE_RETURN_STMT));
+    fprintf(file, "%s\n", ast_type_to_str(AstType::RETURN_STMT));
 
     if(return_stmt->value != nullptr)
     {

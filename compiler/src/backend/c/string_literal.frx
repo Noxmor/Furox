@@ -1,12 +1,19 @@
 import "c.frx";
 import "../../frontend/syntax/string_literal.frx";
 
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_string_literal(Transpiler* transpiler,
     ASTStringLiteral* str_literal)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(str_literal != nullptr);
+    frx::assert(str_literal != nullptr);
 
     //FIXME: Bootstrap compiler cannot handle escaped quotes
     char quotes = 34;

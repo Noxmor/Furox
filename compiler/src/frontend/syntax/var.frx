@@ -1,5 +1,16 @@
+import "../core/ast.frx";
+import "../core/namespace.frx";
 import "../core/parser.frx";
+import "../core/scope.frx";
 import "../symbols/var.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+    usize strlen(char* str);
+}
 
 export struct ASTVar
 {
@@ -13,9 +24,9 @@ export struct ASTVar
 
 export ASTVar* make_var(Arena* arena, Namespace* ns, Scope* scope, char* name)
 {
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    ASTVar* var = arena_alloc(arena, sizeof(ASTVar));
+    mut ASTVar* var = arena_alloc(arena, frx::sizeof(ASTVar));
 
     var->symbol = nullptr;
     var->ns = ns;
@@ -25,27 +36,27 @@ export ASTVar* make_var(Arena* arena, Namespace* ns, Scope* scope, char* name)
 
 export ASTVar* parse_var(Parser* parser, Namespace* ns)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    ASTVar* var = make_var(&parser->arena, ns, parser->current_scope,
+    mut ASTVar* var = make_var(&parser->arena, ns, parser->current_scope,
         parser->token->identifier);
 
     var->range.start = parser_current_location(parser);
     var->range.end = parser_current_location(parser);
     var->range.end.column = var->range.end.column + strlen(var->name);
 
-    parser_eat(parser, TOKEN_TYPE_IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
     return var;
 }
 
 export void print_var(ASTVar* var, FILE* file, usize depth)
 {
-    assert(var != nullptr);
+    frx::assert(var != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_VAR), var->name);
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::VAR), var->name);
 }

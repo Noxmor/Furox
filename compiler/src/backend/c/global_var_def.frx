@@ -1,16 +1,25 @@
+import "ast.frx";
 import "c.frx";
 import "type_specifier.frx";
 import "../core/mangling.frx";
+import "../../frontend/symbols/var.frx";
 import "../../frontend/syntax/global_var_def.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export void transpile_global_var_def(Transpiler* transpiler,
     ASTGlobalVarDef* var_def)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(var_def != nullptr);
+    frx::assert(var_def != nullptr);
 
-    if(transpiler->mode != TRANSPILER_MODE_GLOBAL_VARS)
+    if(transpiler->mode != TranspilerMode::GLOBAL_VARS)
     {
         return;
     }

@@ -1,13 +1,15 @@
 import "ast.frx";
+import "../core/ast.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
 import "../syntax/func_call.frx";
+import "../../core/list.frx";
 
-export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
+export void analyze_func_call(mut Parser* parser, mut ASTFuncCall* func_call)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(func_call != nullptr);
+    frx::assert(func_call != nullptr);
 
     if(func_call->ns == nullptr)
     {
@@ -30,7 +32,7 @@ export void analyze_func_call(Parser* parser, ASTFuncCall* func_call)
         parser->failed = true;
     }
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&func_call->args); i = i + 1)
     {
         AST* ast = list_get(&func_call->args, i);

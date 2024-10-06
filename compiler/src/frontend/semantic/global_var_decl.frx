@@ -1,12 +1,15 @@
+import "type_specifier.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
+import "../symbols/var.frx";
 import "../syntax/global_var_decl.frx";
 
-export void analyze_global_var_decl(Parser* parser, ASTGlobalVarDecl* var_decl)
+export void analyze_global_var_decl(mut Parser* parser,
+    ASTGlobalVarDecl* var_decl)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(var_decl != nullptr);
+    frx::assert(var_decl != nullptr);
 
     VarSymbol* symbol = &var_decl->symbol;
 

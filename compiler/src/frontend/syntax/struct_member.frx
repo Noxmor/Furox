@@ -1,4 +1,12 @@
+import "../core/ast.frx";
 import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
 
 export struct ASTStructMember
 {
@@ -7,9 +15,10 @@ export struct ASTStructMember
 
 export ASTStructMember* make_struct_member(Arena* arena, char* name)
 {
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    ASTStructMember* member = arena_alloc(arena, sizeof(ASTStructMember));
+    mut ASTStructMember* member = arena_alloc(arena,
+        frx::sizeof(ASTStructMember));
 
     member->name = name;
 
@@ -19,12 +28,12 @@ export ASTStructMember* make_struct_member(Arena* arena, char* name)
 export void print_struct_member(ASTStructMember* member, FILE* file,
     usize depth)
 {
-    assert(member != nullptr);
+    frx::assert(member != nullptr);
 
-    assert(file != nullptr);
+    frx::assert(file != nullptr);
 
     print_ast_depth(file, depth);
 
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AST_TYPE_STRUCT_MEMBER),
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::STRUCT_MEMBER),
         member->name);
 }

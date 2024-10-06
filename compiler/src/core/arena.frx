@@ -1,3 +1,6 @@
+extern void* malloc(usize size);
+extern void free(void* ptr);
+
 export struct Arena
 {
     usize size;
@@ -6,26 +9,26 @@ export struct Arena
     void* buffer;
 }
 
-export void arena_init(Arena* arena, usize size)
+export void arena_init(mut Arena* arena, usize size)
 {
-    assert(arena != nullptr);
+    frx::assert(arena != nullptr);
 
-    assert(size > 0);
+    frx::assert(size > 0);
 
     arena->size = size;
     arena->pos = 0;
     arena->buffer = malloc(arena->size);
 }
 
-export void* arena_alloc(Arena* arena, usize size)
+export void* arena_alloc(mut Arena* arena, usize size)
 {
-    assert(arena != nullptr);
+    frx::assert(arena != nullptr);
 
-    assert(size > 0);
+    frx::assert(size > 0);
 
-    assert(arena->buffer != nullptr);
+    frx::assert(arena->buffer != nullptr);
 
-    assert(arena->pos + size <= arena->size);
+    frx::assert(arena->pos + size <= arena->size);
 
     void* memory = arena->buffer + arena->pos;
 
@@ -34,16 +37,16 @@ export void* arena_alloc(Arena* arena, usize size)
     return memory;
 }
 
-export void arena_reset(Arena* arena)
+export void arena_reset(mut Arena* arena)
 {
-    assert(arena != nullptr);
+    frx::assert(arena != nullptr);
 
     arena->pos = 0;
 }
 
 export void arena_destroy(Arena* arena)
 {
-    assert(arena != nullptr);
+    frx::assert(arena != nullptr);
 
     free(arena->buffer);
 }

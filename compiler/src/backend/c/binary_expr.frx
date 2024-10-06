@@ -2,15 +2,22 @@ import "ast.frx";
 import "c.frx";
 import "../../frontend/syntax/binary_expr.frx";
 
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
 export void transpile_binary_expr(Transpiler* transpiler, ASTBinaryExpr* expr)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(expr != nullptr);
+    frx::assert(expr != nullptr);
 
     switch(expr->operator)
     {
-        case OP_ARRAY_SUBSCRIPT:
+        case Operator::ARRAY_SUBSCRIPT:
         {
             transpile_ast(transpiler, expr->left);
             fprintf(transpiler->file, "[");

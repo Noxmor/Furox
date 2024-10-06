@@ -3,21 +3,21 @@ import "../frontend/syntax/program.frx";
 
 export enum BackendType : u8
 {
-    BACKEND_TYPE_NATIVE,
-    BACKEND_TYPE_LLVM,
+    NATIVE,
+    LLVM,
 
-    BACKEND_TYPE_COUNT
+    COUNT
 }
 
 export i32 backend_generate_code(BackendType backend, ASTProgram* program)
 {
-    assert(backend < BACKEND_TYPE_COUNT);
+    frx::assert(backend < BackendType::COUNT);
 
-    i32 success = 0;
+    mut i32 success = 0;
 
     switch(backend)
     {
-        case BACKEND_TYPE_NATIVE:
+        case BackendType::NATIVE:
         {
             success = c_generate_code(program);
 
@@ -25,7 +25,7 @@ export i32 backend_generate_code(BackendType backend, ASTProgram* program)
         }
         default:
         {
-            assert(false);
+            frx::assert(false);
 
             break;
         }

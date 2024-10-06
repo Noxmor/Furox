@@ -5,9 +5,9 @@ import "../syntax/if_stmt.frx";
 
 export void analyze_if_stmt(Parser* parser, ASTIfStmt* if_stmt)
 {
-    assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-    assert(if_stmt != nullptr);
+    frx::assert(if_stmt != nullptr);
 
     analyze_ast(parser, if_stmt->condition);
     analyze_scope(parser, if_stmt->if_block);

@@ -1,19 +1,24 @@
 import "c.frx";
+import "struct_def.frx";
 import "translation_unit.frx";
+import "../../core/queue.frx";
+import "../../frontend/core/ast.frx";
 import "../../frontend/syntax/program.frx";
+import "../../frontend/syntax/struct_def.frx";
 
-export void transpile_program(Transpiler* transpiler, ASTProgram* program)
+export void transpile_program(mut Transpiler* transpiler, ASTProgram* program)
 {
-    assert(transpiler != nullptr);
+    frx::assert(transpiler != nullptr);
 
-    assert(program != nullptr);
+    frx::assert(program != nullptr);
 
-    TranspilerMode mode;
-    for(mode = TRANSPILER_MODE_MACROS; mode < TRANSPILER_MODE_COUNT; mode = mode + 1)
+    mut TranspilerMode mode;
+    for(mode = TranspilerMode::MACROS; mode < TranspilerMode::COUNT;
+        mode = mode + 1)
     {
         transpiler->mode = mode;
 
-        usize i;
+        mut usize i;
         for(i = 0; i < list_size(&program->translation_units); i = i + 1)
         {
             ASTCompound* translation_unit = list_get(
@@ -22,12 +27,12 @@ export void transpile_program(Transpiler* transpiler, ASTProgram* program)
             transpile_translation_unit(transpiler, translation_unit);
         }
 
-        if(transpiler->mode == TRANSPILER_MODE_STRUCT_IMPL)
+        if(transpiler->mode == TranspilerMode::STRUCT_IMPL)
         {
             while(!queue_is_empty(&transpiler->untranspiled_structs))
             {
-                ASTStructDef* struct_def = queue_dequeue(
-                    &transpiler->untranspiled_structs);
+                ASTStructDef* struct_def =
+                    queue_dequeue(&transpiler->untranspiled_structs);
 
                 transpile_struct_def(transpiler, struct_def);
             }

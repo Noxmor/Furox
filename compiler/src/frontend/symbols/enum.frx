@@ -1,7 +1,16 @@
 import "../core/namespace.frx";
 import "../core/scope.frx";
 import "../core/token.frx";
+import "../syntax/enum_def.frx";
+import "../../core/hash.frx";
 import "../../core/list.frx";
+
+extern
+{
+    void* malloc(usize size);
+    void* memset(mut char* str, i32 c, usize n);
+    i32 strcmp(char* str1, char* str2);
+}
 
 export struct EnumSymbol
 {
@@ -13,16 +22,16 @@ export struct EnumSymbol
     b8 exported;
 }
 
-export void enum_symbol_init(EnumSymbol* symbol, TokenType type, Scope* scope,
-    Namespace* ns, char* name, b8 exported)
+export void enum_symbol_init(mut EnumSymbol* symbol, TokenType type,
+    Scope* scope, Namespace* ns, char* name, b8 exported)
 {
-    assert(symbol != nullptr);
+    frx::assert(symbol != nullptr);
 
-    assert(type != TOKEN_TYPE_ERROR && type < TOKEN_TYPE_COUNT);
+    frx::assert(type != TokenType::ERROR && type < TokenType::COUNT);
 
-    assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
     symbol->type = type;
     symbol->scope = scope;
@@ -32,13 +41,13 @@ export void enum_symbol_init(EnumSymbol* symbol, TokenType type, Scope* scope,
     symbol->exported = exported;
 }
 
-b8 enum_symbol_has_constant(EnumSymbol* symbol, char* name)
+export b8 enum_symbol_has_constant(EnumSymbol* symbol, char* name)
 {
-    assert(symbol != nullptr);
+    frx::assert(symbol != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    usize i;
+    mut usize i;
     for(i = 0; i < list_size(&symbol->constants); i = i + 1)
     {
         ASTEnumConstantDef* constant = list_get(&symbol->constants, i);
@@ -64,20 +73,20 @@ enum Constants : u64
 
 export struct EnumTable
 {
-    EnumTableEntry*[ENUM_TABLE_CAPACITY] entries;
+    EnumTableEntry* entries[Constants::ENUM_TABLE_CAPACITY];
 }
 
 export void enum_table_init(EnumTable* table)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    memset(table, 0, sizeof(EnumTable));
+    memset(table, 0, frx::sizeof(EnumTable));
 }
 
-export EnumSymbol* enum_table_find_r(EnumTable* table, Namespace* ns,
+export EnumSymbol* enum_table_find_r(EnumTable* table, mut Namespace* ns,
     char* name)
 {
-    EnumSymbol* symbol = enum_table_find(table, ns, name);
+    mut EnumSymbol* symbol = enum_table_find(table, ns, name);
     while(symbol == nullptr && ns != nullptr)
     {
         ns = ns->parent;
@@ -89,12 +98,12 @@ export EnumSymbol* enum_table_find_r(EnumTable* table, Namespace* ns,
 
 export EnumSymbol* enum_table_find(EnumTable* table, Namespace* ns, char* name)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-    u64 index = hash_djb2(name) % ENUM_TABLE_CAPACITY;
-    EnumTableEntry* entry = table->entries[index];
+    u64 index = hash_djb2(name) % Constants::ENUM_TABLE_CAPACITY;
+    mut EnumTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -113,12 +122,12 @@ export EnumSymbol* enum_table_find(EnumTable* table, Namespace* ns, char* name)
 
 export b8 enum_table_insert(EnumTable* table, EnumSymbol* symbol)
 {
-    assert(table != nullptr);
+    frx::assert(table != nullptr);
 
-    assert(symbol != nullptr);
+    frx::assert(symbol != nullptr);
 
-    u64 index = hash_djb2(symbol->name) % ENUM_TABLE_CAPACITY;
-    EnumTableEntry* entry = table->entries[index];
+    u64 index = hash_djb2(symbol->name) % Constants::ENUM_TABLE_CAPACITY;
+    mut EnumTableEntry* entry = table->entries[index];
 
     while(entry != nullptr)
     {
@@ -133,7 +142,7 @@ export b8 enum_table_insert(EnumTable* table, EnumSymbol* symbol)
         entry = entry->next;
     }
 
-    EnumTableEntry* new_entry = malloc(sizeof(EnumTableEntry));
+    mut EnumTableEntry* new_entry = malloc(frx::sizeof(EnumTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 
