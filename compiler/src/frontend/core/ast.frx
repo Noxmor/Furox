@@ -1,0 +1,474 @@
+import "../syntax/binary_expr.frx";
+import "../syntax/break_stmt.frx";
+import "../syntax/char_literal.frx";
+import "../syntax/continue_stmt.frx";
+import "../syntax/do_while_loop.frx";
+import "../syntax/extern_block.frx";
+import "../syntax/enum_def.frx";
+import "../syntax/enum_constant.frx";
+import "../syntax/error.frx";
+import "../syntax/expr_stmt.frx";
+import "../syntax/float_literal.frx";
+import "../syntax/for_loop.frx";
+import "../syntax/func_decl.frx";
+import "../syntax/func_def.frx";
+import "../syntax/func_call.frx";
+import "../syntax/global_var_decl.frx";
+import "../syntax/global_var_def.frx";
+import "../syntax/if_stmt.frx";
+import "../syntax/import_stmt.frx";
+import "../syntax/initializer_list.frx";
+import "../syntax/int_literal.frx";
+import "../syntax/internal_func_call.frx";
+import "../syntax/namespace.frx";
+import "../syntax/return_stmt.frx";
+import "../syntax/scope.frx";
+import "../syntax/string_literal.frx";
+import "../syntax/struct_decl.frx";
+import "../syntax/struct_def.frx";
+import "../syntax/struct_member.frx";
+import "../syntax/switch_stmt.frx";
+import "../syntax/unary_expr.frx";
+import "../syntax/unresolved_name.frx";
+import "../syntax/unresolved_namespaced_name.frx";
+import "../syntax/var.frx";
+import "../syntax/var_decl.frx";
+import "../syntax/var_def.frx";
+import "../syntax/while_loop.frx";
+import "../../core/arena.frx";
+import "../../core/list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+char* ast_type_names[AstType::COUNT] = {
+    "error",
+    "program",
+    "compound",
+    "type-specifier",
+    "import-statement",
+    "extern-block",
+    "namespace",
+    "enum-definition",
+    "enum-constant",
+    "struct-declaration",
+    "struct-definition",
+    "struct-member",
+    "function-declaration",
+    "function-definition",
+    "parameter-list",
+    "function-call",
+    "scope",
+    "global-variable-declaration",
+    "global-variable-definition",
+    "variable-declaration",
+    "variable-definition",
+    "variable",
+    "unary-expression",
+    "binary-expression",
+    "expression-statement",
+    "break-statement",
+    "continue-statement",
+    "return-statement",
+    "float-literal",
+    "int-literal",
+    "char-literal",
+    "string-literal",
+    "if-statement",
+    "for-loop",
+    "while-loop",
+    "do-while-loop",
+    "switch-statement",
+    "initializer-list",
+    "assert",
+    "sizeof",
+    "enum-count",
+    "unresolved-name",
+    "unresolved-namespaced-name"
+};
+
+export enum AstType : u8
+{
+    ERROR,
+    PROGRAM,
+    COMPOUND,
+
+    TYPE_SPECIFIER,
+
+    IMPORT_STMT,
+    EXTERN_BLOCK,
+    NAMESPACE,
+    ENUM_DEF,
+    ENUM_CONSTANT,
+    STRUCT_DECL,
+    STRUCT_DEF,
+    STRUCT_MEMBER,
+    FUNC_DECL,
+    FUNC_DEF,
+    FUNC_PARAMS,
+    FUNC_CALL,
+    SCOPE,
+
+    GLOBAL_VAR_DECL,
+    GLOBAL_VAR_DEF,
+
+    VAR_DECL,
+    VAR_DEF,
+    VAR,
+
+    UNARY_EXPR,
+    BINARY_EXPR,
+
+    EXPR_STMT,
+
+    BREAK_STMT,
+    CONTINUE_STMT,
+    RETURN_STMT,
+
+    FLOAT_LITERAL,
+    INT_LITERAL,
+    CHAR_LITERAL,
+    STRING_LITERAL,
+
+    IF_STMT,
+    FOR_LOOP,
+    WHILE_LOOP,
+    DO_WHILE_LOOP,
+    SWITCH_STMT,
+
+    INITIALIZER_LIST,
+
+    ASSERT,
+    SIZEOF,
+    ENUM_COUNT,
+
+    UNRESOLVED_NAME,
+    UNRESOLVED_NAMESPACED_NAME,
+
+    COUNT
+}
+
+export struct AST
+{
+    AstType type;
+    void* node;
+}
+
+export AST* make_ast(Arena* arena, AstType type, void* node)
+{
+    frx::assert(type < AstType::COUNT);
+
+    frx::assert(node != nullptr);
+
+    mut AST* ast = arena_alloc(arena, frx::sizeof(AST));
+
+    ast->type = type;
+    ast->node = node;
+
+    return ast;
+}
+
+export void print_ast(AST* ast, FILE* file, usize depth)
+{
+    frx::assert(ast != nullptr);
+
+    void* node = ast->node;
+
+    switch(ast->type)
+    {
+        case AstType::COMPOUND:
+        {
+            print_compound(node, file, depth);
+
+            break;
+        }
+        case AstType::IMPORT_STMT:
+        {
+            print_import_stmt(node, file, depth);
+
+            break;
+        }
+        case AstType::EXTERN_BLOCK:
+        {
+            print_extern_block(node, file, depth);
+
+            break;
+        }
+        case AstType::NAMESPACE:
+        {
+            print_namespace(node, file, depth);
+
+            break;
+        }
+        case AstType::ENUM_DEF:
+        {
+            print_enum_def(node, file, depth);
+
+            break;
+        }
+        case AstType::ENUM_CONSTANT:
+        {
+            print_enum_constant(node, file, depth);
+
+            break;
+        }
+        case AstType::STRUCT_DECL:
+        {
+            print_struct_decl(node, file, depth);
+
+            break;
+        }
+        case AstType::STRUCT_DEF:
+        {
+            print_struct_def(node, file, depth);
+
+            break;
+        }
+        case AstType::STRUCT_MEMBER:
+        {
+            print_struct_member(node, file, depth);
+
+            break;
+        }
+        case AstType::FUNC_DECL:
+        {
+            print_func_decl(node, file, depth);
+
+            break;
+        }
+        case AstType::FUNC_DEF:
+        {
+            print_func_def(node, file, depth);
+
+            break;
+        }
+        case AstType::FUNC_CALL:
+        {
+            print_func_call(node, file, depth);
+
+            break;
+        }
+        case AstType::SCOPE:
+        {
+            print_scope(node, file, depth);
+
+            break;
+        }
+        case AstType::GLOBAL_VAR_DECL:
+        {
+            print_global_var_decl(node, file, depth);
+
+            break;
+        }
+        case AstType::GLOBAL_VAR_DEF:
+        {
+            print_global_var_def(node, file, depth);
+
+            break;
+        }
+        case AstType::VAR_DECL:
+        {
+            print_var_decl(node, file, depth);
+
+            break;
+        }
+        case AstType::VAR_DEF:
+        {
+            print_var_def(node, file, depth);
+
+            break;
+        }
+        case AstType::VAR:
+        {
+            print_var(node, file, depth);
+
+            break;
+        }
+        case AstType::UNARY_EXPR:
+        {
+            print_unary_expr(node, file, depth);
+
+            break;
+        }
+        case AstType::BINARY_EXPR:
+        {
+            print_binary_expr(node, file, depth);
+
+            break;
+        }
+        case AstType::EXPR_STMT:
+        {
+            print_expr_stmt(node, file, depth);
+
+            break;
+        }
+        case AstType::BREAK_STMT:
+        {
+            print_break_stmt(node, file, depth);
+
+            break;
+        }
+        case AstType::CONTINUE_STMT:
+        {
+            print_continue_stmt(node, file, depth);
+
+            break;
+        }
+        case AstType::RETURN_STMT:
+        {
+            print_return_stmt(node, file, depth);
+
+            break;
+        }
+        case AstType::FLOAT_LITERAL:
+        {
+            print_float_literal(node, file, depth);
+
+            break;
+        }
+        case AstType::INT_LITERAL:
+        {
+            print_int_literal(node, file, depth);
+
+            break;
+        }
+        case AstType::CHAR_LITERAL:
+        {
+            print_char_literal(node, file, depth);
+
+            break;
+        }
+        case AstType::STRING_LITERAL:
+        {
+            print_string_literal(node, file, depth);
+
+            break;
+        }
+        case AstType::IF_STMT:
+        {
+            print_if_stmt(node, file, depth);
+
+            break;
+        }
+        case AstType::FOR_LOOP:
+        {
+            print_for_loop(node, file, depth);
+
+            break;
+        }
+        case AstType::WHILE_LOOP:
+        {
+            print_while_loop(node, file, depth);
+
+            break;
+        }
+        case AstType::DO_WHILE_LOOP:
+        {
+            print_do_while_loop(node, file, depth);
+
+            break;
+        }
+        case AstType::SWITCH_STMT:
+        {
+            print_switch_stmt(node, file, depth);
+
+            break;
+        }
+        case AstType::INITIALIZER_LIST:
+        {
+            print_initializer_list(node, file, depth);
+
+            break;
+        }
+        case AstType::ASSERT:
+        {
+            print_assert(node, file, depth);
+
+            break;
+        }
+        case AstType::SIZEOF:
+        {
+            print_sizeof(node, file, depth);
+
+            break;
+        }
+        case AstType::ENUM_COUNT:
+        {
+            print_enum_count(node, file, depth);
+
+            break;
+        }
+        case AstType::UNRESOLVED_NAME:
+        {
+            print_unresolved_name(node, file, depth);
+
+            break;
+        }
+        case AstType::UNRESOLVED_NAMESPACED_NAME:
+        {
+            print_unresolved_namespaced_name(node, file, depth);
+
+            break;
+        }
+        default:
+        {
+            frx::assert(false);
+
+            break;
+        }
+    }
+}
+
+export struct ASTCompound
+{
+    List nodes;
+}
+
+export ASTCompound* make_compound(Arena* arena)
+{
+    ASTCompound* compound = arena_alloc(arena, frx::sizeof(ASTCompound));
+
+    list_init(&compound->nodes);
+
+    return compound;
+}
+
+export void print_compound(ASTCompound* compound, FILE* file, usize depth)
+{
+    frx::assert(compound != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AstType::COMPOUND));
+
+    mut usize i;
+    for(i = 0; i < list_size(&compound->nodes); i = i + 1)
+    {
+        AST* ast = list_get(&compound->nodes, i);
+        print_ast(ast, file, depth + 1);
+    }
+}
+
+export void print_ast_depth(FILE* file, usize depth)
+{
+    frx::assert(file != nullptr);
+
+    mut usize i;
+    for(i = 0; i < depth; i = i + 1)
+    {
+        fprintf(file, "    ");
+    }
+}
+
+export char* ast_type_to_str(AstType type)
+{
+    frx::assert(type < AstType::COUNT);
+
+    return ast_type_names[type];
+}

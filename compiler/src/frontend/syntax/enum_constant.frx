@@ -1,0 +1,56 @@
+import "namespace_resolution.frx";
+import "../core/ast.frx";
+import "../core/namespace.frx";
+import "../core/parser.frx";
+import "../core/scope.frx";
+import "../symbols/enum.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+export struct ASTEnumConstant
+{
+    EnumSymbol* symbol;
+
+    Namespace* enum_namespace;
+    char* enum_name;
+    char* name;
+    Scope* scope;
+}
+
+export ASTEnumConstant* make_enum_constant(Arena* arena,
+    Namespace* enum_namespace, char* enum_name, char* name, Scope* scope)
+{
+    frx::assert(enum_name != nullptr);
+
+    frx::assert(name != nullptr);
+
+    mut ASTEnumConstant* constant = arena_alloc(arena,
+        frx::sizeof(ASTEnumConstant));
+
+    constant->symbol = nullptr;
+    constant->enum_namespace = enum_namespace;
+    constant->enum_name = enum_name;
+    constant->name = name;
+    constant->scope = scope;
+
+    return constant;
+}
+
+export void print_enum_constant(ASTEnumConstant* constant, FILE* file,
+    usize depth)
+{
+    frx::assert(constant != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (", ast_type_to_str(AstType::ENUM_CONSTANT));
+    print_namespace_resolution(file, constant->enum_namespace);
+    fprintf(file, "%s::%s)\n", constant->enum_name, constant->name);
+}

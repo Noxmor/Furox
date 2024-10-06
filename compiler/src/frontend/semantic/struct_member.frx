@@ -1,0 +1,9 @@
+import "../core/parser.frx";
+import "../syntax/struct_member.frx";
+
+export void analyze_struct_member(Parser* parser, ASTStructMember* member)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(member != nullptr);
+}

@@ -1,0 +1,113 @@
+import "ast.frx";
+import "struct_member.frx";
+import "../core/ast.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../symbols/var.frx";
+import "../syntax/binary_expr.frx";
+import "../syntax/struct_member.frx";
+import "../syntax/unresolved_name.frx";
+import "../syntax/var.frx";
+
+export void analyze_binary_expr(mut Parser* parser, mut ASTBinaryExpr* expr)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(expr != nullptr);
+
+    switch(expr->operator)
+    {
+        case Operator::POINTER_MEMBER_ACCESS:
+        {
+            analyze_ast(parser, expr->left);
+
+            if(expr->right->type != AstType::UNRESOLVED_NAME)
+            {
+                //FIXME: Print the correct location, this is only a placeholder
+                SourceLocation loc;
+                error_not_a_struct_member(parser_source_file(parser), loc);
+
+                parser->failed = true;
+            }
+            else
+            {
+                ASTUnresolvedName* unresolved_name = expr->right->node;
+                ASTStructMember* member = make_struct_member(&parser->arena,
+                    unresolved_name->name);
+
+                expr->right->type = AstType::STRUCT_MEMBER;
+                expr->right->node = member;
+
+                analyze_struct_member(parser, member);
+            }
+
+            break;
+        }
+        case Operator::MEMBER_ACCESS:
+        {
+            analyze_ast(parser, expr->left);
+
+            if(expr->right->type != AstType::UNRESOLVED_NAME)
+            {
+                //FIXME: Print the correct location, this is only a placeholder
+                SourceLocation loc;
+                error_not_a_struct_member(parser_source_file(parser), loc);
+
+                parser->failed = true;
+            }
+            else
+            {
+                ASTUnresolvedName* unresolved_name = expr->right->node;
+                ASTStructMember* member = make_struct_member(&parser->arena,
+                    unresolved_name->name);
+
+                expr->right->type = AstType::STRUCT_MEMBER;
+                expr->right->node = member;
+
+                analyze_struct_member(parser, member);
+            }
+
+            break;
+        }
+        case Operator::ASSIGN:
+        {
+            analyze_ast(parser, expr->left);
+            analyze_ast(parser, expr->right);
+
+            mut AST* left = expr->left;
+            while(left->type == AstType::BINARY_EXPR)
+            {
+                ASTBinaryExpr* binary_expr = left->node;
+                if(binary_expr->operator != Operator::POINTER_MEMBER_ACCESS
+                    && binary_expr->operator != Operator::MEMBER_ACCESS)
+                {
+                    break;
+                }
+
+                left = binary_expr->left;
+            }
+
+            if(left->type == AstType::VAR)
+            {
+                ASTVar* var = left->node;
+                VarSymbol* symbol = var->symbol;
+
+                if(!symbol->mutable)
+                {
+                    error_assignment_const_var(parser_source_file(parser),
+                        var->range.start, var->name);
+                    parser->failed = true;
+                }
+            }
+
+            break;
+        }
+        default:
+        {
+            analyze_ast(parser, expr->left);
+            analyze_ast(parser, expr->right);
+
+            break;
+        }
+    }
+}

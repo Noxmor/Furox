@@ -1,0 +1,320 @@
+import "break_stmt.frx";
+import "continue_stmt.frx";
+import "do_while_loop.frx";
+import "expr_stmt.frx";
+import "for_loop.frx";
+import "func_call.frx";
+import "if_stmt.frx";
+import "namespace_resolution.frx";
+import "return_stmt.frx";
+import "switch_stmt.frx";
+import "type_specifier.frx";
+import "unresolved_namespaced_name.frx";
+import "var_decl.frx";
+import "var_decl_or_def.frx";
+import "var_def.frx";
+import "while_loop.frx";
+import "../core/ast.frx";
+import "../core/namespace.frx";
+import "../core/parser.frx";
+import "../core/scope.frx";
+import "../../core/list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+    i32 strcmp(char* str1, char* str2);
+}
+
+export struct ASTScope
+{
+    SourceRange range;
+
+    List stmts;
+}
+
+export ASTScope* make_scope(Arena* arena)
+{
+    ASTScope* scope = arena_alloc(arena, frx::sizeof(ASTScope));
+
+    list_init(&scope->stmts);
+
+    return scope;
+}
+
+export ASTScope* parse_scope(Parser* parser)
+{
+    frx::assert(parser != nullptr);
+
+    SourceLocation start = parser_current_location(parser);
+
+    parser_eat(parser, TokenType::LBRACE);
+
+    parser_push_scope(parser);
+
+    mut usize pushed_scopes = 1;
+
+    mut ASTScope* scope = make_scope(&parser->arena);
+
+    while(parser_loop_until(parser, TokenType::RBRACE))
+    {
+        switch(parser->token->type)
+        {
+            case TokenType::LBRACE:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::SCOPE, parse_scope(parser)));
+
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
+
+                break;
+            }
+            case TokenType::KW_BREAK:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::BREAK_STMT, parse_break_stmt(parser)));
+
+                break;
+            }
+            case TokenType::KW_CONTINUE:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::CONTINUE_STMT, parse_continue_stmt(parser)));
+
+                break;
+            }
+            case TokenType::KW_RETURN:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::RETURN_STMT, parse_return_stmt(parser)));
+
+                break;
+            }
+            case TokenType::KW_IF:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::IF_STMT, parse_if_stmt(parser)));
+
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
+
+                break;
+            }
+            case TokenType::KW_FOR:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::FOR_LOOP, parse_for_loop(parser)));
+
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
+
+                break;
+            }
+            case TokenType::KW_WHILE:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::WHILE_LOOP, parse_while_loop(parser)));
+
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
+
+                break;
+            }
+            case TokenType::KW_DO:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::DO_WHILE_LOOP, parse_do_while_loop(parser)));
+
+                parser_push_scope(parser);
+                pushed_scopes = pushed_scopes + 1;
+
+                break;
+            }
+            case TokenType::KW_SWITCH:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::SWITCH_STMT, parse_switch_stmt(parser)));
+
+                break;
+            }
+            case TokenType::KW_U8:
+            {
+
+            }
+            case TokenType::KW_U16:
+            {
+
+            }
+            case TokenType::KW_U32:
+            {
+
+            }
+            case TokenType::KW_U64:
+            {
+
+            }
+            case TokenType::KW_USIZE:
+            {
+
+            }
+            case TokenType::KW_I8:
+            {
+
+            }
+            case TokenType::KW_I16:
+            {
+
+            }
+            case TokenType::KW_I32:
+            {
+
+            }
+            case TokenType::KW_I64:
+            {
+
+            }
+            case TokenType::KW_ISIZE:
+            {
+
+            }
+            case TokenType::KW_B8:
+            {
+
+            }
+            case TokenType::KW_B16:
+            {
+
+            }
+            case TokenType::KW_B32:
+            {
+
+            }
+            case TokenType::KW_B64:
+            {
+
+            }
+            case TokenType::KW_CHAR:
+            {
+
+            }
+            case TokenType::KW_F32:
+            {
+
+            }
+            case TokenType::KW_F64:
+            {
+
+            }
+            case TokenType::KW_VOID:
+            {
+                ASTTypeSpecifier* type = parse_type_specifier(parser);
+                list_push(&scope->stmts, parse_var_decl_or_def(parser, type,
+                    false));
+
+                break;
+            }
+            case TokenType::IDENTIFIER:
+            {
+                mut Namespace* resolved_ns = nullptr;
+
+                if(parser->token->type != TokenType::IDENTIFIER ||
+                    strcmp(parser->token->identifier, "frx") != 0)
+                {
+                    resolved_ns = parse_namespace_resolution(parser);
+                }
+
+                Token* next = parser_peek(parser, 1);
+                if(next->type == TokenType::STAR
+                    || next->type == TokenType::IDENTIFIER)
+                {
+                    mut ASTTypeSpecifier* type = parse_type_specifier(parser);
+                    type->ns = resolved_ns;
+
+                    list_push(&scope->stmts, parse_var_decl_or_def(parser, type,
+                        false));
+                }
+                else
+                {
+                    ASTExprStmt* expr_stmt = parse_expr_stmt(parser);
+                    AST* expr = expr_stmt->expr;
+
+                    switch(expr->type)
+                    {
+                        case AstType::FUNC_CALL:
+                        {
+                            mut ASTFuncCall* func_call = expr->node;
+                            func_call->ns = resolved_ns;
+
+                            break;
+                        }
+                        case AstType::UNRESOLVED_NAMESPACED_NAME:
+                        {
+                            mut ASTUnresolvedNamespacedName*
+                                unresolved_namespaced_name = expr->node;
+
+                            unresolved_namespaced_name->ns = resolved_ns;
+
+                            break;
+                        }
+                    }
+
+                    list_push(&scope->stmts, make_ast(&parser->arena,
+                        AstType::EXPR_STMT, expr_stmt));
+                }
+
+                break;
+            }
+            case TokenType::KW_MUT:
+            {
+                parser_eat(parser, TokenType::KW_MUT);
+
+                ASTTypeSpecifier* type = parse_type_specifier(parser);
+                list_push(&scope->stmts, parse_var_decl_or_def(parser, type,
+                    true));
+
+                break;
+            }
+            default:
+            {
+                list_push(&scope->stmts, make_ast(&parser->arena,
+                    AstType::EXPR_STMT, parse_expr_stmt(parser)));
+
+                break;
+            }
+        }
+    }
+
+    scope->range.start = start;
+    scope->range.end = parser_current_location(parser);
+
+    parser_eat(parser, TokenType::RBRACE);
+
+    while(pushed_scopes > 0)
+    {
+        parser_pop_scope(parser);
+        pushed_scopes = pushed_scopes - 1;
+    }
+
+    return scope;
+}
+
+export void print_scope(ASTScope* scope, FILE* file, usize depth)
+{
+    frx::assert(scope != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AstType::SCOPE));
+
+    mut usize i;
+    for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+    {
+        AST* stmt = list_get(&scope->stmts, i);
+        print_ast(stmt, file, depth + 1);
+    }
+}

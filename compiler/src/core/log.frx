@@ -1,0 +1,26 @@
+import "../frontend/core/token.frx";
+
+extern struct FILE;
+extern struct va_list;
+
+extern
+{
+    i32 printf(char* format, ...);
+    void va_start(mut va_list ap, void* param);
+    void va_end(mut va_list ap);
+    i32 vprintf(char* format, va_list arg);
+}
+
+export void log_error(char* filepath, SourceLocation location, char* format, ...)
+{
+    //FIXME: Print to stderr instead of stderr
+    printf("[ERROR]:%s:%zu:%zu: ", filepath, location.line,
+        location.column);
+
+    mut va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+
+    printf("\n");
+}

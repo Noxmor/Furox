@@ -1,0 +1,92 @@
+import "ast.frx";
+import "../core/ast.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../symbols/enum.frx";
+import "../symbols/struct.frx";
+import "../syntax/int_literal.frx";
+import "../syntax/internal_func_call.frx";
+
+export void analyze_assert(Parser* parser, ASTAssert* assert_node)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(assert_node != nullptr);
+
+    analyze_ast(parser, assert_node->expr);
+}
+
+export void analyze_sizeof(mut Parser* parser, mut ASTSizeof* sizeof_node)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(sizeof_node != nullptr);
+
+    if(sizeof_node->primitive_type != TokenType::ERROR)
+    {
+        return;
+    }
+
+    if(sizeof_node->ns == nullptr)
+    {
+        sizeof_node->struct_type = parser_find_struct_symbol_r(parser,
+            parser->current_namespace, sizeof_node->name);
+
+        sizeof_node->enum_type = parser_find_enum_symbol_r(parser,
+            parser->current_namespace, sizeof_node->name);
+    }
+    else
+    {
+        sizeof_node->struct_type = parser_find_struct_symbol(parser,
+            sizeof_node->ns, sizeof_node->name);
+        sizeof_node->enum_type = parser_find_enum_symbol(parser,
+            sizeof_node->ns, sizeof_node->name);
+    }
+
+    if(sizeof_node->enum_type == nullptr
+        && sizeof_node->struct_type == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_sizeof_invalid_arg(parser_source_file(parser), loc,
+            sizeof_node->name);
+
+        parser->failed = true;
+    }
+}
+
+export void analyze_enum_count(mut Parser* parser, ASTEnumCount* enum_count,
+    mut AST* ast)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(enum_count != nullptr);
+
+    mut EnumSymbol* symbol = nullptr;
+
+    if(enum_count->ns == nullptr)
+    {
+        symbol = parser_find_enum_symbol_r(parser, parser->current_namespace,
+            enum_count->name);
+    }
+    else
+    {
+        symbol = parser_find_enum_symbol(parser, enum_count->ns,
+            enum_count->name);
+    }
+
+    if(symbol == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_enum_count_invalid_arg(parser->lexer.filepath, loc,
+            enum_count->name);
+        parser->failed = true;
+    }
+    else
+    {
+        ast->type = AstType::INT_LITERAL;
+        ast->node = make_int_literal(&parser->arena,
+            list_size(&symbol->constants));
+    }
+}

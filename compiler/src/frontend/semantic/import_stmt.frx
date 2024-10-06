@@ -1,0 +1,20 @@
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/import_stmt.frx";
+
+export void analyze_import_stmt(mut Parser* parser, ASTImportStmt* import_stmt)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(import_stmt != nullptr);
+
+    if(import_stmt->imported_parser == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_import_stmt_invalid_filepath(parser_source_file(parser), loc,
+            import_stmt->filepath);
+
+        parser->failed = true;
+    }
+}

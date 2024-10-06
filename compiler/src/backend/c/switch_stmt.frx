@@ -1,0 +1,51 @@
+import "ast.frx";
+import "c.frx";
+import "scope.frx";
+import "../../core/list.frx";
+import "../../frontend/syntax/switch_stmt.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+void transpile_switch_case(Transpiler* transpiler, ASTSwitchCase* switch_case)
+{
+    frx::assert(transpiler != nullptr);
+
+    frx::assert(switch_case != nullptr);
+
+    fprintf(transpiler->file, "case ");
+    transpile_ast(transpiler, switch_case->value);
+    fprintf(transpiler->file, ":\n");
+    transpile_scope(transpiler, switch_case->scope);
+}
+
+export void transpile_switch_stmt(Transpiler* transpiler,
+    ASTSwitchStmt* switch_stmt)
+{
+    frx::assert(transpiler != nullptr);
+
+    frx::assert(switch_stmt != nullptr);
+
+    fprintf(transpiler->file, "switch(");
+    transpile_ast(transpiler, switch_stmt->value);
+    fprintf(transpiler->file, ")\n{\n");
+
+    mut usize i;
+    for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
+    {
+        ASTSwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+        transpile_switch_case(transpiler, switch_case);
+    }
+
+    if(switch_stmt->default_scope != nullptr)
+    {
+        fprintf(transpiler->file, "default:\n");
+        transpile_scope(transpiler, switch_stmt->default_scope);
+    }
+
+    fprintf(transpiler->file, "}\n");
+}

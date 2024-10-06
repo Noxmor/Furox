@@ -1,0 +1,45 @@
+import "../core/ast.frx";
+import "../core/parser.frx";
+import "../../core/list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+    void* malloc(usize size);
+}
+
+export struct ASTProgram
+{
+    List translation_units;
+}
+
+export ASTProgram* make_program()
+{
+    ASTProgram* program = malloc(frx::sizeof(ASTProgram));
+
+    list_init(&program->translation_units);
+
+    return program;
+}
+
+export void print_program(ASTProgram* program, FILE* file, usize depth)
+{
+    frx::assert(program != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AstType::PROGRAM));
+
+    mut usize i;
+    for(i = 0; i < list_size(&program->translation_units); i = i + 1)
+    {
+        ASTCompound* translation_unit = list_get(&program->translation_units,
+            i);
+
+        print_compound(translation_unit, file, depth + 1);
+    }
+}

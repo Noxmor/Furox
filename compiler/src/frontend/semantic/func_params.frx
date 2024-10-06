@@ -1,0 +1,38 @@
+import "type_specifier.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../syntax/func_params.frx";
+import "../../core/list.frx";
+
+void analyze_func_param(mut Parser* parser, ASTFuncParam* param)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(param != nullptr);
+
+    if(param->is_redefinition)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_var_redefinition(parser_source_file(parser), loc,
+            param->symbol.name);
+
+        parser->failed = true;
+    }
+
+    analyze_type_specifier(parser, param->symbol.type);
+}
+
+export void analyze_func_params(Parser* parser, ASTFuncParams* params)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(params != nullptr);
+
+    mut usize i;
+    for(i = 0; i < list_size(&params->params); i = i + 1)
+    {
+        ASTFuncParam* param = list_get(&params->params, i);
+        analyze_func_param(parser, param);
+    }
+}

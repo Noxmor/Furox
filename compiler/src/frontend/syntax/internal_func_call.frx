@@ -1,0 +1,226 @@
+import "expr.frx";
+import "namespace_resolution.frx";
+import "../core/ast.frx";
+import "../core/namespace.frx";
+import "../core/parser.frx";
+import "../core/scope.frx";
+import "../symbols/enum.frx";
+import "../symbols/struct.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+    i32 strcmp(char* str1, char* str2);
+}
+
+export struct ASTAssert
+{
+    SourceRange range;
+    char* filepath;
+    AST* expr;
+}
+
+ASTAssert* make_assert(Arena* arena, char* filepath, AST* expr)
+{
+    frx::assert(filepath != nullptr);
+
+    frx::assert(expr != nullptr);
+
+    mut ASTAssert* assert_node = arena_alloc(arena, frx::sizeof(ASTAssert));
+
+    assert_node->filepath = filepath;
+    assert_node->expr = expr;
+
+    return assert_node;
+}
+
+ASTAssert* parse_assert(Parser* parser)
+{
+    frx::assert(parser != nullptr);
+
+    SourceLocation start = parser_current_location(parser);
+
+    AST* expr = parse_expr(parser);
+    mut ASTAssert* assert_node = make_assert(&parser->arena,
+        parser_source_file(parser), expr);
+
+    SourceLocation end = parser_current_location(parser);
+
+    assert_node->range.start = start;
+    assert_node->range.end = end;
+
+    return assert_node;
+}
+
+export ASTAssert* print_assert(ASTAssert* assert_node, FILE* file, usize depth)
+{
+    frx::assert(assert_node != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AstType::ASSERT));
+
+    print_ast(assert_node->expr, file, depth + 1);
+}
+
+export struct ASTSizeof
+{
+    Namespace* ns;
+    char* name;
+    TokenType primitive_type;
+    EnumSymbol* enum_type;
+    StructSymbol* struct_type;
+    Scope* scope;
+}
+
+ASTSizeof* make_sizeof(Arena* arena, Namespace* ns, char* name,
+    TokenType primitive_type, Scope* scope)
+{
+    frx::assert(primitive_type < TokenType::COUNT);
+
+    frx::assert(scope != nullptr);
+
+    mut ASTSizeof* sizeof_node = arena_alloc(arena, frx::sizeof(ASTSizeof));
+
+    sizeof_node->ns = ns;
+    sizeof_node->name = name;
+    sizeof_node->primitive_type = primitive_type;
+    sizeof_node->scope = scope;
+
+    return sizeof_node;
+}
+
+ASTSizeof* parse_sizeof(Parser* parser)
+{
+    frx::assert(parser != nullptr);
+
+    if(token_type_is_primitive(parser->token->type))
+    {
+        TokenType type = parser->token->type;
+
+        parser_eat(parser, parser->token->type);
+
+        return make_sizeof(&parser->arena, nullptr, nullptr, type,
+            parser->current_scope);
+    }
+    else
+    {
+        Namespace* ns = parse_namespace_resolution(parser);
+        char* name = parser->token->identifier;
+
+        parser_eat(parser, TokenType::IDENTIFIER);
+
+        return make_sizeof(&parser->arena, ns, name, TokenType::ERROR,
+            parser->current_scope);
+    }
+}
+
+export void print_sizeof(ASTSizeof* sizeof_node, FILE* file, usize depth)
+{
+    frx::assert(sizeof_node != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AstType::SIZEOF));
+
+    print_ast_depth(file, depth + 1);
+    print_namespace_resolution(file, sizeof_node->ns);
+
+    if(sizeof_node->name != nullptr)
+    {
+        fprintf(file, "%s\n", sizeof_node->name);
+    }
+    else
+    {
+        fprintf(file, "%s\n", token_type_to_str(sizeof_node->primitive_type));
+    }
+}
+
+export struct ASTEnumCount
+{
+    Namespace* ns;
+    char* name;
+    Scope* scope;
+}
+
+ASTEnumCount* make_enum_count(Arena* arena, Namespace* ns, char* name,
+    Scope* scope)
+{
+    frx::assert(name != nullptr);
+
+    frx::assert(scope != nullptr);
+
+    mut ASTEnumCount* enum_count = arena_alloc(arena,
+        frx::sizeof(ASTEnumCount));
+
+    enum_count->ns = ns;
+    enum_count->name = name;
+    enum_count->scope = scope;
+
+    return enum_count;
+}
+
+ASTEnumCount* parse_enum_count(Parser* parser)
+{
+    frx::assert(parser != nullptr);
+
+    Namespace* ns = parse_namespace_resolution(parser);
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TokenType::IDENTIFIER);
+
+    return make_enum_count(&parser->arena, ns, name, parser->current_scope);
+}
+
+export void print_enum_count(ASTEnumCount* enum_count, FILE* file, usize depth)
+{
+    frx::assert(enum_count != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s\n", ast_type_to_str(AstType::ENUM_COUNT));
+
+    print_ast_depth(file, depth + 1);
+
+    print_namespace_resolution(file, enum_count->ns);
+    fprintf(file, "%s\n", enum_count->name);
+}
+
+export AST* parse_internal_func_call(Parser* parser)
+{
+    frx::assert(parser != nullptr);
+
+    mut AST* ast = nullptr;
+
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TokenType::IDENTIFIER);
+
+    parser_eat(parser, TokenType::LPAREN);
+
+    if(strcmp(name, "assert") == 0)
+    {
+        ast = make_ast(&parser->arena, AstType::ASSERT, parse_assert(parser));
+    }
+    else if(strcmp(name, "sizeof") == 0)
+    {
+        ast = make_ast(&parser->arena, AstType::SIZEOF, parse_sizeof(parser));
+    }
+    else if(strcmp(name, "enum_count") == 0)
+    {
+        ast = make_ast(&parser->arena, AstType::ENUM_COUNT,
+            parse_enum_count(parser));
+    }
+
+    parser_eat(parser, TokenType::RPAREN);
+
+    return ast;
+}

@@ -1,0 +1,62 @@
+import "type_specifier.frx";
+import "../core/ast.frx";
+import "../core/namespace.frx";
+import "../core/parser.frx";
+import "../core/scope.frx";
+import "../symbols/var.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+export struct ASTGlobalVarDecl
+{
+    VarSymbol symbol;
+}
+
+export ASTGlobalVarDecl* make_global_var_decl(Arena* arena, Namespace* ns,
+    ASTTypeSpecifier* type, Scope* scope, char* name, b8 mutable)
+{
+    ASTGlobalVarDecl* var_decl = arena_alloc(arena,
+        frx::sizeof(ASTGlobalVarDecl));
+
+
+    var_symbol_init(&var_decl->symbol, ns, type, scope, name, true, mutable);
+
+    return var_decl;
+}
+
+export ASTGlobalVarDecl* parse_global_var_decl(Parser* parser,
+    ASTTypeSpecifier* type, char* name, b8 mutable)
+{
+    frx::assert(parser != nullptr);
+
+    ASTGlobalVarDecl* var_decl = make_global_var_decl(&parser->arena,
+        parser->current_namespace, type, parser->current_scope, name, mutable);
+
+    var_table_insert(&parser->var_table, &var_decl->symbol);
+
+    parser_eat(parser, TokenType::SEMICOLON);
+
+    return var_decl;
+}
+
+export void print_global_var_decl(ASTGlobalVarDecl* var_decl, FILE* file,
+    usize depth)
+{
+    frx::assert(var_decl != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    VarSymbol* symbol = &var_decl->symbol;
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::GLOBAL_VAR_DECL),
+        symbol->name);
+
+    print_type_specifier(symbol->type, file, depth + 1);
+}

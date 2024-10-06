@@ -1,0 +1,38 @@
+import "ast.frx";
+import "c.frx";
+import "type_specifier.frx";
+import "../../frontend/symbols/var.frx";
+import "../../frontend/syntax/var_def.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+export void transpile_var_def(Transpiler* transpiler, ASTVarDef* var_def)
+{
+    frx::assert(transpiler != nullptr);
+
+    frx::assert(var_def != nullptr);
+
+    if(transpiler->mode != TranspilerMode::FUNC_IMPL)
+    {
+        return;
+    }
+
+    VarSymbol* symbol = &var_def->symbol;
+
+    if(!symbol->mutable)
+    {
+        fprintf(transpiler->file, "const ");
+    }
+
+    transpile_type_specifier(transpiler, symbol->type);
+    fprintf(transpiler->file, "%s", symbol->name);
+    transpile_type_specifier_array_dimensions(transpiler, symbol->type);
+    fprintf(transpiler->file, " = ");
+    transpile_ast(transpiler, var_def->value);
+    fprintf(transpiler->file, ";\n");
+}

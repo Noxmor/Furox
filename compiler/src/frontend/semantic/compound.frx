@@ -1,0 +1,16 @@
+import "ast.frx";
+import "../core/ast.frx";
+import "../core/parser.frx";
+import "../../core/list.frx";
+
+export void analyze_compound(Parser* parser, ASTCompound* compound)
+{
+    frx::assert(compound != nullptr);
+
+    mut usize i;
+    for(i = 0; i < list_size(&compound->nodes); i = i + 1)
+    {
+        AST* ast = list_get(&compound->nodes, i);
+        analyze_ast(parser, ast);
+    }
+}

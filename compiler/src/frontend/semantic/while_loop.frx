@@ -1,0 +1,14 @@
+import "ast.frx";
+import "scope.frx";
+import "../core/parser.frx";
+import "../syntax/while_loop.frx";
+
+export void analyze_while_loop(Parser* parser, ASTWhileLoop* while_loop)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(while_loop != nullptr);
+
+    analyze_ast(parser, while_loop->condition);
+    analyze_scope(parser, while_loop->scope);
+}

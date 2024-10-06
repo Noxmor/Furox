@@ -1,0 +1,75 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/syntax/unary_expr.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+export void transpile_unary_expr(Transpiler* transpiler, ASTUnaryExpr* expr)
+{
+    frx::assert(transpiler != nullptr);
+
+    frx::assert(expr != nullptr);
+
+    switch(expr->operator)
+    {
+        case Operator::PREFIX_INC:
+        {
+
+        }
+        case Operator::PREFIX_DEC:
+        {
+
+        }
+        case Operator::SIGN_PLUS:
+        {
+
+        }
+        case Operator::SIGN_MINUS:
+        {
+
+        }
+        case Operator::LOG_NEG:
+        {
+
+        }
+        case Operator::BIN_NEG:
+        {
+
+        }
+        case Operator::DEREF:
+        {
+
+        }
+        case Operator::ADDRESS_OF:
+        {
+            fprintf(transpiler->file, "(%s", token_type_to_str(expr->type));
+            transpile_ast(transpiler, expr->operand);
+            fprintf(transpiler->file, ")");
+
+            break;
+        }
+        case Operator::POSTFIX_INC:
+        {
+
+        }
+        case Operator::POSTFIX_DEC:
+        {
+            fprintf(transpiler->file, "(");
+            transpile_ast(transpiler, expr->operand);
+            fprintf(transpiler->file, "%s)", token_type_to_str(expr->type));
+
+            break;
+        }
+        default:
+        {
+            frx::assert(false);
+
+            break;
+        }
+    }
+}

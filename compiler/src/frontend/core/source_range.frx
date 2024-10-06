@@ -1,0 +1,7 @@
+export import "source_location.frx";
+
+export struct SourceRange
+{
+    SourceLocation start;
+    SourceLocation end;
+}

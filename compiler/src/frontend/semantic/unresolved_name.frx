@@ -1,0 +1,52 @@
+import "ast.frx";
+import "../core/ast.frx";
+import "../core/errors.frx";
+import "../core/namespace.frx";
+import "../core/parser.frx";
+import "../core/scope.frx";
+import "../symbols/var.frx";
+import "../syntax/unresolved_name.frx";
+import "../syntax/var.frx";
+
+export void analyze_unresolved_name(mut Parser* parser,
+    ASTUnresolvedName* unresolved_name, mut AST* ast)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(unresolved_name != nullptr);
+
+    Namespace* ns = parser->current_namespace;
+    char* name = unresolved_name->name;
+    Scope* scope = unresolved_name->scope;
+
+    VarSymbol* var_symbol = var_table_find_by_scope(&parser->var_table, scope,
+        name);
+
+    b8 is_var = var_symbol != nullptr;
+
+    b8 is_ambiguous = false;
+    b8 resolved = is_var;
+
+    if(is_ambiguous)
+    {
+        error_ambiguous_unresolved_name(parser_source_file(parser),
+            unresolved_name->range.start, name);
+        parser->failed = true;
+    }
+    else if(is_var)
+    {
+        ast->type = AstType::VAR;
+        ast->node = make_var(&parser->arena, nullptr, scope, name);
+    }
+    else
+    {
+        error_unresolved_name(parser_source_file(parser),
+            unresolved_name->range.start, name);
+        parser->failed = true;
+    }
+
+    if(!is_ambiguous && resolved)
+    {
+        analyze_ast(parser, ast);
+    }
+}

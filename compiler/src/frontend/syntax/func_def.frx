@@ -1,0 +1,89 @@
+import "func_params.frx";
+import "scope.frx";
+import "type_specifier.frx";
+import "../core/ast.frx";
+import "../core/namespace.frx";
+import "../core/parser.frx";
+import "../core/scope.frx";
+import "../symbols/func.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+export struct ASTFuncDef
+{
+    SourceRange range;
+
+    ASTTypeSpecifier* return_type;
+    FuncSymbol symbol;
+    ASTFuncParams* params;
+    ASTScope* body;
+
+    b8 is_redefinition;
+}
+
+export ASTFuncDef* make_func_def(Arena* arena, Scope* scope, Namespace* ns,
+    char* name, ASTTypeSpecifier* return_type, b8 exported)
+{
+    frx::assert(return_type != nullptr);
+
+    mut ASTFuncDef* func_def = arena_alloc(arena, frx::sizeof(ASTFuncDef));
+
+    func_def->return_type = return_type;
+    func_symbol_init(&func_def->symbol, scope, ns, name, exported, false);
+    func_def->params = nullptr;
+    func_def->body = nullptr;
+    func_def->is_redefinition = false;
+
+    return func_def;
+}
+
+export ASTFuncDef* parse_func_def(Parser* parser, ASTTypeSpecifier* return_type,
+    b8 exported)
+{
+    frx::assert(parser != nullptr);
+
+    char* name = parser->token->identifier;
+
+    mut ASTFuncDef* func_def = make_func_def(&parser->arena,
+        parser->current_scope, parser->current_namespace, name, return_type,
+        exported);
+
+    func_def->is_redefinition = !func_table_insert(&parser->func_table,
+        &func_def->symbol);
+
+    parser_eat(parser, TokenType::IDENTIFIER);
+
+    parser_push_scope(parser);
+
+    func_def->params = parse_func_params(parser);
+
+    func_def->body = parse_scope(parser);
+
+    parser_pop_scope(parser);
+
+    func_def->range.start = return_type->range.start;
+    func_def->range.end = func_def->body->range.end;
+
+    return func_def;
+}
+
+export void print_func_def(ASTFuncDef* func_def, FILE* file, usize depth)
+{
+    frx::assert(func_def != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::FUNC_DEF),
+        func_def->symbol.name);
+
+    print_type_specifier(func_def->return_type, file, depth + 1);
+    print_func_params(func_def->params, file, depth + 1);
+    print_scope(func_def->body, file, depth + 1);
+}

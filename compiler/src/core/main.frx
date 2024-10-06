@@ -1,0 +1,139 @@
+import "config.frx";
+import "options.frx";
+import "parser_table.frx";
+import "queue.frx";
+import "../backend/backend.frx";
+import "../frontend/syntax/program.frx";
+
+extern struct FILE;
+
+extern
+{
+    char* realpath(char* filename, mut char* resolved_name);
+    FILE* fopen(char* filepath, char* mode);
+    void fclose(mut FILE* stream);
+}
+
+mut ASTProgram* program;
+mut b8 failed = false;
+
+mut Queue syntax_queue;
+mut Queue resolve_imports_queue;
+mut Queue semantic_queue;
+
+export void compile(char* filepath)
+{
+    if(parser_table_find(filepath) != nullptr)
+    {
+        return;
+    }
+
+    if(!parser_table_insert(filepath))
+    {
+        return;
+    }
+
+    Parser* parser = parser_table_find(filepath);
+
+    frx::assert(parser != nullptr);
+
+    queue_enqueue(&syntax_queue, parser);
+}
+
+i32 main(usize argc, char** argv)
+{
+    config_init();
+    lexer_init_keyword_table();
+
+    queue_init(&syntax_queue);
+    queue_init(&resolve_imports_queue);
+    queue_init(&semantic_queue);
+
+    program = make_program();
+
+    mut Option options[6];
+
+    //TODO: Remove tmp
+    mut Option tmp;
+    tmp = (options[0] = create_option(OptionID::HELP, OptionType::OPT_ARG, 'h', "help"));
+    tmp = (options[1] = create_option(OptionID::OUTPUT, OptionType::REQ_ARG, 'o', "output"));
+    tmp = (options[2] = create_long_option(OptionID::TARGET, OptionType::REQ_ARG, "target"));
+    tmp = (options[3] = create_long_option(OptionID::EMIT_AST, OptionType::NO_ARG, "emit-ast"));
+    tmp = (options[4] = create_short_option(OptionID::LINK, OptionType::REQ_ARG, 'l'));
+    tmp = (options[5] = create_option(OptionID::NONE, OptionType::NO_ARG, '\0', nullptr));
+
+    mut b8 emit_ast = false;
+
+    mut Config* config = get_config();
+
+    mut OptionID opt;
+    while((opt = parse_command_line(argc, argv, options)) != 0)
+    {
+        switch(opt)
+        {
+            case OptionID::OUTPUT:
+            {
+                config->output = get_arg();
+                break;
+            }
+            case OptionID::EMIT_AST:
+            {
+                emit_ast = true;
+                break;
+            }
+            case OptionID::LINK:
+            {
+                list_push(&config->link_targets, get_arg());
+                break;
+            }
+        }
+    }
+
+    mut usize i;
+    for(i = 0; i < get_positional_argc(); i = i + 1)
+    {
+        char* arg = argv[i + 1];
+        char fullpath[4096];
+        realpath(arg, fullpath);
+        compile(fullpath);
+    }
+
+    while(!queue_is_empty(&syntax_queue))
+    {
+        Parser* parser = queue_dequeue(&syntax_queue);
+        parser_parse(parser);
+        queue_enqueue(&resolve_imports_queue, parser);
+    }
+
+    while(!queue_is_empty(&resolve_imports_queue))
+    {
+        Parser* parser = queue_dequeue(&resolve_imports_queue);
+        parser_resolve_imports(parser);
+        queue_enqueue(&semantic_queue, parser);
+    }
+
+    while(!queue_is_empty(&semantic_queue))
+    {
+        Parser* parser = queue_dequeue(&semantic_queue);
+        parser_analyze(parser);
+        failed = failed || parser->failed;
+        list_push(&program->translation_units, parser->translation_unit);
+    }
+
+    if(emit_ast)
+    {
+        FILE* file = fopen("frx.ast", "w");
+        if(file != nullptr)
+        {
+            print_program(program, file, 0);
+            fclose(file);
+        }
+    }
+
+    if(!failed)
+    {
+        return backend_generate_code(BackendType::NATIVE, program);
+    }
+
+    return failed;
+}

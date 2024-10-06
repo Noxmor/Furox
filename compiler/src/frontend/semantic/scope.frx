@@ -1,0 +1,19 @@
+import "ast.frx";
+import "../core/ast.frx";
+import "../core/parser.frx";
+import "../syntax/scope.frx";
+import "../../core/list.frx";
+
+export void analyze_scope(Parser* parser, ASTScope* scope)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(scope != nullptr);
+
+    mut usize i;
+    for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+    {
+        AST* stmt = list_get(&scope->stmts, i);
+        analyze_ast(parser, stmt);
+    }
+}

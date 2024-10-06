@@ -1,0 +1,47 @@
+import "type_specifier.frx";
+import "var_decl.frx";
+import "var_def.frx";
+import "../core/ast.frx";
+import "../core/parser.frx";
+
+export AST* parse_var_decl_or_def(Parser* parser, ASTTypeSpecifier* type,
+    b8 mutable)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(type != nullptr);
+
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TokenType::IDENTIFIER);
+
+    parse_array_dimensions(parser, type);
+
+    mut AST* ast = nullptr;
+
+    switch(parser->token->type)
+    {
+        case TokenType::SEMICOLON:
+        {
+            ast = make_ast(&parser->arena, AstType::VAR_DECL,
+                parse_var_decl(parser, type, name, mutable));
+
+            break;
+        }
+        case TokenType::EQ:
+        {
+            ast = make_ast(&parser->arena, AstType::VAR_DEF,
+                parse_var_def(parser, type, name, mutable));
+
+            break;
+        }
+        default:
+        {
+            parser_panic(parser);
+
+            break;
+        }
+    }
+
+    return ast;
+}

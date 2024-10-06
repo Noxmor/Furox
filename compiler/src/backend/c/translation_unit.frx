@@ -1,0 +1,16 @@
+import "ast.frx";
+import "c.frx";
+import "../../frontend/core/ast.frx";
+import "../../frontend/syntax/translation_unit.frx";
+
+export void transpile_translation_unit(Transpiler* transpiler,
+    ASTCompound* translation_unit)
+{
+    mut usize i;
+    for(i = 0; i < list_size(&translation_unit->nodes); i = i + 1)
+    {
+        AST* ast = list_get(&translation_unit->nodes, i);
+
+        transpile_ast(transpiler, ast);
+    }
+}

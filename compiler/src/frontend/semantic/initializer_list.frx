@@ -1,0 +1,18 @@
+import "ast.frx";
+import "../core/ast.frx";
+import "../core/parser.frx";
+import "../syntax/initializer_list.frx";
+
+export void analyze_initializer_list(Parser* parser, ASTInitializerList* list)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(list != nullptr);
+
+    mut usize i;
+    for(i = 0; i < list_size(&list->values); i = i + 1)
+    {
+        AST* value = list_get(&list->values, i);
+        analyze_ast(parser, value);
+    }
+}

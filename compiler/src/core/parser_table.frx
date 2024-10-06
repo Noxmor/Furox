@@ -1,0 +1,101 @@
+import "hash.frx";
+export import "../frontend/core/parser.frx";
+import "../frontend/core/string_table.frx";
+
+extern
+{
+    void* malloc(usize size);
+    i32 strcmp(char* str1, char* str2);
+    i32 strncmp(char* str1, char* str2, usize n);
+    usize strlen(char* str);
+}
+
+struct ParserTableEntry
+{
+    Parser* parser;
+    ParserTableEntry* next;
+}
+
+enum Constants : u64
+{
+    PARSER_TABLE_CAPACITY = 1024
+}
+
+struct ParserTable
+{
+    ParserTableEntry* entries[Constants::PARSER_TABLE_CAPACITY];
+}
+
+mut ParserTable parser_table;
+
+export Parser* parser_table_find(char* filepath)
+{
+    frx::assert(filepath != nullptr);
+
+    u64 index = hash_djb2(filepath) % Constants::PARSER_TABLE_CAPACITY;
+    mut ParserTableEntry* entry = parser_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        Parser* parser = entry->parser;
+
+        if(strcmp(parser_source_file(parser), filepath) == 0)
+        {
+            return parser;
+        }
+
+        entry = entry->next;
+    }
+
+    return nullptr;
+}
+
+b8 is_real_path(mut char* filepath)
+{
+    frx::assert(filepath != nullptr);
+
+    if(filepath[0] != '/')
+    {
+        return false;
+    }
+
+    while(filepath[0] != '\0')
+    {
+        if(strncmp(filepath, "/./",strlen("/./")) == 0
+            || strncmp(filepath, "/../", strlen("/../")) == 0)
+        {
+            return false;
+        }
+
+        filepath = filepath + 1;
+    }
+
+    return true;
+}
+
+export b8 parser_table_insert(char* filepath)
+{
+    frx::assert(is_real_path(filepath));
+
+    u64 index = hash_djb2(filepath) % Constants::PARSER_TABLE_CAPACITY;
+    mut ParserTableEntry* entry = parser_table.entries[index];
+
+    while(entry != nullptr)
+    {
+        if(strcmp(parser_source_file(entry->parser), filepath) == 0)
+        {
+            return false;
+        }
+
+        entry = entry->next;
+    }
+
+    mut ParserTableEntry* new_entry = malloc(frx::sizeof(ParserTableEntry));
+    new_entry->parser = malloc(frx::sizeof(Parser));
+    parser_init(new_entry->parser, string_table_insert(filepath));
+    new_entry->next = parser_table.entries[index];
+
+    parser_table.entries[index] = new_entry;
+
+    return true;
+}

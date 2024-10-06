@@ -1,0 +1,45 @@
+import "ast.frx";
+import "c.frx";
+import "../core/mangling.frx";
+import "../../core/list.frx";
+import "../../frontend/core/ast.frx";
+import "../../frontend/symbols/func.frx";
+import "../../frontend/syntax/func_call.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+export void transpile_func_call(Transpiler* transpiler, ASTFuncCall* func_call)
+{
+    frx::assert(transpiler != nullptr);
+
+    frx::assert(func_call != nullptr);
+
+    FuncSymbol* symbol = func_call->symbol;
+
+    mut char* name = symbol->name;
+    if(!symbol->external)
+    {
+        name = mangle_function_name(symbol->scope, symbol->ns, symbol->name);
+    }
+
+    fprintf(transpiler->file, "%s(", name);
+
+    mut usize i;
+    for(i = 0; i < list_size(&func_call->args); i = i + 1)
+    {
+        AST* ast = list_get(&func_call->args, i);
+        transpile_ast(transpiler, ast);
+
+        if(i < list_size(&func_call->args) - 1)
+        {
+            fprintf(transpiler->file, ", ");
+        }
+    }
+
+    fprintf(transpiler->file, ")");
+}

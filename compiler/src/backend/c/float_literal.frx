@@ -1,0 +1,22 @@
+import "c.frx";
+import "../../frontend/syntax/float_literal.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+export void transpile_float_literal(Transpiler* transpiler,
+    ASTFloatLiteral* literal)
+{
+    frx::assert(transpiler != nullptr);
+
+    frx::assert(literal != nullptr);
+
+    u64 integer = literal->value >> 32;
+    u64 decimal = literal->value & 0xFFFFFFFF;
+
+    fprintf(transpiler->file, "%zu.%zuf", integer, decimal);
+}

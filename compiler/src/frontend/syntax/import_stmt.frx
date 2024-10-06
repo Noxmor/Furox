@@ -1,0 +1,62 @@
+import "../core/ast.frx";
+import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+export struct ASTImportStmt
+{
+    Parser* imported_parser;
+    char* filepath;
+    b8 exported;
+}
+
+export ASTImportStmt* make_import_stmt(Arena* arena, Parser* imported_parser,
+    char* filepath, b8 exported)
+{
+    frx::assert(filepath != nullptr);
+
+    mut ASTImportStmt* import_stmt = arena_alloc(arena,
+        frx::sizeof(ASTImportStmt));
+
+    import_stmt->imported_parser = imported_parser;
+    import_stmt->filepath = filepath;
+    import_stmt->exported = exported;
+
+    return import_stmt;
+}
+
+export ASTImportStmt* parse_import_stmt(Parser* parser, b8 exported)
+{
+    parser_eat(parser, TokenType::KW_IMPORT);
+
+    char* filepath = parser->token->identifier;
+
+    parser_eat(parser, TokenType::STRING_LITERAL);
+
+    Parser* imported_parser = parser_compile(parser, filepath);
+
+    ASTImportStmt* import_stmt = make_import_stmt(&parser->arena,
+        imported_parser, filepath, exported);
+
+    parser_eat(parser, TokenType::SEMICOLON);
+
+    return import_stmt;
+}
+
+export void print_import_stmt(ASTImportStmt* import_stmt, FILE* file,
+    usize depth)
+{
+    frx::assert(import_stmt != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_ast_depth(file, depth);
+
+    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::IMPORT_STMT),
+        import_stmt->filepath);
+}

@@ -1,0 +1,89 @@
+extern
+{
+    void* malloc(usize size);
+    void free(mut void* ptr);
+}
+
+struct QueueNode
+{
+    void* data;
+    QueueNode* next;
+}
+
+export struct Queue
+{
+    QueueNode* front;
+    QueueNode* rear;
+}
+
+export void queue_init(mut Queue* queue)
+{
+    frx::assert(queue != nullptr);
+
+    queue->front = nullptr;
+    queue->rear = nullptr;
+}
+
+export b8 queue_is_empty(Queue* queue)
+{
+    frx::assert(queue != nullptr);
+
+    return queue->front == nullptr;
+}
+
+export b8 queue_contains(Queue* queue, void* data)
+{
+    frx::assert(queue != nullptr);
+
+    mut QueueNode* node = queue->front;
+    while(node != nullptr)
+    {
+        if(node->data == data)
+        {
+            return true;
+        }
+
+        node = node->next;
+    }
+
+    return false;
+}
+
+export void queue_enqueue(mut Queue* queue, void* data)
+{
+    frx::assert(queue != nullptr);
+
+    mut QueueNode* node = malloc(frx::sizeof(QueueNode));
+    node->data = data;
+    node->next = nullptr;
+
+    if(queue_is_empty(queue))
+    {
+        queue->front = node;
+        queue->rear = node;
+    }
+    else
+    {
+        queue->rear->next = node;
+        queue->rear = node;
+    }
+}
+
+export void* queue_dequeue(mut Queue* queue)
+{
+    frx::assert(queue != nullptr);
+
+    if(queue_is_empty(queue))
+    {
+        return nullptr;
+    }
+
+    QueueNode* node = queue->front;
+    void* data = node->data;
+
+    queue->front = queue->front->next;
+
+    free(node);
+
+    return data;
+}

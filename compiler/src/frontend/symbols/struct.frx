@@ -1,0 +1,130 @@
+import "../core/namespace.frx";
+import "../core/scope.frx";
+import "../../core/list.frx";
+import "../../core/hash.frx";
+
+extern
+{
+    void* malloc(usize size);
+    void* memset(mut char* str, i32 c, usize n);
+    i32 strcmp(char* str1, char* str2);
+}
+
+export struct StructSymbol
+{
+    Scope* scope;
+    Namespace* ns;
+    char* name;
+    List fields;
+    b8 exported;
+    b8 external;
+}
+
+export void struct_symbol_init(mut StructSymbol* symbol, Scope* scope,
+    Namespace* ns, char* name, b8 exported, b8 external)
+{
+    frx::assert(symbol != nullptr);
+
+    frx::assert(scope != nullptr);
+
+    frx::assert(name != nullptr);
+
+    symbol->scope = scope;
+    symbol->ns = ns;
+    symbol->name = name;
+    list_init(&symbol->fields);
+    symbol->exported = exported;
+    symbol->external = external;
+}
+
+struct StructTableEntry
+{
+    StructSymbol* symbol;
+    StructTableEntry* next;
+}
+
+enum Constants : u64
+{
+    STRUCT_TABLE_CAPACITY = 128
+}
+
+export struct StructTable
+{
+    StructTableEntry* entries[Constants::STRUCT_TABLE_CAPACITY];
+}
+
+export void struct_table_init(StructTable* table)
+{
+    frx::assert(table != nullptr);
+
+    memset(table, 0, frx::sizeof(StructTable));
+}
+
+export StructSymbol* struct_table_find_r(StructTable* table, mut Namespace* ns,
+    char* name)
+{
+    mut StructSymbol* symbol = struct_table_find(table, ns, name);
+    while(symbol == nullptr && ns != nullptr)
+    {
+        ns = ns->parent;
+        symbol = struct_table_find(table, ns, name);
+    }
+
+    return symbol;
+}
+
+export StructSymbol* struct_table_find(StructTable* table, Namespace* ns,
+    char* name)
+{
+    frx::assert(table != nullptr);
+
+    frx::assert(name != nullptr);
+
+    u64 index = hash_djb2(name) % Constants::STRUCT_TABLE_CAPACITY;
+    mut StructTableEntry* entry = table->entries[index];
+
+    while(entry != nullptr)
+    {
+        StructSymbol* symbol = entry->symbol;
+
+        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        {
+            return symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    return nullptr;
+}
+
+export b8 struct_table_insert(StructTable* table, StructSymbol* symbol)
+{
+    frx::assert(table != nullptr);
+
+    frx::assert(symbol != nullptr);
+
+    u64 index = hash_djb2(symbol->name) % Constants::STRUCT_TABLE_CAPACITY;
+    mut StructTableEntry* entry = table->entries[index];
+
+    while(entry != nullptr)
+    {
+        StructSymbol* existing_symbol = entry->symbol;
+
+        if(strcmp(existing_symbol->name, symbol->name) == 0
+            && namespace_equals(existing_symbol->ns, symbol->ns))
+        {
+            return false;
+        }
+
+        entry = entry->next;
+    }
+
+    mut StructTableEntry* new_entry = malloc(frx::sizeof(StructTableEntry));
+    new_entry->symbol = symbol;
+    new_entry->next = table->entries[index];
+
+    table->entries[index] = new_entry;
+
+    return true;
+}

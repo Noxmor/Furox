@@ -1,0 +1,19 @@
+import "c.frx";
+import "../../frontend/syntax/char_literal.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+export void transpile_char_literal(Transpiler* transpiler,
+    ASTCharLiteral* char_literal)
+{
+    frx::assert(transpiler != nullptr);
+
+    frx::assert(char_literal != nullptr);
+
+    fprintf(transpiler->file, "'%s'", char_literal->literal);
+}
