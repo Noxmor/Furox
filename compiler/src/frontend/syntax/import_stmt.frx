@@ -1,11 +1,18 @@
 import "../core/ast.frx";
 import "../core/parser.frx";
+import "../core/string_table.frx";
+import "../../core/config.frx";
+import "../../core/main.frx";
+import "../../core/parser_table.frx";
 
 extern struct FILE;
 
 extern
 {
     i32 fprintf(mut FILE* stream, char* format, ...);
+    i32 strncmp(char* str1, char* str2, usize n);
+    usize strlen(char* str);
+    i32 sprintf(mut char* str, char* format, ...);
 }
 
 export struct ASTImportStmt
@@ -34,11 +41,40 @@ export ASTImportStmt* parse_import_stmt(Parser* parser, b8 exported)
 {
     parser_eat(parser, TokenType::KW_IMPORT);
 
-    char* filepath = parser->token->identifier;
+    mut char* filepath = parser->token->identifier;
 
     parser_eat(parser, TokenType::STRING_LITERAL);
 
-    Parser* imported_parser = parser_compile(parser, filepath);
+    char* std_prefix = "std/";
+    char* lib_prefix = "lib/";
+
+    Config* config = get_config();
+    mut Parser* imported_parser = nullptr;
+
+    if(strncmp(filepath, std_prefix, strlen(std_prefix)) == 0)
+    {
+        char stdlib_path[1024];
+        sprintf(stdlib_path, "%s/%s", config->stdlib_path, filepath + 4);
+        filepath = string_table_insert(stdlib_path);
+
+        compile(filepath);
+        imported_parser = parser_table_find(filepath);
+    }
+    else if(strncmp(filepath, lib_prefix, strlen(lib_prefix)) == 0)
+    {
+        frx::assert(config->library_path != nullptr);
+
+        char library_path[1024];
+        sprintf(library_path, "%s/%s", config->library_path, filepath + 4);
+        filepath = string_table_insert(library_path);
+
+        compile(filepath);
+        imported_parser = parser_table_find(filepath);
+    }
+    else
+    {
+        imported_parser = parser_compile(parser, filepath);
+    }
 
     ASTImportStmt* import_stmt = make_import_stmt(&parser->arena,
         imported_parser, filepath, exported);

@@ -51,7 +51,7 @@ i32 main(usize argc, char** argv)
 
     program = make_program();
 
-    mut Option options[6];
+    mut Option options[7];
 
     //TODO: Remove tmp
     mut Option tmp;
@@ -61,6 +61,7 @@ i32 main(usize argc, char** argv)
     tmp = (options[3] = create_long_option(OptionID::EMIT_AST, OptionType::NO_ARG, "emit-ast"));
     tmp = (options[4] = create_short_option(OptionID::LINK, OptionType::REQ_ARG, 'l'));
     tmp = (options[5] = create_option(OptionID::NONE, OptionType::NO_ARG, '\0', nullptr));
+    tmp = (options[6] = create_long_option(OptionID::LIBRARY_PATH, OptionType::REQ_ARG, "library-path"));
 
     mut b8 emit_ast = false;
 
@@ -84,6 +85,11 @@ i32 main(usize argc, char** argv)
             case OptionID::LINK:
             {
                 list_push(&config->link_targets, get_arg());
+                break;
+            }
+            case OptionID::LIBRARY_PATH:
+            {
+                config->library_path = get_arg();
                 break;
             }
         }

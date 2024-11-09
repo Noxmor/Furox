@@ -8,12 +8,15 @@ export enum OptionID : u8
     OUTPUT,
     TARGET,
     EMIT_AST,
-    LINK
+    LINK,
+    LIBRARY_PATH
 }
 
 export struct Config
 {
     char* output;
+    char* stdlib_path;
+    char* library_path;
     b8 emit_ast;
     List link_targets;
 }
@@ -23,6 +26,8 @@ mut Config config;
 export void config_init()
 {
     config.output = "a.out";
+    config.stdlib_path = "/usr/local/lib/furox/stdlib";
+    config.library_path = nullptr;
     list_init(&config.link_targets);
 }
 
