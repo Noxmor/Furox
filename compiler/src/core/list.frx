@@ -1,8 +1,4 @@
-extern
-{
-    void* realloc(mut void* ptr, usize size);
-    void free(void* ptr);
-}
+import "std/libc.frx";
 
 export struct List
 {
@@ -35,7 +31,8 @@ export void list_push(mut List* list, void* item)
         }
 
         //TODO: Change sizeof to use void* instead of usize
-        list->items = realloc(list->items, list->capacity * frx::sizeof(usize));
+        list->items = libc::realloc(list->items,
+            list->capacity * frx::sizeof(usize));
     }
 
     list->items[list->size] = item;
@@ -79,5 +76,5 @@ export void list_destroy(List* list)
 {
     frx::assert(list != nullptr);
 
-    free(list->items);
+    libc::free(list->items);
 }

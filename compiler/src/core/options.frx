@@ -1,8 +1,4 @@
-extern
-{
-    i32 strcmp(char* str1, char* str2);
-    char* strchr(char* str, i32 c);
-}
+import "std/libc.frx";
 
 export enum OptionType : u8
 {
@@ -68,7 +64,7 @@ Option* find_option_by_long_name(Option* options, char* long_name)
     mut usize i;
     for(i = 0; options[i].id != 0; i = i + 1)
     {
-        if(strcmp(options[i].long_name, long_name) == 0)
+        if(libc::strcmp(options[i].long_name, long_name) == 0)
         {
             return &options[i];
         }
@@ -157,7 +153,7 @@ export u16 parse_command_line(usize argc, char** argv, Option* options)
     {
         char* long_name = option + 2;
 
-        mut char* equals = strchr(option, '=');
+        mut char* equals = libc::strchr(option, '=');
         if(equals != nullptr)
         {
             tmp = (equals[0] = '\0');

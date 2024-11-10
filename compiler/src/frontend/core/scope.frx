@@ -1,7 +1,4 @@
-extern
-{
-    void* malloc(usize size);
-}
+import "std/libc.frx";
 
 export struct Scope
 {
@@ -13,7 +10,7 @@ mut usize next_scope_id;
 
 export Scope* scope_create(Scope* parent)
 {
-    mut Scope* scope = malloc(frx::sizeof(Scope));
+    mut Scope* scope = libc::malloc(frx::sizeof(Scope));
 
     scope->parent = parent;
     scope->id = next_scope_id;

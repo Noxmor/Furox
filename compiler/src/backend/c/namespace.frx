@@ -1,3 +1,4 @@
+import "std/libc.frx";
 import "ast.frx";
 import "c.frx";
 import "../../core/list.frx";
@@ -9,7 +10,6 @@ extern struct FILE;
 extern
 {
     i32 fprintf(mut FILE* stream, char* format, ...);
-    i32 strcmp(char* str1, char* str2);
 }
 
 export void transpile_namespace(mut Transpiler* transpiler,
@@ -35,7 +35,7 @@ export void transpile_namespace_resolution(Transpiler* transpiler,
 
     while(ns != nullptr)
     {
-        if(strcmp(ns->name, "") != 0)
+        if(libc::strcmp(ns->name, "") != 0)
         {
             fprintf(transpiler->file, "%s_", ns->name);
         }

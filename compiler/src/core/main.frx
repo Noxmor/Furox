@@ -1,3 +1,4 @@
+import "std/libc.frx";
 import "config.frx";
 import "options.frx";
 import "parser_table.frx";
@@ -10,8 +11,6 @@ extern struct FILE;
 extern
 {
     char* realpath(char* filename, mut char* resolved_name);
-    FILE* fopen(char* filepath, char* mode);
-    void fclose(mut FILE* stream);
 }
 
 mut ASTProgram* program;
@@ -128,11 +127,11 @@ i32 main(usize argc, char** argv)
 
     if(emit_ast)
     {
-        FILE* file = fopen("frx.ast", "w");
+        FILE* file = libc::fopen("frx.ast", "w");
         if(file != nullptr)
         {
             print_program(program, file, 0);
-            fclose(file);
+            libc::fclose(file);
         }
     }
 

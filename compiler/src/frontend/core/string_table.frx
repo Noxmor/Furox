@@ -1,11 +1,5 @@
+import "std/libc.frx";
 import "../../core/hash.frx";
-
-extern
-{
-    void* malloc(usize size);
-    i32 strcmp(char* str1, char* str2);
-    char* strdup(char* str);
-}
 
 struct StringTableEntry
 {
@@ -34,7 +28,7 @@ export char* string_table_insert(char* str)
 
     while(entry != nullptr)
     {
-        if(strcmp(entry->str, str) == 0)
+        if(libc::strcmp(entry->str, str) == 0)
         {
             return entry->str;
         }
@@ -42,8 +36,8 @@ export char* string_table_insert(char* str)
         entry = entry->next;
     }
 
-    mut StringTableEntry* new_entry = malloc(frx::sizeof(StringTableEntry));
-    new_entry->str = strdup(str);
+    mut StringTableEntry* new_entry = libc::malloc(frx::sizeof(StringTableEntry));
+    new_entry->str = libc::strdup(str);
     new_entry->next = string_table.entries[index];
 
     string_table.entries[index] = new_entry;

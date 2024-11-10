@@ -1,14 +1,9 @@
+import "std/libc.frx";
 export import "../../frontend/core/namespace.frx";
 export import "../../frontend/core/scope.frx";
 
 extern
 {
-    void* realloc(mut void* ptr, usize size);
-    char* strcat(mut char* dest_str, char* src_str);
-    i32 strcmp(char* str1, char* str2);
-    char* strcpy(mut char* dest, char* src);
-    char* strrchr(char* str, i32 c);
-    usize strlen(char* str);
     i32 sprintf(mut char* str, char* format, ...);
 }
 
@@ -18,7 +13,7 @@ mut usize buffer_size = 0;
 void realloc_buffer(usize size)
 {
     buffer_size = size;
-    buffer = realloc(buffer, buffer_size * frx::sizeof(char));
+    buffer = libc::realloc(buffer, buffer_size * frx::sizeof(char));
 }
 
 void mangle_namespace(Namespace* ns)
@@ -30,16 +25,16 @@ void mangle_namespace(Namespace* ns)
 
     mangle_namespace(ns->parent);
 
-    if(strcmp(ns->name, "") != 0)
+    if(libc::strcmp(ns->name, "") != 0)
     {
-        usize size = strlen(buffer) + strlen(ns->name) + strlen("_");
+        usize size = libc::strlen(buffer) + libc::strlen(ns->name) + libc::strlen("_");
         if(size > buffer_size)
         {
             realloc_buffer(size);
         }
 
-        strcat(buffer, ns->name);
-        strcat(buffer, "_");
+        libc::strcat(buffer, ns->name);
+        libc::strcat(buffer, "_");
     }
 }
 
@@ -49,12 +44,12 @@ export char* mangle_enum_name(Scope* scope, Namespace* ns, char* name)
 
     frx::assert(name != nullptr);
 
-    mut usize size = strlen(name);
+    mut usize size = libc::strlen(name);
 
     mut Namespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + strlen(ns->name) + 1;
+        size = size + libc::strlen(ns->name) + 1;
 
         temp = temp->parent;
     }
@@ -64,16 +59,16 @@ export char* mangle_enum_name(Scope* scope, Namespace* ns, char* name)
         realloc_buffer(size);
     }
 
-    strcpy(buffer, "");
+    libc::strcpy(buffer, "");
 
     mangle_namespace(ns);
 
-    strcat(buffer, name);
+    libc::strcat(buffer, name);
 
-    char* buffer_end = strrchr(buffer, '\0');
+    char* buffer_end = libc::strrchr(buffer, '\0');
     sprintf(buffer_end, "%zu", scope->id);
 
-    strcat(buffer, "E");
+    libc::strcat(buffer, "E");
 
     return buffer;
 }
@@ -84,12 +79,12 @@ export char* mangle_struct_name(Scope* scope, Namespace* ns, char* name)
 
     frx::assert(name != nullptr);
 
-    mut usize size = strlen(name);
+    mut usize size = libc::strlen(name);
 
     mut Namespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + strlen(ns->name) + 1;
+        size = size + libc::strlen(ns->name) + 1;
 
         temp = temp->parent;
     }
@@ -99,16 +94,16 @@ export char* mangle_struct_name(Scope* scope, Namespace* ns, char* name)
         realloc_buffer(size);
     }
 
-    strcpy(buffer, "");
+    libc::strcpy(buffer, "");
 
     mangle_namespace(ns);
 
-    strcat(buffer, name);
+    libc::strcat(buffer, name);
 
-    char* buffer_end = strrchr(buffer, '\0');
+    char* buffer_end = libc::strrchr(buffer, '\0');
     sprintf(buffer_end, "%zu", scope->id);
 
-    strcat(buffer, "S");
+    libc::strcat(buffer, "S");
 
     return buffer;
 }
@@ -119,16 +114,16 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
 
     frx::assert(name != nullptr);
 
-    mut usize size = strlen(name);
+    mut usize size = libc::strlen(name);
 
-    if(namespace_is_global(ns) && strcmp(name, "main") == 0)
+    if(namespace_is_global(ns) && libc::strcmp(name, "main") == 0)
     {
         if(size > buffer_size)
         {
             realloc_buffer(size);
         }
 
-        strcpy(buffer, name);
+        libc::strcpy(buffer, name);
 
         return buffer;
     }
@@ -136,7 +131,7 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
     mut Namespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + strlen(ns->name) + 1;
+        size = size + libc::strlen(ns->name) + 1;
 
         temp = temp->parent;
     }
@@ -146,22 +141,22 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
         realloc_buffer(size);
     }
 
-    if(namespace_is_global(ns) && strcmp(name, "main") == 0)
+    if(namespace_is_global(ns) && libc::strcmp(name, "main") == 0)
     {
-        strcpy(buffer, "main");
+        libc::strcpy(buffer, "main");
         return buffer;
     }
 
-    strcpy(buffer, "");
+    libc::strcpy(buffer, "");
 
     mangle_namespace(ns);
 
-    strcat(buffer, name);
+    libc::strcat(buffer, name);
 
-    char* buffer_end = strrchr(buffer, '\0');
+    char* buffer_end = libc::strrchr(buffer, '\0');
     sprintf(buffer_end, "%zu", scope->id);
 
-    strcat(buffer, "F");
+    libc::strcat(buffer, "F");
 
     return buffer;
 }
@@ -172,12 +167,12 @@ export char* mangle_global_var_name(Scope* scope, Namespace* ns, char* name)
 
     frx::assert(name != nullptr);
 
-    mut usize size = strlen(name);
+    mut usize size = libc::strlen(name);
 
     mut Namespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + strlen(ns->name) + 1;
+        size = size + libc::strlen(ns->name) + 1;
 
         temp = temp->parent;
     }
@@ -187,16 +182,16 @@ export char* mangle_global_var_name(Scope* scope, Namespace* ns, char* name)
         realloc_buffer(size);
     }
 
-    strcpy(buffer, "");
+    libc::strcpy(buffer, "");
 
     mangle_namespace(ns);
 
-    strcat(buffer, name);
+    libc::strcat(buffer, name);
 
-    char* buffer_end = strrchr(buffer, '\0');
+    char* buffer_end = libc::strrchr(buffer, '\0');
     sprintf(buffer_end, "%zu", scope->id);
 
-    strcat(buffer, "V");
+    libc::strcat(buffer, "V");
 
     return buffer;
 }

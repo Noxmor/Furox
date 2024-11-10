@@ -1,8 +1,4 @@
-extern
-{
-    void* malloc(usize size);
-    void free(mut void* ptr);
-}
+import "std/libc.frx";
 
 struct QueueNode
 {
@@ -53,7 +49,7 @@ export void queue_enqueue(mut Queue* queue, void* data)
 {
     frx::assert(queue != nullptr);
 
-    mut QueueNode* node = malloc(frx::sizeof(QueueNode));
+    mut QueueNode* node = libc::malloc(frx::sizeof(QueueNode));
     node->data = data;
     node->next = nullptr;
 
@@ -83,7 +79,7 @@ export void* queue_dequeue(mut Queue* queue)
 
     queue->front = queue->front->next;
 
-    free(node);
+    libc::free(node);
 
     return data;
 }

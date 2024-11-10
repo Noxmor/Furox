@@ -1,9 +1,4 @@
-extern
-{
-    void* malloc(usize size);
-    void free(mut void* ptr);
-    i32 strcmp(char* str1, char* str2);
-}
+import "std/libc.frx";
 
 export struct Namespace
 {
@@ -13,7 +8,7 @@ export struct Namespace
 
 export Namespace* namespace_create(Namespace* parent, char* name)
 {
-    mut Namespace* ns = malloc(frx::sizeof(Namespace));
+    mut Namespace* ns = libc::malloc(frx::sizeof(Namespace));
 
     ns->name = name;
     ns->parent = parent;
@@ -34,7 +29,7 @@ export void namespace_destroy(Namespace* ns)
     }
 
     namespace_destroy(ns->parent);
-    free(ns);
+    libc::free(ns);
 }
 
 export b8 namespace_equals(Namespace* left, Namespace* right)
@@ -54,7 +49,7 @@ export b8 namespace_equals(Namespace* left, Namespace* right)
         return false;
     }
 
-    if(strcmp(left->name, right->name) != 0)
+    if(libc::strcmp(left->name, right->name) != 0)
     {
         return false;
     }
@@ -64,11 +59,11 @@ export b8 namespace_equals(Namespace* left, Namespace* right)
 
 export b8 namespace_is_global(Namespace* ns)
 {
-    return ns != nullptr && strcmp(ns->name, "") == 0 && ns->parent == nullptr;
+    return ns != nullptr && libc::strcmp(ns->name, "") == 0 && ns->parent == nullptr;
 }
 
 export b8 namespace_is_internal(Namespace* ns)
 {
-    return ns != nullptr && strcmp(ns->name, "frx") == 0
+    return ns != nullptr && libc::strcmp(ns->name, "frx") == 0
         && namespace_is_global(ns->parent);
 }

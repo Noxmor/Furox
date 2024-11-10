@@ -1,3 +1,4 @@
+import "std/libc.frx";
 import "c.frx";
 import "../../frontend/symbols/struct.frx";
 import "../../frontend/syntax/struct_decl.frx";
@@ -7,7 +8,6 @@ extern struct FILE;
 extern
 {
     i32 fprintf(mut FILE* stream, char* format, ...);
-    i32 strcmp(char* str1, char* str2);
 }
 
 export void transpile_struct_decl(Transpiler* transpiler,
@@ -22,7 +22,7 @@ export void transpile_struct_decl(Transpiler* transpiler,
 
     if(transpiler->mode == TranspilerMode::STRUCT_DECL)
     {
-        if(strcmp(name, "va_list") != 0)
+        if(libc::strcmp(name, "va_list") != 0)
         {
             fprintf(transpiler->file, "typedef struct %s %s;\n", name, name);
         }

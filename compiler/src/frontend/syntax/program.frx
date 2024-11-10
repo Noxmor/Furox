@@ -1,3 +1,4 @@
+import "std/libc.frx";
 import "../core/ast.frx";
 import "../core/parser.frx";
 import "../../core/list.frx";
@@ -7,7 +8,6 @@ extern struct FILE;
 extern
 {
     i32 fprintf(mut FILE* stream, char* format, ...);
-    void* malloc(usize size);
 }
 
 export struct ASTProgram
@@ -17,7 +17,7 @@ export struct ASTProgram
 
 export ASTProgram* make_program()
 {
-    ASTProgram* program = malloc(frx::sizeof(ASTProgram));
+    ASTProgram* program = libc::malloc(frx::sizeof(ASTProgram));
 
     list_init(&program->translation_units);
 

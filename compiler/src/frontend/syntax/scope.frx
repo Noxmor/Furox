@@ -1,3 +1,4 @@
+import "std/libc.frx";
 import "break_stmt.frx";
 import "continue_stmt.frx";
 import "do_while_loop.frx";
@@ -25,7 +26,6 @@ extern struct FILE;
 extern
 {
     i32 fprintf(mut FILE* stream, char* format, ...);
-    i32 strcmp(char* str1, char* str2);
 }
 
 export struct ASTScope
@@ -221,7 +221,7 @@ export ASTScope* parse_scope(Parser* parser)
                 mut Namespace* resolved_ns = nullptr;
 
                 if(parser->token->type != TokenType::IDENTIFIER ||
-                    strcmp(parser->token->identifier, "frx") != 0)
+                    libc::strcmp(parser->token->identifier, "frx") != 0)
                 {
                     resolved_ns = parse_namespace_resolution(parser);
                 }

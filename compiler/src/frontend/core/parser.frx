@@ -1,3 +1,4 @@
+import "std/libc.frx";
 import "ast.frx";
 export import "lexer.frx";
 import "namespace.frx";
@@ -21,11 +22,7 @@ extern
 {
     char* realpath(char* filename, mut char* resolved_name);
     i32 sprintf(mut char* str, char* format, ...);
-    char* strrchr(char* str, i32 c);
-    char* strcpy(mut char* dest, char* src);
     i32 fprintf(mut FILE* stream, char* format, ...);
-    FILE* fopen(char* filepath, char* mode);
-    void fclose(mut FILE* stream);
 }
 
 export struct Parser
@@ -143,13 +140,13 @@ b8 file_exists(char* filepath)
 {
     frx::assert(filepath != nullptr);
 
-    FILE* file = fopen(filepath, "r");
+    FILE* file = libc::fopen(filepath, "r");
     if(file == nullptr)
     {
         return false;
     }
 
-    fclose(file);
+    libc::fclose(file);
     return true;
 }
 
@@ -160,8 +157,8 @@ export Parser* parser_compile(Parser* parser, char* filepath)
     frx::assert(filepath != nullptr);
 
     char directory[4096];
-    strcpy(directory, parser_source_file(parser));
-    mut char* last_slash = strrchr(directory, '/');
+    libc::strcpy(directory, parser_source_file(parser));
+    mut char* last_slash = libc::strrchr(directory, '/');
     char temp = (last_slash[0] = '\0');
 
     char resolved_filepath[4096];

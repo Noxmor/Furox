@@ -1,3 +1,4 @@
+import "std/libc.frx";
 import "expr.frx";
 import "namespace_resolution.frx";
 import "../core/ast.frx";
@@ -12,7 +13,6 @@ extern struct FILE;
 extern
 {
     i32 fprintf(mut FILE* stream, char* format, ...);
-    i32 strcmp(char* str1, char* str2);
 }
 
 export struct ASTAssert
@@ -206,15 +206,15 @@ export AST* parse_internal_func_call(Parser* parser)
 
     parser_eat(parser, TokenType::LPAREN);
 
-    if(strcmp(name, "assert") == 0)
+    if(libc::strcmp(name, "assert") == 0)
     {
         ast = make_ast(&parser->arena, AstType::ASSERT, parse_assert(parser));
     }
-    else if(strcmp(name, "sizeof") == 0)
+    else if(libc::strcmp(name, "sizeof") == 0)
     {
         ast = make_ast(&parser->arena, AstType::SIZEOF, parse_sizeof(parser));
     }
-    else if(strcmp(name, "enum_count") == 0)
+    else if(libc::strcmp(name, "enum_count") == 0)
     {
         ast = make_ast(&parser->arena, AstType::ENUM_COUNT,
             parse_enum_count(parser));

@@ -1,5 +1,4 @@
-extern void* malloc(usize size);
-extern void free(void* ptr);
+import "std/libc.frx";
 
 export struct Arena
 {
@@ -17,7 +16,7 @@ export void arena_init(mut Arena* arena, usize size)
 
     arena->size = size;
     arena->pos = 0;
-    arena->buffer = malloc(arena->size);
+    arena->buffer = libc::malloc(arena->size);
 }
 
 export void* arena_alloc(mut Arena* arena, usize size)
@@ -48,5 +47,5 @@ export void arena_destroy(Arena* arena)
 {
     frx::assert(arena != nullptr);
 
-    free(arena->buffer);
+    libc::free(arena->buffer);
 }

@@ -1,14 +1,8 @@
+import "std/libc.frx";
 import "../core/namespace.frx";
 import "../core/scope.frx";
 import "../../core/list.frx";
 import "../../core/hash.frx";
-
-extern
-{
-    void* malloc(usize size);
-    void* memset(mut char* str, i32 c, usize n);
-    i32 strcmp(char* str1, char* str2);
-}
 
 export struct StructSymbol
 {
@@ -57,7 +51,7 @@ export void struct_table_init(StructTable* table)
 {
     frx::assert(table != nullptr);
 
-    memset(table, 0, frx::sizeof(StructTable));
+    libc::memset(table, 0, frx::sizeof(StructTable));
 }
 
 export StructSymbol* struct_table_find_r(StructTable* table, mut Namespace* ns,
@@ -87,7 +81,7 @@ export StructSymbol* struct_table_find(StructTable* table, Namespace* ns,
     {
         StructSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(libc::strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -111,7 +105,7 @@ export b8 struct_table_insert(StructTable* table, StructSymbol* symbol)
     {
         StructSymbol* existing_symbol = entry->symbol;
 
-        if(strcmp(existing_symbol->name, symbol->name) == 0
+        if(libc::strcmp(existing_symbol->name, symbol->name) == 0
             && namespace_equals(existing_symbol->ns, symbol->ns))
         {
             return false;
@@ -120,7 +114,7 @@ export b8 struct_table_insert(StructTable* table, StructSymbol* symbol)
         entry = entry->next;
     }
 
-    mut StructTableEntry* new_entry = malloc(frx::sizeof(StructTableEntry));
+    mut StructTableEntry* new_entry = libc::malloc(frx::sizeof(StructTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

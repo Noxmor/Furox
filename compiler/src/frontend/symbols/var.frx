@@ -1,14 +1,8 @@
+import "std/libc.frx";
 import "../core/namespace.frx";
 import "../core/scope.frx";
 import "../syntax/type_specifier.frx";
 import "../../core/hash.frx";
-
-extern
-{
-    void* malloc(usize size);
-    void* memset(char* str, i32 c, usize n);
-    i32 strcmp(mut char* str1, char* str2);
-}
 
 export struct VarSymbol
 {
@@ -59,7 +53,7 @@ export void var_table_init(VarTable* table)
 {
     frx::assert(table != nullptr);
 
-    memset(table, 0, frx::sizeof(VarTable));
+    libc::memset(table, 0, frx::sizeof(VarTable));
 }
 
 export VarSymbol* var_table_find_by_namespace(VarTable* table, Namespace* ns,
@@ -76,7 +70,7 @@ export VarSymbol* var_table_find_by_namespace(VarTable* table, Namespace* ns,
     {
         VarSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(libc::strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -103,7 +97,7 @@ export VarSymbol* var_table_find_by_scope(VarTable* table, Scope* scope,
     {
         VarSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0
+        if(libc::strcmp(symbol->name, name) == 0
             && scope_is_child_of(scope, symbol->scope))
         {
             return symbol;
@@ -128,7 +122,7 @@ export b8 var_table_insert(VarTable* table, VarSymbol* symbol)
     {
         VarSymbol* existing_symbol = entry->symbol;
 
-        if(strcmp(existing_symbol->name, symbol->name) == 0
+        if(libc::strcmp(existing_symbol->name, symbol->name) == 0
             && scope_is_child_of(symbol->scope, existing_symbol->scope))
         {
             return false;
@@ -137,7 +131,7 @@ export b8 var_table_insert(VarTable* table, VarSymbol* symbol)
         entry = entry->next;
     }
 
-    mut VarTableEntry* new_entry = malloc(frx::sizeof(VarTableEntry));
+    mut VarTableEntry* new_entry = libc::malloc(frx::sizeof(VarTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

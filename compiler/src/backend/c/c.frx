@@ -1,3 +1,4 @@
+import "std/libc.frx";
 import "program.frx";
 import "../../core/config.frx";
 import "../../core/list.frx";
@@ -10,11 +11,6 @@ extern struct FILE;
 extern
 {
     i32 fprintf(mut FILE* stream, char* format, ...);
-    FILE* fopen(char* filepath, char* mode);
-    void fclose(mut FILE* stream);
-    char* strcat(mut char* dest, char* src);
-    char* strcpy(mut char* dest, char* src);
-    i32 system(char* command);
 }
 
 export enum TranspilerMode : u8
@@ -44,7 +40,7 @@ export struct Transpiler
 export i32 c_generate_code(ASTProgram* program)
 {
     mut Transpiler transpiler;
-    transpiler.file = fopen("/tmp/output.c", "w");
+    transpiler.file = libc::fopen("/tmp/output.c", "w");
 
     if(transpiler.file == nullptr)
     {
@@ -79,21 +75,21 @@ export i32 c_generate_code(ASTProgram* program)
 
     transpile_program(&transpiler, program);
 
-    fclose(transpiler.file);
+    libc::fclose(transpiler.file);
 
     Config* config = get_config();
 
     char command[4096];
-    strcpy(command, "gcc /tmp/output.c -o ");
-    strcat(command, config->output);
+    libc::strcpy(command, "gcc /tmp/output.c -o ");
+    libc::strcat(command, config->output);
 
     mut usize i;
     for(i = 0; i < list_size(&config->link_targets); i = i + 1)
     {
         char* link_target = list_get(&config->link_targets, i);
-        strcat(command, " ");
-        strcat(command, link_target);
+        libc::strcat(command, " ");
+        libc::strcat(command, link_target);
     }
 
-    return system(command);
+    return libc::system(command);
 }

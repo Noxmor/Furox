@@ -1,16 +1,10 @@
+import "std/libc.frx";
 import "../core/namespace.frx";
 import "../core/scope.frx";
 import "../core/token.frx";
 import "../syntax/enum_def.frx";
 import "../../core/hash.frx";
 import "../../core/list.frx";
-
-extern
-{
-    void* malloc(usize size);
-    void* memset(mut char* str, i32 c, usize n);
-    i32 strcmp(char* str1, char* str2);
-}
 
 export struct EnumSymbol
 {
@@ -51,7 +45,7 @@ export b8 enum_symbol_has_constant(EnumSymbol* symbol, char* name)
     for(i = 0; i < list_size(&symbol->constants); i = i + 1)
     {
         ASTEnumConstantDef* constant = list_get(&symbol->constants, i);
-        if(strcmp(constant->name, name) == 0)
+        if(libc::strcmp(constant->name, name) == 0)
         {
             return true;
         }
@@ -80,7 +74,7 @@ export void enum_table_init(EnumTable* table)
 {
     frx::assert(table != nullptr);
 
-    memset(table, 0, frx::sizeof(EnumTable));
+    libc::memset(table, 0, frx::sizeof(EnumTable));
 }
 
 export EnumSymbol* enum_table_find_r(EnumTable* table, mut Namespace* ns,
@@ -109,7 +103,7 @@ export EnumSymbol* enum_table_find(EnumTable* table, Namespace* ns, char* name)
     {
         EnumSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(libc::strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -133,7 +127,7 @@ export b8 enum_table_insert(EnumTable* table, EnumSymbol* symbol)
     {
         EnumSymbol* existing_symbol = entry->symbol;
 
-        if(strcmp(existing_symbol->name, symbol->name) == 0
+        if(libc::strcmp(existing_symbol->name, symbol->name) == 0
             && namespace_equals(existing_symbol->ns, symbol->ns))
         {
             return false;
@@ -142,7 +136,7 @@ export b8 enum_table_insert(EnumTable* table, EnumSymbol* symbol)
         entry = entry->next;
     }
 
-    mut EnumTableEntry* new_entry = malloc(frx::sizeof(EnumTableEntry));
+    mut EnumTableEntry* new_entry = libc::malloc(frx::sizeof(EnumTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

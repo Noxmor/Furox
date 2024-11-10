@@ -1,3 +1,4 @@
+import "std/libc.frx";
 import "../core/ast.frx";
 import "../core/namespace.frx";
 import "../core/parser.frx";
@@ -9,7 +10,6 @@ extern struct FILE;
 extern
 {
     i32 fprintf(mut FILE* stream, char* format, ...);
-    usize strlen(char* str);
 }
 
 export struct ASTVar
@@ -43,7 +43,7 @@ export ASTVar* parse_var(Parser* parser, Namespace* ns)
 
     var->range.start = parser_current_location(parser);
     var->range.end = parser_current_location(parser);
-    var->range.end.column = var->range.end.column + strlen(var->name);
+    var->range.end.column = var->range.end.column + libc::strlen(var->name);
 
     parser_eat(parser, TokenType::IDENTIFIER);
 

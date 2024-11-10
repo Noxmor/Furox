@@ -1,14 +1,8 @@
+import "std/libc.frx";
 import "namespace.frx";
 import "token.frx";
 import "../core/ast.frx";
 import "../../core/log.frx";
-
-extern
-{
-    char* strcpy(mut char* dest, char* src);
-    char* strcat(mut char* dest, char* src);
-    usize strlen(char* str);
-}
 
 export void error_import_stmt_invalid_filepath(char* filepath,
     SourceLocation loc, char* imported_filepath)
@@ -39,25 +33,25 @@ export void error_ambiguous_unresolved_name(char* filepath, SourceLocation loc,
 export void error_ambiguous_unresolved_namespaced_name(char* filepath,
     SourceLocation loc, mut Namespace* ns, char* name)
 {
-    mut usize size = 1 + strlen(ns->name);
+    mut usize size = 1 + libc::strlen(ns->name);
 
     mut Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
-            + strlen(temp->name);
+        size = size + libc::strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
+            + libc::strlen(temp->name);
         temp = temp->parent;
     }
 
     char ns_str[size];
-    strcpy(ns_str, ns->name);
+    libc::strcpy(ns_str, ns->name);
 
     ns = ns->parent;
 
     while(ns != nullptr)
     {
-        strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
-        strcat(ns_str, ns->name);
+        libc::strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+        libc::strcat(ns_str, ns->name);
 
         ns = ns->parent;
     }
@@ -69,25 +63,25 @@ export void error_ambiguous_unresolved_namespaced_name(char* filepath,
 export void error_namespace_is_reserved(char* filepath, SourceLocation loc,
     mut Namespace* ns)
 {
-    mut usize size = 1 + strlen(ns->name);
+    mut usize size = 1 + libc::strlen(ns->name);
 
     mut Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
-            + strlen(temp->name);
+        size = size + libc::strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
+            + libc::strlen(temp->name);
         temp = temp->parent;
     }
 
     char ns_str[size];
-    strcpy(ns_str, ns->name);
+    libc::strcpy(ns_str, ns->name);
 
     ns = ns->parent;
 
     while(ns != nullptr)
     {
-        strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
-        strcat(ns_str, ns->name);
+        libc::strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+        libc::strcat(ns_str, ns->name);
 
         ns = ns->parent;
     }
@@ -186,25 +180,25 @@ export void error_unresolved_name(char* filepath, SourceLocation loc,
 export void error_unresolved_namespaced_name(char* filepath, SourceLocation loc,
     mut Namespace* ns, char* name)
 {
-    mut usize size = 1 + strlen(ns->name);
+    mut usize size = 1 + libc::strlen(ns->name);
 
     mut Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
-            + strlen(temp->name);
+        size = size + libc::strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
+            + libc::strlen(temp->name);
         temp = temp->parent;
     }
 
     char ns_str[size];
-    strcpy(ns_str, ns->name);
+    libc::strcpy(ns_str, ns->name);
 
     ns = ns->parent;
 
     while(ns != nullptr)
     {
-        strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
-        strcat(ns_str, ns->name);
+        libc::strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+        libc::strcat(ns_str, ns->name);
 
         ns = ns->parent;
     }

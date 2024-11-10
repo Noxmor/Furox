@@ -1,13 +1,7 @@
+import "std/libc.frx";
 import "../core/namespace.frx";
 import "../core/scope.frx";
 import "../../core/hash.frx";
-
-extern
-{
-    void* malloc(usize size);
-    void* memset(mut char* str, i32 c, usize n);
-    i32 strcmp(char* str1, char* str2);
-}
 
 export struct FuncSymbol
 {
@@ -54,7 +48,7 @@ export void func_table_init(FuncTable* table)
 {
     frx::assert(table != nullptr);
 
-    memset(table, 0, frx::sizeof(FuncTable));
+    libc::memset(table, 0, frx::sizeof(FuncTable));
 }
 
 export FuncSymbol* func_table_find_r(FuncTable* table, mut Namespace* ns,
@@ -83,7 +77,7 @@ export FuncSymbol* func_table_find(FuncTable* table, Namespace* ns, char* name)
     {
         FuncSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(libc::strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -107,7 +101,7 @@ export b8 func_table_insert(FuncTable* table, FuncSymbol* symbol)
     {
         FuncSymbol* existing_symbol = entry->symbol;
 
-        if(strcmp(existing_symbol->name, symbol->name) == 0
+        if(libc::strcmp(existing_symbol->name, symbol->name) == 0
             && namespace_equals(existing_symbol->ns, symbol->ns))
         {
             return false;
@@ -116,7 +110,7 @@ export b8 func_table_insert(FuncTable* table, FuncSymbol* symbol)
         entry = entry->next;
     }
 
-    mut FuncTableEntry* new_entry = malloc(frx::sizeof(FuncTableEntry));
+    mut FuncTableEntry* new_entry = libc::malloc(frx::sizeof(FuncTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

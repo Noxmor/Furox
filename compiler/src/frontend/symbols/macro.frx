@@ -1,8 +1,7 @@
+import "std/libc.frx";
 import "../core/namespace.frx";
 import "../core/scope.frx";
 import "../../core/hash.frx";
-
-extern i32 strcmp(char* str1, char* str2);
 
 export struct MacroSymbol
 {
@@ -51,7 +50,7 @@ export void macro_table_init(MacroTable* table)
 {
     frx::assert(table != nullptr);
 
-    memset(table, 0, frx::sizeof(MacroTable));
+    libc::memset(table, 0, frx::sizeof(MacroTable));
 }
 
 export MacroSymbol* macro_table_find_r(MacroTable* table, Namespace* ns,
@@ -81,7 +80,7 @@ export MacroSymbol* macro_table_find(MacroTable* table, Namespace* ns,
     {
         MacroSymbol* symbol = entry->symbol;
 
-        if(strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(libc::strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -105,7 +104,7 @@ export b8 macro_table_insert(MacroTable* table, MacroSymbol* symbol)
     {
         MacroSymbol* existing_symbol = entry->symbol;
 
-        if(strcmp(existing_symbol->name, symbol->name) == 0
+        if(libc::strcmp(existing_symbol->name, symbol->name) == 0
             && namespace_equals(existing_symbol->ns, symbol->ns))
         {
             return false;
@@ -114,7 +113,7 @@ export b8 macro_table_insert(MacroTable* table, MacroSymbol* symbol)
         entry = entry->next;
     }
 
-    mut MacroTableEntry* new_entry = malloc(frx::sizeof(MacroTableEntry));
+    mut MacroTableEntry* new_entry = libc::malloc(frx::sizeof(MacroTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 
