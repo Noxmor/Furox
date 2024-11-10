@@ -40,6 +40,8 @@ export AST* parse_global_scope(Parser* parser)
         }
         case TokenType::KW_EXPORT:
         {
+            parser_eat(parser, TokenType::KW_EXPORT);
+
             switch(parser->token->type)
             {
                 case TokenType::KW_ENUM:
