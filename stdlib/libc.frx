@@ -1,0 +1,146 @@
+extern struct FILE;
+
+extern
+{
+    void exit(i32 status);
+    i32 fclose(mut FILE* stream);
+    FILE* fopen(char* filepath, char* mode);
+    usize fread(mut void* ptr, usize size, usize n, mut FILE* stream);
+    void free(void* ptr);
+    i32 fseek(mut FILE* stream, i64 offset, i32 whence);
+    i32 isalnum(i32 c);
+    i32 isalpha(i32 c);
+    i32 isdigit(i32 c);
+    void* malloc(usize size);
+    void* memcpy(mut void* dest, void* src, usize n);
+    void* memset(mut void* ptr, i32 value, usize n);
+    void* realloc(mut void* ptr, usize size);
+    char* strcat(mut char* dest, char* src);
+    char* strchr(char* str, i32 c);
+    i32 strcmp(char* str1, char* str2);
+    char* strcpy(mut char* dest, char* src);
+    char* strdup(char* str);
+    usize strlen(char* str);
+    i32 strncmp(char* str1, char* str2, usize n);
+    char* strrchr(char* str, i32 c);
+    i32 system(char* command);
+    i32 toupper(i32 c);
+}
+
+namespace libc
+{
+    export void exit(i32 status)
+    {
+        return ::exit(status);
+    }
+
+    export i32 fclose(mut FILE* stream)
+    {
+        return ::fclose(stream);
+    }
+
+    export FILE* fopen(char* filepath, char* mode)
+    {
+        return ::fopen(filepath, mode);
+    }
+
+    export usize fread(mut void* ptr, usize size, usize n, mut FILE* stream)
+    {
+        return ::fread(ptr, size, n, stream);
+    }
+
+    export void free(void* ptr)
+    {
+        ::free(ptr);
+    }
+
+    export i32 fseek(mut FILE* stream, i64 offset, i32 whence)
+    {
+        return ::fseek(stream, offset, whence);
+    }
+
+    export i32 isalnum(i32 c)
+    {
+        return ::isalnum(c);
+    }
+
+    export i32 isalpha(i32 c)
+    {
+        return ::isalpha(c);
+    }
+
+    export i32 isdigit(i32 c)
+    {
+        return ::isdigit(c);
+    }
+
+    export void* malloc(usize size)
+    {
+        return ::malloc(size);
+    }
+
+    export void* memcpy(mut void* dest, void* src, usize n)
+    {
+        return ::memcpy(dest, src, n);
+    }
+
+    export void* memset(mut void* ptr, i32 value, usize n)
+    {
+        return ::memset(ptr, value, n);
+    }
+
+    export void* realloc(mut void* ptr, usize size)
+    {
+        return ::realloc(ptr, size);
+    }
+
+    export char* strcat(mut char* dest, char* src)
+    {
+        return ::strcat(dest, src);
+    }
+
+    export char* strchr(char* str, i32 c)
+    {
+        return ::strchr(str, c);
+    }
+
+    export i32 strcmp(char* str1, char* str2)
+    {
+        return ::strcmp(str1, str2);
+    }
+
+    export char* strcpy(mut char* dest, char* src)
+    {
+        return ::strcpy(dest, src);
+    }
+
+    export char* strdup(char* str)
+    {
+        return ::strdup(str);
+    }
+
+    export usize strlen(char* str)
+    {
+        return ::strlen(str);
+    }
+
+    export char* strrchr(char* str, i32 c)
+    {
+        return ::strrchr(str, c);
+    }
+
+    export i32 strncmp(char* str1, char* str2, usize n)
+    {
+        return ::strncmp(str1, str2, n);
+    }
+
+    export i32 system(char* command)
+    {
+        return ::system(command);
+    }
+
+    export i32 toupper(i32 c)
+    {
+        return ::toupper(c);
+    }
+}
