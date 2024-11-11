@@ -72,6 +72,13 @@ export usize list_size(List* list)
     return list->size;
 }
 
+export void list_clear(mut List* list)
+{
+    frx::assert(list != nullptr);
+
+    list->size = 0;
+}
+
 export void list_destroy(List* list)
 {
     frx::assert(list != nullptr);
