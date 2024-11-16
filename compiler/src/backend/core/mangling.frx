@@ -10,8 +10,14 @@ extern
 mut char* buffer = nullptr;
 mut usize buffer_size = 0;
 
-void realloc_buffer(usize size)
+void validate_buffer_size(mut usize size)
 {
+    size = size * 2;
+    if(buffer_size >= size)
+    {
+        return;
+    }
+
     buffer_size = size;
     buffer = libc::realloc(buffer, buffer_size * frx::sizeof(char));
 }
@@ -28,10 +34,7 @@ void mangle_namespace(Namespace* ns)
     if(libc::strcmp(ns->name, "") != 0)
     {
         usize size = libc::strlen(buffer) + libc::strlen(ns->name) + libc::strlen("_");
-        if(size > buffer_size)
-        {
-            realloc_buffer(size);
-        }
+        validate_buffer_size(size);
 
         libc::strcat(buffer, ns->name);
         libc::strcat(buffer, "_");
@@ -54,10 +57,7 @@ export char* mangle_enum_name(Scope* scope, Namespace* ns, char* name)
         temp = temp->parent;
     }
 
-    if(size > buffer_size)
-    {
-        realloc_buffer(size);
-    }
+    validate_buffer_size(size);
 
     libc::strcpy(buffer, "");
 
@@ -89,10 +89,7 @@ export char* mangle_struct_name(Scope* scope, Namespace* ns, char* name)
         temp = temp->parent;
     }
 
-    if(size > buffer_size)
-    {
-        realloc_buffer(size);
-    }
+    validate_buffer_size(size);
 
     libc::strcpy(buffer, "");
 
@@ -118,10 +115,7 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
 
     if(namespace_is_global(ns) && libc::strcmp(name, "main") == 0)
     {
-        if(size > buffer_size)
-        {
-            realloc_buffer(size);
-        }
+        validate_buffer_size(size);
 
         libc::strcpy(buffer, name);
 
@@ -136,10 +130,7 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
         temp = temp->parent;
     }
 
-    if(size > buffer_size)
-    {
-        realloc_buffer(size);
-    }
+    validate_buffer_size(size);
 
     if(namespace_is_global(ns) && libc::strcmp(name, "main") == 0)
     {
@@ -177,10 +168,7 @@ export char* mangle_global_var_name(Scope* scope, Namespace* ns, char* name)
         temp = temp->parent;
     }
 
-    if(size > buffer_size)
-    {
-        realloc_buffer(size);
-    }
+    validate_buffer_size(size);
 
     libc::strcpy(buffer, "");
 
