@@ -1,0 +1,109 @@
+export import "../ast/stmt.frx";
+import "../core/parser.frx";
+import "return_stmt.frx";
+import "expr_stmt.frx";
+import "var_decl.frx";
+import "var_def.frx";
+import "if_stmt.frx";
+import "for_loop.frx";
+import "while_loop.frx";
+import "do_while_loop.frx";
+import "switch_stmt.frx";
+import "scope.frx";
+
+export void analyze_stmt(Parser* parser, AST::Stmt* stmt)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(stmt != nullptr);
+
+    switch(stmt->type)
+    {
+        case AST::StmtType::BREAK_STMT:
+        {
+            break;
+        }
+
+        case AST::StmtType::CONTINUE_STMT:
+        {
+            break;
+        }
+
+        case AST::StmtType::RETURN_STMT:
+        {
+            analyze_return_stmt(parser, stmt->return_stmt);
+
+            break;
+        }
+
+        case AST::StmtType::EXPR_STMT:
+        {
+            analyze_expr_stmt(parser, stmt->expr_stmt);
+
+            break;
+        }
+
+        case AST::StmtType::VAR_DECL:
+        {
+            analyze_var_decl(parser, stmt->var_decl);
+
+            break;
+        }
+
+        case AST::StmtType::VAR_DEF:
+        {
+            analyze_var_def(parser, stmt->var_def);
+
+            break;
+        }
+
+        case AST::StmtType::IF_STMT:
+        {
+            analyze_if_stmt(parser, stmt->if_stmt);
+
+            break;
+        }
+
+        case AST::StmtType::FOR_LOOP:
+        {
+            analyze_for_loop(parser, stmt->for_loop);
+
+            break;
+        }
+
+        case AST::StmtType::WHILE_LOOP:
+        {
+            analyze_while_loop(parser, stmt->while_loop);
+
+            break;
+        }
+
+        case AST::StmtType::DO_WHILE_LOOP:
+        {
+            analyze_do_while_loop(parser, stmt->do_while_loop);
+
+            break;
+        }
+
+        case AST::StmtType::SWITCH_STMT:
+        {
+            analyze_switch_stmt(parser, stmt->switch_stmt);
+
+            break;
+        }
+
+        case AST::StmtType::SCOPE:
+        {
+            analyze_scope(parser, stmt->scope);
+
+            break;
+        }
+
+        default:
+        {
+            frx::assert(false);
+
+            break;
+        }
+    }
+}

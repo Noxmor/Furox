@@ -1,31 +1,31 @@
-import "ast.frx";
+import "expr.frx";
 import "scope.frx";
 import "../core/parser.frx";
-import "../syntax/switch_stmt.frx";
+import "../ast/switch_stmt.frx";
 import "../../core/list.frx";
 
-void analyze_switch_case(Parser* parser, ASTSwitchCase* switch_case)
+void analyze_switch_case(Parser* parser, AST::SwitchCase* switch_case)
 {
     frx::assert(parser != nullptr);
 
     frx::assert(switch_case != nullptr);
 
-    analyze_ast(parser, switch_case->value);
+    analyze_expr(parser, switch_case->value);
     analyze_scope(parser, switch_case->scope);
 }
 
-export void analyze_switch_stmt(Parser* parser, ASTSwitchStmt* switch_stmt)
+export void analyze_switch_stmt(Parser* parser, AST::SwitchStmt* switch_stmt)
 {
     frx::assert(parser != nullptr);
 
     frx::assert(switch_stmt != nullptr);
 
-    analyze_ast(parser, switch_stmt->value);
+    analyze_expr(parser, switch_stmt->value);
 
     mut usize i;
     for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
     {
-        ASTSwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+        AST::SwitchCase* switch_case = list_get(&switch_stmt->cases, i);
         analyze_switch_case(parser, switch_case);
     }
 

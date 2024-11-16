@@ -1,11 +1,11 @@
-import "ast.frx";
+import "expr.frx";
 import "type_specifier.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
 import "../symbols/var.frx";
-import "../syntax/var_def.frx";
+import "../ast/var_def.frx";
 
-export void analyze_var_def(mut Parser* parser, ASTVarDef* var_def)
+export void analyze_var_def(mut Parser* parser, AST::VarDef* var_def)
 {
     frx::assert(parser != nullptr);
 
@@ -27,5 +27,5 @@ export void analyze_var_def(mut Parser* parser, ASTVarDef* var_def)
         parser->failed = true;
     }
 
-    analyze_ast(parser, var_def->value);
+    analyze_expr(parser, var_def->value);
 }

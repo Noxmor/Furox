@@ -1,7 +1,7 @@
+export import "../ast/type_specifier.frx";
 import "expr.frx";
 import "namespace.frx";
 import "namespace_resolution.frx";
-import "../core/ast.frx";
 import "../core/namespace.frx";
 import "../core/parser.frx";
 import "../core/scope.frx";
@@ -10,150 +10,68 @@ import "../symbols/enum.frx";
 import "../symbols/struct.frx";
 import "../../core/list.frx";
 
-extern struct FILE;
-
-extern
+namespace AST::TypeSpecifier
 {
-    i32 fprintf(mut FILE* stream, char* format, ...);
-}
-
-export void parse_array_dimensions(Parser* parser, ASTTypeSpecifier* type)
-{
-    frx::assert(parser != nullptr);
-
-    frx::assert(type != nullptr);
-
-    while(parser->token->type == TokenType::LBRACKET)
+    export void parse_array_dimensions(Parser* parser, TypeSpecifier* type)
     {
-        parser_eat(parser, TokenType::LBRACKET);
-        list_push(&type->array_dimensions, parse_expr(parser));
-        parser_eat(parser, TokenType::RBRACKET);
+        frx::assert(parser != nullptr);
+
+        frx::assert(type != nullptr);
+
+        while(parser->token->type == TokenType::LBRACKET)
+        {
+            parser_eat(parser, TokenType::LBRACKET);
+            list_push(&type->array_dimensions, AST::Expr::parse(parser));
+            parser_eat(parser, TokenType::RBRACKET);
+        }
     }
 }
 
-export struct ASTTypeSpecifier
+namespace AST::TypeSpecifier
 {
-    SourceRange range;
-
-    Namespace* ns;
-    char* name;
-    Scope* scope;
-
-    TokenType primitive_type;
-    EnumSymbol* enum_type;
-    StructSymbol* struct_type;
-
-    usize pointer_level;
-
-    List array_dimensions;
-}
-
-export ASTTypeSpecifier* make_type_specifier(Arena* arena, Namespace* ns,
-    char* name, Scope* scope, TokenType primitive_type, usize pointer_level)
-{
-    frx::assert(name != nullptr || primitive_type != TokenType::ERROR);
-
-    frx::assert(scope != nullptr);
-
-    mut ASTTypeSpecifier* type_specifier = arena_alloc(arena,
-        frx::sizeof(ASTTypeSpecifier));
-
-    type_specifier->ns = ns;
-    type_specifier->name = name;
-    type_specifier->scope = scope;
-    type_specifier->primitive_type = primitive_type;
-    type_specifier->enum_type = nullptr;
-    type_specifier->struct_type = nullptr;
-    type_specifier->pointer_level = pointer_level;
-    list_init(&type_specifier->array_dimensions);
-
-    return type_specifier;
-}
-
-export ASTTypeSpecifier* parse_type_specifier(Parser* parser)
-{
-    frx::assert(parser != nullptr);
-
-    SourceLocation start = parser_current_location(parser);
-
-    mut Namespace* ns = nullptr;
-    mut char* name = nullptr;
-    mut TokenType primitive_type = TokenType::ERROR;
-
-    if(token_type_is_primitive(parser->token->type))
+    export TypeSpecifier* parse(Parser* parser)
     {
-        primitive_type = parser->token->type;
+        frx::assert(parser != nullptr);
 
-        parser_eat(parser, parser->token->type);
-    }
-    else
-    {
-        ns = parse_namespace_resolution(parser);
-        name = parser->token->identifier;
+        SourceLocation start = parser_current_location(parser);
 
-        parser_eat(parser, TokenType::IDENTIFIER);
-    }
+        mut Namespace* ns = nullptr;
+        mut char* name = nullptr;
+        mut TokenType primitive_type = TokenType::ERROR;
 
-    mut usize pointer_level = 0;
+        if(token_type_is_primitive(parser->token->type))
+        {
+            primitive_type = parser->token->type;
 
-    mut SourceLocation end;
+            parser_eat(parser, parser->token->type);
+        }
+        else
+        {
+            ns = AST::NamespaceResolution::parse(parser);
+            name = parser->token->identifier;
 
-    while(parser->token->type == TokenType::STAR)
-    {
-        pointer_level = pointer_level + 1;
+            parser_eat(parser, TokenType::IDENTIFIER);
+        }
 
-        end = parser_current_location(parser);
+        mut usize pointer_level = 0;
 
-        parser_eat(parser, TokenType::STAR);
-    }
+        mut SourceLocation end;
 
-    mut ASTTypeSpecifier* type_specifier = make_type_specifier(&parser->arena, ns,
-        name, parser->current_scope, primitive_type, pointer_level);
+        while(parser->token->type == TokenType::STAR)
+        {
+            pointer_level = pointer_level + 1;
 
-    type_specifier->range.start = start;
-    type_specifier->range.end = end;
+            end = parser_current_location(parser);
 
-    return type_specifier;
-}
+            parser_eat(parser, TokenType::STAR);
+        }
 
-export void print_type_specifier(ASTTypeSpecifier* type_specifier, FILE* file,
-    usize depth)
-{
-    frx::assert(type_specifier != nullptr);
+        mut TypeSpecifier* type_specifier = new(&parser->arena, ns, name,
+            parser->current_scope, primitive_type, pointer_level);
 
-    frx::assert(file != nullptr);
+        type_specifier->range.start = start;
+        type_specifier->range.end = end;
 
-    print_ast_depth(file, depth);
-
-    fprintf(file, "%s\n", ast_type_to_str(AstType::TYPE_SPECIFIER));
-
-    print_ast_depth(file, depth + 1);
-
-    fprintf(file, "type: ");
-    if(type_specifier->primitive_type != 0)
-    {
-        fprintf(file, "%s", token_type_to_str(type_specifier->primitive_type));
-    }
-    else
-    {
-        print_namespace_resolution(file, type_specifier->ns);
-        fprintf(file, "%s", type_specifier->name);
-    }
-
-    fprintf(file, "\n");
-
-    print_ast_depth(file, depth + 1);
-
-    fprintf(file, "pointer_level: %zu\n", type_specifier->pointer_level);
-
-    print_ast_depth(file, depth + 1);
-
-    fprintf(file, "array-dimensions\n");
-
-    mut usize i;
-    for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
-    {
-        print_ast(list_get(&type_specifier->array_dimensions, i), file,
-            depth + 2);
+        return type_specifier;
     }
 }

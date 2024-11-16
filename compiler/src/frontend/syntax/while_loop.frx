@@ -1,55 +1,20 @@
+export import "../ast/while_loop.frx";
 import "expr.frx";
 import "scope.frx";
-import "../core/ast.frx";
 import "../core/parser.frx";
 
-extern struct FILE;
-
-extern
+namespace AST::WhileLoop
 {
-    i32 fprintf(mut FILE* stream, char* format, ...);
-}
+    export WhileLoop* parse(Parser* parser)
+    {
+        parser_eat(parser, TokenType::KW_WHILE);
 
-export struct ASTWhileLoop
-{
-    AST* condition;
-    ASTScope* scope;
-}
+        parser_eat(parser, TokenType::LPAREN);
+        Expr* condition = AST::Expr::parse(parser);
+        parser_eat(parser, TokenType::RPAREN);
 
-ASTWhileLoop* make_while_loop(Arena* arena, AST* condition, ASTScope* scope)
-{
-    frx::assert(condition != nullptr);
+        Scope* scope = AST::Scope::parse(parser);
 
-    frx::assert(scope != nullptr);
-
-    mut ASTWhileLoop* while_loop = arena_alloc(arena, frx::sizeof(ASTWhileLoop));
-
-    while_loop->condition = condition;
-    while_loop->scope = scope;
-}
-
-export ASTWhileLoop* parse_while_loop(Parser* parser)
-{
-    parser_eat(parser, TokenType::KW_WHILE);
-
-    parser_eat(parser, TokenType::LPAREN);
-    AST* condition = parse_expr(parser);
-    parser_eat(parser, TokenType::RPAREN);
-
-    ASTScope* scope = parse_scope(parser);
-
-    return make_while_loop(&parser->arena, condition, scope);
-}
-
-export void print_while_loop(ASTWhileLoop* while_loop, FILE* file, usize depth)
-{
-    frx::assert(while_loop != nullptr);
-
-    frx::assert(file != nullptr);
-
-    print_ast_depth(file, depth);
-
-    fprintf(file, "%s\n", ast_type_to_str(AstType::WHILE_LOOP));
-    print_ast(while_loop->condition, file, depth + 1);
-    print_scope(while_loop->scope, file, depth + 1);
+        return new(&parser->arena, condition, scope);
+    }
 }

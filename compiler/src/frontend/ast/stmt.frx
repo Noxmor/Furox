@@ -1,0 +1,316 @@
+import "std/libc.frx";
+import "../../core/arena.frx";
+export import "break_stmt.frx";
+export import "continue_stmt.frx";
+export import "return_stmt.frx";
+export import "expr_stmt.frx";
+export import "var_decl.frx";
+export import "var_def.frx";
+export import "if_stmt.frx";
+export import "for_loop.frx";
+export import "while_loop.frx";
+export import "do_while_loop.frx";
+export import "switch_stmt.frx";
+export import "scope.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export enum StmtType : u8
+    {
+        INVALID,
+        BREAK_STMT,
+        CONTINUE_STMT,
+        RETURN_STMT,
+        EXPR_STMT,
+        VAR_DECL,
+        VAR_DEF,
+        IF_STMT,
+        FOR_LOOP,
+        WHILE_LOOP,
+        DO_WHILE_LOOP,
+        SWITCH_STMT,
+        SCOPE
+    }
+
+    export struct Stmt
+    {
+        StmtType type;
+
+        BreakStmt* break_stmt;
+        ContinueStmt* continue_stmt;
+        ReturnStmt* return_stmt;
+        ExprStmt* expr_stmt;
+        VarDecl* var_decl;
+        VarDef* var_def;
+        IfStmt* if_stmt;
+        ForLoop* for_loop;
+        WhileLoop* while_loop;
+        DoWhileLoop* do_while_loop;
+        SwitchStmt* switch_stmt;
+        Scope* scope;
+    }
+
+    namespace Stmt
+    {
+        Stmt* new(Arena* arena)
+        {
+            mut Stmt* stmt = arena_alloc(arena, frx::sizeof(Stmt));
+
+            libc::memset(stmt, 0, frx::sizeof(Stmt));
+
+            return stmt;
+        }
+
+        export Stmt* from_break_stmt(Arena* arena, BreakStmt* break_stmt)
+        {
+            frx::assert(break_stmt != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::BREAK_STMT;
+            stmt->break_stmt = break_stmt;
+
+            return stmt;
+        }
+
+        export Stmt* from_continue_stmt(Arena* arena, ContinueStmt* continue_stmt)
+        {
+            frx::assert(continue_stmt != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::CONTINUE_STMT;
+            stmt->continue_stmt = continue_stmt;
+
+            return stmt;
+        }
+
+        export Stmt* from_return_stmt(Arena* arena, ReturnStmt* return_stmt)
+        {
+            frx::assert(return_stmt != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::RETURN_STMT;
+            stmt->return_stmt = return_stmt;
+
+            return stmt;
+        }
+
+        export Stmt* from_expr_stmt(Arena* arena, ExprStmt* expr_stmt)
+        {
+            frx::assert(expr_stmt != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::EXPR_STMT;
+            stmt->expr_stmt = expr_stmt;
+
+            return stmt;
+        }
+
+        export Stmt* from_var_decl(Arena* arena, VarDecl* var_decl)
+        {
+            frx::assert(var_decl != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::VAR_DECL;
+            stmt->var_decl = var_decl;
+
+            return stmt;
+        }
+
+        export Stmt* from_var_def(Arena* arena, VarDef* var_def)
+        {
+            frx::assert(var_def != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::VAR_DEF;
+            stmt->var_def = var_def;
+
+            return stmt;
+        }
+
+        export Stmt* from_if_stmt(Arena* arena, IfStmt* if_stmt)
+        {
+            frx::assert(if_stmt != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::IF_STMT;
+            stmt->if_stmt = if_stmt;
+
+            return stmt;
+        }
+
+        export Stmt* from_for_loop(Arena* arena, ForLoop* for_loop)
+        {
+            frx::assert(for_loop != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::FOR_LOOP;
+            stmt->for_loop = for_loop;
+
+            return stmt;
+        }
+
+        export Stmt* from_while_loop(Arena* arena, WhileLoop* while_loop)
+        {
+            frx::assert(while_loop != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::WHILE_LOOP;
+            stmt->while_loop = while_loop;
+
+            return stmt;
+        }
+
+        export Stmt* from_do_while_loop(Arena* arena, DoWhileLoop* do_while_loop)
+        {
+            frx::assert(do_while_loop != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::DO_WHILE_LOOP;
+            stmt->do_while_loop = do_while_loop;
+
+            return stmt;
+        }
+
+        export Stmt* from_switch_stmt(Arena* arena, SwitchStmt* switch_stmt)
+        {
+            frx::assert(switch_stmt != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::SWITCH_STMT;
+            stmt->switch_stmt = switch_stmt;
+
+            return stmt;
+        }
+
+        export Stmt* from_scope(Arena* arena, Scope* scope)
+        {
+            frx::assert(scope != nullptr);
+
+            mut Stmt* stmt = new(arena);
+
+            stmt->type = AST::StmtType::SCOPE;
+            stmt->scope = scope;
+
+            return stmt;
+        }
+
+        export void print(Stmt* stmt, mut FILE* file, usize depth)
+        {
+            frx::assert(stmt != nullptr);
+
+            frx::assert(file != nullptr);
+
+            switch(stmt->type)
+            {
+                case AST::StmtType::BREAK_STMT:
+                {
+                    AST::BreakStmt::print(stmt->break_stmt, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::CONTINUE_STMT:
+                {
+                    AST::ContinueStmt::print(stmt->continue_stmt, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::RETURN_STMT:
+                {
+                    AST::ReturnStmt::print(stmt->return_stmt, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::EXPR_STMT:
+                {
+                    AST::ExprStmt::print(stmt->expr_stmt, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::VAR_DECL:
+                {
+                    AST::VarDecl::print(stmt->var_decl, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::VAR_DEF:
+                {
+                    AST::VarDef::print(stmt->var_def, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::IF_STMT:
+                {
+                    AST::IfStmt::print(stmt->if_stmt, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::FOR_LOOP:
+                {
+                    AST::ForLoop::print(stmt->for_loop, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::WHILE_LOOP:
+                {
+                    AST::WhileLoop::print(stmt->while_loop, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::DO_WHILE_LOOP:
+                {
+                    AST::DoWhileLoop::print(stmt->do_while_loop, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::SWITCH_STMT:
+                {
+                    AST::SwitchStmt::print(stmt->switch_stmt, file, depth);
+
+                    break;
+                }
+
+                case AST::StmtType::SCOPE:
+                {
+                    AST::Scope::print(stmt->scope, file, depth);
+
+                    break;
+                }
+
+                default:
+                {
+                    frx::assert(false);
+
+                    break;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,61 @@
+import "../../core/arena.frx";
+import "ast.frx";
+import "stmt.frx";
+export import "../../core/list.frx";
+import "../core/source_range.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct Scope
+    {
+        SourceRange range;
+
+        List stmts;
+    }
+
+    namespace Scope
+    {
+        export Scope* new(Arena* arena)
+        {
+            mut Scope* scope = arena_alloc(arena, frx::sizeof(Scope));
+
+            list_init(&scope->stmts);
+
+            return scope;
+        }
+
+        export void add_stmt(mut Scope* scope, Stmt* stmt)
+        {
+            frx::assert(scope != nullptr);
+
+            frx::assert(stmt != nullptr);
+
+            list_push(&scope->stmts, stmt);
+        }
+
+        export void print(Scope* scope, mut FILE* file, usize depth)
+        {
+            frx::assert(scope != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s\n", "scope");
+
+            mut usize i;
+            for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+            {
+                AST::Stmt* stmt = list_get(&scope->stmts, i);
+                AST::Stmt::print(stmt, file, depth + 1);
+            }
+        }
+    }
+}

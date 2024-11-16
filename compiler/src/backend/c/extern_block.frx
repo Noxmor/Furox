@@ -1,8 +1,7 @@
 import "c.frx";
 import "func_decl.frx";
 import "../../core/list.frx";
-import "../../frontend/syntax/extern_block.frx";
-import "../../frontend/syntax/func_decl.frx";
+import "../../frontend/ast/extern_block.frx";
 
 extern struct FILE;
 
@@ -12,7 +11,7 @@ extern
 }
 
 export void transpile_extern_block(Transpiler* transpiler,
-    ASTExternBlock* extern_block)
+    AST::ExternBlock* extern_block)
 {
     frx::assert(transpiler != nullptr);
 
@@ -21,7 +20,7 @@ export void transpile_extern_block(Transpiler* transpiler,
     mut usize i;
     for(i = 0; i < list_size(&extern_block->func_decls); i = i + 1)
     {
-        ASTFuncDecl* func_decl = list_get(&extern_block->func_decls, i);
+        AST::FuncDecl* func_decl = list_get(&extern_block->func_decls, i);
         transpile_func_decl(transpiler, func_decl);
     }
 }

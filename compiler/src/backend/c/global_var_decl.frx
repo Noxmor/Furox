@@ -1,8 +1,7 @@
 import "c.frx";
 import "type_specifier.frx";
 import "../core/mangling.frx";
-import "../../frontend/symbols/var.frx";
-import "../../frontend/syntax/global_var_decl.frx";
+import "../../frontend/ast/global_var_decl.frx";
 
 extern struct FILE;
 
@@ -12,7 +11,7 @@ extern
 }
 
 export void transpile_global_var_decl(Transpiler* transpiler,
-    ASTGlobalVarDecl* var_decl)
+    AST::GlobalVarDecl* var_decl)
 {
     frx::assert(transpiler != nullptr);
 

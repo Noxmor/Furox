@@ -1,69 +1,31 @@
+export import "../ast/initializer_list.frx";
 import "expr.frx";
-import "../core/ast.frx";
 import "../core/parser.frx";
 import "../../core/list.frx";
 
-extern struct FILE;
-
-extern
+namespace AST::InitializerList
 {
-    i32 fprintf(mut FILE* stream, char* format, ...);
-}
-
-export struct ASTInitializerList
-{
-    List values;
-}
-
-ASTInitializerList* make_initializer_list(Arena* arena)
-{
-    ASTInitializerList* list = arena_alloc(arena,
-        frx::sizeof(ASTInitializerList));
-
-    list_init(&list->values);
-
-    return list;
-}
-
-export ASTInitializerList* parse_initializer_list(Parser* parser)
-{
-    frx::assert(parser != nullptr);
-
-    parser_eat(parser, TokenType::LBRACE);
-
-    ASTInitializerList* list = make_initializer_list(&parser->arena);
-
-    while(parser_loop_until(parser, TokenType::RBRACE))
+    export InitializerList* parse(Parser* parser)
     {
-        if(list_size(&list->values) > 0)
+        frx::assert(parser != nullptr);
+
+        parser_eat(parser, TokenType::LBRACE);
+
+        InitializerList* list = new(&parser->arena);
+
+        while(parser_loop_until(parser, TokenType::RBRACE))
         {
-            parser_eat(parser, TokenType::COMMA);
+            if(list_size(&list->values) > 0)
+            {
+                parser_eat(parser, TokenType::COMMA);
+            }
+
+            Expr* value = AST::Expr::parse(parser);
+            list_push(&list->values, value);
         }
 
-        AST* value = parse_expr(parser);
-        list_push(&list->values, value);
-    }
+        parser_eat(parser, TokenType::RBRACE);
 
-    parser_eat(parser, TokenType::RBRACE);
-
-    return list;
-}
-
-export void print_initializer_list(ASTInitializerList* list, FILE* file,
-    usize depth)
-{
-    frx::assert(list != nullptr);
-
-    frx::assert(file != nullptr);
-
-    print_ast_depth(file, depth);
-
-    fprintf(file, "%s\n", ast_type_to_str(AstType::INITIALIZER_LIST));
-
-    mut usize i;
-    for(i = 0; i < list_size(&list->values); i = i + 1)
-    {
-        AST* value = list_get(&list->values, i);
-        print_ast(value, file, depth);
+        return list;
     }
 }

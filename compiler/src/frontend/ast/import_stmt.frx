@@ -1,0 +1,48 @@
+import "../../core/arena.frx";
+import "ast.frx";
+export import "../core/parser.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct ImportStmt
+    {
+        Parser* imported_parser;
+        char* filepath;
+        b8 exported;
+    }
+
+    namespace ImportStmt
+    {
+        export ImportStmt* new(Arena* arena, Parser* imported_parser,
+            char* filepath, b8 exported)
+        {
+            frx::assert(filepath != nullptr);
+
+            mut ImportStmt* import_stmt = arena_alloc(arena, frx::sizeof(ImportStmt));
+
+            import_stmt->imported_parser = imported_parser;
+            import_stmt->filepath = filepath;
+            import_stmt->exported = exported;
+
+            return import_stmt;
+        }
+
+        export void print(ImportStmt* import_stmt, mut FILE* file, usize depth)
+        {
+            frx::assert(import_stmt != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (%s)\n", "import-statement", import_stmt->filepath);
+        }
+    }
+}

@@ -1,0 +1,57 @@
+import "../../core/arena.frx";
+import "ast.frx";
+import "namespace_scope.frx";
+export import "../core/namespace.frx";
+export import "../../core/list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct Namespace
+    {
+        core::Namespace* ns;
+
+        List namespace_scope;
+    }
+
+    namespace Namespace
+    {
+        export Namespace* new(Arena* arena, core::Namespace* ns)
+        {
+            frx::assert(ns != nullptr);
+
+            mut Namespace* namespace_node = arena_alloc(arena, frx::sizeof(Namespace));
+
+            namespace_node->ns = ns;
+
+            list_init(&namespace_node->namespace_scope);
+
+            return namespace_node;
+        }
+
+        export void print(Namespace* namespace_node, mut FILE* file, usize depth)
+        {
+            frx::assert(namespace_node != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (%s)\n", "namespace",
+                namespace_node->ns->name);
+
+            mut usize i;
+            for(i = 0; i < list_size(&namespace_node->namespace_scope); i = i + 1)
+            {
+                NamespaceScope* namespace_scope = list_get(&namespace_node->namespace_scope, i);
+                AST::NamespaceScope::print(namespace_scope, file, depth + 1);
+            }
+        }
+    }
+}

@@ -1,21 +1,21 @@
 import "std/libc.frx";
-import "../core/namespace.frx";
-import "../core/scope.frx";
-import "../syntax/type_specifier.frx";
+export import "../core/namespace.frx";
+export import "../core/scope.frx";
+export import "../ast/type_specifier.frx";
 import "../../core/hash.frx";
 
 export struct VarSymbol
 {
-    Namespace* ns;
-    ASTTypeSpecifier* type;
-    Scope* scope;
+    core::Namespace* ns;
+    AST::TypeSpecifier* type;
+    core::Scope* scope;
     char* name;
     b8 global;
     b8 mutable;
 }
 
-export void var_symbol_init(mut VarSymbol* symbol, Namespace* ns,
-    ASTTypeSpecifier* type, Scope* scope, char* name, b8 global, b8 mutable)
+export void var_symbol_init(mut VarSymbol* symbol, core::Namespace* ns,
+    AST::TypeSpecifier* type, core::Scope* scope, char* name, b8 global, b8 mutable)
 {
     frx::assert(symbol != nullptr);
 
@@ -56,7 +56,7 @@ export void var_table_init(VarTable* table)
     libc::memset(table, 0, frx::sizeof(VarTable));
 }
 
-export VarSymbol* var_table_find_by_namespace(VarTable* table, Namespace* ns,
+export VarSymbol* var_table_find_by_namespace(VarTable* table, core::Namespace* ns,
     char* name)
 {
     frx::assert(table != nullptr);
@@ -81,7 +81,7 @@ export VarSymbol* var_table_find_by_namespace(VarTable* table, Namespace* ns,
     return nullptr;
 }
 
-export VarSymbol* var_table_find_by_scope(VarTable* table, Scope* scope,
+export VarSymbol* var_table_find_by_scope(VarTable* table, core::Scope* scope,
     char* name)
 {
     frx::assert(table != nullptr);

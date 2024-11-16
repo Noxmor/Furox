@@ -1,10 +1,10 @@
 import "../core/errors.frx";
 import "../core/parser.frx";
 import "../symbols/enum.frx";
-import "../syntax/enum_def.frx";
+import "../ast/enum_def.frx";
 import "../../core/list.frx";
 
-export void analyze_enum_def(mut Parser* parser, mut ASTEnumDef* enum_def)
+export void analyze_enum_def(mut Parser* parser, mut AST::EnumDef* enum_def)
 {
     frx::assert(parser != nullptr);
 

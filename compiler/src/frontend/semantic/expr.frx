@@ -1,0 +1,115 @@
+export import "../ast/expr.frx";
+import "../core/parser.frx";
+import "enum_constant.frx";
+import "func_call.frx";
+import "internal_func_call.frx";
+import "var.frx";
+import "struct_member.frx";
+import "unresolved_name.frx";
+import "unresolved_namespaced_name.frx";
+import "initializer_list.frx";
+import "unary_expr.frx";
+import "binary_expr.frx";
+
+export void analyze_expr(Parser* parser, mut AST::Expr* expr)
+{
+    switch(expr->type)
+    {
+        case AST::ExprType::INT_LITERAL:
+        {
+            break;
+        }
+
+        case AST::ExprType::FLOAT_LITERAL:
+        {
+            break;
+        }
+
+        case AST::ExprType::CHAR_LITERAL:
+        {
+            break;
+        }
+
+        case AST::ExprType::STRING_LITERAL:
+        {
+            break;
+        }
+
+        case AST::ExprType::ENUM_CONSTANT:
+        {
+            analyze_enum_constant(parser, expr->enum_constant);
+
+            break;
+        }
+
+        case AST::ExprType::FUNC_CALL:
+        {
+            analyze_func_call(parser, expr->func_call);
+
+            break;
+        }
+
+        case AST::ExprType::INTERNAL_FUNC_CALL:
+        {
+            analyze_internal_func_call(parser, expr->internal_func_call, expr);
+
+            break;
+        }
+
+        case AST::ExprType::VAR:
+        {
+            analyze_var(parser, expr->var);
+
+            break;
+        }
+
+        case AST::ExprType::STRUCT_MEMBER:
+        {
+            analyze_struct_member(parser, expr->struct_member);
+
+            break;
+        }
+
+        case AST::ExprType::UNRESOLVED_NAME:
+        {
+            analyze_unresolved_name(parser, expr->unresolved_name, expr);
+
+            break;
+        }
+
+        case AST::ExprType::UNRESOLVED_NAMESPACED_NAME:
+        {
+            analyze_unresolved_namespaced_name(parser, expr->unresolved_namespaced_name, expr);
+
+            break;
+        }
+
+        case AST::ExprType::INITIALIZER_LIST:
+        {
+            analyze_initializer_list(parser, expr->initializer_list);
+
+            break;
+        }
+
+        case AST::ExprType::UNARY_EXPR:
+        {
+            analyze_unary_expr(parser, expr->unary_expr);
+
+            break;
+        }
+
+        case AST::ExprType::BINARY_EXPR:
+        {
+            analyze_binary_expr(parser, expr->binary_expr);
+
+            break;
+        }
+
+        default:
+        {
+            frx::assert(false);
+
+            break;
+        }
+    }
+}

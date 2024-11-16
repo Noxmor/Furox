@@ -1,0 +1,50 @@
+import "../../core/arena.frx";
+import "ast.frx";
+export import "../core/source_range.frx";
+export import "../symbols/struct.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct StructDecl
+    {
+        SourceRange range;
+
+        StructSymbol symbol;
+
+        b8 is_redefinition;
+    }
+
+    namespace StructDecl
+    {
+        export StructDecl* new(Arena* arena, core::Scope* scope, core::Namespace* ns, char* name)
+        {
+            mut StructDecl* struct_decl = arena_alloc(arena, frx::sizeof(StructDecl));
+
+            struct_symbol_init(&struct_decl->symbol, scope, ns, name, false, true);
+
+            struct_decl->is_redefinition = false;
+
+            return struct_decl;
+        }
+
+        export void print(StructDecl* struct_decl, mut FILE* file, usize depth)
+        {
+            frx::assert(struct_decl != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            StructSymbol* symbol = &struct_decl->symbol;
+
+            fprintf(file, "%s (%s)\n", "struct-declaration", symbol->name);
+        }
+    }
+}

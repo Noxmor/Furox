@@ -1,56 +1,39 @@
 import "../core/namespace.frx";
 import "../core/parser.frx";
 
-extern struct FILE;
-
-extern
+namespace AST::NamespaceResolution
 {
-    i32 fprintf(mut FILE* stream, char* format, ...);
-}
-
-export Namespace* parse_namespace_resolution(Parser* parser)
-{
-    frx::assert(parser != nullptr);
-
-    if(parser->token->type == TokenType::NAMESPACE_RESOLUTION)
+    export core::Namespace* parse(Parser* parser)
     {
-        parser_eat(parser, TokenType::NAMESPACE_RESOLUTION);
+        frx::assert(parser != nullptr);
 
-        return namespace_create_global();
-    }
+        if(parser->token->type == TokenType::NAMESPACE_RESOLUTION)
+        {
+            parser_eat(parser, TokenType::NAMESPACE_RESOLUTION);
 
-    mut Token* next = parser_peek(parser, 1);
+            return namespace_create_global();
+        }
 
-    mut Namespace* ns = nullptr;
-    if(parser->token->type == TokenType::IDENTIFIER
-        && next->type == TokenType::NAMESPACE_RESOLUTION)
-    {
-        ns = namespace_create_global();
-    }
+        mut Token* next = parser_peek(parser, 1);
 
-    while(parser->token->type == TokenType::IDENTIFIER
-        && next->type == TokenType::NAMESPACE_RESOLUTION)
-    {
-        ns = namespace_create(ns, parser->token->identifier);
+        mut core::Namespace* ns = nullptr;
+        if(parser->token->type == TokenType::IDENTIFIER
+            && next->type == TokenType::NAMESPACE_RESOLUTION)
+        {
+            ns = namespace_create_global();
+        }
 
-        parser_eat(parser, TokenType::IDENTIFIER);
-        parser_eat(parser, TokenType::NAMESPACE_RESOLUTION);
+        while(parser->token->type == TokenType::IDENTIFIER
+            && next->type == TokenType::NAMESPACE_RESOLUTION)
+        {
+            ns = namespace_create(ns, parser->token->identifier);
 
-        next = parser_peek(parser, 1);
-    }
+            parser_eat(parser, TokenType::IDENTIFIER);
+            parser_eat(parser, TokenType::NAMESPACE_RESOLUTION);
 
-    return ns;
-}
+            next = parser_peek(parser, 1);
+        }
 
-export void print_namespace_resolution(FILE* file, mut Namespace* ns)
-{
-    frx::assert(file != nullptr);
-
-    while(ns != nullptr)
-    {
-        fprintf(file, "%s%s", ns->name,
-            token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
-
-        ns = ns->parent;
+        return ns;
     }
 }

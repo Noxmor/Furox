@@ -1,0 +1,51 @@
+import "../../core/arena.frx";
+import "ast.frx";
+export import "../symbols/var.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct Var
+    {
+        SourceRange range;
+        VarSymbol* symbol;
+
+        core::Namespace* ns;
+        core::Scope* scope;
+        char* name;
+    }
+
+    namespace Var
+    {
+        export Var* new(Arena* arena, core::Namespace* ns, core::Scope* scope, char* name)
+        {
+            frx::assert(name != nullptr);
+
+            mut Var* var = arena_alloc(arena, frx::sizeof(Var));
+
+            var->symbol = nullptr;
+            var->ns = ns;
+            var->scope = scope;
+            var->name = name;
+
+            return var;
+        }
+
+        export void print(Var* var, mut FILE* file, usize depth)
+        {
+            frx::assert(var != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (%s)\n", "variable", var->name);
+        }
+    }
+}

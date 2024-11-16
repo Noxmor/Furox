@@ -1,0 +1,48 @@
+import "../../core/arena.frx";
+import "ast.frx";
+export import "../core/source_range.frx";
+export import "../core/scope.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct UnresolvedName
+    {
+        SourceRange range;
+
+        char* name;
+        core::Scope* scope;
+    }
+
+    namespace UnresolvedName
+    {
+        export UnresolvedName* new(Arena* arena, char* name, core::Scope* scope)
+        {
+            frx::assert(name != nullptr);
+
+            mut UnresolvedName* unresolved_name = arena_alloc(arena, frx::sizeof(UnresolvedName));
+
+            unresolved_name->name = name;
+            unresolved_name->scope = scope;
+
+            return unresolved_name;
+        }
+
+        export void print(UnresolvedName* unresolved_name, mut FILE* file, usize depth)
+        {
+            frx::assert(unresolved_name != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (%s)\n", "unresolved-name", unresolved_name->name);
+        }
+    }
+}

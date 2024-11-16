@@ -1,7 +1,7 @@
 import "c.frx";
 import "../core/mangling.frx";
 import "../../frontend/symbols/enum.frx";
-import "../../frontend/syntax/enum_constant.frx";
+import "../../frontend/ast/enum_constant.frx";
 
 extern struct FILE;
 
@@ -11,7 +11,7 @@ extern
 }
 
 export void transpile_enum_constant(Transpiler* transpiler,
-    ASTEnumConstant* constant)
+    AST::EnumConstant* constant)
 {
     frx::assert(transpiler != nullptr);
 

@@ -1,0 +1,37 @@
+import "../../core/arena.frx";
+import "ast.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct BreakStmt
+    {
+        b8 value; //Placeholder, since the arena allocator can't handle
+                  //allocations for structs with a size of 0.
+    }
+
+    namespace BreakStmt
+    {
+        export BreakStmt* new(Arena* arena)
+        {
+            return arena_alloc(arena, frx::sizeof(BreakStmt));
+        }
+
+        export void print(BreakStmt* break_stmt, mut FILE* file, usize depth)
+        {
+            frx::assert(break_stmt != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s\n", "break-statement");
+        }
+    }
+}

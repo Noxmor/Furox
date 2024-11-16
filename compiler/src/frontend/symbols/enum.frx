@@ -2,22 +2,22 @@ import "std/libc.frx";
 import "../core/namespace.frx";
 import "../core/scope.frx";
 import "../core/token.frx";
-import "../syntax/enum_def.frx";
+import "../ast/enum_def.frx";
 import "../../core/hash.frx";
-import "../../core/list.frx";
+export import "../../core/list.frx";
 
 export struct EnumSymbol
 {
     TokenType type;
-    Scope* scope;
-    Namespace* ns;
+    core::Scope* scope;
+    core::Namespace* ns;
     char* name;
     List constants;
     b8 exported;
 }
 
 export void enum_symbol_init(mut EnumSymbol* symbol, TokenType type,
-    Scope* scope, Namespace* ns, char* name, b8 exported)
+    core::Scope* scope, core::Namespace* ns, char* name, b8 exported)
 {
     frx::assert(symbol != nullptr);
 
@@ -44,7 +44,7 @@ export b8 enum_symbol_has_constant(EnumSymbol* symbol, char* name)
     mut usize i;
     for(i = 0; i < list_size(&symbol->constants); i = i + 1)
     {
-        ASTEnumConstantDef* constant = list_get(&symbol->constants, i);
+        AST::EnumConstantDef* constant = list_get(&symbol->constants, i);
         if(libc::strcmp(constant->name, name) == 0)
         {
             return true;
@@ -77,7 +77,7 @@ export void enum_table_init(EnumTable* table)
     libc::memset(table, 0, frx::sizeof(EnumTable));
 }
 
-export EnumSymbol* enum_table_find_r(EnumTable* table, mut Namespace* ns,
+export EnumSymbol* enum_table_find_r(EnumTable* table, mut core::Namespace* ns,
     char* name)
 {
     mut EnumSymbol* symbol = enum_table_find(table, ns, name);
@@ -90,7 +90,7 @@ export EnumSymbol* enum_table_find_r(EnumTable* table, mut Namespace* ns,
     return symbol;
 }
 
-export EnumSymbol* enum_table_find(EnumTable* table, Namespace* ns, char* name)
+export EnumSymbol* enum_table_find(EnumTable* table, core::Namespace* ns, char* name)
 {
     frx::assert(table != nullptr);
 

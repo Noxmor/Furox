@@ -2,9 +2,9 @@ import "type_specifier.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
 import "../symbols/var.frx";
-import "../syntax/var_decl.frx";
+import "../ast/var_decl.frx";
 
-export void analyze_var_decl(mut Parser* parser, ASTVarDecl* var_decl)
+export void analyze_var_decl(mut Parser* parser, AST::VarDecl* var_decl)
 {
     frx::assert(parser != nullptr);
 

@@ -1,5 +1,5 @@
 import "c/c.frx";
-import "../frontend/syntax/program.frx";
+import "../frontend/ast/program.frx";
 
 export enum BackendType : u8
 {
@@ -9,7 +9,7 @@ export enum BackendType : u8
     COUNT
 }
 
-export i32 backend_generate_code(BackendType backend, ASTProgram* program)
+export i32 backend_generate_code(BackendType backend, AST::Program* program)
 {
     frx::assert(backend < BackendType::COUNT);
 

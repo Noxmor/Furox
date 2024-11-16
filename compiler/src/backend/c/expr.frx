@@ -1,0 +1,111 @@
+import "c.frx";
+import "int_literal.frx";
+import "float_literal.frx";
+import "char_literal.frx";
+import "string_literal.frx";
+import "enum_constant.frx";
+import "func_call.frx";
+import "internal_func_call.frx";
+import "var.frx";
+import "struct_member.frx";
+import "initializer_list.frx";
+import "unary_expr.frx";
+import "binary_expr.frx";
+import "../../frontend/ast/expr.frx";
+
+export void transpile_expr(Transpiler* transpiler, AST::Expr* expr)
+{
+    switch(expr->type)
+    {
+        case AST::ExprType::INT_LITERAL:
+        {
+            transpile_int_literal(transpiler, expr->int_literal);
+
+            break;
+        }
+
+        case AST::ExprType::FLOAT_LITERAL:
+        {
+            transpile_float_literal(transpiler, expr->float_literal);
+
+            break;
+        }
+
+        case AST::ExprType::CHAR_LITERAL:
+        {
+            transpile_char_literal(transpiler, expr->char_literal);
+
+            break;
+        }
+
+        case AST::ExprType::STRING_LITERAL:
+        {
+            transpile_string_literal(transpiler, expr->string_literal);
+
+            break;
+        }
+
+        case AST::ExprType::ENUM_CONSTANT:
+        {
+            transpile_enum_constant(transpiler, expr->enum_constant);
+
+            break;
+        }
+
+        case AST::ExprType::FUNC_CALL:
+        {
+            transpile_func_call(transpiler, expr->func_call);
+
+            break;
+        }
+
+        case AST::ExprType::INTERNAL_FUNC_CALL:
+        {
+            transpile_internal_func_call(transpiler, expr->internal_func_call);
+
+            break;
+        }
+
+        case AST::ExprType::VAR:
+        {
+            transpile_var(transpiler, expr->var);
+
+            break;
+        }
+
+        case AST::ExprType::STRUCT_MEMBER:
+        {
+            transpile_struct_member(transpiler, expr->struct_member);
+
+            break;
+        }
+
+        case AST::ExprType::INITIALIZER_LIST:
+        {
+            transpile_initializer_list(transpiler, expr->initializer_list);
+
+            break;
+        }
+
+        case AST::ExprType::UNARY_EXPR:
+        {
+            transpile_unary_expr(transpiler, expr->unary_expr);
+
+            break;
+        }
+
+        case AST::ExprType::BINARY_EXPR:
+        {
+            transpile_binary_expr(transpiler, expr->binary_expr);
+
+            break;
+        }
+
+        default:
+        {
+            frx::assert(false);
+
+            break;
+        }
+    }
+}

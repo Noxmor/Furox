@@ -1,0 +1,370 @@
+import "std/libc.frx";
+import "../../core/arena.frx";
+export import "error.frx";
+export import "char_literal.frx";
+export import "float_literal.frx";
+export import "int_literal.frx";
+export import "string_literal.frx";
+export import "enum_constant.frx";
+export import "func_call.frx";
+export import "internal_func_call.frx";
+export import "var.frx";
+export import "struct_member.frx";
+export import "unresolved_name.frx";
+export import "unresolved_namespaced_name.frx";
+export import "initializer_list.frx";
+export import "unary_expr.frx";
+export import "binary_expr.frx";
+
+extern struct FILE;
+
+namespace AST
+{
+    export enum ExprType : u8
+    {
+        INVALID,
+        ERROR,
+        INT_LITERAL,
+        FLOAT_LITERAL,
+        CHAR_LITERAL,
+        STRING_LITERAL,
+        ENUM_CONSTANT,
+        FUNC_CALL,
+        INTERNAL_FUNC_CALL,
+        VAR,
+        STRUCT_MEMBER,
+        UNRESOLVED_NAME,
+        UNRESOLVED_NAMESPACED_NAME,
+        INITIALIZER_LIST,
+        UNARY_EXPR,
+        BINARY_EXPR
+    }
+
+    export struct Expr
+    {
+        ExprType type;
+
+        Error* error;
+        IntLiteral* int_literal;
+        FloatLiteral* float_literal;
+        CharLiteral* char_literal;
+        StringLiteral* string_literal;
+        EnumConstant* enum_constant;
+        FuncCall* func_call;
+        InternalFuncCall* internal_func_call;
+        Var* var;
+        StructMember* struct_member;
+        UnresolvedName* unresolved_name;
+        UnresolvedNamespacedName* unresolved_namespaced_name;
+        InitializerList* initializer_list;
+        UnaryExpr* unary_expr;
+        BinaryExpr* binary_expr;
+    }
+
+    namespace Expr
+    {
+        Expr* new(Arena* arena)
+        {
+            mut Expr* expr = arena_alloc(arena, frx::sizeof(Expr));
+
+            libc::memset(expr, 0, frx::sizeof(Expr));
+
+            return expr;
+        }
+
+        export Expr* from_error(Arena* arena, Error* error)
+        {
+            frx::assert(error != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::ERROR;
+            expr->error = error;
+
+            return expr;
+        }
+
+        export Expr* from_int_literal(Arena* arena, IntLiteral* literal)
+        {
+            frx::assert(literal != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::INT_LITERAL;
+            expr->int_literal = literal;
+
+            return expr;
+        }
+
+        export Expr* from_float_literal(Arena* arena, FloatLiteral* literal)
+        {
+            frx::assert(literal != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::FLOAT_LITERAL;
+            expr->float_literal = literal;
+
+            return expr;
+        }
+
+        export Expr* from_char_literal(Arena* arena, CharLiteral* literal)
+        {
+            frx::assert(literal != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::CHAR_LITERAL;
+            expr->char_literal = literal;
+
+            return expr;
+        }
+
+        export Expr* from_string_literal(Arena* arena, StringLiteral* literal)
+        {
+            frx::assert(literal != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::STRING_LITERAL;
+            expr->string_literal = literal;
+
+            return expr;
+        }
+
+        export Expr* from_enum_constant(Arena* arena, EnumConstant* enum_constant)
+        {
+            frx::assert(enum_constant != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::ENUM_CONSTANT;
+            expr->enum_constant = enum_constant;
+
+            return expr;
+        }
+
+        export Expr* from_func_call(Arena* arena, FuncCall* func_call)
+        {
+            frx::assert(func_call != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::FUNC_CALL;
+            expr->func_call = func_call;
+
+            return expr;
+        }
+
+        export Expr* from_internal_func_call(Arena* arena, InternalFuncCall* internal_func_call)
+        {
+            frx::assert(internal_func_call != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::INTERNAL_FUNC_CALL;
+            expr->internal_func_call = internal_func_call;
+
+            return expr;
+        }
+
+        export Expr* from_var(Arena* arena, Var* var)
+        {
+            frx::assert(var != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::VAR;
+            expr->var = var;
+
+            return expr;
+        }
+
+        export Expr* from_struct_member(Arena* arena, StructMember* struct_member)
+        {
+            frx::assert(struct_member != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::STRUCT_MEMBER;
+            expr->struct_member;
+
+            return expr;
+        }
+
+        export Expr* from_unresolved_name(Arena* arena, UnresolvedName* unresolved_name)
+        {
+            frx::assert(unresolved_name != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::UNRESOLVED_NAME;
+            expr->unresolved_name = unresolved_name;
+
+            return expr;
+        }
+
+        export Expr* from_unresolved_namespaced_name(Arena* arena, UnresolvedNamespacedName* unresolved_namespaced_name)
+        {
+            frx::assert(unresolved_namespaced_name != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::UNRESOLVED_NAMESPACED_NAME;
+            expr->unresolved_namespaced_name = unresolved_namespaced_name;
+
+            return expr;
+        }
+
+        export Expr* from_initializer_list(Arena* arena, InitializerList* initializer_list)
+        {
+            frx::assert(initializer_list != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::INITIALIZER_LIST;
+            expr->initializer_list = initializer_list;
+
+            return expr;
+        }
+
+        export Expr* from_unary_expr(Arena* arena, UnaryExpr* unary_expr)
+        {
+            frx::assert(unary_expr != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::UNARY_EXPR;
+            expr->unary_expr = unary_expr;
+
+            return expr;
+        }
+
+        export Expr* from_binary_expr(Arena* arena, BinaryExpr* binary_expr)
+        {
+            frx::assert(binary_expr != nullptr);
+
+            mut Expr* expr = new(arena);
+
+            expr->type = AST::ExprType::BINARY_EXPR;
+            expr->binary_expr = binary_expr;
+
+            return expr;
+        }
+
+        export void print(Expr* expr, mut FILE* file, usize depth)
+        {
+            frx::assert(expr != nullptr);
+
+            frx::assert(file != nullptr);
+
+            switch(expr->type)
+            {
+                case AST::ExprType::INT_LITERAL:
+                {
+                    AST::IntLiteral::print(expr->int_literal, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::FLOAT_LITERAL:
+                {
+                    AST::FloatLiteral::print(expr->float_literal, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::CHAR_LITERAL:
+                {
+                    AST::CharLiteral::print(expr->char_literal, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::STRING_LITERAL:
+                {
+                    AST::StringLiteral::print(expr->string_literal, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::ENUM_CONSTANT:
+                {
+                    AST::EnumConstant::print(expr->enum_constant, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::FUNC_CALL:
+                {
+                    AST::FuncCall::print(expr->func_call, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::INTERNAL_FUNC_CALL:
+                {
+                    AST::InternalFuncCall::print(expr->internal_func_call, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::VAR:
+                {
+                    AST::Var::print(expr->var, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::STRUCT_MEMBER:
+                {
+                    AST::StructMember::print(expr->struct_member, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::UNRESOLVED_NAME:
+                {
+                    AST::UnresolvedName::print(expr->unresolved_name, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::UNRESOLVED_NAMESPACED_NAME:
+                {
+                    AST::UnresolvedNamespacedName::print(expr->unresolved_namespaced_name, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::INITIALIZER_LIST:
+                {
+                    AST::InitializerList::print(expr->initializer_list, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::UNARY_EXPR:
+                {
+                    AST::UnaryExpr::print(expr->unary_expr, file, depth);
+
+                    break;
+                }
+
+                case AST::ExprType::BINARY_EXPR:
+                {
+                    AST::BinaryExpr::print(expr->binary_expr, file, depth);
+
+                    break;
+                }
+
+                default:
+                {
+                    frx::assert(false);
+
+                    break;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,64 @@
+import "../../core/arena.frx";
+import "ast.frx";
+export import "expr.frx";
+export import "../core/token.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct BinaryExpr
+    {
+        TokenType type;
+        Operator operator;
+
+        Expr* left;
+        Expr* right;
+    }
+
+    namespace BinaryExpr
+    {
+        export BinaryExpr* new(Arena* arena, TokenType type, Operator operator,
+            Expr* left, Expr* right)
+        {
+            frx::assert(arena != nullptr);
+
+            frx::assert(token_type_is_infix_operator(type));
+
+            frx::assert(operator != Operator::INVALID && operator < Operator::COUNT);
+
+            frx::assert(left != nullptr);
+
+            frx::assert(right != nullptr);
+
+            mut BinaryExpr* expr = arena_alloc(arena,
+                frx::sizeof(BinaryExpr));
+
+            expr->type = type;
+            expr->operator = operator;
+            expr->left = left;
+            expr->right = right;
+
+            return expr;
+        }
+
+        export void print(BinaryExpr* binary_expr, mut FILE* file, usize depth)
+        {
+            frx::assert(binary_expr != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (%s)\n", "binary-expression", token_type_to_str(binary_expr->type));
+
+            AST::Expr::print(binary_expr->left, file, depth + 1);
+            AST::Expr::print(binary_expr->right, file, depth + 1);
+        }
+    }
+}

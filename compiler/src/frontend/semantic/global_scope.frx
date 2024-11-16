@@ -1,0 +1,99 @@
+import "../core/parser.frx";
+import "import_stmt.frx";
+import "extern_block.frx";
+import "struct_decl.frx";
+import "func_decl.frx";
+import "namespace.frx";
+import "enum_def.frx";
+import "struct_def.frx";
+import "func_def.frx";
+import "global_var_decl.frx";
+import "global_var_def.frx";
+export import "../ast/global_scope.frx";
+
+export void analyze_global_scope(Parser* parser, AST::GlobalScope* global_scope)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(global_scope != nullptr);
+
+    switch(global_scope->type)
+    {
+        case AST::GlobalScopeType::IMPORT_STMT:
+        {
+            analyze_import_stmt(parser, global_scope->import_stmt);
+
+            break;
+        }
+
+        case AST::GlobalScopeType::EXTERN_BLOCK:
+        {
+            analyze_extern_block(parser, global_scope->extern_block);
+
+            break;
+        }
+
+        case AST::GlobalScopeType::STRUCT_DECL:
+        {
+            analyze_struct_decl(parser, global_scope->struct_decl);
+
+            break;
+        }
+
+        case AST::GlobalScopeType::FUNC_DECL:
+        {
+            analyze_func_decl(parser, global_scope->func_decl);
+
+            break;
+        }
+
+        case AST::GlobalScopeType::NAMESPACE:
+        {
+            analyze_namespace(parser, global_scope->ns);
+
+            break;
+        }
+
+        case AST::GlobalScopeType::ENUM_DEF:
+        {
+            analyze_enum_def(parser, global_scope->enum_def);
+
+            break;
+        }
+
+        case AST::GlobalScopeType::STRUCT_DEF:
+        {
+            analyze_struct_def(parser, global_scope->struct_def);
+
+            break;
+        }
+
+        case AST::GlobalScopeType::FUNC_DEF:
+        {
+            analyze_func_def(parser, global_scope->func_def);
+
+            break;
+        }
+
+        case AST::GlobalScopeType::GLOBAL_VAR_DECL:
+        {
+            analyze_global_var_decl(parser, global_scope->global_var_decl);
+
+            break;
+        }
+
+        case AST::GlobalScopeType::GLOBAL_VAR_DEF:
+        {
+            analyze_global_var_def(parser, global_scope->global_var_def);
+
+            break;
+        }
+
+        default:
+        {
+            frx::assert(false);
+
+            break;
+        }
+    }
+}

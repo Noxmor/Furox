@@ -1,8 +1,7 @@
-import "ast.frx";
 import "c.frx";
+import "stmt.frx";
 import "../../core/list.frx";
-import "../../frontend/core/ast.frx";
-import "../../frontend/syntax/scope.frx";
+import "../../frontend/ast/scope.frx";
 
 extern struct FILE;
 
@@ -11,7 +10,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_scope(Transpiler* transpiler, ASTScope* scope)
+export void transpile_scope(Transpiler* transpiler, AST::Scope* scope)
 {
     frx::assert(transpiler != nullptr);
 
@@ -22,8 +21,8 @@ export void transpile_scope(Transpiler* transpiler, ASTScope* scope)
     mut usize i;
     for(i = 0; i < list_size(&scope->stmts); i = i + 1)
     {
-        AST* stmt = list_get(&scope->stmts, i);
-        transpile_ast(transpiler, stmt);
+        AST::Stmt* stmt = list_get(&scope->stmts, i);
+        transpile_stmt(transpiler, stmt);
     }
 
     fprintf(transpiler->file, "}\n");

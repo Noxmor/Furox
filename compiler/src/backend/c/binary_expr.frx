@@ -1,6 +1,6 @@
-import "ast.frx";
 import "c.frx";
-import "../../frontend/syntax/binary_expr.frx";
+import "expr.frx";
+import "../../frontend/ast/binary_expr.frx";
 
 extern struct FILE;
 
@@ -9,7 +9,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_binary_expr(Transpiler* transpiler, ASTBinaryExpr* expr)
+export void transpile_binary_expr(Transpiler* transpiler, AST::BinaryExpr* expr)
 {
     frx::assert(transpiler != nullptr);
 
@@ -19,9 +19,9 @@ export void transpile_binary_expr(Transpiler* transpiler, ASTBinaryExpr* expr)
     {
         case Operator::ARRAY_SUBSCRIPT:
         {
-            transpile_ast(transpiler, expr->left);
+            transpile_expr(transpiler, expr->left);
             fprintf(transpiler->file, "[");
-            transpile_ast(transpiler, expr->right);
+            transpile_expr(transpiler, expr->right);
             fprintf(transpiler->file, "]");
 
             break;
@@ -29,9 +29,9 @@ export void transpile_binary_expr(Transpiler* transpiler, ASTBinaryExpr* expr)
         default:
         {
             fprintf(transpiler->file, "(");
-            transpile_ast(transpiler, expr->left);
+            transpile_expr(transpiler, expr->left);
             fprintf(transpiler->file, " %s ", token_type_to_str(expr->type));
-            transpile_ast(transpiler, expr->right);
+            transpile_expr(transpiler, expr->right);
             fprintf(transpiler->file, ")");
 
             break;

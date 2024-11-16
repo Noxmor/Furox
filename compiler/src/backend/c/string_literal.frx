@@ -1,5 +1,5 @@
 import "c.frx";
-import "../../frontend/syntax/string_literal.frx";
+import "../../frontend/ast/string_literal.frx";
 
 extern struct FILE;
 
@@ -9,7 +9,7 @@ extern
 }
 
 export void transpile_string_literal(Transpiler* transpiler,
-    ASTStringLiteral* str_literal)
+    AST::StringLiteral* str_literal)
 {
     frx::assert(transpiler != nullptr);
 

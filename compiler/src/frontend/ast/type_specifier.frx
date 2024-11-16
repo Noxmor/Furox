@@ -1,0 +1,111 @@
+import "../../core/arena.frx";
+import "../../core/list.frx";
+import "ast.frx";
+import "namespace_resolution.frx";
+export import "../core/source_range.frx";
+export import "../core/namespace.frx";
+export import "../core/scope.frx";
+export import "../core/token.frx";
+export import "../symbols/enum.frx";
+export import "../symbols/struct.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct TypeSpecifier
+    {
+        SourceRange range;
+
+        core::Namespace* ns;
+        char* name;
+        core::Scope* scope;
+
+        TokenType primitive_type;
+        EnumSymbol* enum_type;
+        StructSymbol* struct_type;
+
+        usize pointer_level;
+
+        List array_dimensions;
+    }
+
+    namespace TypeSpecifier
+    {
+        export TypeSpecifier* new(Arena* arena, core::Namespace* ns, char* name,
+            core::Scope* scope, TokenType primitive_type, usize pointer_level)
+        {
+            frx::assert(name != nullptr || primitive_type != TokenType::ERROR);
+
+            frx::assert(scope != nullptr);
+
+            mut TypeSpecifier* type_specifier = arena_alloc(arena, frx::sizeof(TypeSpecifier));
+
+            type_specifier->ns = ns;
+            type_specifier->name = name;
+            type_specifier->scope = scope;
+            type_specifier->primitive_type = primitive_type;
+            type_specifier->enum_type = nullptr;
+            type_specifier->struct_type = nullptr;
+            type_specifier->pointer_level = pointer_level;
+            list_init(&type_specifier->array_dimensions);
+
+            return type_specifier;
+        }
+
+        export void add_array_dimension(mut TypeSpecifier* type_specifier, Expr* array_dimension)
+        {
+            frx::assert(type_specifier != nullptr);
+
+            frx::assert(array_dimension != nullptr);
+
+            list_push(&type_specifier->array_dimensions, array_dimension);
+        }
+
+        export void print(TypeSpecifier* type_specifier, mut FILE* file, usize depth)
+        {
+            frx::assert(type_specifier != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s\n", "type-specifier");
+
+            print_depth(file, depth + 1);
+
+            fprintf(file, "type: ");
+            if(type_specifier->primitive_type != 0)
+            {
+                fprintf(file, "%s", token_type_to_str(type_specifier->primitive_type));
+            }
+            else
+            {
+                AST::NamespaceResolution::print(file, type_specifier->ns);
+                fprintf(file, "%s", type_specifier->name);
+            }
+
+            fprintf(file, "\n");
+
+            print_depth(file, depth + 1);
+
+            fprintf(file, "pointer_level: %zu\n", type_specifier->pointer_level);
+
+            print_depth(file, depth + 1);
+
+            fprintf(file, "array-dimensions\n");
+
+            mut usize i;
+            for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
+            {
+                AST::Expr* array_dimension = list_get(&type_specifier->array_dimensions, i);
+                AST::Expr::print(array_dimension, file, depth + 2);
+            }
+        }
+    }
+}

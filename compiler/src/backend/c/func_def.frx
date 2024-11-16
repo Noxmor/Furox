@@ -3,8 +3,7 @@ import "func_params.frx";
 import "scope.frx";
 import "type_specifier.frx";
 import "../core/mangling.frx";
-import "../../frontend/symbols/func.frx";
-import "../../frontend/syntax/func_def.frx";
+import "../../frontend/ast/func_def.frx";
 
 extern struct FILE;
 
@@ -13,7 +12,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_func_def(Transpiler* transpiler, ASTFuncDef* func_def)
+export void transpile_func_def(Transpiler* transpiler, AST::FuncDef* func_def)
 {
     frx::assert(transpiler != nullptr);
 

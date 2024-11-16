@@ -1,11 +1,11 @@
 import "../core/errors.frx";
 import "../core/parser.frx";
 import "../symbols/struct.frx";
-import "../syntax/struct_decl.frx";
+import "../ast/struct_decl.frx";
 import "../../core/list.frx";
 
 export void analyze_struct_decl(mut Parser* parser,
-    mut ASTStructDecl* struct_decl)
+    mut AST::StructDecl* struct_decl)
 {
     frx::assert(parser != nullptr);
 

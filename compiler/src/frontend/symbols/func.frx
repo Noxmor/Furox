@@ -1,19 +1,19 @@
 import "std/libc.frx";
-import "../core/namespace.frx";
-import "../core/scope.frx";
+export import "../core/namespace.frx";
+export import "../core/scope.frx";
 import "../../core/hash.frx";
 
 export struct FuncSymbol
 {
-    Scope* scope;
-    Namespace* ns;
+    core::Scope* scope;
+    core::Namespace* ns;
     char* name;
     b8 exported;
     b8 external;
 }
 
-export void func_symbol_init(mut FuncSymbol* symbol, Scope* scope,
-    Namespace* ns, char* name, b8 exported, b8 external)
+export void func_symbol_init(mut FuncSymbol* symbol, core::Scope* scope,
+    core::Namespace* ns, char* name, b8 exported, b8 external)
 {
     frx::assert(symbol != nullptr);
 
@@ -51,7 +51,7 @@ export void func_table_init(FuncTable* table)
     libc::memset(table, 0, frx::sizeof(FuncTable));
 }
 
-export FuncSymbol* func_table_find_r(FuncTable* table, mut Namespace* ns,
+export FuncSymbol* func_table_find_r(FuncTable* table, mut core::Namespace* ns,
     char* name)
 {
     mut FuncSymbol* symbol = func_table_find(table, ns, name);
@@ -64,7 +64,7 @@ export FuncSymbol* func_table_find_r(FuncTable* table, mut Namespace* ns,
     return symbol;
 }
 
-export FuncSymbol* func_table_find(FuncTable* table, Namespace* ns, char* name)
+export FuncSymbol* func_table_find(FuncTable* table, core::Namespace* ns, char* name)
 {
     frx::assert(table != nullptr);
 

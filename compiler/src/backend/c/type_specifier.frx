@@ -1,11 +1,8 @@
-import "ast.frx";
 import "c.frx";
+import "expr.frx";
 import "../core/mangling.frx";
 import "../../core/list.frx";
-import "../../frontend/core/ast.frx";
-import "../../frontend/symbols/enum.frx";
-import "../../frontend/symbols/struct.frx";
-import "../../frontend/syntax/type_specifier.frx";
+import "../../frontend/ast/type_specifier.frx";
 
 extern struct FILE;
 
@@ -15,7 +12,7 @@ extern
 }
 
 export void transpile_type_specifier(Transpiler* transpiler,
-    ASTTypeSpecifier* type_specifier)
+    AST::TypeSpecifier* type_specifier)
 {
     frx::assert(transpiler != nullptr);
 
@@ -55,7 +52,7 @@ export void transpile_type_specifier(Transpiler* transpiler,
 }
 
 export void transpile_type_specifier_array_dimensions(Transpiler* transpiler,
-    ASTTypeSpecifier* type_specifier)
+    AST::TypeSpecifier* type_specifier)
 {
     frx::assert(transpiler != nullptr);
 
@@ -65,8 +62,8 @@ export void transpile_type_specifier_array_dimensions(Transpiler* transpiler,
     for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
     {
         fprintf(transpiler->file, "[");
-        AST* dimension_size = list_get(&type_specifier->array_dimensions, i);
-        transpile_ast(transpiler, dimension_size);
+        AST::Expr* dimension_size = list_get(&type_specifier->array_dimensions, i);
+        transpile_expr(transpiler, dimension_size);
         fprintf(transpiler->file, "]");
     }
 }

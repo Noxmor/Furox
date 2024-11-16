@@ -1,0 +1,53 @@
+import "../../core/arena.frx";
+import "ast.frx";
+export import "../core/token.frx";
+export import "expr.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct UnaryExpr
+    {
+        TokenType type;
+        Operator operator;
+        Expr* operand;
+    }
+
+    namespace UnaryExpr
+    {
+        export UnaryExpr* new(Arena* arena, TokenType type, Operator operator, Expr* operand)
+        {
+            frx::assert(operator != Operator::INVALID && operator < Operator::COUNT);
+
+            frx::assert(operand != nullptr);
+
+            mut UnaryExpr* unary_expr = arena_alloc(arena, frx::sizeof(UnaryExpr));
+
+            unary_expr->type = type;
+            unary_expr->operator = operator;
+            unary_expr->operand = operand;
+
+            return unary_expr;
+        }
+
+        export void print(UnaryExpr* expr, mut FILE* file, usize depth)
+        {
+            frx::assert(expr != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (%s)\n", "unary-expression",
+                token_type_to_str(expr->type));
+
+            AST::Expr::print(expr->operand, file, depth + 1);
+        }
+    }
+}

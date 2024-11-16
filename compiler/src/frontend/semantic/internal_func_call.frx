@@ -1,22 +1,21 @@
-import "ast.frx";
-import "../core/ast.frx";
+import "expr.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
 import "../symbols/enum.frx";
 import "../symbols/struct.frx";
-import "../syntax/int_literal.frx";
-import "../syntax/internal_func_call.frx";
+import "../ast/int_literal.frx";
+import "../ast/internal_func_call.frx";
 
-export void analyze_assert(Parser* parser, ASTAssert* assert_node)
+export void analyze_assert(Parser* parser, AST::Assert* assert_node)
 {
     frx::assert(parser != nullptr);
 
     frx::assert(assert_node != nullptr);
 
-    analyze_ast(parser, assert_node->expr);
+    analyze_expr(parser, assert_node->expr);
 }
 
-export void analyze_sizeof(mut Parser* parser, mut ASTSizeof* sizeof_node)
+export void analyze_sizeof(mut Parser* parser, mut AST::Sizeof* sizeof_node)
 {
     frx::assert(parser != nullptr);
 
@@ -55,8 +54,8 @@ export void analyze_sizeof(mut Parser* parser, mut ASTSizeof* sizeof_node)
     }
 }
 
-export void analyze_enum_count(mut Parser* parser, ASTEnumCount* enum_count,
-    mut AST* ast)
+export void analyze_enum_count(mut Parser* parser, AST::EnumCount* enum_count,
+    mut AST::Expr* expr)
 {
     frx::assert(parser != nullptr);
 
@@ -85,8 +84,47 @@ export void analyze_enum_count(mut Parser* parser, ASTEnumCount* enum_count,
     }
     else
     {
-        ast->type = AstType::INT_LITERAL;
-        ast->node = make_int_literal(&parser->arena,
+        expr->type = AST::ExprType::INT_LITERAL;
+        expr->int_literal = AST::IntLiteral::new(&parser->arena,
             list_size(&symbol->constants));
+    }
+}
+
+export void analyze_internal_func_call(Parser* parser, AST::InternalFuncCall* internal_func_call,
+    mut AST::Expr* expr)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(internal_func_call != nullptr);
+
+    switch(internal_func_call->type)
+    {
+        case AST::InternalFuncCallType::ASSERT:
+        {
+            analyze_assert(parser, internal_func_call->assert_node);
+
+            break;
+        }
+
+        case AST::InternalFuncCallType::SIZEOF:
+        {
+            analyze_sizeof(parser, internal_func_call->sizeof_node);
+
+            break;
+        }
+
+        case AST::InternalFuncCallType::ENUM_COUNT:
+        {
+            analyze_enum_count(parser, internal_func_call->enum_count_node, expr);
+
+            break;
+        }
+
+        default:
+        {
+            frx::assert(false);
+
+            break;
+        }
     }
 }

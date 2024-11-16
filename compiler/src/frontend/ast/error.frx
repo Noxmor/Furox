@@ -1,0 +1,20 @@
+import "../../core/arena.frx";
+import "../core/source_range.frx";
+
+namespace AST
+{
+    export struct Error
+    {
+        SourceRange range;
+    }
+
+    namespace Error
+    {
+        export Error* new(Arena* arena)
+        {
+            Error* error = arena_alloc(arena, frx::sizeof(Error));
+
+            return error;
+        }
+    }
+}

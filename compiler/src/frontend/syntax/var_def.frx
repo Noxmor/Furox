@@ -1,66 +1,27 @@
+export import "../ast/var_def.frx";
 import "expr.frx";
 import "type_specifier.frx";
-import "../core/ast.frx";
 import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/var.frx";
 
-extern struct FILE;
-
-extern
+namespace AST::VarDef
 {
-    i32 fprintf(mut FILE* stream, char* format, ...);
-}
+    export VarDef* parse(Parser* parser, TypeSpecifier* type, char* name, b8 mutable)
+    {
+        frx::assert(parser != nullptr);
 
-export struct ASTVarDef
-{
-    VarSymbol symbol;
-    AST* value;
-}
+        mut VarDef* var_def = new(&parser->arena, type, parser->current_scope,
+            name, mutable);
 
-export ASTVarDef* make_var_def(Arena* arena, ASTTypeSpecifier* type,
-    Scope* scope, char* name, b8 mutable)
-{
-    ASTVarDef* var_def = arena_alloc(arena, frx::sizeof(ASTVarDef));
+        var_table_insert(&parser->var_table, &var_def->symbol);
 
-    var_symbol_init(&var_def->symbol, nullptr, type, scope, name, false,
-        mutable);
+        parser_eat(parser, TokenType::EQ);
 
-    return var_def;
-}
+        var_def->value = AST::Expr::parse(parser);
 
-export ASTVarDef* parse_var_def(Parser* parser, ASTTypeSpecifier* type,
-    char* name, b8 mutable)
-{
-    frx::assert(parser != nullptr);
+        parser_eat(parser, TokenType::SEMICOLON);
 
-    mut ASTVarDef* var_def = make_var_def(&parser->arena, type,
-        parser->current_scope, name, mutable);
-
-    var_table_insert(&parser->var_table, &var_def->symbol);
-
-
-    parser_eat(parser, TokenType::EQ);
-
-    var_def->value = parse_expr(parser);
-
-    parser_eat(parser, TokenType::SEMICOLON);
-
-    return var_def;
-}
-
-export void print_var_def(ASTVarDef* var_def, FILE* file, usize depth)
-{
-    frx::assert(var_def != nullptr);
-
-    frx::assert(file != nullptr);
-
-    print_ast_depth(file, depth);
-
-    VarSymbol* symbol = &var_def->symbol;
-
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::VAR_DEF), symbol->name);
-
-    print_type_specifier(symbol->type, file, depth + 1);
-    print_ast(var_def->value, file, depth + 1);
+        return var_def;
+    }
 }

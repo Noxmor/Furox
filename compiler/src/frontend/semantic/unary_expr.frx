@@ -1,12 +1,12 @@
-import "ast.frx";
+import "expr.frx";
 import "../core/parser.frx";
-import "../syntax/unary_expr.frx";
+import "../ast/unary_expr.frx";
 
-export void analyze_unary_expr(Parser* parser, ASTUnaryExpr* expr)
+export void analyze_unary_expr(Parser* parser, AST::UnaryExpr* expr)
 {
     frx::assert(parser != nullptr);
 
     frx::assert(expr != nullptr);
 
-    analyze_ast(parser, expr->operand);
+    analyze_expr(parser, expr->operand);
 }

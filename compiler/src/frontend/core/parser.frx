@@ -1,14 +1,13 @@
 import "std/libc.frx";
-import "ast.frx";
 export import "lexer.frx";
 import "namespace.frx";
 import "scope.frx";
-import "../semantic/compound.frx";
+import "../ast/compound.frx";
 import "../symbols/enum.frx";
 import "../symbols/func.frx";
 import "../symbols/struct.frx";
 import "../symbols/var.frx";
-import "../syntax/import_stmt.frx";
+import "../semantic/global_scope.frx";
 import "../syntax/translation_unit.frx";
 export import "../../core/arena.frx";
 import "../../core/list.frx";
@@ -29,12 +28,12 @@ export struct Parser
 {
     Lexer lexer;
 
-    ASTCompound* translation_unit;
+    AST::Compound* translation_unit;
 
     Token* token;
 
-    Namespace* current_namespace;
-    Scope* current_scope;
+    core::Namespace* current_namespace;
+    core::Scope* current_scope;
 
     List visible_parsers;
 
@@ -133,7 +132,7 @@ export void parser_parse(mut Parser* parser)
 {
     frx::assert(parser != nullptr);
 
-    parser->translation_unit = parse_translation_unit(parser);
+    parser->translation_unit = AST::TranslationUnit::parse(parser);
 }
 
 b8 file_exists(char* filepath)
@@ -189,13 +188,13 @@ void parser_resolve_imports_recursive(Parser* main_parser,
     mut usize i;
     for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
     {
-        AST* ast = list_get(&parser->translation_unit->nodes, i);
-        if(ast->type != AstType::IMPORT_STMT)
+        AST::GlobalScope* global_scope = list_get(&parser->translation_unit->nodes, i);
+        if(global_scope->type != AST::GlobalScopeType::IMPORT_STMT)
         {
             continue;
         }
 
-        ASTImportStmt* import_stmt = ast->node;
+        AST::ImportStmt* import_stmt = global_scope->import_stmt;
         Parser* imported_parser = import_stmt->imported_parser;
         if(imported_parser == nullptr || imported_parser == main_parser)
         {
@@ -229,13 +228,13 @@ export void parser_resolve_imports(Parser* parser)
     mut usize i;
     for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
     {
-        AST* ast = list_get(&parser->translation_unit->nodes, i);
-        if(ast->type != AstType::IMPORT_STMT)
+        AST::GlobalScope* global_scope = list_get(&parser->translation_unit->nodes, i);
+        if(global_scope->type != AST::GlobalScopeType::IMPORT_STMT)
         {
             continue;
         }
 
-        ASTImportStmt* import_stmt = ast->node;
+        AST::ImportStmt* import_stmt = global_scope->import_stmt;
         Parser* imported_parser = import_stmt->imported_parser;
         if(imported_parser == nullptr || imported_parser == parser)
         {
@@ -268,7 +267,12 @@ export void parser_analyze(Parser* parser)
 {
     frx::assert(parser != nullptr);
 
-    analyze_compound(parser, parser->translation_unit);
+    mut usize i;
+    for(i = 0; i < list_size(&parser->translation_unit->nodes); ++i)
+    {
+        AST::GlobalScope* global_scope = list_get(&parser->translation_unit->nodes, i);
+        analyze_global_scope(parser, global_scope);
+    }
 }
 
 export void parser_next_token(Parser* parser)
@@ -283,7 +287,7 @@ export Token* parser_peek(Parser* parser, usize offset)
     return lexer_peek(&parser->lexer, offset);
 }
 
-export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, mut Namespace* ns,
+export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, mut core::Namespace* ns,
     char* name)
 {
     mut EnumSymbol* symbol = parser_find_enum_symbol(parser, ns, name);
@@ -296,7 +300,7 @@ export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, mut Namespace* ns,
     return symbol;
 }
 
-export EnumSymbol* parser_find_enum_symbol(Parser* parser, Namespace* ns,
+export EnumSymbol* parser_find_enum_symbol(Parser* parser, core::Namespace* ns,
     char* name)
 {
     frx::assert(parser != nullptr);
@@ -323,7 +327,7 @@ export EnumSymbol* parser_find_enum_symbol(Parser* parser, Namespace* ns,
 }
 
 export StructSymbol* parser_find_struct_symbol_r(Parser* parser,
-    mut Namespace* ns, char* name)
+    mut core::Namespace* ns, char* name)
 {
     mut StructSymbol* symbol = parser_find_struct_symbol(parser, ns, name);
     while(symbol == nullptr && ns != nullptr)
@@ -335,7 +339,7 @@ export StructSymbol* parser_find_struct_symbol_r(Parser* parser,
     return symbol;
 }
 
-export StructSymbol* parser_find_struct_symbol(Parser* parser, Namespace* ns,
+export StructSymbol* parser_find_struct_symbol(Parser* parser, core::Namespace* ns,
     char* name)
 {
     frx::assert(parser != nullptr);
@@ -361,7 +365,7 @@ export StructSymbol* parser_find_struct_symbol(Parser* parser, Namespace* ns,
     return nullptr;
 }
 
-export FuncSymbol* parser_find_func_symbol_r(Parser* parser, mut Namespace* ns,
+export FuncSymbol* parser_find_func_symbol_r(Parser* parser, mut core::Namespace* ns,
     char* name)
 {
     mut FuncSymbol* symbol = parser_find_func_symbol(parser, ns, name);
@@ -374,7 +378,7 @@ export FuncSymbol* parser_find_func_symbol_r(Parser* parser, mut Namespace* ns,
     return symbol;
 }
 
-export FuncSymbol* parser_find_func_symbol(Parser* parser, Namespace* ns,
+export FuncSymbol* parser_find_func_symbol(Parser* parser, core::Namespace* ns,
     char* name)
 {
     frx::assert(parser != nullptr);

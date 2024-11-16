@@ -1,0 +1,50 @@
+import "../../core/arena.frx";
+import "ast.frx";
+export import "expr.frx";
+export import "scope.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct WhileLoop
+    {
+        Expr* condition;
+        Scope* scope;
+    }
+
+    namespace WhileLoop
+    {
+        export WhileLoop* new(Arena* arena, Expr* condition, Scope* scope)
+        {
+            frx::assert(condition != nullptr);
+
+            frx::assert(scope != nullptr);
+
+            mut WhileLoop* while_loop = arena_alloc(arena, frx::sizeof(WhileLoop));
+
+            while_loop->condition = condition;
+            while_loop->scope = scope;
+
+            return while_loop;
+        }
+
+        export void print(WhileLoop* while_loop, mut FILE* file, usize depth)
+        {
+            frx::assert(while_loop != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s\n", "while-loop");
+            AST::Expr::print(while_loop->condition, file, depth + 1);
+            AST::Scope::print(while_loop->scope, file, depth + 1);
+        }
+    }
+}

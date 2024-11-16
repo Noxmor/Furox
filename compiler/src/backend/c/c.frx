@@ -4,7 +4,7 @@ import "../../core/config.frx";
 import "../../core/list.frx";
 import "../../core/queue.frx";
 import "../../frontend/core/namespace.frx";
-import "../../frontend/syntax/program.frx";
+import "../../frontend/ast/program.frx";
 
 extern struct FILE;
 
@@ -31,13 +31,13 @@ export struct Transpiler
     TranspilerMode mode;
     FILE* file;
 
-    Namespace* current_namespace;
+    core::Namespace* current_namespace;
 
     Queue untranspiled_structs;
     List transpiled_symbols;
 }
 
-export i32 c_generate_code(ASTProgram* program)
+export i32 c_generate_code(AST::Program* program)
 {
     mut Transpiler transpiler;
     transpiler.file = libc::fopen("/tmp/output.c", "w");

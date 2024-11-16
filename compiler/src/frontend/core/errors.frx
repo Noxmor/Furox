@@ -1,7 +1,6 @@
 import "std/libc.frx";
 import "namespace.frx";
 import "token.frx";
-import "../core/ast.frx";
 import "../../core/log.frx";
 
 export void error_import_stmt_invalid_filepath(char* filepath,
@@ -27,15 +26,15 @@ export void error_ambiguous_unresolved_name(char* filepath, SourceLocation loc,
     char* name)
 {
     log_error(filepath, loc, "Encountered ambiguous %s %s!",
-        ast_type_to_str(AstType::UNRESOLVED_NAME), name);
+        "unresolved-name", name);
 }
 
 export void error_ambiguous_unresolved_namespaced_name(char* filepath,
-    SourceLocation loc, mut Namespace* ns, char* name)
+    SourceLocation loc, mut core::Namespace* ns, char* name)
 {
     mut usize size = 1 + libc::strlen(ns->name);
 
-    mut Namespace* temp = ns->parent;
+    mut core::Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
         size = size + libc::strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
@@ -57,15 +56,15 @@ export void error_ambiguous_unresolved_namespaced_name(char* filepath,
     }
 
     log_error(filepath, loc, "Encountered ambiguous %s %s%s!",
-        ast_type_to_str(AstType::UNRESOLVED_NAMESPACED_NAME), ns_str, name);
+        "unresolved-namespaced-name", ns_str, name);
 }
 
 export void error_namespace_is_reserved(char* filepath, SourceLocation loc,
-    mut Namespace* ns)
+    mut core::Namespace* ns)
 {
     mut usize size = 1 + libc::strlen(ns->name);
 
-    mut Namespace* temp = ns->parent;
+    mut core::Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
         size = size + libc::strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
@@ -178,11 +177,11 @@ export void error_unresolved_name(char* filepath, SourceLocation loc,
 }
 
 export void error_unresolved_namespaced_name(char* filepath, SourceLocation loc,
-    mut Namespace* ns, char* name)
+    mut core::Namespace* ns, char* name)
 {
     mut usize size = 1 + libc::strlen(ns->name);
 
-    mut Namespace* temp = ns->parent;
+    mut core::Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
         size = size + libc::strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))

@@ -1,0 +1,51 @@
+import "../../core/arena.frx";
+import "ast.frx";
+import "func_decl.frx";
+import "struct_decl.frx";
+export import "../../core/list.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct ExternBlock
+    {
+        List func_decls;
+    }
+
+    namespace ExternBlock
+    {
+        export ExternBlock* new(Arena* arena)
+        {
+            mut ExternBlock* extern_block = arena_alloc(arena,
+                frx::sizeof(ExternBlock));
+
+            list_init(&extern_block->func_decls);
+
+            return extern_block;
+        }
+
+        export void print(ExternBlock* extern_block, mut FILE* file, usize depth)
+        {
+            frx::assert(extern_block != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s\n", "extern-block");
+
+            mut usize i;
+            for(i = 0; i < list_size(&extern_block->func_decls); i = i + 1)
+            {
+                FuncDecl* func_decl = list_get(&extern_block->func_decls, i);
+                AST::FuncDecl::print(func_decl, file, depth + 1);
+            }
+        }
+    }
+}

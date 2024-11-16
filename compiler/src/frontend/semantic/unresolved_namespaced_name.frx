@@ -1,25 +1,24 @@
-import "ast.frx";
-import "../core/ast.frx";
+import "expr.frx";
+import "../ast/enum_constant.frx";
 import "../core/errors.frx";
 import "../core/namespace.frx";
 import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/enum.frx";
 import "../symbols/var.frx";
-import "../syntax/enum_constant.frx";
-import "../syntax/unresolved_namespaced_name.frx";
-import "../syntax/var.frx";
+import "../ast/unresolved_namespaced_name.frx";
+import "../ast/var.frx";
 
 export void analyze_unresolved_namespaced_name(mut Parser* parser,
-    ASTUnresolvedNamespacedName* unresolved_namespaced_name, mut AST* ast)
+    AST::UnresolvedNamespacedName* unresolved_namespaced_name, mut AST::Expr* expr)
 {
     frx::assert(parser != nullptr);
 
     frx::assert(unresolved_namespaced_name != nullptr);
 
-    Namespace* ns = unresolved_namespaced_name->ns;
+    core::Namespace* ns = unresolved_namespaced_name->ns;
     char* name = unresolved_namespaced_name->name;
-    Scope* scope = unresolved_namespaced_name->scope;
+    core::Scope* scope = unresolved_namespaced_name->scope;
 
     EnumSymbol* enum_symbol = parser_find_enum_symbol(parser, ns->parent,
         ns->name);
@@ -41,14 +40,14 @@ export void analyze_unresolved_namespaced_name(mut Parser* parser,
     }
     else if(is_enum_constant)
     {
-        ast->type = AstType::ENUM_CONSTANT;
-        ast->node = make_enum_constant(&parser->arena, ns->parent, ns->name,
+        expr->type = AST::ExprType::ENUM_CONSTANT;
+        expr->enum_constant = AST::EnumConstant::new(&parser->arena, ns->parent, ns->name,
             name, scope);
     }
     else if(is_global_var)
     {
-        ast->type = AstType::VAR;
-        ast->node = make_var(&parser->arena, ns, scope, name);
+        expr->type = AST::ExprType::VAR;
+        expr->var = AST::Var::new(&parser->arena, ns, scope, name);
     }
     else
     {
@@ -59,6 +58,6 @@ export void analyze_unresolved_namespaced_name(mut Parser* parser,
 
     if(!is_ambiguous && resolved)
     {
-        analyze_ast(parser, ast);
+        analyze_expr(parser, expr);
     }
 }

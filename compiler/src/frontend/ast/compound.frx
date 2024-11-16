@@ -1,0 +1,29 @@
+import "../../core/arena.frx";
+export import "../../core/list.frx";
+
+namespace AST
+{
+    export struct Compound
+    {
+        List nodes;
+    }
+
+    namespace Compound
+    {
+        export Compound* new(Arena* arena)
+        {
+            mut Compound* compound = arena_alloc(arena, frx::sizeof(Compound));
+
+            list_init(&compound->nodes);
+
+            return compound;
+        }
+
+        export void add_node(mut Compound* compound, void* node)
+        {
+            frx::assert(compound != nullptr);
+
+            list_push(&compound->nodes, node);
+        }
+    }
+}

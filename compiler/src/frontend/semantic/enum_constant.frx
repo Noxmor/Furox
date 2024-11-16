@@ -2,11 +2,11 @@ import "std/libc.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
 import "../symbols/enum.frx";
-import "../syntax/enum_constant.frx";
-import "../syntax/enum_def.frx";
+import "../ast/enum_constant.frx";
+import "../ast/enum_def.frx";
 import "../../core/list.frx";
 
-export void analyze_enum_constant(Parser* parser, mut ASTEnumConstant* constant)
+export void analyze_enum_constant(Parser* parser, mut AST::EnumConstant* constant)
 {
     frx::assert(parser != nullptr);
 
@@ -22,7 +22,7 @@ export void analyze_enum_constant(Parser* parser, mut ASTEnumConstant* constant)
     mut usize i;
     for(i = 0; i < list_size(&symbol->constants); i = i + 1)
     {
-        ASTEnumConstantDef* constant_def = list_get(&symbol->constants, i);
+        AST::EnumConstantDef* constant_def = list_get(&symbol->constants, i);
 
         if(libc::strcmp(constant_def->name, constant->name) == 0)
         {

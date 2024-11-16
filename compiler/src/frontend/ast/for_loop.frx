@@ -1,0 +1,61 @@
+import "../../core/arena.frx";
+import "ast.frx";
+import "expr.frx";
+import "scope.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct ForLoop
+    {
+        Expr* initialization;
+        Expr* condition;
+        Expr* iteration;
+        Scope* scope;
+    }
+
+    namespace ForLoop
+    {
+        export ForLoop* new(Arena* arena, Expr* initialization, Expr* condition,
+            Expr* iteration, Scope* scope)
+        {
+            frx::assert(initialization != nullptr);
+
+            frx::assert(condition != nullptr);
+
+            frx::assert(iteration != nullptr);
+
+            frx::assert(scope != nullptr);
+
+            mut ForLoop* for_loop = arena_alloc(arena, frx::sizeof(ForLoop));
+
+            for_loop->initialization = initialization;
+            for_loop->condition = condition;
+            for_loop->iteration = iteration;
+            for_loop->scope = scope;
+
+            return for_loop;
+        }
+
+        export void print(ForLoop* for_loop, mut FILE* file, usize depth)
+        {
+            frx::assert(for_loop != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s\n", "for-loop");
+
+            AST::Expr::print(for_loop->initialization, file, depth + 1);
+            AST::Expr::print(for_loop->condition, file, depth + 1);
+            AST::Expr::print(for_loop->iteration, file, depth + 1);
+        }
+    }
+}

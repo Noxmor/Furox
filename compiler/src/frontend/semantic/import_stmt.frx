@@ -1,8 +1,8 @@
 import "../core/errors.frx";
 import "../core/parser.frx";
-import "../syntax/import_stmt.frx";
+import "../ast/import_stmt.frx";
 
-export void analyze_import_stmt(mut Parser* parser, ASTImportStmt* import_stmt)
+export void analyze_import_stmt(mut Parser* parser, AST::ImportStmt* import_stmt)
 {
     frx::assert(parser != nullptr);
 

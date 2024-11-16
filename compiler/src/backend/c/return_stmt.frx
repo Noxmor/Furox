@@ -1,6 +1,6 @@
-import "ast.frx";
 import "c.frx";
-import "../../frontend/syntax/return_stmt.frx";
+import "expr.frx";
+import "../../frontend/ast/return_stmt.frx";
 
 extern struct FILE;
 
@@ -10,7 +10,7 @@ extern
 }
 
 export void transpile_return_stmt(Transpiler* transpiler,
-    ASTReturnStmt* return_stmt)
+    AST::ReturnStmt* return_stmt)
 {
     frx::assert(transpiler != nullptr);
 
@@ -19,7 +19,7 @@ export void transpile_return_stmt(Transpiler* transpiler,
     if(return_stmt->value != nullptr)
     {
         fprintf(transpiler->file, "return ");
-        transpile_ast(transpiler, return_stmt->value);
+        transpile_expr(transpiler, return_stmt->value);
         fprintf(transpiler->file, ";\n");
     }
     else

@@ -1,14 +1,13 @@
-import "ast.frx";
-import "../core/ast.frx";
+import "expr.frx";
 import "../core/errors.frx";
 import "../core/namespace.frx";
 import "../core/parser.frx";
 import "../core/scope.frx";
-import "../syntax/type_specifier.frx";
+import "../ast/type_specifier.frx";
 import "../../core/list.frx";
 
 export void analyze_type_specifier(mut Parser* parser,
-    mut ASTTypeSpecifier* type_specifier)
+    mut AST::TypeSpecifier* type_specifier)
 {
     frx::assert(parser != nullptr);
 
@@ -17,8 +16,8 @@ export void analyze_type_specifier(mut Parser* parser,
     mut usize i;
     for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
     {
-        AST* array_dimension = list_get(&type_specifier->array_dimensions, i);
-        analyze_ast(parser, array_dimension);
+        AST::Expr* array_dimension = list_get(&type_specifier->array_dimensions, i);
+        analyze_expr(parser, array_dimension);
     }
 
     if(type_specifier->primitive_type != TokenType::ERROR)
@@ -26,9 +25,9 @@ export void analyze_type_specifier(mut Parser* parser,
         return;
     }
 
-    Namespace* ns = type_specifier->ns;
+    core::Namespace* ns = type_specifier->ns;
     char* name = type_specifier->name;
-    Scope* scope = type_specifier->scope;
+    core::Scope* scope = type_specifier->scope;
 
     if(type_specifier->ns == nullptr)
     {

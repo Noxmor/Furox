@@ -1,5 +1,5 @@
 import "c.frx";
-import "../../frontend/syntax/float_literal.frx";
+import "../../frontend/ast/float_literal.frx";
 
 extern struct FILE;
 
@@ -9,7 +9,7 @@ extern
 }
 
 export void transpile_float_literal(Transpiler* transpiler,
-    ASTFloatLiteral* literal)
+    AST::FloatLiteral* literal)
 {
     frx::assert(transpiler != nullptr);
 

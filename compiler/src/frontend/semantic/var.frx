@@ -1,9 +1,9 @@
 import "../core/errors.frx";
 import "../core/parser.frx";
 import "../symbols/var.frx";
-import "../syntax/var.frx";
+import "../ast/var.frx";
 
-export void analyze_var(mut Parser* parser, mut ASTVar* var)
+export void analyze_var(mut Parser* parser, mut AST::Var* var)
 {
     frx::assert(parser != nullptr);
 

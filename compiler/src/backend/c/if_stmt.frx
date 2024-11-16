@@ -1,7 +1,7 @@
-import "ast.frx";
 import "c.frx";
+import "expr.frx";
 import "scope.frx";
-import "../../frontend/syntax/if_stmt.frx";
+import "../../frontend/ast/if_stmt.frx";
 
 extern struct FILE;
 
@@ -10,14 +10,14 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_if_stmt(Transpiler* transpiler, ASTIfStmt* if_stmt)
+export void transpile_if_stmt(Transpiler* transpiler, AST::IfStmt* if_stmt)
 {
     frx::assert(transpiler != nullptr);
 
     frx::assert(if_stmt != nullptr);
 
     fprintf(transpiler->file, "if(");
-    transpile_ast(transpiler, if_stmt->condition);
+    transpile_expr(transpiler, if_stmt->condition);
     fprintf(transpiler->file, ")\n");
     transpile_scope(transpiler, if_stmt->if_block);
 

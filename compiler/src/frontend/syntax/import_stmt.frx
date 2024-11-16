@@ -1,5 +1,5 @@
+export import "../ast/import_stmt.frx";
 import "std/libc.frx";
-import "../core/ast.frx";
 import "../core/parser.frx";
 import "../core/string_table.frx";
 import "../../core/config.frx";
@@ -10,88 +10,55 @@ extern struct FILE;
 
 extern
 {
-    i32 fprintf(mut FILE* stream, char* format, ...);
     i32 sprintf(mut char* str, char* format, ...);
 }
 
-export struct ASTImportStmt
+namespace AST::ImportStmt
 {
-    Parser* imported_parser;
-    char* filepath;
-    b8 exported;
-}
-
-export ASTImportStmt* make_import_stmt(Arena* arena, Parser* imported_parser,
-    char* filepath, b8 exported)
-{
-    frx::assert(filepath != nullptr);
-
-    mut ASTImportStmt* import_stmt = arena_alloc(arena,
-        frx::sizeof(ASTImportStmt));
-
-    import_stmt->imported_parser = imported_parser;
-    import_stmt->filepath = filepath;
-    import_stmt->exported = exported;
-
-    return import_stmt;
-}
-
-export ASTImportStmt* parse_import_stmt(Parser* parser, b8 exported)
-{
-    parser_eat(parser, TokenType::KW_IMPORT);
-
-    mut char* filepath = parser->token->identifier;
-
-    parser_eat(parser, TokenType::STRING_LITERAL);
-
-    char* std_prefix = "std/";
-    char* lib_prefix = "lib/";
-
-    Config* config = get_config();
-    mut Parser* imported_parser = nullptr;
-
-    if(libc::strncmp(filepath, std_prefix, libc::strlen(std_prefix)) == 0)
+    export ImportStmt* parse(Parser* parser, b8 exported)
     {
-        char stdlib_path[1024];
-        sprintf(stdlib_path, "%s/%s", config->stdlib_path, filepath + 4);
-        filepath = string_table_insert(stdlib_path);
+        parser_eat(parser, TokenType::KW_IMPORT);
 
-        compile(filepath);
-        imported_parser = parser_table_find(filepath);
+        mut char* filepath = parser->token->identifier;
+
+        parser_eat(parser, TokenType::STRING_LITERAL);
+
+        char* std_prefix = "std/";
+        char* lib_prefix = "lib/";
+
+        Config* config = get_config();
+        mut Parser* imported_parser = nullptr;
+
+        if(libc::strncmp(filepath, std_prefix, libc::strlen(std_prefix)) == 0)
+        {
+            char stdlib_path[1024];
+            sprintf(stdlib_path, "%s/%s", config->stdlib_path, filepath + 4);
+            filepath = string_table_insert(stdlib_path);
+
+            compile(filepath);
+            imported_parser = parser_table_find(filepath);
+        }
+        else if(libc::strncmp(filepath, lib_prefix, libc::strlen(lib_prefix)) == 0)
+        {
+            frx::assert(config->library_path != nullptr);
+
+            char library_path[1024];
+            sprintf(library_path, "%s/%s", config->library_path, filepath + 4);
+            filepath = string_table_insert(library_path);
+
+            compile(filepath);
+            imported_parser = parser_table_find(filepath);
+        }
+        else
+        {
+            imported_parser = parser_compile(parser, filepath);
+        }
+
+        ImportStmt* import_stmt = new(&parser->arena, imported_parser, filepath,
+            exported);
+
+        parser_eat(parser, TokenType::SEMICOLON);
+
+        return import_stmt;
     }
-    else if(libc::strncmp(filepath, lib_prefix, libc::strlen(lib_prefix)) == 0)
-    {
-        frx::assert(config->library_path != nullptr);
-
-        char library_path[1024];
-        sprintf(library_path, "%s/%s", config->library_path, filepath + 4);
-        filepath = string_table_insert(library_path);
-
-        compile(filepath);
-        imported_parser = parser_table_find(filepath);
-    }
-    else
-    {
-        imported_parser = parser_compile(parser, filepath);
-    }
-
-    ASTImportStmt* import_stmt = make_import_stmt(&parser->arena,
-        imported_parser, filepath, exported);
-
-    parser_eat(parser, TokenType::SEMICOLON);
-
-    return import_stmt;
-}
-
-export void print_import_stmt(ASTImportStmt* import_stmt, FILE* file,
-    usize depth)
-{
-    frx::assert(import_stmt != nullptr);
-
-    frx::assert(file != nullptr);
-
-    print_ast_depth(file, depth);
-
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::IMPORT_STMT),
-        import_stmt->filepath);
 }

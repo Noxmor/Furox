@@ -1,16 +1,19 @@
 import "std/libc.frx";
 
-export struct Scope
+namespace core
 {
-    Scope* parent;
-    usize id;
+    export struct Scope
+    {
+        core::Scope* parent;
+        usize id;
+    }
 }
 
 mut usize next_scope_id;
 
-export Scope* scope_create(Scope* parent)
+export core::Scope* scope_create(core::Scope* parent)
 {
-    mut Scope* scope = libc::malloc(frx::sizeof(Scope));
+    mut core::Scope* scope = libc::malloc(frx::sizeof(core::Scope));
 
     scope->parent = parent;
     scope->id = next_scope_id;
@@ -20,7 +23,7 @@ export Scope* scope_create(Scope* parent)
     return scope;
 }
 
-export b8 scope_is_child_of(Scope* child, Scope* parent)
+export b8 scope_is_child_of(core::Scope* child, core::Scope* parent)
 {
     frx::assert(child != nullptr && parent != nullptr);
 
@@ -37,7 +40,7 @@ export b8 scope_is_child_of(Scope* child, Scope* parent)
     return scope_is_child_of(child->parent, parent);
 }
 
-export b8 scope_same_root(mut Scope* left, mut Scope* right)
+export b8 scope_same_root(mut core::Scope* left, mut core::Scope* right)
 {
     frx::assert(left != nullptr);
 

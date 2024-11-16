@@ -1,12 +1,12 @@
-import "ast.frx";
+import "expr.frx";
 import "../core/parser.frx";
-import "../syntax/expr_stmt.frx";
+import "../ast/expr_stmt.frx";
 
-export void analyze_expr_stmt(Parser* parser, ASTExprStmt* expr_stmt)
+export void analyze_expr_stmt(Parser* parser, AST::ExprStmt* expr_stmt)
 {
     frx::assert(parser != nullptr);
 
     frx::assert(expr_stmt != nullptr);
 
-    analyze_ast(parser, expr_stmt->expr);
+    analyze_expr(parser, expr_stmt->expr);
 }

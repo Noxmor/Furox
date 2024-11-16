@@ -1,21 +1,21 @@
 import "std/libc.frx";
-import "../core/namespace.frx";
-import "../core/scope.frx";
-import "../../core/list.frx";
+export import "../core/namespace.frx";
+export import "../core/scope.frx";
+export import "../../core/list.frx";
 import "../../core/hash.frx";
 
 export struct StructSymbol
 {
-    Scope* scope;
-    Namespace* ns;
+    core::Scope* scope;
+    core::Namespace* ns;
     char* name;
     List fields;
     b8 exported;
     b8 external;
 }
 
-export void struct_symbol_init(mut StructSymbol* symbol, Scope* scope,
-    Namespace* ns, char* name, b8 exported, b8 external)
+export void struct_symbol_init(mut StructSymbol* symbol, core::Scope* scope,
+    core::Namespace* ns, char* name, b8 exported, b8 external)
 {
     frx::assert(symbol != nullptr);
 
@@ -54,7 +54,7 @@ export void struct_table_init(StructTable* table)
     libc::memset(table, 0, frx::sizeof(StructTable));
 }
 
-export StructSymbol* struct_table_find_r(StructTable* table, mut Namespace* ns,
+export StructSymbol* struct_table_find_r(StructTable* table, mut core::Namespace* ns,
     char* name)
 {
     mut StructSymbol* symbol = struct_table_find(table, ns, name);
@@ -67,7 +67,7 @@ export StructSymbol* struct_table_find_r(StructTable* table, mut Namespace* ns,
     return symbol;
 }
 
-export StructSymbol* struct_table_find(StructTable* table, Namespace* ns,
+export StructSymbol* struct_table_find(StructTable* table, core::Namespace* ns,
     char* name)
 {
     frx::assert(table != nullptr);

@@ -1,18 +1,17 @@
-import "ast.frx";
-import "../core/ast.frx";
+import "namespace_scope.frx";
 import "../core/errors.frx";
 import "../core/namespace.frx";
 import "../core/parser.frx";
-import "../syntax/namespace.frx";
+import "../ast/namespace.frx";
 import "../../core/list.frx";
 
-export void analyze_namespace(mut Parser* parser, ASTNamespace* namespace_node)
+export void analyze_namespace(mut Parser* parser, AST::Namespace* namespace_node)
 {
     frx::assert(parser != nullptr);
 
     frx::assert(namespace_node != nullptr);
 
-    Namespace* ns = namespace_node->ns;
+    core::Namespace* ns = namespace_node->ns;
 
     if(namespace_is_internal(ns))
     {
@@ -21,14 +20,14 @@ export void analyze_namespace(mut Parser* parser, ASTNamespace* namespace_node)
         parser->failed = true;
     }
 
-    Namespace* old_namespace = parser->current_namespace;
+    core::Namespace* old_namespace = parser->current_namespace;
     parser->current_namespace = ns;
 
     mut usize i;
-    for(i = 0; i < list_size(&namespace_node->global_scope); i = i + 1)
+    for(i = 0; i < list_size(&namespace_node->namespace_scope); i = i + 1)
     {
-        AST* ast = list_get(&namespace_node->global_scope, i);
-        analyze_ast(parser, ast);
+        AST::NamespaceScope* namespace_scope = list_get(&namespace_node->namespace_scope, i);
+        analyze_namespace_scope(parser, namespace_scope);
     }
 
     parser->current_namespace = old_namespace;

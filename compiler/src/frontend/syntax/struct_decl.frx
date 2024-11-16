@@ -1,77 +1,36 @@
-import "../core/ast.frx";
+export import "../ast/struct_decl.frx";
 import "../core/namespace.frx";
 import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/struct.frx";
 
-extern struct FILE;
-
-extern
+namespace AST::StructDecl
 {
-    i32 fprintf(mut FILE* stream, char* format, ...);
-}
+    export StructDecl* parse(Parser* parser)
+    {
+        frx::assert(parser != nullptr);
 
-export struct ASTStructDecl
-{
-    SourceRange range;
+        SourceLocation start = parser_current_location(parser);
 
-    StructSymbol symbol;
+        parser_eat(parser, TokenType::KW_EXTERN);
 
-    b8 is_redefinition;
-}
+        parser_eat(parser, TokenType::KW_STRUCT);
 
-export ASTStructDecl* make_struct_decl(Arena* arena, Scope* scope,
-    Namespace* ns, char* name)
-{
-    mut ASTStructDecl* struct_decl = arena_alloc(arena,
-        frx::sizeof(ASTStructDecl));
+        char* name = parser->token->identifier;
 
-    struct_symbol_init(&struct_decl->symbol, scope, ns, name, false, true);
+        mut StructDecl* struct_decl = new(&parser->arena, parser->current_scope,
+            parser->current_namespace, name);
 
-    struct_decl->is_redefinition = false;
+        struct_decl->is_redefinition = !struct_table_insert(&parser->struct_table,
+            &struct_decl->symbol);
 
-    return struct_decl;
-}
+        parser_eat(parser, TokenType::IDENTIFIER);
 
-export ASTStructDecl* parse_struct_decl(Parser* parser)
-{
-    frx::assert(parser != nullptr);
+        parser_eat(parser, TokenType::SEMICOLON);
 
-    SourceLocation start = parser_current_location(parser);
+        struct_decl->range.start = start;
+        struct_decl->range.end = parser_current_location(parser);
 
-    parser_eat(parser, TokenType::KW_EXTERN);
-
-    parser_eat(parser, TokenType::KW_STRUCT);
-
-    char* name = parser->token->identifier;
-
-    mut ASTStructDecl* struct_decl = make_struct_decl(&parser->arena,
-        parser->current_scope, parser->current_namespace, name);
-
-    struct_decl->is_redefinition = !struct_table_insert(&parser->struct_table,
-        &struct_decl->symbol);
-
-    parser_eat(parser, TokenType::IDENTIFIER);
-
-    parser_eat(parser, TokenType::SEMICOLON);
-
-    struct_decl->range.start = start;
-    struct_decl->range.end = parser_current_location(parser);
-
-    return struct_decl;
-}
-
-export void print_struct_decl(ASTStructDecl* struct_decl, FILE* file,
-    usize depth)
-{
-    frx::assert(struct_decl != nullptr);
-
-    frx::assert(file != nullptr);
-
-    print_ast_depth(file, depth);
-
-    StructSymbol* symbol = &struct_decl->symbol;
-
-    fprintf(file, "%s (%s)\n", ast_type_to_str(AstType::STRUCT_DECL),
-        symbol->name);
+        return struct_decl;
+    }
 }

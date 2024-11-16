@@ -1,65 +1,27 @@
+export import "../ast/extern_block.frx";
 import "func_decl.frx";
-import "../core/ast.frx";
 import "../core/parser.frx";
 import "../../core/list.frx";
 
-extern struct FILE;
-
-extern
+namespace AST::ExternBlock
 {
-    i32 fprintf(mut FILE* stream, char* format, ...);
-}
-
-export struct ASTExternBlock
-{
-    List func_decls;
-}
-
-ASTExternBlock* make_extern_block(Arena* arena)
-{
-    ASTExternBlock* extern_block = arena_alloc(arena,
-        frx::sizeof(ASTExternBlock));
-
-    list_init(&extern_block->func_decls);
-
-    return extern_block;
-}
-
-export ASTExternBlock* parse_extern_block(Parser* parser)
-{
-    frx::assert(parser != nullptr);
-
-    ASTExternBlock* extern_block = make_extern_block(&parser->arena);
-
-    parser_eat(parser, TokenType::KW_EXTERN);
-
-    parser_eat(parser, TokenType::LBRACE);
-
-    while(parser_loop_until(parser, TokenType::RBRACE))
+    export ExternBlock* parse(Parser* parser)
     {
-        list_push(&extern_block->func_decls, parse_func_decl(parser));
-    }
+        frx::assert(parser != nullptr);
 
-    parser_eat(parser, TokenType::RBRACE);
+        ExternBlock* extern_block = new(&parser->arena);
 
-    return extern_block;
-}
+        parser_eat(parser, TokenType::KW_EXTERN);
 
-export void print_extern_block(ASTExternBlock* extern_block, FILE* file,
-    usize depth)
-{
-    frx::assert(extern_block != nullptr);
+        parser_eat(parser, TokenType::LBRACE);
 
-    frx::assert(file != nullptr);
+        while(parser_loop_until(parser, TokenType::RBRACE))
+        {
+            list_push(&extern_block->func_decls, AST::FuncDecl::parse(parser));
+        }
 
-    print_ast_depth(file, depth);
+        parser_eat(parser, TokenType::RBRACE);
 
-    fprintf(file, "%s\n", ast_type_to_str(AstType::EXTERN_BLOCK));
-
-    mut usize i;
-    for(i = 0; i < list_size(&extern_block->func_decls); i = i + 1)
-    {
-        ASTFuncDecl* func_decl = list_get(&extern_block->func_decls, i);
-        print_func_decl(func_decl, file, depth + 1);
+        return extern_block;
     }
 }

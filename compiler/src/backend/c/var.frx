@@ -1,7 +1,6 @@
 import "c.frx";
 import "../core/mangling.frx";
-import "../../frontend/symbols/var.frx";
-import "../../frontend/syntax/var.frx";
+import "../../frontend/ast/var.frx";
 
 extern struct FILE;
 
@@ -10,7 +9,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_var(Transpiler* transpiler, ASTVar* var)
+export void transpile_var(Transpiler* transpiler, AST::Var* var)
 {
     frx::assert(transpiler != nullptr);
 

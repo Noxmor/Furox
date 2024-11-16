@@ -1,0 +1,43 @@
+import "../../core/arena.frx";
+import "ast.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct CharLiteral
+    {
+        char* literal;
+    }
+
+    namespace CharLiteral
+    {
+        export CharLiteral* new(Arena* arena, char* literal)
+        {
+            frx::assert(literal != nullptr);
+
+            mut CharLiteral* char_literal = arena_alloc(arena,
+                frx::sizeof(CharLiteral));
+
+            char_literal->literal = literal;
+
+            return char_literal;
+        }
+
+        export void print(CharLiteral* char_literal, mut FILE* file, usize depth)
+        {
+            frx::assert(char_literal != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (%s)\n", "char-literal", char_literal->literal);
+        }
+    }
+}

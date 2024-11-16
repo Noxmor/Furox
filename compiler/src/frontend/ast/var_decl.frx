@@ -1,0 +1,47 @@
+import "../../core/arena.frx";
+import "ast.frx";
+export import "../symbols/var.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct VarDecl
+    {
+        VarSymbol symbol;
+    }
+
+    namespace VarDecl
+    {
+        export VarDecl* new(Arena* arena, TypeSpecifier* type, core::Scope* scope,
+            char* name, b8 mutable)
+        {
+            VarDecl* var_decl = arena_alloc(arena, frx::sizeof(VarDecl));
+
+            var_symbol_init(&var_decl->symbol, nullptr, type, scope, name, false,
+                mutable);
+
+            return var_decl;
+        }
+
+        export void print(VarDecl* var_decl, mut FILE* file, usize depth)
+        {
+            frx::assert(var_decl != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            VarSymbol* symbol = &var_decl->symbol;
+
+            fprintf(file, "%s (%s)\n", "variable-declaration", symbol->name);
+
+            AST::TypeSpecifier::print(symbol->type, file, depth + 1);
+        }
+    }
+}

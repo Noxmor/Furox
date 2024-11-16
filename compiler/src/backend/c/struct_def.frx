@@ -2,9 +2,7 @@ import "c.frx";
 import "type_specifier.frx";
 import "../core/mangling.frx";
 import "../../core/queue.frx";
-import "../../frontend/symbols/struct.frx";
-import "../../frontend/syntax/struct_def.frx";
-import "../../frontend/syntax/type_specifier.frx";
+import "../../frontend/ast/struct_def.frx";
 
 extern struct FILE;
 
@@ -13,13 +11,13 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-void transpile_struct_field(Transpiler* transpiler, ASTStructField* field)
+void transpile_struct_field(Transpiler* transpiler, AST::StructField* field)
 {
     frx::assert(transpiler != nullptr);
 
     frx::assert(field != nullptr);
 
-    ASTTypeSpecifier* type = field->type;
+    AST::TypeSpecifier* type = field->type;
 
     transpile_type_specifier(transpiler, type);
     fprintf(transpiler->file, "%s", field->name);
@@ -28,7 +26,7 @@ void transpile_struct_field(Transpiler* transpiler, ASTStructField* field)
 }
 
 export void transpile_struct_def(Transpiler* transpiler,
-    ASTStructDef* struct_def)
+    AST::StructDef* struct_def)
 {
     frx::assert(transpiler != nullptr);
 
@@ -52,8 +50,8 @@ export void transpile_struct_def(Transpiler* transpiler,
         mut usize i;
         for(i = 0; i < list_size(&symbol->fields); i = i + 1)
         {
-            ASTStructField* field = list_get(&symbol->fields, i);
-            ASTTypeSpecifier* type = field->type;
+            AST::StructField* field = list_get(&symbol->fields, i);
+            AST::TypeSpecifier* type = field->type;
             if(type->struct_type == nullptr || type->pointer_level > 0)
             {
                 continue;
@@ -81,7 +79,7 @@ export void transpile_struct_def(Transpiler* transpiler,
 
             for(i = 0; i < list_size(&symbol->fields); i = i + 1)
             {
-                ASTStructField* field = list_get(&symbol->fields, i);
+                AST::StructField* field = list_get(&symbol->fields, i);
                 transpile_struct_field(transpiler, field);
             }
 

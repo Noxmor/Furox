@@ -1,7 +1,6 @@
 import "std/libc.frx";
 import "c.frx";
-import "../../frontend/symbols/struct.frx";
-import "../../frontend/syntax/struct_decl.frx";
+import "../../frontend/ast/struct_decl.frx";
 
 extern struct FILE;
 
@@ -11,7 +10,7 @@ extern
 }
 
 export void transpile_struct_decl(Transpiler* transpiler,
-    ASTStructDecl* struct_decl)
+    AST::StructDecl* struct_decl)
 {
     frx::assert(transpiler != nullptr);
 

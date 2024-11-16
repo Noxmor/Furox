@@ -1,0 +1,69 @@
+export import "../ast/namespace_scope.frx";
+import "../core/parser.frx";
+import "namespace.frx";
+import "enum_def.frx";
+import "struct_def.frx";
+import "func_def.frx";
+import "global_var_decl.frx";
+import "global_var_def.frx";
+
+export void analyze_namespace_scope(Parser* parser, AST::NamespaceScope* namespace_scope)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(namespace_scope != nullptr);
+
+    switch(namespace_scope->type)
+    {
+        case AST::NamespaceScopeType::NAMESPACE:
+        {
+            analyze_namespace(parser, namespace_scope->ns);
+
+            break;
+        }
+
+        case AST::NamespaceScopeType::ENUM_DEF:
+        {
+            analyze_enum_def(parser, namespace_scope->enum_def);
+
+            break;
+        }
+
+        case AST::NamespaceScopeType::STRUCT_DEF:
+        {
+            analyze_struct_def(parser, namespace_scope->struct_def);
+
+            break;
+        }
+
+        case AST::NamespaceScopeType::FUNC_DEF:
+        {
+            analyze_func_def(parser, namespace_scope->func_def);
+
+            break;
+        }
+
+        case AST::NamespaceScopeType::GLOBAL_VAR_DECL:
+        {
+            analyze_global_var_decl(parser, namespace_scope->global_var_decl);
+
+            break;
+        }
+
+        case AST::NamespaceScopeType::GLOBAL_VAR_DEF:
+        {
+            analyze_global_var_def(parser, namespace_scope->global_var_def);
+
+            break;
+        }
+
+        default:
+        {
+            printf("%zu\n", namespace_scope->type);
+            frx::assert(false);
+
+            break;
+        }
+    }
+}
+extern i32 printf(char* format, ...);

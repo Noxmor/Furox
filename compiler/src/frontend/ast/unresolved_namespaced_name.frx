@@ -1,0 +1,60 @@
+import "../../core/arena.frx";
+import "ast.frx";
+import "namespace_resolution.frx";
+export import "../core/source_range.frx";
+export import "../core/namespace.frx";
+export import "../core/scope.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct UnresolvedNamespacedName
+    {
+        SourceRange range;
+
+        core::Namespace* ns;
+        char* name;
+        core::Scope* scope;
+    }
+
+    namespace UnresolvedNamespacedName
+    {
+        export UnresolvedNamespacedName* new(Arena* arena, core::Namespace* ns,
+            char* name, core::Scope* scope)
+        {
+            frx::assert(ns != nullptr);
+
+            frx::assert(name != nullptr);
+
+            mut UnresolvedNamespacedName* unresolved_namespaced_name =
+                arena_alloc(arena, frx::sizeof(UnresolvedNamespacedName));
+
+            unresolved_namespaced_name->ns = ns;
+            unresolved_namespaced_name->name = name;
+            unresolved_namespaced_name->scope = scope;
+
+            return unresolved_namespaced_name;
+        }
+
+        export void print(UnresolvedNamespacedName* unresolved_namespaced_name, mut FILE* file, usize depth)
+        {
+            frx::assert(unresolved_namespaced_name != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (", "unresolved-namespaced-name");
+
+            AST::NamespaceResolution::print(file, unresolved_namespaced_name->ns);
+
+            fprintf(file, "%s)\n", unresolved_namespaced_name->name);
+        }
+    }
+}

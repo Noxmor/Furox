@@ -1,7 +1,7 @@
-import "ast.frx";
 import "c.frx";
+import "expr.frx";
 import "scope.frx";
-import "../../frontend/syntax/do_while_loop.frx";
+import "../../frontend/ast/do_while_loop.frx";
 
 extern struct FILE;
 
@@ -11,7 +11,7 @@ extern
 }
 
 export void transpile_do_while_loop(Transpiler* transpiler,
-    ASTDoWhileLoop* do_while_loop)
+    AST::DoWhileLoop* do_while_loop)
 {
     frx::assert(transpiler != nullptr);
 
@@ -20,6 +20,6 @@ export void transpile_do_while_loop(Transpiler* transpiler,
     fprintf(transpiler->file, "do\n");
     transpile_scope(transpiler, do_while_loop->scope);
     fprintf(transpiler->file, "while(");
-    transpile_ast(transpiler, do_while_loop->condition);
+    transpile_expr(transpiler, do_while_loop->condition);
     fprintf(transpiler->file, ");\n");
 }

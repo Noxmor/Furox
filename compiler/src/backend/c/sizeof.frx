@@ -1,8 +1,7 @@
 import "c.frx";
 import "../core/mangling.frx";
 import "../../frontend/symbols/enum.frx";
-import "../../frontend/symbols/struct.frx";
-import "../../frontend/syntax/internal_func_call.frx";
+import "../../frontend/ast/internal_func_call.frx";
 
 extern struct FILE;
 
@@ -11,7 +10,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_sizeof(Transpiler* transpiler, ASTSizeof* sizeof_node)
+export void transpile_sizeof(Transpiler* transpiler, AST::Sizeof* sizeof_node)
 {
     frx::assert(transpiler != nullptr);
 

@@ -2,10 +2,10 @@ import "type_specifier.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
 import "../symbols/struct.frx";
-import "../syntax/struct_def.frx";
+import "../ast/struct_def.frx";
 import "../../core/list.frx";
 
-void analyze_struct_field(Parser* parser, ASTStructField* field)
+void analyze_struct_field(Parser* parser, AST::StructField* field)
 {
     frx::assert(parser != nullptr);
 
@@ -14,7 +14,7 @@ void analyze_struct_field(Parser* parser, ASTStructField* field)
     analyze_type_specifier(parser, field->type);
 }
 
-export void analyze_struct_def(mut Parser* parser, mut ASTStructDef* struct_def)
+export void analyze_struct_def(mut Parser* parser, mut AST::StructDef* struct_def)
 {
     frx::assert(parser != nullptr);
 
@@ -46,7 +46,7 @@ export void analyze_struct_def(mut Parser* parser, mut ASTStructDef* struct_def)
 
     for(i = 0; i < list_size(&symbol->fields); i = i + 1)
     {
-        ASTStructField* field = list_get(&symbol->fields, i);
+        AST::StructField* field = list_get(&symbol->fields, i);
         analyze_struct_field(parser, field);
     }
 }

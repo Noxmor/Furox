@@ -2,8 +2,7 @@ import "std/libc.frx";
 import "c.frx";
 import "func_params.frx";
 import "type_specifier.frx";
-import "../../frontend/symbols/func.frx";
-import "../../frontend/syntax/func_decl.frx";
+import "../../frontend/ast/func_decl.frx";
 
 extern struct FILE;
 
@@ -12,7 +11,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_func_decl(Transpiler* transpiler, ASTFuncDecl* func_decl)
+export void transpile_func_decl(Transpiler* transpiler, AST::FuncDecl* func_decl)
 {
     frx::assert(transpiler != nullptr);
 

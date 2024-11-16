@@ -1,7 +1,7 @@
-import "ast.frx";
 import "c.frx";
+import "expr.frx";
 import "scope.frx";
-import "../../frontend/syntax/for_loop.frx";
+import "../../frontend/ast/for_loop.frx";
 
 extern struct FILE;
 
@@ -10,18 +10,18 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_for_loop(Transpiler* transpiler, ASTForLoop* for_loop)
+export void transpile_for_loop(Transpiler* transpiler, AST::ForLoop* for_loop)
 {
     frx::assert(transpiler != nullptr);
 
     frx::assert(for_loop != nullptr);
 
     fprintf(transpiler->file, "for(");
-    transpile_ast(transpiler, for_loop->initialization);
+    transpile_expr(transpiler, for_loop->initialization);
     fprintf(transpiler->file, "; ");
-    transpile_ast(transpiler, for_loop->condition);
+    transpile_expr(transpiler, for_loop->condition);
     fprintf(transpiler->file, "; ");
-    transpile_ast(transpiler, for_loop->iteration);
+    transpile_expr(transpiler, for_loop->iteration);
     fprintf(transpiler->file, ")\n");
     transpile_scope(transpiler, for_loop->scope);
 }

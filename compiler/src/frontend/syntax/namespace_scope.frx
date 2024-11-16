@@ -1,0 +1,193 @@
+export import "../ast/namespace_scope.frx";
+import "enum_def.frx";
+import "func_def.frx";
+import "global_var_decl.frx";
+import "global_var_decl_or_def.frx";
+import "global_var_def.frx";
+import "namespace.frx";
+import "type_specifier.frx";
+import "struct_def.frx";
+import "../core/parser.frx";
+
+namespace AST::NamespaceScope
+{
+    export NamespaceScope* parse(Parser* parser)
+    {
+        frx::assert(parser != nullptr);
+
+        mut NamespaceScope* namespace_scope = nullptr;
+
+        switch(parser->token->type)
+        {
+            case TokenType::KW_NAMESPACE:
+            {
+                namespace_scope = from_namespace(&parser->arena,
+                    AST::Namespace::parse(parser));
+
+                break;
+            }
+            case TokenType::KW_ENUM:
+            {
+                namespace_scope = from_enum_def(&parser->arena,
+                    AST::EnumDef::parse(parser, false));
+
+                break;
+            }
+            case TokenType::KW_STRUCT:
+            {
+                namespace_scope = from_struct_def(&parser->arena,
+                    AST::StructDef::parse(parser, false));
+
+                break;
+            }
+            case TokenType::KW_EXPORT:
+            {
+                parser_eat(parser, TokenType::KW_EXPORT);
+
+                switch(parser->token->type)
+                {
+                    case TokenType::KW_ENUM:
+                    {
+                        namespace_scope = from_enum_def(&parser->arena,
+                            AST::EnumDef::parse(parser, true));
+
+                        break;
+                    }
+                    case TokenType::KW_STRUCT:
+                    {
+                        namespace_scope = from_struct_def(&parser->arena,
+                            AST::StructDef::parse(parser, true));
+
+                        break;
+                    }
+                    default:
+                    {
+                        TypeSpecifier* type_specifier = AST::TypeSpecifier::parse(parser);
+                        namespace_scope = from_func_def(&parser->arena,
+                            AST::FuncDef::parse(parser, type_specifier, true));
+
+                        break;
+                    }
+                }
+
+                break;
+            }
+            case TokenType::KW_U8:
+            {
+
+            }
+            case TokenType::KW_U16:
+            {
+
+            }
+            case TokenType::KW_U32:
+            {
+
+            }
+            case TokenType::KW_U64:
+            {
+
+            }
+            case TokenType::KW_USIZE:
+            {
+
+            }
+            case TokenType::KW_I8:
+            {
+
+            }
+            case TokenType::KW_I16:
+            {
+
+            }
+            case TokenType::KW_I32:
+            {
+
+            }
+            case TokenType::KW_I64:
+            {
+
+            }
+            case TokenType::KW_ISIZE:
+            {
+
+            }
+            case TokenType::KW_B8:
+            {
+
+            }
+            case TokenType::KW_B16:
+            {
+
+            }
+            case TokenType::KW_B32:
+            {
+
+            }
+            case TokenType::KW_B64:
+            {
+
+            }
+            case TokenType::KW_CHAR:
+            {
+
+            }
+            case TokenType::KW_F32:
+            {
+
+            }
+            case TokenType::KW_F64:
+            {
+
+            }
+            case TokenType::KW_VOID:
+            {
+
+            }
+            case TokenType::IDENTIFIER:
+            {
+                TypeSpecifier* type_specifier = AST::TypeSpecifier::parse(parser);
+
+                Token* next = parser_peek(parser, 1);
+                if(next->type == TokenType::LPAREN)
+                {
+                    namespace_scope = from_func_def(&parser->arena,
+                        AST::FuncDef::parse(parser, type_specifier, false));
+                }
+                else
+                {
+                    AST::GlobalScope* global_scope =
+                        AST::GlobalVarDeclOrDef::parse(parser, type_specifier, false);
+
+
+                    if(global_scope->type == AST::GlobalScopeType::GLOBAL_VAR_DECL)
+                    {
+                        namespace_scope = from_global_var_decl(&parser->arena, global_scope->global_var_decl);
+                    }
+                    else
+                    {
+                        namespace_scope = from_global_var_def(&parser->arena, global_scope->global_var_def);
+                    }
+                }
+
+                break;
+            }
+            case TokenType::KW_MUT:
+            {
+                parser_eat(parser, TokenType::KW_MUT);
+
+                TypeSpecifier* type = AST::TypeSpecifier::parse(parser);
+
+                namespace_scope = AST::GlobalVarDeclOrDef::parse(parser, type, true);
+
+                break;
+            }
+            default:
+            {
+                parser_panic(parser);
+            }
+        }
+
+        return namespace_scope;
+    }
+}

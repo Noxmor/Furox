@@ -1,5 +1,5 @@
 import "c.frx";
-import "../../frontend/syntax/break_stmt.frx";
+import "../../frontend/ast/break_stmt.frx";
 
 extern struct FILE;
 
@@ -9,7 +9,7 @@ extern
 }
 
 export void transpile_break_stmt(Transpiler* transpiler,
-    ASTBreakStmt* break_stmt)
+    AST::BreakStmt* break_stmt)
 {
     frx::assert(transpiler != nullptr);
 

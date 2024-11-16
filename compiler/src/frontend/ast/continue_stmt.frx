@@ -1,0 +1,37 @@
+import "../../core/arena.frx";
+import "ast.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct ContinueStmt
+    {
+        b8 value; //Placeholder, since the arena allocator can't handle
+                  //allocations for structs with a size of 0.
+    }
+
+    namespace ContinueStmt
+    {
+        export ContinueStmt* new(Arena* arena)
+        {
+            return arena_alloc(arena, frx::sizeof(ContinueStmt));
+        }
+
+        export void print(ContinueStmt* continue_stmt, mut FILE* file, usize depth)
+        {
+            frx::assert(continue_stmt != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s\n", "continue-statement");
+        }
+    }
+}

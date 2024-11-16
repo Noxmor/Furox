@@ -1,0 +1,91 @@
+import "../../core/arena.frx";
+import "../../core/list.frx";
+import "ast.frx";
+export import "type_specifier.frx";
+export import "../symbols/var.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct FuncParam
+    {
+        VarSymbol symbol;
+
+        b8 is_redefinition;
+    }
+
+    namespace FuncParam
+    {
+        export FuncParam* new(Arena* arena, TypeSpecifier* type,
+            core::Scope* scope, char* name, b8 mutable)
+        {
+            FuncParam* param = arena_alloc(arena, frx::sizeof(FuncParam));
+
+            var_symbol_init(&param->symbol, nullptr, type, scope, name, false,
+                mutable);
+
+            return param;
+        }
+
+        void print(FuncParam* param, mut FILE* file, usize depth)
+        {
+            frx::assert(param != nullptr);
+
+            frx::assert(file != nullptr);
+
+            VarSymbol* symbol = &param->symbol;
+
+            print_depth(file, depth);
+            fprintf(file, "%s\n", symbol->name);
+
+            AST::TypeSpecifier::print(symbol->type, file, depth + 1);
+        }
+    }
+
+    export struct FuncParams
+    {
+        b8 variadic;
+
+        List params;
+    }
+
+    namespace FuncParams
+    {
+        export FuncParams* new(Arena* arena)
+        {
+            mut FuncParams* func_params = arena_alloc(arena,
+                frx::sizeof(FuncParams));
+
+            func_params->variadic = false;
+            list_init(&func_params->params);
+
+            return func_params;
+        }
+
+        export void print(FuncParams* func_params, mut FILE* file, usize depth)
+        {
+            frx::assert(func_params != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+            fprintf(file, "%s\n", "function-parameters");
+
+            print_depth(file, depth + 1);
+            fprintf(file, "variadic: %d\n", func_params->variadic);
+
+            mut usize i;
+            for(i = 0; i < list_size(&func_params->params); i = i + 1)
+            {
+                AST::FuncParam* param = list_get(&func_params->params, i);
+                AST::FuncParam::print(param, file, depth + 1);
+            }
+        }
+    }
+}

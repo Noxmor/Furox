@@ -9,7 +9,7 @@ extern
 }
 
 export void transpile_char_literal(Transpiler* transpiler,
-    ASTCharLiteral* char_literal)
+    AST::CharLiteral* char_literal)
 {
     frx::assert(transpiler != nullptr);
 

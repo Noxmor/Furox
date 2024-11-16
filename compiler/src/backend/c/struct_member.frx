@@ -1,5 +1,5 @@
 import "c.frx";
-import "../../frontend/syntax/struct_member.frx";
+import "../../frontend/ast/struct_member.frx";
 
 extern struct FILE;
 
@@ -9,7 +9,7 @@ extern
 }
 
 export void transpile_struct_member(Transpiler* transpiler,
-    ASTStructMember* member)
+    AST::StructMember* member)
 {
     frx::assert(transpiler != nullptr);
 

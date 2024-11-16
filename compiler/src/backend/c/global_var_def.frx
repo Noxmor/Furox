@@ -1,9 +1,8 @@
-import "ast.frx";
 import "c.frx";
+import "expr.frx";
 import "type_specifier.frx";
 import "../core/mangling.frx";
-import "../../frontend/symbols/var.frx";
-import "../../frontend/syntax/global_var_def.frx";
+import "../../frontend/ast/global_var_def.frx";
 
 extern struct FILE;
 
@@ -13,7 +12,7 @@ extern
 }
 
 export void transpile_global_var_def(Transpiler* transpiler,
-    ASTGlobalVarDef* var_def)
+    AST::GlobalVarDef* var_def)
 {
     frx::assert(transpiler != nullptr);
 
@@ -39,6 +38,6 @@ export void transpile_global_var_def(Transpiler* transpiler,
     fprintf(transpiler->file, "%s", mangled_name);
     transpile_type_specifier_array_dimensions(transpiler, symbol->type);
     fprintf(transpiler->file, " = ");
-    transpile_ast(transpiler, var_def->value);
+    transpile_expr(transpiler, var_def->value);
     fprintf(transpiler->file, ";\n");
 }

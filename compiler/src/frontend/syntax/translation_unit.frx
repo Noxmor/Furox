@@ -1,3 +1,5 @@
+export import "../ast/compound.frx";
+import "../ast/global_scope.frx";
 import "enum_def.frx";
 import "extern_block.frx";
 import "func_decl.frx";
@@ -8,225 +10,226 @@ import "namespace.frx";
 import "struct_decl.frx";
 import "struct_def.frx";
 import "type_specifier.frx";
-import "../core/ast.frx";
 import "../core/parser.frx";
 
-export ASTCompound* parse_translation_unit(Parser* parser)
+namespace AST::TranslationUnit
 {
-    ASTCompound* translation_unit = make_compound(&parser->arena);
-
-    while(parser->token->type != TokenType::EOF
-        && parser->token->type != TokenType::ERROR)
+    export Compound* parse(Parser* parser)
     {
-        mut AST* ast = nullptr;
+        Compound* translation_unit = AST::Compound::new(&parser->arena);
 
-        switch(parser->token->type)
+        while(parser->token->type != TokenType::EOF
+            && parser->token->type != TokenType::ERROR)
         {
-            case TokenType::KW_IMPORT:
-            {
-                ast = make_ast(&parser->arena, AstType::IMPORT_STMT,
-                    parse_import_stmt(parser, false));
+            mut AST::GlobalScope* global_scope = nullptr;
 
-                break;
-            }
-            case TokenType::KW_NAMESPACE:
+            switch(parser->token->type)
             {
-                ast = make_ast(&parser->arena, AstType::NAMESPACE,
-                    parse_namespace(parser));
-
-                break;
-            }
-            case TokenType::KW_ENUM:
-            {
-                ast = make_ast(&parser->arena, AstType::ENUM_DEF,
-                    parse_enum_def(parser, false));
-
-                break;
-            }
-            case TokenType::KW_STRUCT:
-            {
-                ast = make_ast(&parser->arena, AstType::STRUCT_DEF,
-                    parse_struct_def(parser, false));
-
-                break;
-            }
-            case TokenType::KW_EXTERN:
-            {
-                Token* next = parser_peek(parser, 1);
-                if(next->type == TokenType::LBRACE)
+                case TokenType::KW_IMPORT:
                 {
-                    ast = make_ast(&parser->arena, AstType::EXTERN_BLOCK,
-                        parse_extern_block(parser));
+                    global_scope = AST::GlobalScope::from_import_stmt(&parser->arena,
+                        AST::ImportStmt::parse(parser, false));
+
+                    break;
                 }
-                else if(next->type == TokenType::KW_STRUCT)
+                case TokenType::KW_NAMESPACE:
                 {
-                    ast = make_ast(&parser->arena, AstType::STRUCT_DECL,
-                        parse_struct_decl(parser));
+                    global_scope = AST::GlobalScope::from_namespace(&parser->arena,
+                        AST::Namespace::parse(parser));
+
+                    break;
                 }
-                else
+                case TokenType::KW_ENUM:
                 {
-                    parser_eat(parser, TokenType::KW_EXTERN);
+                    global_scope = AST::GlobalScope::from_enum_def(&parser->arena,
+                        AST::EnumDef::parse(parser, false));
 
-                    ast = make_ast(&parser->arena, AstType::FUNC_DECL,
-                        parse_func_decl(parser));
+                    break;
                 }
-
-                break;
-            }
-            case TokenType::KW_EXPORT:
-            {
-                parser_eat(parser, TokenType::KW_EXPORT);
-
-                switch(parser->token->type)
+                case TokenType::KW_STRUCT:
                 {
-                    case TokenType::KW_IMPORT:
+                    global_scope = AST::GlobalScope::from_struct_def(&parser->arena,
+                        AST::StructDef::parse(parser, false));
+
+                    break;
+                }
+                case TokenType::KW_EXTERN:
+                {
+                    Token* next = parser_peek(parser, 1);
+                    if(next->type == TokenType::LBRACE)
                     {
-                        ast = make_ast(&parser->arena, AstType::IMPORT_STMT,
-                            parse_import_stmt(parser, true));
-
-                        break;
+                        global_scope = AST::GlobalScope::from_extern_block(&parser->arena,
+                            AST::ExternBlock::parse(parser));
                     }
-                    case TokenType::KW_ENUM:
+                    else if(next->type == TokenType::KW_STRUCT)
                     {
-                        ast = make_ast(&parser->arena, AstType::ENUM_DEF,
-                            parse_enum_def(parser, true));
-
-                        break;
+                        global_scope = AST::GlobalScope::from_struct_decl(&parser->arena,
+                            AST::StructDecl::parse(parser));
                     }
-                    case TokenType::KW_STRUCT:
+                    else
                     {
-                        ast = make_ast(&parser->arena, AstType::STRUCT_DEF,
-                            parse_struct_def(parser, true));
+                        parser_eat(parser, TokenType::KW_EXTERN);
 
-                        break;
+                        global_scope = AST::GlobalScope::from_func_decl(&parser->arena,
+                            AST::FuncDecl::parse(parser));
                     }
-                    default:
-                    {
-                        ASTTypeSpecifier* type_specifier =
-                            parse_type_specifier(parser);
-                        ast = make_ast(&parser->arena, AstType::FUNC_DEF,
-                            parse_func_def(parser, type_specifier, true));
 
-                        break;
-                    }
+                    break;
                 }
-
-                break;
-            }
-            case TokenType::KW_U8:
-            {
-
-            }
-            case TokenType::KW_U16:
-            {
-
-            }
-            case TokenType::KW_U32:
-            {
-
-            }
-            case TokenType::KW_U64:
-            {
-
-            }
-            case TokenType::KW_USIZE:
-            {
-
-            }
-            case TokenType::KW_I8:
-            {
-
-            }
-            case TokenType::KW_I16:
-            {
-
-            }
-            case TokenType::KW_I32:
-            {
-
-            }
-            case TokenType::KW_I64:
-            {
-
-            }
-            case TokenType::KW_ISIZE:
-            {
-
-            }
-            case TokenType::KW_B8:
-            {
-
-            }
-            case TokenType::KW_B16:
-            {
-
-            }
-            case TokenType::KW_B32:
-            {
-
-            }
-            case TokenType::KW_B64:
-            {
-
-            }
-            case TokenType::KW_CHAR:
-            {
-
-            }
-            case TokenType::KW_F32:
-            {
-
-            }
-            case TokenType::KW_F64:
-            {
-
-            }
-            case TokenType::KW_VOID:
-            {
-
-            }
-            case TokenType::IDENTIFIER:
-            {
-                ASTTypeSpecifier* type_specifier = parse_type_specifier(parser);
-
-                Token* next = parser_peek(parser, 1);
-                if(next->type == TokenType::LPAREN)
+                case TokenType::KW_EXPORT:
                 {
-                    ast = make_ast(&parser->arena, AstType::FUNC_DEF,
-                        parse_func_def(parser, type_specifier, false));
+                    parser_eat(parser, TokenType::KW_EXPORT);
+
+                    switch(parser->token->type)
+                    {
+                        case TokenType::KW_IMPORT:
+                        {
+                            global_scope = AST::GlobalScope::from_import_stmt(&parser->arena,
+                                AST::ImportStmt::parse(parser, true));
+
+                            break;
+                        }
+                        case TokenType::KW_ENUM:
+                        {
+                            global_scope = AST::GlobalScope::from_enum_def(&parser->arena,
+                                AST::EnumDef::parse(parser, true));
+
+                            break;
+                        }
+                        case TokenType::KW_STRUCT:
+                        {
+                            global_scope = AST::GlobalScope::from_struct_def(&parser->arena,
+                                AST::StructDef::parse(parser, true));
+
+                            break;
+                        }
+                        default:
+                        {
+                            TypeSpecifier* type_specifier = AST::TypeSpecifier::parse(parser);
+                            global_scope = AST::GlobalScope::from_func_def(&parser->arena,
+                                AST::FuncDef::parse(parser, type_specifier, true));
+
+                            break;
+                        }
+                    }
+
+                    break;
                 }
-                else
+                case TokenType::KW_U8:
                 {
-                    ast = parse_global_var_decl_or_def(parser, type_specifier,
-                        false);
+
                 }
+                case TokenType::KW_U16:
+                {
 
-                break;
+                }
+                case TokenType::KW_U32:
+                {
+
+                }
+                case TokenType::KW_U64:
+                {
+
+                }
+                case TokenType::KW_USIZE:
+                {
+
+                }
+                case TokenType::KW_I8:
+                {
+
+                }
+                case TokenType::KW_I16:
+                {
+
+                }
+                case TokenType::KW_I32:
+                {
+
+                }
+                case TokenType::KW_I64:
+                {
+
+                }
+                case TokenType::KW_ISIZE:
+                {
+
+                }
+                case TokenType::KW_B8:
+                {
+
+                }
+                case TokenType::KW_B16:
+                {
+
+                }
+                case TokenType::KW_B32:
+                {
+
+                }
+                case TokenType::KW_B64:
+                {
+
+                }
+                case TokenType::KW_CHAR:
+                {
+
+                }
+                case TokenType::KW_F32:
+                {
+
+                }
+                case TokenType::KW_F64:
+                {
+
+                }
+                case TokenType::KW_VOID:
+                {
+
+                }
+                case TokenType::IDENTIFIER:
+                {
+                    TypeSpecifier* type_specifier = AST::TypeSpecifier::parse(parser);
+
+                    Token* next = parser_peek(parser, 1);
+                    if(next->type == TokenType::LPAREN)
+                    {
+                        global_scope = AST::GlobalScope::from_func_def(&parser->arena,
+                            AST::FuncDef::parse(parser, type_specifier, false));
+                    }
+                    else
+                    {
+                        global_scope = AST::GlobalVarDeclOrDef::parse(parser, type_specifier,
+                            false);
+                    }
+
+                    break;
+                }
+                case TokenType::KW_MUT:
+                {
+                    parser_eat(parser, TokenType::KW_MUT);
+
+                    TypeSpecifier* type = AST::TypeSpecifier::parse(parser);
+                    global_scope = AST::GlobalVarDeclOrDef::parse(parser, type, true);
+
+                    break;
+                }
+                default:
+                {
+                    parser_panic(parser);
+
+                    parser_advance(parser);
+
+                    break;
+                }
             }
-            case TokenType::KW_MUT:
+
+            if(global_scope != nullptr)
             {
-                parser_eat(parser, TokenType::KW_MUT);
-
-                ASTTypeSpecifier* type = parse_type_specifier(parser);
-                ast = parse_global_var_decl_or_def(parser, type, true);
-
-                break;
-            }
-            default:
-            {
-                parser_panic(parser);
-
-                parser_advance(parser);
-
-                break;
+                AST::Compound::add_node(translation_unit, global_scope);
             }
         }
 
-        if(ast != nullptr)
-        {
-            list_push(&translation_unit->nodes, ast);
-        }
+        return translation_unit;
     }
-
-    return translation_unit;
 }

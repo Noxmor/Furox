@@ -4,7 +4,7 @@ import "options.frx";
 import "parser_table.frx";
 import "queue.frx";
 import "../backend/backend.frx";
-import "../frontend/syntax/program.frx";
+import "../frontend/ast/program.frx";
 
 extern struct FILE;
 
@@ -13,7 +13,7 @@ extern
     char* realpath(char* filename, mut char* resolved_name);
 }
 
-mut ASTProgram* program;
+mut AST::Program* program;
 mut b8 failed = false;
 
 mut Queue syntax_queue;
@@ -48,7 +48,7 @@ i32 main(usize argc, char** argv)
     queue_init(&resolve_imports_queue);
     queue_init(&semantic_queue);
 
-    program = make_program();
+    program = AST::Program::new();
 
     mut Option options[7];
 
@@ -130,7 +130,7 @@ i32 main(usize argc, char** argv)
         FILE* file = libc::fopen("frx.ast", "w");
         if(file != nullptr)
         {
-            print_program(program, file, 0);
+            AST::Program::print(program, file, 0);
             libc::fclose(file);
         }
     }

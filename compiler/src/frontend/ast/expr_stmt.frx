@@ -1,0 +1,43 @@
+import "../../core/arena.frx";
+import "ast.frx";
+export import "expr.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct ExprStmt
+    {
+        Expr* expr;
+    }
+
+    namespace ExprStmt
+    {
+        export ExprStmt* new(Arena* arena, Expr* expr)
+        {
+            mut ExprStmt* expr_stmt = arena_alloc(arena,
+                frx::sizeof(ExprStmt));
+
+            expr_stmt->expr = expr;
+
+            return expr_stmt;
+        }
+
+        export void print(ExprStmt* expr_stmt, mut FILE* file, usize depth)
+        {
+            frx::assert(expr_stmt != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s\n", "expression-statement");
+            AST::Expr::print(expr_stmt->expr, file, depth + 1);
+        }
+    }
+}

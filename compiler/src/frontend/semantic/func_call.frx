@@ -1,11 +1,10 @@
-import "ast.frx";
-import "../core/ast.frx";
+import "expr.frx";
 import "../core/errors.frx";
 import "../core/parser.frx";
-import "../syntax/func_call.frx";
+import "../ast/func_call.frx";
 import "../../core/list.frx";
 
-export void analyze_func_call(mut Parser* parser, mut ASTFuncCall* func_call)
+export void analyze_func_call(mut Parser* parser, mut AST::FuncCall* func_call)
 {
     frx::assert(parser != nullptr);
 
@@ -35,7 +34,7 @@ export void analyze_func_call(mut Parser* parser, mut ASTFuncCall* func_call)
     mut usize i;
     for(i = 0; i < list_size(&func_call->args); i = i + 1)
     {
-        AST* ast = list_get(&func_call->args, i);
-        analyze_ast(parser, ast);
+        AST::Expr* arg = list_get(&func_call->args, i);
+        analyze_expr(parser, arg);
     }
 }

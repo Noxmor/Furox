@@ -1,0 +1,68 @@
+import "../../core/arena.frx";
+import "ast.frx";
+import "expr.frx";
+import "namespace_resolution.frx";
+import "../../core/list.frx";
+export import "../symbols/func.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct FuncCall
+    {
+        FuncSymbol* symbol;
+
+        core::Namespace* ns;
+        char* name;
+
+        core::Scope* scope;
+
+        List args;
+    }
+
+    namespace FuncCall
+    {
+        export FuncCall* new(Arena* arena, core::Namespace* ns, char* name, core::Scope* scope)
+        {
+            frx::assert(name != nullptr);
+
+            frx::assert(scope != nullptr);
+
+            mut FuncCall* func_call = arena_alloc(arena, frx::sizeof(FuncCall));
+
+            func_call->symbol = nullptr;
+            func_call->ns = ns;
+            func_call->name = name;
+            func_call->scope = scope;
+            list_init(&func_call->args);
+
+            return func_call;
+        }
+
+        export void print(FuncCall* func_call, mut FILE* file, usize depth)
+        {
+            frx::assert(func_call != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (", "function-call");
+            AST::NamespaceResolution::print(file, func_call->ns);
+            fprintf(file, "%s)\n", func_call->name);
+
+            mut usize i;
+            for(i = 0; i < list_size(&func_call->args); i = i + 1)
+            {
+                AST::Expr* arg = list_get(&func_call->args, i);
+                AST::Expr::print(arg, file, depth + 1);
+            }
+        }
+    }
+}

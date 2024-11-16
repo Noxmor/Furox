@@ -12,7 +12,10 @@ mut usize buffer_size = 0;
 
 void validate_buffer_size(mut usize size)
 {
+    //This should ensure that the buffer is always big enough.
+    //This whole file will be replaced eventually anyways, since it's not safe for multithreading.
     size = size * 2;
+
     if(buffer_size >= size)
     {
         return;
@@ -22,7 +25,7 @@ void validate_buffer_size(mut usize size)
     buffer = libc::realloc(buffer, buffer_size * frx::sizeof(char));
 }
 
-void mangle_namespace(Namespace* ns)
+void mangle_namespace(core::Namespace* ns)
 {
     if(ns == nullptr)
     {
@@ -41,7 +44,7 @@ void mangle_namespace(Namespace* ns)
     }
 }
 
-export char* mangle_enum_name(Scope* scope, Namespace* ns, char* name)
+export char* mangle_enum_name(core::Scope* scope, core::Namespace* ns, char* name)
 {
     frx::assert(scope != nullptr);
 
@@ -49,7 +52,7 @@ export char* mangle_enum_name(Scope* scope, Namespace* ns, char* name)
 
     mut usize size = libc::strlen(name);
 
-    mut Namespace* temp = ns;
+    mut core::Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + libc::strlen(ns->name) + 1;
@@ -73,7 +76,7 @@ export char* mangle_enum_name(Scope* scope, Namespace* ns, char* name)
     return buffer;
 }
 
-export char* mangle_struct_name(Scope* scope, Namespace* ns, char* name)
+export char* mangle_struct_name(core::Scope* scope, core::Namespace* ns, char* name)
 {
     frx::assert(scope != nullptr);
 
@@ -81,7 +84,7 @@ export char* mangle_struct_name(Scope* scope, Namespace* ns, char* name)
 
     mut usize size = libc::strlen(name);
 
-    mut Namespace* temp = ns;
+    mut core::Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + libc::strlen(ns->name) + 1;
@@ -105,7 +108,7 @@ export char* mangle_struct_name(Scope* scope, Namespace* ns, char* name)
     return buffer;
 }
 
-export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
+export char* mangle_function_name(core::Scope* scope, core::Namespace* ns, char* name)
 {
     frx::assert(scope != nullptr);
 
@@ -122,7 +125,7 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
         return buffer;
     }
 
-    mut Namespace* temp = ns;
+    mut core::Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + libc::strlen(ns->name) + 1;
@@ -152,7 +155,7 @@ export char* mangle_function_name(Scope* scope, Namespace* ns, char* name)
     return buffer;
 }
 
-export char* mangle_global_var_name(Scope* scope, Namespace* ns, char* name)
+export char* mangle_global_var_name(core::Scope* scope, core::Namespace* ns, char* name)
 {
     frx::assert(scope != nullptr);
 
@@ -160,7 +163,7 @@ export char* mangle_global_var_name(Scope* scope, Namespace* ns, char* name)
 
     mut usize size = libc::strlen(name);
 
-    mut Namespace* temp = ns;
+    mut core::Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + libc::strlen(ns->name) + 1;

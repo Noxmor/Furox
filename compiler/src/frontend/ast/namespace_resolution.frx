@@ -1,0 +1,24 @@
+import "../core/namespace.frx";
+import "../core/token.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST::NamespaceResolution
+{
+    export void print(mut FILE* file, mut core::Namespace* ns)
+    {
+        frx::assert(file != nullptr);
+
+        while(ns != nullptr)
+        {
+            fprintf(file, "%s%s", ns->name, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+
+            ns = ns->parent;
+        }
+    }
+}

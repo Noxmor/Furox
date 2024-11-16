@@ -1,8 +1,7 @@
 import "c.frx";
 import "type_specifier.frx";
 import "../../core/list.frx";
-import "../../frontend/symbols/var.frx";
-import "../../frontend/syntax/func_params.frx";
+import "../../frontend/ast/func_params.frx";
 
 extern struct FILE;
 
@@ -11,7 +10,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-void transpile_func_param(Transpiler* transpiler, ASTFuncParam* param)
+void transpile_func_param(Transpiler* transpiler, AST::FuncParam* param)
 {
     frx::assert(transpiler != nullptr);
 
@@ -23,7 +22,7 @@ void transpile_func_param(Transpiler* transpiler, ASTFuncParam* param)
     fprintf(transpiler->file, "%s", symbol->name);
 }
 
-export void transpile_func_params(Transpiler* transpiler, ASTFuncParams* params)
+export void transpile_func_params(Transpiler* transpiler, AST::FuncParams* params)
 {
     frx::assert(transpiler != nullptr);
 

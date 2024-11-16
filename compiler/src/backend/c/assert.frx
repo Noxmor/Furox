@@ -1,6 +1,6 @@
-import "ast.frx";
 import "c.frx";
-import "../../frontend/syntax/internal_func_call.frx";
+import "expr.frx";
+import "../../frontend/ast/internal_func_call.frx";
 
 extern struct FILE;
 
@@ -9,7 +9,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_assert(Transpiler* transpiler, ASTAssert* assert_node)
+export void transpile_assert(Transpiler* transpiler, AST::Assert* assert_node)
 {
     frx::assert(transpiler != nullptr);
 
@@ -18,7 +18,7 @@ export void transpile_assert(Transpiler* transpiler, ASTAssert* assert_node)
     SourceLocation loc = assert_node->range.start;
 
     fprintf(transpiler->file, "if(!(");
-    transpile_ast(transpiler, assert_node->expr);
+    transpile_expr(transpiler, assert_node->expr);
     fprintf(transpiler->file, "))\n{\n");
     fprintf(transpiler->file,
         "printf(%cAssertion failed: %s:%zu:%zu\\n%c);\nexit(1);\n}\n", '"',
