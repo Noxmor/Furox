@@ -20,7 +20,7 @@ namespace AST
     {
         export ContinueStmt* new(Arena* arena)
         {
-            return arena_alloc(arena, frx::sizeof(ContinueStmt));
+            return Arena::alloc(arena, frx::sizeof(ContinueStmt));
         }
 
         export void print(ContinueStmt* continue_stmt, mut FILE* file, usize depth)

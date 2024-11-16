@@ -68,7 +68,7 @@ export void parser_init(mut Parser* parser, char* filepath)
     parser->panic = false;
     parser->failed = false;
 
-    arena_init(&parser->arena, 1024 * 1024);
+    Arena::init(&parser->arena, 1024 * 1024);
 
     enum_table_init(&parser->enum_table);
     struct_table_init(&parser->struct_table);

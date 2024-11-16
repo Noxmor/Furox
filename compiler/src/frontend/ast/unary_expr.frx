@@ -27,7 +27,7 @@ namespace AST
 
             frx::assert(operand != nullptr);
 
-            mut UnaryExpr* unary_expr = arena_alloc(arena, frx::sizeof(UnaryExpr));
+            mut UnaryExpr* unary_expr = Arena::alloc(arena, frx::sizeof(UnaryExpr));
 
             unary_expr->type = type;
             unary_expr->operator = operator;

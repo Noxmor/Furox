@@ -20,7 +20,7 @@ namespace AST
     {
         export ReturnStmt* new(Arena* arena)
         {
-            mut ReturnStmt* return_stmt = arena_alloc(arena, frx::sizeof(ReturnStmt));
+            mut ReturnStmt* return_stmt = Arena::alloc(arena, frx::sizeof(ReturnStmt));
 
             return_stmt->value = nullptr;
 

@@ -27,7 +27,7 @@ namespace AST
 
             frx::assert(scope != nullptr);
 
-            mut SwitchCase* switch_case = arena_alloc(arena, frx::sizeof(SwitchCase));
+            mut SwitchCase* switch_case = Arena::alloc(arena, frx::sizeof(SwitchCase));
 
             switch_case->value = value;
             switch_case->scope = scope;
@@ -63,7 +63,7 @@ namespace AST
         {
             frx::assert(value != nullptr);
 
-            mut SwitchStmt* switch_stmt = arena_alloc(arena, frx::sizeof(SwitchStmt));
+            mut SwitchStmt* switch_stmt = Arena::alloc(arena, frx::sizeof(SwitchStmt));
 
             switch_stmt->value = value;
             list_init(&switch_stmt->cases);

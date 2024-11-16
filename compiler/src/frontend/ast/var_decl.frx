@@ -21,7 +21,7 @@ namespace AST
         export VarDecl* new(Arena* arena, TypeSpecifier* type, core::Scope* scope,
             char* name, b8 mutable)
         {
-            VarDecl* var_decl = arena_alloc(arena, frx::sizeof(VarDecl));
+            VarDecl* var_decl = Arena::alloc(arena, frx::sizeof(VarDecl));
 
             var_symbol_init(&var_decl->symbol, nullptr, type, scope, name, false,
                 mutable);

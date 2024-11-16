@@ -12,7 +12,7 @@ namespace AST
     {
         export Compound* new(Arena* arena)
         {
-            mut Compound* compound = arena_alloc(arena, frx::sizeof(Compound));
+            mut Compound* compound = Arena::alloc(arena, frx::sizeof(Compound));
 
             list_init(&compound->nodes);
 

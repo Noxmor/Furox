@@ -43,8 +43,7 @@ namespace AST
     {
         NamespaceScope* new(Arena* arena)
         {
-            mut NamespaceScope* namespace_scope = arena_alloc(arena,
-                frx::sizeof(NamespaceScope));
+            mut NamespaceScope* namespace_scope = Arena::alloc(arena, frx::sizeof(NamespaceScope));
 
             libc::memset(namespace_scope, 0, frx::sizeof(NamespaceScope));
             namespace_scope->type = AST::NamespaceScopeType::INVALID;

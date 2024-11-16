@@ -26,8 +26,7 @@ namespace AST
 
             frx::assert(condition != nullptr);
 
-            mut DoWhileLoop* do_while_loop = arena_alloc(arena,
-                frx::sizeof(DoWhileLoop));
+            mut DoWhileLoop* do_while_loop = Arena::alloc(arena, frx::sizeof(DoWhileLoop));
 
             do_while_loop->scope = scope;
             do_while_loop->condition = condition;

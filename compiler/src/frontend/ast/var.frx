@@ -27,7 +27,7 @@ namespace AST
         {
             frx::assert(name != nullptr);
 
-            mut Var* var = arena_alloc(arena, frx::sizeof(Var));
+            mut Var* var = Arena::alloc(arena, frx::sizeof(Var));
 
             var->symbol = nullptr;
             var->ns = ns;

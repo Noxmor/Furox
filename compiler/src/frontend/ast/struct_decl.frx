@@ -25,7 +25,7 @@ namespace AST
     {
         export StructDecl* new(Arena* arena, core::Scope* scope, core::Namespace* ns, char* name)
         {
-            mut StructDecl* struct_decl = arena_alloc(arena, frx::sizeof(StructDecl));
+            mut StructDecl* struct_decl = Arena::alloc(arena, frx::sizeof(StructDecl));
 
             struct_symbol_init(&struct_decl->symbol, scope, ns, name, false, true);
 

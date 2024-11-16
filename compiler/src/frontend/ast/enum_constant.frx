@@ -33,8 +33,7 @@ namespace AST
 
             frx::assert(name != nullptr);
 
-            mut EnumConstant* constant = arena_alloc(arena,
-                frx::sizeof(EnumConstant));
+            mut EnumConstant* constant = Arena::alloc(arena, frx::sizeof(EnumConstant));
 
             constant->symbol = nullptr;
             constant->enum_namespace = enum_namespace;

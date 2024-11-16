@@ -65,7 +65,7 @@ namespace AST
     {
         Expr* new(Arena* arena)
         {
-            mut Expr* expr = arena_alloc(arena, frx::sizeof(Expr));
+            mut Expr* expr = Arena::alloc(arena, frx::sizeof(Expr));
 
             libc::memset(expr, 0, frx::sizeof(Expr));
 

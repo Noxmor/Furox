@@ -24,7 +24,7 @@ namespace AST
         export GlobalVarDef* new(Arena* arena, core::Namespace* ns,
             TypeSpecifier* type, core::Scope* scope, char* name, b8 mutable)
         {
-            GlobalVarDef* var_def = arena_alloc(arena, frx::sizeof(GlobalVarDef));
+            GlobalVarDef* var_def = Arena::alloc(arena, frx::sizeof(GlobalVarDef));
 
             var_symbol_init(&var_def->symbol, ns, type, scope, name, true, mutable);
 

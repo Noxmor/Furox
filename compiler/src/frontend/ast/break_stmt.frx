@@ -20,7 +20,7 @@ namespace AST
     {
         export BreakStmt* new(Arena* arena)
         {
-            return arena_alloc(arena, frx::sizeof(BreakStmt));
+            return Arena::alloc(arena, frx::sizeof(BreakStmt));
         }
 
         export void print(BreakStmt* break_stmt, mut FILE* file, usize depth)

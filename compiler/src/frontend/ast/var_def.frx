@@ -23,7 +23,7 @@ namespace AST
         export VarDef* new(Arena* arena, TypeSpecifier* type, core::Scope* scope,
             char* name, b8 mutable)
         {
-            VarDef* var_def = arena_alloc(arena, frx::sizeof(VarDef));
+            VarDef* var_def = Arena::alloc(arena, frx::sizeof(VarDef));
 
             var_symbol_init(&var_def->symbol, nullptr, type, scope, name, false,
                 mutable);

@@ -36,8 +36,7 @@ namespace AST
 
             frx::assert(right != nullptr);
 
-            mut BinaryExpr* expr = arena_alloc(arena,
-                frx::sizeof(BinaryExpr));
+            mut BinaryExpr* expr = Arena::alloc(arena, frx::sizeof(BinaryExpr));
 
             expr->type = type;
             expr->operator = operator;

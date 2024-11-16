@@ -19,8 +19,7 @@ namespace AST
     {
         export IntLiteral* new(Arena* arena, u64 value)
         {
-            mut IntLiteral* int_literal = arena_alloc(arena,
-                frx::sizeof(IntLiteral));
+            mut IntLiteral* int_literal = Arena::alloc(arena, frx::sizeof(IntLiteral));
 
             int_literal->value = value;
 

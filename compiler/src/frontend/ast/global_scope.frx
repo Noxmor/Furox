@@ -55,7 +55,7 @@ namespace AST
     {
         GlobalScope* new(Arena* arena)
         {
-            mut GlobalScope* global_scope = arena_alloc(arena, frx::sizeof(GlobalScope));
+            mut GlobalScope* global_scope = Arena::alloc(arena, frx::sizeof(GlobalScope));
 
             libc::memset(global_scope, 0, frx::sizeof(GlobalScope));
             global_scope->type = AST::GlobalScopeType::INVALID;

@@ -26,7 +26,7 @@ namespace AST
 
             frx::assert(name != nullptr);
 
-            mut StructField* field = arena_alloc(arena, frx::sizeof(StructField));
+            mut StructField* field = Arena::alloc(arena, frx::sizeof(StructField));
 
             field->type = type;
             field->name = name;
@@ -58,7 +58,7 @@ namespace AST
         export StructDef* new(Arena* arena, core::Scope* scope, core::Namespace* ns,
             char* name, b8 exported)
         {
-            mut StructDef* struct_def = arena_alloc(arena, frx::sizeof(StructDef));
+            mut StructDef* struct_def = Arena::alloc(arena, frx::sizeof(StructDef));
 
             struct_symbol_init(&struct_def->symbol, scope, ns, name, exported, false);
 

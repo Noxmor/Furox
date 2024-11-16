@@ -23,7 +23,7 @@ namespace AST
         export GlobalVarDecl* new(Arena* arena, core::Namespace* ns,
             TypeSpecifier* type, core::Scope* scope, char* name, b8 mutable)
         {
-            GlobalVarDecl* var_decl = arena_alloc(arena, frx::sizeof(GlobalVarDecl));
+            GlobalVarDecl* var_decl = Arena::alloc(arena, frx::sizeof(GlobalVarDecl));
 
             var_symbol_init(&var_decl->symbol, ns, type, scope, name, true, mutable);
 

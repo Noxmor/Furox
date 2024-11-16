@@ -25,7 +25,7 @@ namespace AST
         {
             frx::assert(filepath != nullptr);
 
-            mut ImportStmt* import_stmt = arena_alloc(arena, frx::sizeof(ImportStmt));
+            mut ImportStmt* import_stmt = Arena::alloc(arena, frx::sizeof(ImportStmt));
 
             import_stmt->imported_parser = imported_parser;
             import_stmt->filepath = filepath;

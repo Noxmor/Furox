@@ -24,8 +24,7 @@ namespace AST
         {
             frx::assert(name != nullptr);
 
-            mut EnumConstantDef* constant = arena_alloc(arena,
-                frx::sizeof(EnumConstantDef));
+            mut EnumConstantDef* constant = Arena::alloc(arena, frx::sizeof(EnumConstantDef));
 
             constant->name = name;
             constant->value = value;
@@ -48,7 +47,7 @@ namespace AST
         export EnumDef* new(Arena* arena, core::Scope* scope, core::Namespace* ns,
             char* name, TokenType type, b8 exported)
         {
-            mut EnumDef* enum_def = arena_alloc(arena, frx::sizeof(EnumDef));
+            mut EnumDef* enum_def = Arena::alloc(arena, frx::sizeof(EnumDef));
 
             enum_symbol_init(&enum_def->symbol, type, scope, ns, name, exported);
 

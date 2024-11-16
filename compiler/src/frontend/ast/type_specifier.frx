@@ -44,7 +44,7 @@ namespace AST
 
             frx::assert(scope != nullptr);
 
-            mut TypeSpecifier* type_specifier = arena_alloc(arena, frx::sizeof(TypeSpecifier));
+            mut TypeSpecifier* type_specifier = Arena::alloc(arena, frx::sizeof(TypeSpecifier));
 
             type_specifier->ns = ns;
             type_specifier->name = name;

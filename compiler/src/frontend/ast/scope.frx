@@ -24,7 +24,7 @@ namespace AST
     {
         export Scope* new(Arena* arena)
         {
-            mut Scope* scope = arena_alloc(arena, frx::sizeof(Scope));
+            mut Scope* scope = Arena::alloc(arena, frx::sizeof(Scope));
 
             list_init(&scope->stmts);
 

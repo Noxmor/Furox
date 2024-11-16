@@ -21,8 +21,7 @@ namespace AST
         {
             frx::assert(literal != nullptr);
 
-            mut CharLiteral* char_literal = arena_alloc(arena,
-                frx::sizeof(CharLiteral));
+            mut CharLiteral* char_literal = Arena::alloc(arena, frx::sizeof(CharLiteral));
 
             char_literal->literal = literal;
 

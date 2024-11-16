@@ -32,7 +32,7 @@ namespace AST
         {
             frx::assert(return_type != nullptr);
 
-            mut FuncDecl* func_decl = arena_alloc(arena, frx::sizeof(FuncDecl));
+            mut FuncDecl* func_decl = Arena::alloc(arena, frx::sizeof(FuncDecl));
 
             func_symbol_init(&func_decl->symbol, scope, ns, name, false, true);
 

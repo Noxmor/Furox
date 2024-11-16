@@ -61,7 +61,7 @@ namespace AST
     {
         Stmt* new(Arena* arena)
         {
-            mut Stmt* stmt = arena_alloc(arena, frx::sizeof(Stmt));
+            mut Stmt* stmt = Arena::alloc(arena, frx::sizeof(Stmt));
 
             libc::memset(stmt, 0, frx::sizeof(Stmt));
 

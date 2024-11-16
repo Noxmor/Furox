@@ -21,7 +21,7 @@ namespace AST
     {
         export InitializerList* new(Arena* arena)
         {
-            InitializerList* list = arena_alloc(arena, frx::sizeof(InitializerList));
+            InitializerList* list = Arena::alloc(arena, frx::sizeof(InitializerList));
 
             list_init(&list->values);
 

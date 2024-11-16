@@ -12,7 +12,7 @@ namespace AST
     {
         export Error* new(Arena* arena)
         {
-            Error* error = arena_alloc(arena, frx::sizeof(Error));
+            Error* error = Arena::alloc(arena, frx::sizeof(Error));
 
             return error;
         }

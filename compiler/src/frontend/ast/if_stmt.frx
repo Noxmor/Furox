@@ -27,7 +27,7 @@ namespace AST
 
             frx::assert(if_block != nullptr);
 
-            mut IfStmt* if_stmt = arena_alloc(arena, frx::sizeof(IfStmt));
+            mut IfStmt* if_stmt = Arena::alloc(arena, frx::sizeof(IfStmt));
 
             if_stmt->condition = condition;
             if_stmt->if_block = if_block;

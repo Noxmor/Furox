@@ -26,7 +26,7 @@ namespace AST
 
             frx::assert(scope != nullptr);
 
-            mut WhileLoop* while_loop = arena_alloc(arena, frx::sizeof(WhileLoop));
+            mut WhileLoop* while_loop = Arena::alloc(arena, frx::sizeof(WhileLoop));
 
             while_loop->condition = condition;
             while_loop->scope = scope;

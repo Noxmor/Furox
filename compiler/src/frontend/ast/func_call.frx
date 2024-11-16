@@ -34,7 +34,7 @@ namespace AST
 
             frx::assert(scope != nullptr);
 
-            mut FuncCall* func_call = arena_alloc(arena, frx::sizeof(FuncCall));
+            mut FuncCall* func_call = Arena::alloc(arena, frx::sizeof(FuncCall));
 
             func_call->symbol = nullptr;
             func_call->ns = ns;

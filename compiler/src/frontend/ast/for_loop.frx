@@ -33,7 +33,7 @@ namespace AST
 
             frx::assert(scope != nullptr);
 
-            mut ForLoop* for_loop = arena_alloc(arena, frx::sizeof(ForLoop));
+            mut ForLoop* for_loop = Arena::alloc(arena, frx::sizeof(ForLoop));
 
             for_loop->initialization = initialization;
             for_loop->condition = condition;

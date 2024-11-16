@@ -34,7 +34,7 @@ namespace AST
         {
             frx::assert(return_type != nullptr);
 
-            mut FuncDef* func_def = arena_alloc(arena, frx::sizeof(FuncDef));
+            mut FuncDef* func_def = Arena::alloc(arena, frx::sizeof(FuncDef));
 
             func_def->return_type = return_type;
             func_symbol_init(&func_def->symbol, scope, ns, name, exported, false);

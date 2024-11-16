@@ -26,7 +26,7 @@ namespace AST
         {
             frx::assert(name != nullptr);
 
-            mut UnresolvedName* unresolved_name = arena_alloc(arena, frx::sizeof(UnresolvedName));
+            mut UnresolvedName* unresolved_name = Arena::alloc(arena, frx::sizeof(UnresolvedName));
 
             unresolved_name->name = name;
             unresolved_name->scope = scope;

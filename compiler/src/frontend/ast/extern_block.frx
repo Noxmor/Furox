@@ -22,8 +22,7 @@ namespace AST
     {
         export ExternBlock* new(Arena* arena)
         {
-            mut ExternBlock* extern_block = arena_alloc(arena,
-                frx::sizeof(ExternBlock));
+            mut ExternBlock* extern_block = Arena::alloc(arena, frx::sizeof(ExternBlock));
 
             list_init(&extern_block->func_decls);
 

@@ -25,7 +25,7 @@ namespace AST
         export FuncParam* new(Arena* arena, TypeSpecifier* type,
             core::Scope* scope, char* name, b8 mutable)
         {
-            FuncParam* param = arena_alloc(arena, frx::sizeof(FuncParam));
+            FuncParam* param = Arena::alloc(arena, frx::sizeof(FuncParam));
 
             var_symbol_init(&param->symbol, nullptr, type, scope, name, false,
                 mutable);
@@ -59,7 +59,7 @@ namespace AST
     {
         export FuncParams* new(Arena* arena)
         {
-            mut FuncParams* func_params = arena_alloc(arena,
+            mut FuncParams* func_params = Arena::alloc(arena,
                 frx::sizeof(FuncParams));
 
             func_params->variadic = false;

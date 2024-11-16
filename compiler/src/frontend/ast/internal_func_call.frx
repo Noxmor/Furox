@@ -34,7 +34,7 @@ namespace AST
 
             frx::assert(expr != nullptr);
 
-            mut Assert* assert_node = arena_alloc(arena, frx::sizeof(Assert));
+            mut Assert* assert_node = Arena::alloc(arena, frx::sizeof(Assert));
 
             assert_node->filepath = filepath;
             assert_node->expr = expr;
@@ -75,7 +75,7 @@ namespace AST
 
             frx::assert(scope != nullptr);
 
-            mut Sizeof* sizeof_node = arena_alloc(arena, frx::sizeof(Sizeof));
+            mut Sizeof* sizeof_node = Arena::alloc(arena, frx::sizeof(Sizeof));
 
             sizeof_node->ns = ns;
             sizeof_node->name = name;
@@ -124,7 +124,7 @@ namespace AST
 
             frx::assert(scope != nullptr);
 
-            mut EnumCount* enum_count = arena_alloc(arena, frx::sizeof(EnumCount));
+            mut EnumCount* enum_count = Arena::alloc(arena, frx::sizeof(EnumCount));
 
             enum_count->ns = ns;
             enum_count->name = name;
@@ -171,7 +171,7 @@ namespace AST
     {
         export InternalFuncCall* new(Arena* arena)
         {
-            mut InternalFuncCall* internal_func_call = arena_alloc(arena, frx::sizeof(InternalFuncCall));
+            mut InternalFuncCall* internal_func_call = Arena::alloc(arena, frx::sizeof(InternalFuncCall));
 
             libc::memset(internal_func_call, 0, frx::sizeof(InternalFuncCall));
             internal_func_call->type = AST::InternalFuncCallType::INVALID;
