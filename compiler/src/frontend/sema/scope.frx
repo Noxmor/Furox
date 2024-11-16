@@ -1,0 +1,21 @@
+import "stmt.frx";
+import "../core/parser.frx";
+import "../ast/scope.frx";
+import "../../core/list.frx";
+
+namespace AST::Scope
+{
+    export void sema(Parser* parser, Scope* scope)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(scope != nullptr);
+
+        mut usize i;
+        for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+        {
+            Stmt* stmt = list_get(&scope->stmts, i);
+            AST::Stmt::sema(parser, stmt);
+        }
+    }
+}

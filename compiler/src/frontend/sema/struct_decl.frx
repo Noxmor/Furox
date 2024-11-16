@@ -1,0 +1,37 @@
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../symbols/struct.frx";
+import "../ast/struct_decl.frx";
+import "../../core/list.frx";
+
+namespace AST::StructDecl
+{
+    export void sema(mut Parser* parser, mut StructDecl* struct_decl)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(struct_decl != nullptr);
+
+        StructSymbol* symbol = &struct_decl->symbol;
+
+        mut usize i;
+        for(i = 0; i < list_size(&parser->visible_parsers)
+            && !struct_decl->is_redefinition; i = i + 1)
+        {
+            Parser* visible_parser = list_get(&parser->visible_parsers, i);
+            StructSymbol* imported_symbol = struct_table_find(
+                &visible_parser->struct_table, symbol->ns, symbol->name);
+
+            struct_decl->is_redefinition = imported_symbol != nullptr
+                && imported_symbol->exported;
+        }
+
+        if(struct_decl->is_redefinition)
+        {
+            error_struct_decl_redefinition(parser_source_file(parser),
+                struct_decl->range.start, symbol->name);
+
+            parser->failed = true;
+        }
+    }
+}

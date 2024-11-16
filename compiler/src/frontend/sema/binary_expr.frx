@@ -1,0 +1,113 @@
+import "expr.frx";
+import "struct_member.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../symbols/var.frx";
+import "../ast/binary_expr.frx";
+import "../ast/struct_member.frx";
+import "../ast/unresolved_name.frx";
+import "../syntax/var.frx";
+
+namespace AST::BinaryExpr
+{
+    export void sema(mut Parser* parser, mut BinaryExpr* expr)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(expr != nullptr);
+
+        switch(expr->operator)
+        {
+            case Operator::POINTER_MEMBER_ACCESS:
+            {
+                AST::Expr::sema(parser, expr->left);
+
+                if(expr->right->type != AST::ExprType::UNRESOLVED_NAME)
+                {
+                    //FIXME: Print the correct location, this is only a placeholder
+                    SourceLocation loc;
+                    error_not_a_struct_member(parser_source_file(parser), loc);
+
+                    parser->failed = true;
+                }
+                else
+                {
+                    UnresolvedName* unresolved_name = expr->right->unresolved_name;
+                    StructMember* member = AST::StructMember::new(&parser->arena, unresolved_name->name);
+
+                    expr->right->type = AST::ExprType::STRUCT_MEMBER;
+                    expr->right->struct_member = member;
+
+                    AST::StructMember::sema(parser, member);
+                }
+
+                break;
+            }
+            case Operator::MEMBER_ACCESS:
+            {
+                AST::Expr::sema(parser, expr->left);
+
+                if(expr->right->type != AST::ExprType::UNRESOLVED_NAME)
+                {
+                    //FIXME: Print the correct location, this is only a placeholder
+                    SourceLocation loc;
+                    error_not_a_struct_member(parser_source_file(parser), loc);
+
+                    parser->failed = true;
+                }
+                else
+                {
+                    UnresolvedName* unresolved_name = expr->right->unresolved_name;
+                    StructMember* member = AST::StructMember::new(&parser->arena, unresolved_name->name);
+
+                    expr->right->type = AST::ExprType::STRUCT_MEMBER;
+                    expr->right->struct_member = member;
+
+                    AST::StructMember::sema(parser, member);
+                }
+
+                break;
+            }
+            case Operator::ASSIGN:
+            {
+                AST::Expr::sema(parser, expr->left);
+                AST::Expr::sema(parser, expr->right);
+
+                mut Expr* left = expr->left;
+                while(left->type == AST::ExprType::BINARY_EXPR)
+                {
+                    AST::BinaryExpr* binary_expr = left->binary_expr;
+                    if(binary_expr->operator != Operator::POINTER_MEMBER_ACCESS
+                        && binary_expr->operator != Operator::MEMBER_ACCESS)
+                    {
+                        break;
+                    }
+
+                    left = binary_expr->left;
+                }
+
+                if(left->type == AST::ExprType::VAR)
+                {
+                    Var* var = left->var;
+                    VarSymbol* symbol = var->symbol;
+
+                    if(!symbol->mutable)
+                    {
+                        error_assignment_const_var(parser_source_file(parser),
+                            var->range.start, var->name);
+                        parser->failed = true;
+                    }
+                }
+
+                break;
+            }
+            default:
+            {
+                AST::Expr::sema(parser, expr->left);
+                AST::Expr::sema(parser, expr->right);
+
+                break;
+            }
+        }
+    }
+}

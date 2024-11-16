@@ -1,0 +1,112 @@
+export import "../ast/stmt.frx";
+import "../core/parser.frx";
+import "return_stmt.frx";
+import "expr_stmt.frx";
+import "var_decl.frx";
+import "var_def.frx";
+import "if_stmt.frx";
+import "for_loop.frx";
+import "while_loop.frx";
+import "do_while_loop.frx";
+import "switch_stmt.frx";
+import "scope.frx";
+
+namespace AST::Stmt
+{
+    export void sema(Parser* parser, Stmt* stmt)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(stmt != nullptr);
+
+        switch(stmt->type)
+        {
+            case AST::StmtType::BREAK_STMT:
+            {
+                break;
+            }
+
+            case AST::StmtType::CONTINUE_STMT:
+            {
+                break;
+            }
+
+            case AST::StmtType::RETURN_STMT:
+            {
+                AST::ReturnStmt::sema(parser, stmt->return_stmt);
+
+                break;
+            }
+
+            case AST::StmtType::EXPR_STMT:
+            {
+                AST::ExprStmt::sema(parser, stmt->expr_stmt);
+
+                break;
+            }
+
+            case AST::StmtType::VAR_DECL:
+            {
+                AST::VarDecl::sema(parser, stmt->var_decl);
+
+                break;
+            }
+
+            case AST::StmtType::VAR_DEF:
+            {
+                AST::VarDef::sema(parser, stmt->var_def);
+
+                break;
+            }
+
+            case AST::StmtType::IF_STMT:
+            {
+                AST::IfStmt::sema(parser, stmt->if_stmt);
+
+                break;
+            }
+
+            case AST::StmtType::FOR_LOOP:
+            {
+                AST::ForLoop::sema(parser, stmt->for_loop);
+
+                break;
+            }
+
+            case AST::StmtType::WHILE_LOOP:
+            {
+                AST::WhileLoop::sema(parser, stmt->while_loop);
+
+                break;
+            }
+
+            case AST::StmtType::DO_WHILE_LOOP:
+            {
+                AST::DoWhileLoop::sema(parser, stmt->do_while_loop);
+
+                break;
+            }
+
+            case AST::StmtType::SWITCH_STMT:
+            {
+                AST::SwitchStmt::sema(parser, stmt->switch_stmt);
+
+                break;
+            }
+
+            case AST::StmtType::SCOPE:
+            {
+                AST::Scope::sema(parser, stmt->scope);
+
+                break;
+            }
+
+            default:
+            {
+                frx::assert(false);
+
+                break;
+            }
+        }
+    }
+}

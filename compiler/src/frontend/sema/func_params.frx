@@ -1,0 +1,44 @@
+import "type_specifier.frx";
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../ast/func_params.frx";
+import "../../core/list.frx";
+
+namespace AST::FuncParam
+{
+    void sema(mut Parser* parser, FuncParam* param)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(param != nullptr);
+
+        if(param->is_redefinition)
+        {
+            //FIXME: Print the correct location, this is only a placeholder
+            SourceLocation loc;
+            error_var_redefinition(parser_source_file(parser), loc,
+                param->symbol.name);
+
+            parser->failed = true;
+        }
+
+        AST::TypeSpecifier::sema(parser, param->symbol.type);
+    }
+}
+
+namespace AST::FuncParams
+{
+    export void sema(Parser* parser, FuncParams* params)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(params != nullptr);
+
+        mut usize i;
+        for(i = 0; i < list_size(&params->params); i = i + 1)
+        {
+            FuncParam* param = list_get(&params->params, i);
+            AST::FuncParam::sema(parser, param);
+        }
+    }
+}

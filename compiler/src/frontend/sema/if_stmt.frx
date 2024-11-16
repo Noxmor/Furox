@@ -1,0 +1,22 @@
+import "expr.frx";
+import "scope.frx";
+import "../core/parser.frx";
+import "../ast/if_stmt.frx";
+
+namespace AST::IfStmt
+{
+    export void sema(Parser* parser, IfStmt* if_stmt)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(if_stmt != nullptr);
+
+        AST::Expr::sema(parser, if_stmt->condition);
+        AST::Scope::sema(parser, if_stmt->if_block);
+
+        if(if_stmt->else_block != nullptr)
+        {
+            AST::Scope::sema(parser, if_stmt->else_block);
+        }
+    }
+}

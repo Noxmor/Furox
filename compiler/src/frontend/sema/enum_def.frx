@@ -1,0 +1,37 @@
+import "../core/errors.frx";
+import "../core/parser.frx";
+import "../symbols/enum.frx";
+import "../ast/enum_def.frx";
+import "../../core/list.frx";
+
+namespace AST::EnumDef
+{
+    export void sema(mut Parser* parser, mut EnumDef* enum_def)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(enum_def != nullptr);
+
+        EnumSymbol* symbol = &enum_def->symbol;
+
+        mut usize i;
+        for(i = 0; i < list_size(&parser->visible_parsers)
+            && !enum_def->is_redefinition; i = i + 1)
+        {
+            Parser* visible_parser = list_get(&parser->visible_parsers, i);
+            EnumSymbol* imported_symbol = enum_table_find(
+                &visible_parser->enum_table, symbol->ns, symbol->name);
+
+            enum_def->is_redefinition = imported_symbol != nullptr
+                && imported_symbol->exported;
+        }
+
+        if(enum_def->is_redefinition)
+        {
+            error_enum_redefinition(parser_source_file(parser),
+                enum_def->range.start, symbol->name);
+
+            parser->failed = true;
+        }
+    }
+}

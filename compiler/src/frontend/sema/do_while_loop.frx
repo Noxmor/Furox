@@ -1,0 +1,17 @@
+import "expr.frx";
+import "scope.frx";
+import "../core/parser.frx";
+import "../ast/do_while_loop.frx";
+
+namespace AST::DoWhileLoop
+{
+    export void sema(Parser* parser, DoWhileLoop* do_while_loop)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(do_while_loop != nullptr);
+
+        AST::Scope::sema(parser, do_while_loop->scope);
+        AST::Expr::sema(parser, do_while_loop->condition);
+    }
+}

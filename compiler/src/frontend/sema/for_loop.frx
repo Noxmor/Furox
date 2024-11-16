@@ -1,0 +1,19 @@
+import "expr.frx";
+import "scope.frx";
+import "../core/parser.frx";
+import "../ast/for_loop.frx";
+
+namespace AST::ForLoop
+{
+    export void sema(Parser* parser, ForLoop* for_loop)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(for_loop != nullptr);
+
+        AST::Expr::sema(parser, for_loop->initialization);
+        AST::Expr::sema(parser, for_loop->condition);
+        AST::Expr::sema(parser, for_loop->iteration);
+        AST::Scope::sema(parser, for_loop->scope);
+    }
+}

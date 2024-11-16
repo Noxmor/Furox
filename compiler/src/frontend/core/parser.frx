@@ -7,7 +7,7 @@ import "../symbols/enum.frx";
 import "../symbols/func.frx";
 import "../symbols/struct.frx";
 import "../symbols/var.frx";
-import "../semantic/global_scope.frx";
+import "../sema/global_scope.frx";
 import "../syntax/translation_unit.frx";
 export import "../../core/arena.frx";
 import "../../core/list.frx";
@@ -271,7 +271,7 @@ export void parser_analyze(Parser* parser)
     for(i = 0; i < list_size(&parser->translation_unit->nodes); ++i)
     {
         AST::GlobalScope* global_scope = list_get(&parser->translation_unit->nodes, i);
-        analyze_global_scope(parser, global_scope);
+        AST::GlobalScope::sema(parser, global_scope);
     }
 }
 

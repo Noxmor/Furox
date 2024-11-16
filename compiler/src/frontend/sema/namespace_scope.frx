@@ -1,0 +1,70 @@
+export import "../ast/namespace_scope.frx";
+import "../core/parser.frx";
+import "namespace.frx";
+import "enum_def.frx";
+import "struct_def.frx";
+import "func_def.frx";
+import "global_var_decl.frx";
+import "global_var_def.frx";
+
+namespace AST::NamespaceScope
+{
+    export void sema(Parser* parser, NamespaceScope* namespace_scope)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(namespace_scope != nullptr);
+
+        switch(namespace_scope->type)
+        {
+            case AST::NamespaceScopeType::NAMESPACE:
+            {
+                AST::Namespace::sema(parser, namespace_scope->ns);
+
+                break;
+            }
+
+            case AST::NamespaceScopeType::ENUM_DEF:
+            {
+                AST::EnumDef::sema(parser, namespace_scope->enum_def);
+
+                break;
+            }
+
+            case AST::NamespaceScopeType::STRUCT_DEF:
+            {
+                AST::StructDef::sema(parser, namespace_scope->struct_def);
+
+                break;
+            }
+
+            case AST::NamespaceScopeType::FUNC_DEF:
+            {
+                AST::FuncDef::sema(parser, namespace_scope->func_def);
+
+                break;
+            }
+
+            case AST::NamespaceScopeType::GLOBAL_VAR_DECL:
+            {
+                AST::GlobalVarDecl::sema(parser, namespace_scope->global_var_decl);
+
+                break;
+            }
+
+            case AST::NamespaceScopeType::GLOBAL_VAR_DEF:
+            {
+                AST::GlobalVarDef::sema(parser, namespace_scope->global_var_def);
+
+                break;
+            }
+
+            default:
+            {
+                frx::assert(false);
+
+                break;
+            }
+        }
+    }
+}

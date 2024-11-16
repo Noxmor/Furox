@@ -1,0 +1,56 @@
+import "expr.frx";
+import "../core/errors.frx";
+import "../core/namespace.frx";
+import "../core/parser.frx";
+import "../core/scope.frx";
+import "../ast/type_specifier.frx";
+import "../../core/list.frx";
+
+namespace AST::TypeSpecifier
+{
+    export void sema(mut Parser* parser, mut TypeSpecifier* type_specifier)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(type_specifier != nullptr);
+
+        mut usize i;
+        for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
+        {
+            Expr* array_dimension = list_get(&type_specifier->array_dimensions, i);
+            AST::Expr::sema(parser, array_dimension);
+        }
+
+        if(type_specifier->primitive_type != TokenType::ERROR)
+        {
+            return;
+        }
+
+        core::Namespace* ns = type_specifier->ns;
+        char* name = type_specifier->name;
+        core::Scope* scope = type_specifier->scope;
+
+        if(type_specifier->ns == nullptr)
+        {
+            type_specifier->enum_type = parser_find_enum_symbol_r(parser,
+                parser->current_namespace, name);
+            type_specifier->struct_type = parser_find_struct_symbol_r(parser,
+                parser->current_namespace, name);
+        }
+        else
+        {
+            type_specifier->enum_type = parser_find_enum_symbol(parser, ns, name);
+            type_specifier->struct_type = parser_find_struct_symbol(parser, ns,
+                name);
+        }
+
+        if(type_specifier->enum_type == nullptr
+            && type_specifier->struct_type == nullptr)
+        {
+            //FIXME: Print the correct location, this is only a placeholder
+            SourceLocation loc;
+            error_undefined_type_specifier(parser_source_file(parser), loc, name);
+            parser->failed = true;
+        }
+    }
+}

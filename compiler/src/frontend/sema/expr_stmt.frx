@@ -1,0 +1,15 @@
+import "expr.frx";
+import "../core/parser.frx";
+import "../ast/expr_stmt.frx";
+
+namespace AST::ExprStmt
+{
+    export void sema(Parser* parser, ExprStmt* expr_stmt)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(expr_stmt != nullptr);
+
+        AST::Expr::sema(parser, expr_stmt->expr);
+    }
+}

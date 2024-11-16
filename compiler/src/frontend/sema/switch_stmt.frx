@@ -1,0 +1,42 @@
+import "expr.frx";
+import "scope.frx";
+import "../core/parser.frx";
+import "../ast/switch_stmt.frx";
+import "../../core/list.frx";
+
+namespace AST::SwitchCase
+{
+    void sema(Parser* parser, SwitchCase* switch_case)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(switch_case != nullptr);
+
+        AST::Expr::sema(parser, switch_case->value);
+        AST::Scope::sema(parser, switch_case->scope);
+    }
+}
+
+namespace AST::SwitchStmt
+{
+    export void sema(Parser* parser, SwitchStmt* switch_stmt)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(switch_stmt != nullptr);
+
+        AST::Expr::sema(parser, switch_stmt->value);
+
+        mut usize i;
+        for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
+        {
+            SwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+            AST::SwitchCase::sema(parser, switch_case);
+    }
+
+        if(switch_stmt->default_scope != nullptr)
+        {
+            AST::Scope::sema(parser, switch_stmt->default_scope);
+        }
+    }
+}
