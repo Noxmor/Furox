@@ -88,8 +88,8 @@ export void parser_eat(mut Parser* parser, TokenType type)
     if(parser->token->type != type)
     {
         log_error(parser_source_file(parser), parser_current_location(parser),
-            "Expected '%s', but found '%s'!", token_type_to_str(type),
-            token_type_to_str(parser->token->type));
+            "Expected '%s', but found '%s'!", TokenType::to_str(type),
+            TokenType::to_str(parser->token->type));
 
         parser->failed = true;
         parser_panic(parser);
@@ -110,7 +110,7 @@ export b8 parser_loop_until(Parser* parser, TokenType type)
     return current_type != type
         && current_type != TokenType::ERROR
         && current_type != TokenType::EOF
-        && !token_type_is_synchronizing(current_type);
+        && !TokenType::is_synchronizing(current_type);
 }
 
 export void parser_panic(Parser* parser)
@@ -119,7 +119,7 @@ export void parser_panic(Parser* parser)
 
     while(true)
     {
-        if(token_type_is_synchronizing(parser->token->type))
+        if(TokenType::is_synchronizing(parser->token->type))
         {
             return;
         }

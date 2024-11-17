@@ -82,7 +82,7 @@ namespace AST
             fprintf(file, "type: ");
             if(type_specifier->primitive_type != 0)
             {
-                fprintf(file, "%s", token_type_to_str(type_specifier->primitive_type));
+                fprintf(file, "%s", TokenType::to_str(type_specifier->primitive_type));
             }
             else
             {

@@ -37,7 +37,7 @@ export void error_ambiguous_unresolved_namespaced_name(char* filepath,
     mut core::Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
+        size = size + libc::strlen(TokenType::to_str(TokenType::NAMESPACE_RESOLUTION))
             + libc::strlen(temp->name);
         temp = temp->parent;
     }
@@ -49,7 +49,7 @@ export void error_ambiguous_unresolved_namespaced_name(char* filepath,
 
     while(ns != nullptr)
     {
-        libc::strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+        libc::strcat(ns_str, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
         libc::strcat(ns_str, ns->name);
 
         ns = ns->parent;
@@ -67,7 +67,7 @@ export void error_namespace_is_reserved(char* filepath, SourceLocation loc,
     mut core::Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
+        size = size + libc::strlen(TokenType::to_str(TokenType::NAMESPACE_RESOLUTION))
             + libc::strlen(temp->name);
         temp = temp->parent;
     }
@@ -79,7 +79,7 @@ export void error_namespace_is_reserved(char* filepath, SourceLocation loc,
 
     while(ns != nullptr)
     {
-        libc::strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+        libc::strcat(ns_str, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
         libc::strcat(ns_str, ns->name);
 
         ns = ns->parent;
@@ -184,7 +184,7 @@ export void error_unresolved_namespaced_name(char* filepath, SourceLocation loc,
     mut core::Namespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
+        size = size + libc::strlen(TokenType::to_str(TokenType::NAMESPACE_RESOLUTION))
             + libc::strlen(temp->name);
         temp = temp->parent;
     }
@@ -196,12 +196,12 @@ export void error_unresolved_namespaced_name(char* filepath, SourceLocation loc,
 
     while(ns != nullptr)
     {
-        libc::strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+        libc::strcat(ns_str, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
         libc::strcat(ns_str, ns->name);
 
         ns = ns->parent;
     }
 
     log_error(filepath, loc, "Could not resolve namespaced name %s%s%s!",
-        ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION), name);
+        ns_str, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION), name);
 }

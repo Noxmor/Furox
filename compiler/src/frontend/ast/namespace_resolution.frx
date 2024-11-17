@@ -16,7 +16,7 @@ namespace AST::NamespaceResolution
 
         while(ns != nullptr)
         {
-            fprintf(file, "%s%s", ns->name, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+            fprintf(file, "%s%s", ns->name, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
 
             ns = ns->parent;
         }

@@ -45,7 +45,7 @@ namespace AST
             print_depth(file, depth);
 
             fprintf(file, "%s (%s)\n", "unary-expression",
-                token_type_to_str(expr->type));
+                TokenType::to_str(expr->type));
 
             AST::Expr::print(expr->operand, file, depth + 1);
         }

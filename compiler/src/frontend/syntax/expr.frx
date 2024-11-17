@@ -152,14 +152,14 @@ namespace AST::Expr
             expr = parse(parser);
             parser_eat(parser, TokenType::RPAREN);
         }
-        else if(token_type_is_prefix_operator(parser->token->type))
+        else if(TokenType::is_prefix_operator(parser->token->type))
         {
             TokenType type = parser->token->type;
 
             parser_eat(parser, type);
 
-            Operator operator = token_type_to_prefix_operator(type);
-            Precedence precedence = operator_to_precedence(operator);
+            Operator operator = TokenType::to_prefix_operator(type);
+            Precedence precedence = Operator::to_precedence(operator);
             UnaryExpr* unary_expr = AST::UnaryExpr::new(&parser->arena, type,
                 operator, parse_with_precedence(parser, precedence));
             expr = from_unary_expr(&parser->arena, unary_expr);
@@ -175,10 +175,10 @@ namespace AST::Expr
         {
             TokenType type = parser->token->type;
 
-            if(token_type_is_postfix_operator(type))
+            if(TokenType::is_postfix_operator(type))
             {
-                Operator operator = token_type_to_postfix_operator(type);
-                Precedence precedence = operator_to_precedence(operator);
+                Operator operator = TokenType::to_postfix_operator(type);
+                Precedence precedence = Operator::to_precedence(operator);
                 if(precedence >= min_precedence)
                 {
                     break;
@@ -204,10 +204,10 @@ namespace AST::Expr
 
                 continue;
             }
-            else if(token_type_is_infix_operator(type))
+            else if(TokenType::is_infix_operator(type))
             {
-                Operator operator = token_type_to_infix_operator(type);
-                Precedence precedence = operator_to_precedence(operator);
+                Operator operator = TokenType::to_infix_operator(type);
+                Precedence precedence = Operator::to_precedence(operator);
                 if(precedence >= min_precedence)
                 {
                     break;

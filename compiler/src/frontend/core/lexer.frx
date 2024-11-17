@@ -61,10 +61,10 @@ KeywordTableEntry* keyword_table_find(char* name)
 export void lexer_init_keyword_table()
 {
     mut TokenType type;
-    for(type = token_type_first_keyword(); type <= token_type_last_keyword();
+    for(type = TokenType::first_keyword(); type <= TokenType::last_keyword();
         type = (type + 1))
     {
-        register_keyword(token_type_to_str(type), type);
+        register_keyword(TokenType::to_str(type), type);
     }
 }
 
@@ -943,7 +943,7 @@ export void lexer_read_token(mut Lexer* lexer, mut Token* token)
         }
     }
 
-    token->identifier = token_type_to_str(token->type);
+    token->identifier = TokenType::to_str(token->type);
 
     token->range.end = lexer->location;
 

@@ -47,7 +47,7 @@ export void transpile_unary_expr(Transpiler* transpiler, AST::UnaryExpr* expr)
         }
         case Operator::ADDRESS_OF:
         {
-            fprintf(transpiler->file, "(%s", token_type_to_str(expr->type));
+            fprintf(transpiler->file, "(%s", TokenType::to_str(expr->type));
             transpile_expr(transpiler, expr->operand);
             fprintf(transpiler->file, ")");
 
@@ -61,7 +61,7 @@ export void transpile_unary_expr(Transpiler* transpiler, AST::UnaryExpr* expr)
         {
             fprintf(transpiler->file, "(");
             transpile_expr(transpiler, expr->operand);
-            fprintf(transpiler->file, "%s)", token_type_to_str(expr->type));
+            fprintf(transpiler->file, "%s)", TokenType::to_str(expr->type));
 
             break;
         }

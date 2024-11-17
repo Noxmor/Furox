@@ -28,7 +28,7 @@ namespace AST
         {
             frx::assert(arena != nullptr);
 
-            frx::assert(token_type_is_infix_operator(type));
+            frx::assert(TokenType::is_infix_operator(type));
 
             frx::assert(operator != Operator::INVALID && operator < Operator::COUNT);
 
@@ -54,7 +54,7 @@ namespace AST
 
             print_depth(file, depth);
 
-            fprintf(file, "%s (%s)\n", "binary-expression", token_type_to_str(binary_expr->type));
+            fprintf(file, "%s (%s)\n", "binary-expression", TokenType::to_str(binary_expr->type));
 
             AST::Expr::print(binary_expr->left, file, depth + 1);
             AST::Expr::print(binary_expr->right, file, depth + 1);

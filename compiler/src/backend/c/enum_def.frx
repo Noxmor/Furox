@@ -41,6 +41,6 @@ export void transpile_enum_def(Transpiler* transpiler, AST::EnumDef* enum_def)
 
     fprintf(transpiler->file, "};\n");
 
-    fprintf(transpiler->file, "typedef %s ", token_type_to_str(symbol->type));
+    fprintf(transpiler->file, "typedef %s ", TokenType::to_str(symbol->type));
     fprintf(transpiler->file, "%s;\n", mangled_name);
 }

@@ -39,7 +39,7 @@ namespace AST::TypeSpecifier
         mut char* name = nullptr;
         mut TokenType primitive_type = TokenType::ERROR;
 
-        if(token_type_is_primitive(parser->token->type))
+        if(TokenType::is_primitive(parser->token->type))
         {
             primitive_type = parser->token->type;
 

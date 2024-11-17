@@ -251,352 +251,362 @@ export enum TokenType : u8
     COUNT
 }
 
-export TokenType token_type_first_keyword()
+namespace TokenType
 {
-    return TokenType::KW_U8;
-}
-
-export TokenType token_type_last_keyword()
-{
-    return TokenType::KW_MACRO;
-}
-
-export b8 token_type_is_primitive(TokenType type)
-{
-    frx::assert(type < TokenType::COUNT);
-
-    return type >= TokenType::KW_U8 && type <= TokenType::KW_VOID;
-}
-
-export usize primitive_type_to_size(TokenType primitive_type)
-{
-    frx::assert(token_type_is_primitive(primitive_type));
-
-    switch(primitive_type)
+    export TokenType first_keyword()
     {
-        case TokenType::KW_U8:
-        {
-            return 1;
-        }
-        case TokenType::KW_U16:
-        {
-            return 2;
-        }
-        case TokenType::KW_U32:
-        {
-            return 4;
-        }
-        case TokenType::KW_U64:
-        {
-            return 8;
-        }
-        case TokenType::KW_USIZE:
-        {
-            //TODO: Depends on the target architecture
-            return 8;
-        }
-        case TokenType::KW_I8:
-        {
-            return 1;
-        }
-        case TokenType::KW_I16:
-        {
-            return 2;
-        }
-        case TokenType::KW_I32:
-        {
-            return 4;
-        }
-        case TokenType::KW_I64:
-        {
-            return 8;
-        }
-        case TokenType::KW_ISIZE:
-        {
-            //TODO: Depends on the target architecture
-            return 8;
-        }
-        case TokenType::KW_B8:
-        {
-            return 1;
-        }
-        case TokenType::KW_B16:
-        {
-            return 2;
-        }
-        case TokenType::KW_B32:
-        {
-            return 4;
-        }
-        case TokenType::KW_B64:
-        {
-            return 8;
-        }
-        case TokenType::KW_CHAR:
-        {
-            return 1;
-        }
-        case TokenType::KW_F32:
-        {
-            return 4;
-        }
-        case TokenType::KW_F64:
-        {
-            return 8;
-        }
+        return TokenType::KW_U8;
     }
-}
 
-export b8 token_type_is_synchronizing(TokenType type)
-{
-    frx::assert(type < TokenType::COUNT);
-
-    switch(type)
+    export TokenType last_keyword()
     {
-        case TokenType::ERROR:
-        {
+        return TokenType::KW_MACRO;
+    }
 
-        }
-        case TokenType::EOF:
-        {
+    export b8 is_primitive(TokenType type)
+    {
+        frx::assert(type < TokenType::COUNT);
 
-        }
-        case TokenType::RBRACE:
-        {
+        return type >= TokenType::KW_U8 && type <= TokenType::KW_VOID;
+    }
 
-        }
-        case TokenType::SEMICOLON:
+    export usize primitive_type_to_size(TokenType primitive_type)
+    {
+        frx::assert(is_primitive(primitive_type));
+
+        switch(primitive_type)
         {
-            return true;
+            case TokenType::KW_U8:
+            {
+                return 1;
+            }
+            case TokenType::KW_U16:
+            {
+                return 2;
+            }
+            case TokenType::KW_U32:
+            {
+                return 4;
+            }
+            case TokenType::KW_U64:
+            {
+                return 8;
+            }
+            case TokenType::KW_USIZE:
+            {
+                //TODO: Depends on the target architecture
+                return 8;
+            }
+            case TokenType::KW_I8:
+            {
+                return 1;
+            }
+            case TokenType::KW_I16:
+            {
+                return 2;
+            }
+            case TokenType::KW_I32:
+            {
+                return 4;
+            }
+            case TokenType::KW_I64:
+            {
+                return 8;
+            }
+            case TokenType::KW_ISIZE:
+            {
+                //TODO: Depends on the target architecture
+                return 8;
+            }
+            case TokenType::KW_B8:
+            {
+                return 1;
+            }
+            case TokenType::KW_B16:
+            {
+                return 2;
+            }
+            case TokenType::KW_B32:
+            {
+                return 4;
+            }
+            case TokenType::KW_B64:
+            {
+                return 8;
+            }
+            case TokenType::KW_CHAR:
+            {
+                return 1;
+            }
+            case TokenType::KW_F32:
+            {
+                return 4;
+            }
+            case TokenType::KW_F64:
+            {
+                return 8;
+            }
         }
     }
 
-    return false;
-}
-
-export b8 token_type_is_prefix_operator(TokenType type)
-{
-    return token_type_to_prefix_operator(type) != Operator::INVALID;
-}
-
-export Operator token_type_to_prefix_operator(TokenType type)
-{
-    frx::assert(type < TokenType::COUNT);
-
-    switch(type)
+    export b8 is_synchronizing(TokenType type)
     {
-        case TokenType::PLUS:
+        frx::assert(type < TokenType::COUNT);
+
+        switch(type)
         {
-            return Operator::SIGN_PLUS;
+            case TokenType::ERROR:
+            {
+
+            }
+            case TokenType::EOF:
+            {
+
+            }
+            case TokenType::RBRACE:
+            {
+
+            }
+            case TokenType::SEMICOLON:
+            {
+                return true;
+            }
         }
-        case TokenType::MINUS:
+
+        return false;
+    }
+
+    export b8 is_prefix_operator(TokenType type)
+    {
+        return to_prefix_operator(type) != Operator::INVALID;
+    }
+
+    export Operator to_prefix_operator(TokenType type)
+    {
+        frx::assert(type < TokenType::COUNT);
+
+        switch(type)
         {
-            return Operator::SIGN_MINUS;
-        }
-        case TokenType::STAR:
-        {
-            return Operator::DEREF;
-        }
-        case TokenType::BIN_AND:
-        {
-            return Operator::ADDRESS_OF;
-        }
-        case TokenType::LOG_NEG:
-        {
-            return Operator::LOG_NEG;
-        }
-        case TokenType::BIN_NEG:
-        {
-            return Operator::BIN_NEG;
-        }
-        case TokenType::PLUS_PLUS:
-        {
-            return Operator::PREFIX_INC;
-        }
-        case TokenType::MINUS_MINUS:
-        {
-            return Operator::PREFIX_DEC;
-        }
-        default:
-        {
-            return Operator::INVALID;
+            case TokenType::PLUS:
+            {
+                return Operator::SIGN_PLUS;
+            }
+            case TokenType::MINUS:
+            {
+                return Operator::SIGN_MINUS;
+            }
+            case TokenType::STAR:
+            {
+                return Operator::DEREF;
+            }
+            case TokenType::BIN_AND:
+            {
+                return Operator::ADDRESS_OF;
+            }
+            case TokenType::LOG_NEG:
+            {
+                return Operator::LOG_NEG;
+            }
+            case TokenType::BIN_NEG:
+            {
+                return Operator::BIN_NEG;
+            }
+            case TokenType::PLUS_PLUS:
+            {
+                return Operator::PREFIX_INC;
+            }
+            case TokenType::MINUS_MINUS:
+            {
+                return Operator::PREFIX_DEC;
+            }
+            default:
+            {
+                return Operator::INVALID;
+            }
         }
     }
-}
 
-export b8 token_type_is_infix_operator(TokenType type)
-{
-    return token_type_to_infix_operator(type) != Operator::INVALID;
-}
-
-export Operator token_type_to_infix_operator(TokenType type)
-{
-    frx::assert(type < TokenType::COUNT);
-
-    switch(type)
+    export b8 is_infix_operator(TokenType type)
     {
-        case TokenType::PLUS:
+        return to_infix_operator(type) != Operator::INVALID;
+    }
+
+    export Operator to_infix_operator(TokenType type)
+    {
+        frx::assert(type < TokenType::COUNT);
+
+        switch(type)
         {
-            return Operator::ADD;
-        }
-        case TokenType::PLUS_EQ:
-        {
-            return Operator::ADD_ASSIGN;
-        }
-        case TokenType::MINUS:
-        {
-            return Operator::SUB;
-        }
-        case TokenType::MINUS_EQ:
-        {
-            return Operator::SUB_ASSIGN;
-        }
-        case TokenType::STAR:
-        {
-            return Operator::MUL;
-        }
-        case TokenType::STAR_EQ:
-        {
-            return Operator::MUL_ASSIGN;
-        }
-        case TokenType::DIVIDE:
-        {
-            return Operator::DIV;
-        }
-        case TokenType::DIVIDE_EQ:
-        {
-            return Operator::DIV_ASSIGN;
-        }
-        case TokenType::MODULO:
-        {
-            return Operator::MOD;
-        }
-        case TokenType::MODULO_EQ:
-        {
-            return Operator::MOD_ASSIGN;
-        }
-        case TokenType::LOG_AND:
-        {
-            return Operator::LOG_AND;
-        }
-        case TokenType::LOG_OR:
-        {
-            return Operator::LOG_OR;
-        }
-        case TokenType::BIN_AND:
-        {
-            return Operator::BIN_AND;
-        }
-        case TokenType::BIN_AND_EQ:
-        {
-            return Operator::BIN_AND_ASSIGN;
-        }
-        case TokenType::BIN_OR:
-        {
-            return Operator::BIN_OR;
-        }
-        case TokenType::BIN_OR_EQ:
-        {
-            return Operator::BIN_OR_ASSIGN;
-        }
-        case TokenType::BIN_XOR:
-        {
-            return Operator::BIN_XOR;
-        }
-        case TokenType::BIN_XOR_EQ:
-        {
-            return Operator::BIN_XOR_ASSIGN;
-        }
-        case TokenType::BIN_LSHIFT:
-        {
-            return Operator::BIN_LSHIFT;
-        }
-        case TokenType::BIN_LSHIFT_EQ:
-        {
-            return Operator::BIN_LSHIFT_ASSIGN;
-        }
-        case TokenType::BIN_RSHIFT:
-        {
-            return Operator::BIN_RSHIFT;
-        }
-        case TokenType::BIN_RSHIFT_EQ:
-        {
-            return Operator::BIN_RSHIFT_ASSIGN;
-        }
-        case TokenType::EQ:
-        {
-            return Operator::ASSIGN;
-        }
-        case TokenType::LOG_NEQ:
-        {
-            return Operator::LOG_NEQ;
-        }
-        case TokenType::LOG_EQ:
-        {
-            return Operator::LOG_EQ;
-        }
-        case TokenType::GT:
-        {
-            return Operator::GT;
-        }
-        case TokenType::GEQ:
-        {
-            return Operator::GEQ;
-        }
-        case TokenType::LT:
-        {
-            return Operator::LT;
-        }
-        case TokenType::LEQ:
-        {
-            return Operator::LEQ;
-        }
-        case TokenType::LBRACKET:
-        {
-            return Operator::ARRAY_SUBSCRIPT;
-        }
-        case TokenType::ARROW:
-        {
-            return Operator::POINTER_MEMBER_ACCESS;
-        }
-        case TokenType::DOT:
-        {
-            return Operator::MEMBER_ACCESS;
-        }
-        default:
-        {
-            return Operator::INVALID;
+            case TokenType::PLUS:
+            {
+                return Operator::ADD;
+            }
+            case TokenType::PLUS_EQ:
+            {
+                return Operator::ADD_ASSIGN;
+            }
+            case TokenType::MINUS:
+            {
+                return Operator::SUB;
+            }
+            case TokenType::MINUS_EQ:
+            {
+                return Operator::SUB_ASSIGN;
+            }
+            case TokenType::STAR:
+            {
+                return Operator::MUL;
+            }
+            case TokenType::STAR_EQ:
+            {
+                return Operator::MUL_ASSIGN;
+            }
+            case TokenType::DIVIDE:
+            {
+                return Operator::DIV;
+            }
+            case TokenType::DIVIDE_EQ:
+            {
+                return Operator::DIV_ASSIGN;
+            }
+            case TokenType::MODULO:
+            {
+                return Operator::MOD;
+            }
+            case TokenType::MODULO_EQ:
+            {
+                return Operator::MOD_ASSIGN;
+            }
+            case TokenType::LOG_AND:
+            {
+                return Operator::LOG_AND;
+            }
+            case TokenType::LOG_OR:
+            {
+                return Operator::LOG_OR;
+            }
+            case TokenType::BIN_AND:
+            {
+                return Operator::BIN_AND;
+            }
+            case TokenType::BIN_AND_EQ:
+            {
+                return Operator::BIN_AND_ASSIGN;
+            }
+            case TokenType::BIN_OR:
+            {
+                return Operator::BIN_OR;
+            }
+            case TokenType::BIN_OR_EQ:
+            {
+                return Operator::BIN_OR_ASSIGN;
+            }
+            case TokenType::BIN_XOR:
+            {
+                return Operator::BIN_XOR;
+            }
+            case TokenType::BIN_XOR_EQ:
+            {
+                return Operator::BIN_XOR_ASSIGN;
+            }
+            case TokenType::BIN_LSHIFT:
+            {
+                return Operator::BIN_LSHIFT;
+            }
+            case TokenType::BIN_LSHIFT_EQ:
+            {
+                return Operator::BIN_LSHIFT_ASSIGN;
+            }
+            case TokenType::BIN_RSHIFT:
+            {
+                return Operator::BIN_RSHIFT;
+            }
+            case TokenType::BIN_RSHIFT_EQ:
+            {
+                return Operator::BIN_RSHIFT_ASSIGN;
+            }
+            case TokenType::EQ:
+            {
+                return Operator::ASSIGN;
+            }
+            case TokenType::LOG_NEQ:
+            {
+                return Operator::LOG_NEQ;
+            }
+            case TokenType::LOG_EQ:
+            {
+                return Operator::LOG_EQ;
+            }
+            case TokenType::GT:
+            {
+                return Operator::GT;
+            }
+            case TokenType::GEQ:
+            {
+                return Operator::GEQ;
+            }
+            case TokenType::LT:
+            {
+                return Operator::LT;
+            }
+            case TokenType::LEQ:
+            {
+                return Operator::LEQ;
+            }
+            case TokenType::LBRACKET:
+            {
+                return Operator::ARRAY_SUBSCRIPT;
+            }
+            case TokenType::ARROW:
+            {
+                return Operator::POINTER_MEMBER_ACCESS;
+            }
+            case TokenType::DOT:
+            {
+                return Operator::MEMBER_ACCESS;
+            }
+            default:
+            {
+                return Operator::INVALID;
+            }
         }
     }
-}
 
-export b8 token_type_is_postfix_operator(TokenType type)
-{
-    return token_type_to_postfix_operator(type) != Operator::INVALID;
-}
-
-export Operator token_type_to_postfix_operator(TokenType type)
-{
-    frx::assert(type < TokenType::COUNT);
-
-    switch(type)
+    export b8 is_postfix_operator(TokenType type)
     {
-        case TokenType::PLUS_PLUS:
+        return to_postfix_operator(type) != Operator::INVALID;
+    }
+
+    export Operator to_postfix_operator(TokenType type)
+    {
+        frx::assert(type < TokenType::COUNT);
+
+        switch(type)
         {
-            return Operator::POSTFIX_INC;
+            case TokenType::PLUS_PLUS:
+            {
+                return Operator::POSTFIX_INC;
+            }
+            case TokenType::MINUS_MINUS:
+            {
+                return Operator::POSTFIX_DEC;
+            }
+            case TokenType::LBRACKET:
+            {
+                return Operator::ARRAY_SUBSCRIPT;
+            }
+            default:
+            {
+                return Operator::INVALID;
+            }
         }
-        case TokenType::MINUS_MINUS:
-        {
-            return Operator::POSTFIX_DEC;
-        }
-        case TokenType::LBRACKET:
-        {
-            return Operator::ARRAY_SUBSCRIPT;
-        }
-        default:
-        {
-            return Operator::INVALID;
-        }
+    }
+
+    export char* to_str(TokenType type)
+    {
+        frx::assert(type < TokenType::COUNT);
+
+        return token_type_names[type];
     }
 }
 
@@ -664,189 +674,192 @@ export enum Operator : u8
     COUNT
 }
 
-export Precedence operator_to_precedence(Operator op)
+namespace Operator
 {
-    frx::assert(op < Operator::COUNT);
-
-    switch(op)
+    export Precedence to_precedence(Operator op)
     {
-        case Operator::POSTFIX_INC:
-        {
+        frx::assert(op < Operator::COUNT);
 
-        }
-        case Operator::POSTFIX_DEC:
+        switch(op)
         {
+            case Operator::POSTFIX_INC:
+            {
 
-        }
-        case Operator::ARRAY_SUBSCRIPT:
-        {
+            }
+            case Operator::POSTFIX_DEC:
+            {
 
-        }
-        case Operator::POINTER_MEMBER_ACCESS:
-        {
+            }
+            case Operator::ARRAY_SUBSCRIPT:
+            {
 
-        }
-        case Operator::MEMBER_ACCESS:
-        {
-            return Precedence::P1;
-        }
-        case Operator::PREFIX_INC:
-        {
+            }
+            case Operator::POINTER_MEMBER_ACCESS:
+            {
 
-        }
-        case Operator::PREFIX_DEC:
-        {
+            }
+            case Operator::MEMBER_ACCESS:
+            {
+                return Precedence::P1;
+            }
+            case Operator::PREFIX_INC:
+            {
 
-        }
-        case Operator::SIGN_PLUS:
-        {
+            }
+            case Operator::PREFIX_DEC:
+            {
 
-        }
-        case Operator::SIGN_MINUS:
-        {
+            }
+            case Operator::SIGN_PLUS:
+            {
 
-        }
-        case Operator::LOG_NEG:
-        {
+            }
+            case Operator::SIGN_MINUS:
+            {
 
-        }
-        case Operator::BIN_NEG:
-        {
+            }
+            case Operator::LOG_NEG:
+            {
 
-        }
-        case Operator::DEREF:
-        {
+            }
+            case Operator::BIN_NEG:
+            {
 
-        }
-        case Operator::ADDRESS_OF:
-        {
-            return Precedence::P2;
-        }
-        case Operator::MUL:
-        {
+            }
+            case Operator::DEREF:
+            {
 
-        }
-        case Operator::DIV:
-        {
+            }
+            case Operator::ADDRESS_OF:
+            {
+                return Precedence::P2;
+            }
+            case Operator::MUL:
+            {
 
-        }
-        case Operator::MOD:
-        {
-            return Precedence::P3;
-        }
-        case Operator::ADD:
-        {
+            }
+            case Operator::DIV:
+            {
 
-        }
-        case Operator::SUB:
-        {
-            return Precedence::P4;
-        }
-        case Operator::BIN_LSHIFT:
-        {
+            }
+            case Operator::MOD:
+            {
+                return Precedence::P3;
+            }
+            case Operator::ADD:
+            {
 
-        }
-        case Operator::BIN_RSHIFT:
-        {
-            return Precedence::P5;
-        }
-        case Operator::LT:
-        {
+            }
+            case Operator::SUB:
+            {
+                return Precedence::P4;
+            }
+            case Operator::BIN_LSHIFT:
+            {
 
-        }
-        case Operator::LEQ:
-        {
+            }
+            case Operator::BIN_RSHIFT:
+            {
+                return Precedence::P5;
+            }
+            case Operator::LT:
+            {
 
-        }
-        case Operator::GT:
-        {
+            }
+            case Operator::LEQ:
+            {
 
-        }
-        case Operator::GEQ:
-        {
-            return Precedence::P6;
-        }
-        case Operator::LOG_EQ:
-        {
+            }
+            case Operator::GT:
+            {
 
-        }
-        case Operator::LOG_NEQ:
-        {
-            return Precedence::P7;
-        }
-        case Operator::BIN_AND:
-        {
-            return Precedence::P8;
-        }
-        case Operator::BIN_XOR:
-        {
-            return Precedence::P9;
-        }
-        case Operator::BIN_OR:
-        {
-            return Precedence::P10;
-        }
-        case Operator::LOG_AND:
-        {
-            return Precedence::P11;
-        }
-        case Operator::LOG_OR:
-        {
-            return Precedence::P12;
-        }
-        case Operator::TERNARY:
-        {
-            return Precedence::P13;
-        }
-        case Operator::ASSIGN:
-        {
+            }
+            case Operator::GEQ:
+            {
+                return Precedence::P6;
+            }
+            case Operator::LOG_EQ:
+            {
 
-        }
-        case Operator::ADD_ASSIGN:
-        {
+            }
+            case Operator::LOG_NEQ:
+            {
+                return Precedence::P7;
+            }
+            case Operator::BIN_AND:
+            {
+                return Precedence::P8;
+            }
+            case Operator::BIN_XOR:
+            {
+                return Precedence::P9;
+            }
+            case Operator::BIN_OR:
+            {
+                return Precedence::P10;
+            }
+            case Operator::LOG_AND:
+            {
+                return Precedence::P11;
+            }
+            case Operator::LOG_OR:
+            {
+                return Precedence::P12;
+            }
+            case Operator::TERNARY:
+            {
+                return Precedence::P13;
+            }
+            case Operator::ASSIGN:
+            {
 
-        }
-        case Operator::SUB_ASSIGN:
-        {
+            }
+            case Operator::ADD_ASSIGN:
+            {
 
-        }
-        case Operator::MUL_ASSIGN:
-        {
+            }
+            case Operator::SUB_ASSIGN:
+            {
 
-        }
-        case Operator::DIV_ASSIGN:
-        {
+            }
+            case Operator::MUL_ASSIGN:
+            {
 
-        }
-        case Operator::MOD_ASSIGN:
-        {
+            }
+            case Operator::DIV_ASSIGN:
+            {
 
-        }
-        case Operator::BIN_LSHIFT_ASSIGN:
-        {
+            }
+            case Operator::MOD_ASSIGN:
+            {
 
-        }
-        case Operator::BIN_RSHIFT_ASSIGN:
-        {
+            }
+            case Operator::BIN_LSHIFT_ASSIGN:
+            {
 
-        }
-        case Operator::BIN_AND_ASSIGN:
-        {
+            }
+            case Operator::BIN_RSHIFT_ASSIGN:
+            {
 
-        }
-        case Operator::BIN_XOR_ASSIGN:
-        {
+            }
+            case Operator::BIN_AND_ASSIGN:
+            {
 
-        }
-        case Operator::BIN_OR_ASSIGN:
-        {
-            return Precedence::P14;
-        }
-        default:
-        {
-            frx::assert(false);
+            }
+            case Operator::BIN_XOR_ASSIGN:
+            {
 
-            return Precedence::MIN;
+            }
+            case Operator::BIN_OR_ASSIGN:
+            {
+                return Precedence::P14;
+            }
+            default:
+            {
+                frx::assert(false);
+
+                return Precedence::MIN;
+            }
         }
     }
 }
@@ -884,11 +897,4 @@ export struct Token
     char* identifier;
     u64 int_literal;
     f64 float_literal;
-}
-
-export char* token_type_to_str(TokenType type)
-{
-    frx::assert(type < TokenType::COUNT);
-
-    return token_type_names[type];
 }

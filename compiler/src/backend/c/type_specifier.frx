@@ -21,7 +21,7 @@ export void transpile_type_specifier(Transpiler* transpiler,
     if(type_specifier->primitive_type != 0)
     {
         fprintf(transpiler->file, "%s",
-            token_type_to_str(type_specifier->primitive_type));
+            TokenType::to_str(type_specifier->primitive_type));
     }
     else if(type_specifier->enum_type != nullptr)
     {

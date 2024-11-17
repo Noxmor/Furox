@@ -21,7 +21,7 @@ export void transpile_sizeof(Transpiler* transpiler, AST::Sizeof* sizeof_node)
     if(sizeof_node->primitive_type != TokenType::ERROR)
     {
         fprintf(transpiler->file, "%s",
-            token_type_to_str(sizeof_node->primitive_type));
+            TokenType::to_str(sizeof_node->primitive_type));
     }
     else if(sizeof_node->enum_type != nullptr)
     {

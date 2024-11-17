@@ -104,7 +104,7 @@ namespace AST
             }
             else
             {
-                fprintf(file, "%s\n", token_type_to_str(sizeof_node->primitive_type));
+                fprintf(file, "%s\n", TokenType::to_str(sizeof_node->primitive_type));
             }
         }
     }
