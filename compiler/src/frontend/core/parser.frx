@@ -54,11 +54,11 @@ export void parser_init(mut Parser* parser, char* filepath)
 
     frx::assert(filepath != nullptr);
 
-    lexer_init(&parser->lexer, filepath);
+    Lexer::init(&parser->lexer, filepath);
 
     parser->translation_unit = nullptr;
 
-    parser->token = lexer_peek(&parser->lexer, 0);
+    parser->token = Lexer::peek(&parser->lexer, 0);
 
     parser->current_namespace = namespace_create_global();
     parser->current_scope = scope_create(nullptr);
@@ -80,7 +80,7 @@ export void parser_advance(Parser* parser)
 {
     frx::assert(parser != nullptr);
 
-    lexer_next_token(&parser->lexer);
+    Lexer::next_token(&parser->lexer);
 }
 
 export void parser_eat(mut Parser* parser, TokenType type)
@@ -277,14 +277,14 @@ export void parser_analyze(Parser* parser)
 
 export void parser_next_token(Parser* parser)
 {
-    lexer_next_token(&parser->lexer);
+    Lexer::next_token(&parser->lexer);
 }
 
 export Token* parser_peek(Parser* parser, usize offset)
 {
     frx::assert(parser != nullptr);
 
-    return lexer_peek(&parser->lexer, offset);
+    return Lexer::peek(&parser->lexer, offset);
 }
 
 export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, mut core::Namespace* ns,
@@ -415,14 +415,14 @@ export char* parser_source_file(Parser* parser)
 {
     frx::assert(parser != nullptr);
 
-    return lexer_source_file(&parser->lexer);
+    return Lexer::source_file(&parser->lexer);
 }
 
 export void parser_destroy(Parser* parser)
 {
     frx::assert(parser != nullptr);
 
-    lexer_destroy(&parser->lexer);
+    Lexer::destroy(&parser->lexer);
 }
 
 export void parser_push_namespace(mut Parser* parser, char* name)
