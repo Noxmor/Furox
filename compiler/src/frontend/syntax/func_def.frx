@@ -22,15 +22,15 @@ namespace AST::FuncDef
         func_def->is_redefinition = !func_table_insert(&parser->func_table,
             &func_def->symbol);
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
-        parser_push_scope(parser);
+        Parser::push_scope(parser);
 
         func_def->params = AST::FuncParams::parse(parser);
 
         func_def->body = AST::Scope::parse(parser);
 
-        parser_pop_scope(parser);
+        Parser::pop_scope(parser);
 
         func_def->range.start = return_type->range.start;
         func_def->range.end = func_def->body->range.end;

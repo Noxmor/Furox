@@ -29,17 +29,17 @@ namespace AST::Scope
     {
         frx::assert(parser != nullptr);
 
-        SourceLocation start = parser_current_location(parser);
+        SourceLocation start = Parser::current_location(parser);
 
-        parser_eat(parser, TokenType::LBRACE);
+        Parser::eat(parser, TokenType::LBRACE);
 
-        parser_push_scope(parser);
+        Parser::push_scope(parser);
 
         mut usize pushed_scopes = 1;
 
         mut Scope* scope = new(&parser->arena);
 
-        while(parser_loop_until(parser, TokenType::RBRACE))
+        while(Parser::loop_until(parser, TokenType::RBRACE))
         {
             switch(parser->token->type)
             {
@@ -47,7 +47,7 @@ namespace AST::Scope
                 {
                     add_stmt(scope, AST::Stmt::from_scope(&parser->arena, parse(parser)));
 
-                    parser_push_scope(parser);
+                    Parser::push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
@@ -74,7 +74,7 @@ namespace AST::Scope
                 {
                     add_stmt(scope, AST::Stmt::from_if_stmt(&parser->arena, AST::IfStmt::parse(parser)));
 
-                    parser_push_scope(parser);
+                    Parser::push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
@@ -83,7 +83,7 @@ namespace AST::Scope
                 {
                     add_stmt(scope, AST::Stmt::from_for_loop(&parser->arena, AST::ForLoop::parse(parser)));
 
-                    parser_push_scope(parser);
+                    Parser::push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
@@ -92,7 +92,7 @@ namespace AST::Scope
                 {
                     add_stmt(scope, AST::Stmt::from_while_loop(&parser->arena, AST::WhileLoop::parse(parser)));
 
-                    parser_push_scope(parser);
+                    Parser::push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
@@ -101,7 +101,7 @@ namespace AST::Scope
                 {
                     add_stmt(scope, AST::Stmt::from_do_while_loop(&parser->arena, AST::DoWhileLoop::parse(parser)));
 
-                    parser_push_scope(parser);
+                    Parser::push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
@@ -197,7 +197,7 @@ namespace AST::Scope
                         resolved_ns = AST::NamespaceResolution::parse(parser);
                     }
 
-                    Token* next = parser_peek(parser, 1);
+                    Token* next = Parser::peek(parser, 1);
                     if(next->type == TokenType::STAR
                         || next->type == TokenType::IDENTIFIER)
                     {
@@ -238,7 +238,7 @@ namespace AST::Scope
                 }
                 case TokenType::KW_MUT:
                 {
-                    parser_eat(parser, TokenType::KW_MUT);
+                    Parser::eat(parser, TokenType::KW_MUT);
 
                     TypeSpecifier* type = AST::TypeSpecifier::parse(parser);
                     add_stmt(scope, AST::VarDeclOrDef::parse(parser, type, true));
@@ -255,13 +255,13 @@ namespace AST::Scope
         }
 
         scope->range.start = start;
-        scope->range.end = parser_current_location(parser);
+        scope->range.end = Parser::current_location(parser);
 
-        parser_eat(parser, TokenType::RBRACE);
+        Parser::eat(parser, TokenType::RBRACE);
 
         while(pushed_scopes > 0)
         {
-            parser_pop_scope(parser);
+            Parser::pop_scope(parser);
             pushed_scopes = pushed_scopes - 1;
         }
 

@@ -28,7 +28,7 @@ namespace AST::EnumDef
 
         if(enum_def->is_redefinition)
         {
-            error_enum_redefinition(parser_source_file(parser),
+            error_enum_redefinition(Parser::source_file(parser),
                 enum_def->range.start, symbol->name);
 
             parser->failed = true;

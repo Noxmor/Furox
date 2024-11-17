@@ -5,9 +5,9 @@ namespace AST::BreakStmt
 {
     export BreakStmt* parse(Parser* parser)
     {
-        parser_eat(parser, TokenType::KW_BREAK);
+        Parser::eat(parser, TokenType::KW_BREAK);
 
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
 
         return new(&parser->arena);
     }

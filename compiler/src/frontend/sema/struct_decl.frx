@@ -28,7 +28,7 @@ namespace AST::StructDecl
 
         if(struct_decl->is_redefinition)
         {
-            error_struct_decl_redefinition(parser_source_file(parser),
+            error_struct_decl_redefinition(Parser::source_file(parser),
                 struct_decl->range.start, symbol->name);
 
             parser->failed = true;

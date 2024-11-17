@@ -9,22 +9,22 @@ namespace AST::InitializerList
     {
         frx::assert(parser != nullptr);
 
-        parser_eat(parser, TokenType::LBRACE);
+        Parser::eat(parser, TokenType::LBRACE);
 
         InitializerList* list = new(&parser->arena);
 
-        while(parser_loop_until(parser, TokenType::RBRACE))
+        while(Parser::loop_until(parser, TokenType::RBRACE))
         {
             if(list_size(&list->values) > 0)
             {
-                parser_eat(parser, TokenType::COMMA);
+                Parser::eat(parser, TokenType::COMMA);
             }
 
             Expr* value = AST::Expr::parse(parser);
             list_push(&list->values, value);
         }
 
-        parser_eat(parser, TokenType::RBRACE);
+        Parser::eat(parser, TokenType::RBRACE);
 
         return list;
     }

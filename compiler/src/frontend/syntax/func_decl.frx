@@ -12,13 +12,13 @@ namespace AST::FuncDecl
     {
         frx::assert(parser != nullptr);
 
-        SourceLocation start = parser_current_location(parser);
+        SourceLocation start = Parser::current_location(parser);
 
         TypeSpecifier* return_type = AST::TypeSpecifier::parse(parser);
 
         char* name = parser->token->identifier;
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
         mut FuncDecl* func_decl = new(&parser->arena, parser->current_scope,
             parser->current_namespace, name, return_type);
@@ -26,16 +26,16 @@ namespace AST::FuncDecl
         func_decl->is_redefinition = !func_table_insert(&parser->func_table,
             &func_decl->symbol);
 
-        parser_push_scope(parser);
+        Parser::push_scope(parser);
 
         func_decl->params = AST::FuncParams::parse(parser);
 
-        parser_pop_scope(parser);
+        Parser::pop_scope(parser);
 
         func_decl->range.start = start;
-        func_decl->range.end = parser_current_location(parser);
+        func_decl->range.end = Parser::current_location(parser);
 
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
 
         return func_decl;
     }

@@ -42,7 +42,7 @@ namespace AST::NamespaceScope
             }
             case TokenType::KW_EXPORT:
             {
-                parser_eat(parser, TokenType::KW_EXPORT);
+                Parser::eat(parser, TokenType::KW_EXPORT);
 
                 switch(parser->token->type)
                 {
@@ -148,7 +148,7 @@ namespace AST::NamespaceScope
             {
                 TypeSpecifier* type_specifier = AST::TypeSpecifier::parse(parser);
 
-                Token* next = parser_peek(parser, 1);
+                Token* next = Parser::peek(parser, 1);
                 if(next->type == TokenType::LPAREN)
                 {
                     namespace_scope = from_func_def(&parser->arena,
@@ -174,7 +174,7 @@ namespace AST::NamespaceScope
             }
             case TokenType::KW_MUT:
             {
-                parser_eat(parser, TokenType::KW_MUT);
+                Parser::eat(parser, TokenType::KW_MUT);
 
                 TypeSpecifier* type = AST::TypeSpecifier::parse(parser);
 
@@ -184,7 +184,7 @@ namespace AST::NamespaceScope
             }
             default:
             {
-                parser_panic(parser);
+                Parser::panic(parser);
             }
         }
 

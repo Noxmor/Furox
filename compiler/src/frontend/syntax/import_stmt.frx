@@ -17,11 +17,11 @@ namespace AST::ImportStmt
 {
     export ImportStmt* parse(Parser* parser, b8 exported)
     {
-        parser_eat(parser, TokenType::KW_IMPORT);
+        Parser::eat(parser, TokenType::KW_IMPORT);
 
         mut char* filepath = parser->token->identifier;
 
-        parser_eat(parser, TokenType::STRING_LITERAL);
+        Parser::eat(parser, TokenType::STRING_LITERAL);
 
         char* std_prefix = "std/";
         char* lib_prefix = "lib/";
@@ -51,13 +51,13 @@ namespace AST::ImportStmt
         }
         else
         {
-            imported_parser = parser_compile(parser, filepath);
+            imported_parser = Parser::compile(parser, filepath);
         }
 
         ImportStmt* import_stmt = new(&parser->arena, imported_parser, filepath,
             exported);
 
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
 
         return import_stmt;
     }

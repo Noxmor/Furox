@@ -14,7 +14,7 @@ namespace AST::VarDecl
 
         var_table_insert(&parser->var_table, &var_decl->symbol);
 
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
 
         return var_decl;
     }

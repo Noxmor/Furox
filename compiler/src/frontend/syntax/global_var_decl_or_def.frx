@@ -14,7 +14,7 @@ namespace AST::GlobalVarDeclOrDef
 
         char* name = parser->token->identifier;
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
         AST::TypeSpecifier::parse_array_dimensions(parser, type);
 
@@ -38,7 +38,7 @@ namespace AST::GlobalVarDeclOrDef
             }
             default:
             {
-                parser_panic(parser);
+                Parser::panic(parser);
 
                 break;
             }

@@ -24,7 +24,7 @@ namespace AST::GlobalVarDef
         {
             //FIXME: Print the correct location, this is only a placeholder
             SourceLocation loc;
-            error_var_redefinition(parser_source_file(parser), loc, symbol->name);
+            error_var_redefinition(Parser::source_file(parser), loc, symbol->name);
 
             parser->failed = true;
         }

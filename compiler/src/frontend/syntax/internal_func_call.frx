@@ -14,12 +14,12 @@ namespace AST::Assert
     {
         frx::assert(parser != nullptr);
 
-        SourceLocation start = parser_current_location(parser);
+        SourceLocation start = Parser::current_location(parser);
 
         Expr* expr = AST::Expr::parse(parser);
-        mut Assert* assert_node = new(&parser->arena, parser_source_file(parser), expr);
+        mut Assert* assert_node = new(&parser->arena, Parser::source_file(parser), expr);
 
-        SourceLocation end = parser_current_location(parser);
+        SourceLocation end = Parser::current_location(parser);
 
         assert_node->range.start = start;
         assert_node->range.end = end;
@@ -38,7 +38,7 @@ namespace AST::Sizeof
         {
             TokenType type = parser->token->type;
 
-            parser_eat(parser, parser->token->type);
+            Parser::eat(parser, parser->token->type);
 
             return new(&parser->arena, nullptr, nullptr, type, parser->current_scope);
         }
@@ -47,7 +47,7 @@ namespace AST::Sizeof
             Namespace* ns = AST::NamespaceResolution::parse(parser);
             char* name = parser->token->identifier;
 
-            parser_eat(parser, TokenType::IDENTIFIER);
+            Parser::eat(parser, TokenType::IDENTIFIER);
 
             return new(&parser->arena, ns, name, TokenType::ERROR, parser->current_scope);
         }
@@ -63,7 +63,7 @@ namespace AST::EnumCount
         Namespace* ns = AST::NamespaceResolution::parse(parser);
         char* name = parser->token->identifier;
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
         return new(&parser->arena, ns, name, parser->current_scope);
     }
@@ -79,9 +79,9 @@ namespace AST::InternalFuncCall
 
         char* name = parser->token->identifier;
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
-        parser_eat(parser, TokenType::LPAREN);
+        Parser::eat(parser, TokenType::LPAREN);
 
         if(libc::strcmp(name, "assert") == 0)
         {
@@ -96,7 +96,7 @@ namespace AST::InternalFuncCall
             internal_func_call = from_enum_count(&parser->arena, AST::EnumCount::parse(parser));
         }
 
-        parser_eat(parser, TokenType::RPAREN);
+        Parser::eat(parser, TokenType::RPAREN);
 
         return internal_func_call;
     }

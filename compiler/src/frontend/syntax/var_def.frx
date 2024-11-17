@@ -16,11 +16,11 @@ namespace AST::VarDef
 
         var_table_insert(&parser->var_table, &var_def->symbol);
 
-        parser_eat(parser, TokenType::EQ);
+        Parser::eat(parser, TokenType::EQ);
 
         var_def->value = AST::Expr::parse(parser);
 
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
 
         return var_def;
     }

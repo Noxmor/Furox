@@ -9,17 +9,17 @@ namespace AST::ForLoop
     {
         frx::assert(parser != nullptr);
 
-        parser_eat(parser, TokenType::KW_FOR);
+        Parser::eat(parser, TokenType::KW_FOR);
 
-        parser_eat(parser, TokenType::LPAREN);
+        Parser::eat(parser, TokenType::LPAREN);
 
         Expr* initialization = AST::Expr::parse(parser);
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
         Expr* condition = AST::Expr::parse(parser);
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
         Expr* iteration = AST::Expr::parse(parser);
 
-        parser_eat(parser, TokenType::RPAREN);
+        Parser::eat(parser, TokenType::RPAREN);
 
         Scope* scope = AST::Scope::parse(parser);
 

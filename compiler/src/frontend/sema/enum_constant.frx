@@ -14,7 +14,7 @@ namespace AST::EnumConstant
 
         frx::assert(constant != nullptr);
 
-        constant->symbol = parser_find_enum_symbol(parser, constant->enum_namespace,
+        constant->symbol = Parser::find_enum_symbol(parser, constant->enum_namespace,
             constant->enum_name);
 
         EnumSymbol* symbol = constant->symbol;
@@ -37,7 +37,7 @@ namespace AST::EnumConstant
         {
             //FIXME: Print the correct location, this is only a placeholder
             SourceLocation loc;
-            error_undefined_enum_constant(parser_source_file(parser), loc,
+            error_undefined_enum_constant(Parser::source_file(parser), loc,
                 symbol->name, constant->name);
         }
     }

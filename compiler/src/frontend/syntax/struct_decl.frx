@@ -10,11 +10,11 @@ namespace AST::StructDecl
     {
         frx::assert(parser != nullptr);
 
-        SourceLocation start = parser_current_location(parser);
+        SourceLocation start = Parser::current_location(parser);
 
-        parser_eat(parser, TokenType::KW_EXTERN);
+        Parser::eat(parser, TokenType::KW_EXTERN);
 
-        parser_eat(parser, TokenType::KW_STRUCT);
+        Parser::eat(parser, TokenType::KW_STRUCT);
 
         char* name = parser->token->identifier;
 
@@ -24,12 +24,12 @@ namespace AST::StructDecl
         struct_decl->is_redefinition = !struct_table_insert(&parser->struct_table,
             &struct_decl->symbol);
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
 
         struct_decl->range.start = start;
-        struct_decl->range.end = parser_current_location(parser);
+        struct_decl->range.end = Parser::current_location(parser);
 
         return struct_decl;
     }

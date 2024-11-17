@@ -7,11 +7,11 @@ namespace AST::WhileLoop
 {
     export WhileLoop* parse(Parser* parser)
     {
-        parser_eat(parser, TokenType::KW_WHILE);
+        Parser::eat(parser, TokenType::KW_WHILE);
 
-        parser_eat(parser, TokenType::LPAREN);
+        Parser::eat(parser, TokenType::LPAREN);
         Expr* condition = AST::Expr::parse(parser);
-        parser_eat(parser, TokenType::RPAREN);
+        Parser::eat(parser, TokenType::RPAREN);
 
         Scope* scope = AST::Scope::parse(parser);
 

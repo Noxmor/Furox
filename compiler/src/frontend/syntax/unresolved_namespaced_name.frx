@@ -13,9 +13,9 @@ namespace AST::UnresolvedNamespacedName
         char* name = parser->token->identifier;
         core::Scope* scope = parser->current_scope;
 
-        SourceLocation end = parser_current_location(parser);
+        SourceLocation end = Parser::current_location(parser);
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
         mut UnresolvedNamespacedName* unresolved_namespaced_name =
             new(&parser->arena, ns, name, scope);

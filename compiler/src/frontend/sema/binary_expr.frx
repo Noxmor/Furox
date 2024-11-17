@@ -26,7 +26,7 @@ namespace AST::BinaryExpr
                 {
                     //FIXME: Print the correct location, this is only a placeholder
                     SourceLocation loc;
-                    error_not_a_struct_member(parser_source_file(parser), loc);
+                    error_not_a_struct_member(Parser::source_file(parser), loc);
 
                     parser->failed = true;
                 }
@@ -51,7 +51,7 @@ namespace AST::BinaryExpr
                 {
                     //FIXME: Print the correct location, this is only a placeholder
                     SourceLocation loc;
-                    error_not_a_struct_member(parser_source_file(parser), loc);
+                    error_not_a_struct_member(Parser::source_file(parser), loc);
 
                     parser->failed = true;
                 }
@@ -93,7 +93,7 @@ namespace AST::BinaryExpr
 
                     if(!symbol->mutable)
                     {
-                        error_assignment_const_var(parser_source_file(parser),
+                        error_assignment_const_var(Parser::source_file(parser),
                             var->range.start, var->name);
                         parser->failed = true;
                     }

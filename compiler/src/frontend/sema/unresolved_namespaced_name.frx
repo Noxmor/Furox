@@ -21,7 +21,7 @@ namespace AST::UnresolvedNamespacedName
         char* name = unresolved_namespaced_name->name;
         core::Scope* scope = unresolved_namespaced_name->scope;
 
-        EnumSymbol* enum_symbol = parser_find_enum_symbol(parser, ns->parent,
+        EnumSymbol* enum_symbol = Parser::find_enum_symbol(parser, ns->parent,
             ns->name);
 
         b8 is_enum_constant = enum_symbol != nullptr && enum_symbol_has_constant(
@@ -35,7 +35,7 @@ namespace AST::UnresolvedNamespacedName
 
         if(is_ambiguous)
         {
-            error_ambiguous_unresolved_namespaced_name(parser_source_file(parser),
+            error_ambiguous_unresolved_namespaced_name(Parser::source_file(parser),
                 unresolved_namespaced_name->range.start, ns, name);
             parser->failed = true;
         }
@@ -52,7 +52,7 @@ namespace AST::UnresolvedNamespacedName
         }
         else
         {
-            error_unresolved_namespaced_name(parser_source_file(parser),
+            error_unresolved_namespaced_name(Parser::source_file(parser),
                 unresolved_namespaced_name->range.start, ns, name);
             parser->failed = true;
         }

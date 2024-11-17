@@ -15,24 +15,24 @@ namespace AST::FuncCall
 
         char* name = parser->token->identifier;
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
         FuncCall* func_call = new(&parser->arena, ns, name, parser->current_scope);
 
-        parser_eat(parser, TokenType::LPAREN);
+        Parser::eat(parser, TokenType::LPAREN);
 
-        while(parser_loop_until(parser, TokenType::RPAREN))
+        while(Parser::loop_until(parser, TokenType::RPAREN))
         {
             if(list_size(&func_call->args) > 0)
             {
-                parser_eat(parser, TokenType::COMMA);
+                Parser::eat(parser, TokenType::COMMA);
             }
 
             Expr* arg = AST::Expr::parse(parser);
             list_push(&func_call->args, arg);
         }
 
-        parser_eat(parser, TokenType::RPAREN);
+        Parser::eat(parser, TokenType::RPAREN);
 
         return func_call;
     }

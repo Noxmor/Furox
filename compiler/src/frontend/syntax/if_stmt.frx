@@ -9,17 +9,17 @@ namespace AST::IfStmt
     {
         frx::assert(parser != nullptr);
 
-        parser_eat(parser, TokenType::KW_IF);
+        Parser::eat(parser, TokenType::KW_IF);
 
-        parser_eat(parser, TokenType::LPAREN);
+        Parser::eat(parser, TokenType::LPAREN);
         Expr* condition = AST::Expr::parse(parser);
-        parser_eat(parser, TokenType::RPAREN);
+        Parser::eat(parser, TokenType::RPAREN);
         Scope* if_block = AST::Scope::parse(parser);
 
         mut Scope* else_block = nullptr;
         if(parser->token->type == TokenType::KW_ELSE)
         {
-            parser_eat(parser, TokenType::KW_ELSE);
+            Parser::eat(parser, TokenType::KW_ELSE);
 
             if(parser->token->type == TokenType::KW_IF)
             {

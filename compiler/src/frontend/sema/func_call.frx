@@ -14,12 +14,12 @@ namespace AST::FuncCall
 
         if(func_call->ns == nullptr)
         {
-            func_call->symbol = parser_find_func_symbol_r(parser,
+            func_call->symbol = Parser::find_func_symbol_r(parser,
                 parser->current_namespace, func_call->name);
         }
         else
         {
-            func_call->symbol = parser_find_func_symbol(parser, func_call->ns,
+            func_call->symbol = Parser::find_func_symbol(parser, func_call->ns,
                 func_call->name);
         }
 
@@ -27,7 +27,7 @@ namespace AST::FuncCall
         {
             //FIXME: Print the correct location, this is only a placeholder
             SourceLocation loc;
-            error_undefined_func_call(parser_source_file(parser), loc,
+            error_undefined_func_call(Parser::source_file(parser), loc,
                 func_call->name);
 
             parser->failed = true;

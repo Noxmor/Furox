@@ -16,12 +16,12 @@ namespace AST::EnumConstantDef
 
         char* name = parser->token->identifier;
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
         mut Expr* value = nullptr;
         if(parser->token->type == TokenType::EQ)
         {
-            parser_eat(parser, TokenType::EQ);
+            Parser::eat(parser, TokenType::EQ);
 
             value = AST::Expr::parse(parser);
         }
@@ -36,15 +36,15 @@ namespace AST::EnumDef
     {
         frx::assert(parser != nullptr);
 
-        SourceLocation start = parser_current_location(parser);
+        SourceLocation start = Parser::current_location(parser);
 
-        parser_eat(parser, TokenType::KW_ENUM);
+        Parser::eat(parser, TokenType::KW_ENUM);
 
         char* name = parser->token->identifier;
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
-        parser_eat(parser, TokenType::COLON);
+        Parser::eat(parser, TokenType::COLON);
 
         mut TokenType type = TokenType::ERROR;
 
@@ -82,13 +82,13 @@ namespace AST::EnumDef
             {
                 type = parser->token->type;
 
-                parser_eat(parser, parser->token->type);
+                Parser::eat(parser, parser->token->type);
 
                 break;
             }
             default:
             {
-                parser_panic(parser);
+                Parser::panic(parser);
 
                 break;
             }
@@ -100,9 +100,9 @@ namespace AST::EnumDef
         enum_def->is_redefinition = !enum_table_insert(&parser->enum_table,
             &enum_def->symbol);
 
-        parser_eat(parser, TokenType::LBRACE);
+        Parser::eat(parser, TokenType::LBRACE);
 
-        while(parser_loop_until(parser, TokenType::RBRACE))
+        while(Parser::loop_until(parser, TokenType::RBRACE))
         {
             EnumConstantDef* constant = AST::EnumConstantDef::parse(parser);
 
@@ -110,7 +110,7 @@ namespace AST::EnumDef
 
             if(parser->token->type == TokenType::COMMA)
             {
-                parser_eat(parser, TokenType::COMMA);
+                Parser::eat(parser, TokenType::COMMA);
             }
             else
             {
@@ -119,9 +119,9 @@ namespace AST::EnumDef
         }
 
         enum_def->range.start = start;
-        enum_def->range.end = parser_current_location(parser);
+        enum_def->range.end = Parser::current_location(parser);
 
-        parser_eat(parser, TokenType::RBRACE);
+        Parser::eat(parser, TokenType::RBRACE);
 
         return enum_def;
     }

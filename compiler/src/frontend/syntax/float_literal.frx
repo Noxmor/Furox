@@ -9,7 +9,7 @@ namespace AST::FloatLiteral
 
         FloatLiteral* literal = new(&parser->arena, parser->token->float_literal);
 
-        parser_eat(parser, TokenType::FLOAT_LITERAL);
+        Parser::eat(parser, TokenType::FLOAT_LITERAL);
 
         return literal;
     }

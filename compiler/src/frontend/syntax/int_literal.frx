@@ -9,7 +9,7 @@ namespace AST::IntLiteral
 
         IntLiteral* literal = new(&parser->arena, parser->token->int_literal);
 
-        parser_eat(parser, TokenType::INT_LITERAL);
+        Parser::eat(parser, TokenType::INT_LITERAL);
 
         return literal;
     }

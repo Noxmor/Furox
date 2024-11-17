@@ -10,9 +10,9 @@ namespace AST::SwitchCase
     {
         frx::assert(parser != nullptr);
 
-        parser_eat(parser, TokenType::KW_CASE);
+        Parser::eat(parser, TokenType::KW_CASE);
         Expr* value = AST::Expr::parse(parser);
-        parser_eat(parser, TokenType::COLON);
+        Parser::eat(parser, TokenType::COLON);
         Scope* scope = AST::Scope::parse(parser);
 
         return new(&parser->arena, value, scope);
@@ -25,14 +25,14 @@ namespace AST::SwitchStmt
     {
         frx::assert(parser != nullptr);
 
-        parser_eat(parser, TokenType::KW_SWITCH);
-        parser_eat(parser, TokenType::LPAREN);
+        Parser::eat(parser, TokenType::KW_SWITCH);
+        Parser::eat(parser, TokenType::LPAREN);
         Expr* value = AST::Expr::parse(parser);
-        parser_eat(parser, TokenType::RPAREN);
+        Parser::eat(parser, TokenType::RPAREN);
 
         mut SwitchStmt* switch_stmt = new(&parser->arena, value);
 
-        parser_eat(parser, TokenType::LBRACE);
+        Parser::eat(parser, TokenType::LBRACE);
         while(parser->token->type == TokenType::KW_CASE)
         {
             SwitchCase* switch_case = AST::SwitchCase::parse(parser);
@@ -41,13 +41,13 @@ namespace AST::SwitchStmt
 
         if(parser->token->type == TokenType::KW_DEFAULT)
         {
-            parser_eat(parser, TokenType::KW_DEFAULT);
-            parser_eat(parser, TokenType::COLON);
+            Parser::eat(parser, TokenType::KW_DEFAULT);
+            Parser::eat(parser, TokenType::COLON);
 
             set_default_scope(switch_stmt, AST::Scope::parse(parser));
         }
 
-        parser_eat(parser, TokenType::RBRACE);
+        Parser::eat(parser, TokenType::RBRACE);
 
         return switch_stmt;
     }

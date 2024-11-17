@@ -32,15 +32,15 @@ namespace AST::TypeSpecifier
 
         if(type_specifier->ns == nullptr)
         {
-            type_specifier->enum_type = parser_find_enum_symbol_r(parser,
+            type_specifier->enum_type = Parser::find_enum_symbol_r(parser,
                 parser->current_namespace, name);
-            type_specifier->struct_type = parser_find_struct_symbol_r(parser,
+            type_specifier->struct_type = Parser::find_struct_symbol_r(parser,
                 parser->current_namespace, name);
         }
         else
         {
-            type_specifier->enum_type = parser_find_enum_symbol(parser, ns, name);
-            type_specifier->struct_type = parser_find_struct_symbol(parser, ns,
+            type_specifier->enum_type = Parser::find_enum_symbol(parser, ns, name);
+            type_specifier->struct_type = Parser::find_struct_symbol(parser, ns,
                 name);
         }
 
@@ -49,7 +49,7 @@ namespace AST::TypeSpecifier
         {
             //FIXME: Print the correct location, this is only a placeholder
             SourceLocation loc;
-            error_undefined_type_specifier(parser_source_file(parser), loc, name);
+            error_undefined_type_specifier(Parser::source_file(parser), loc, name);
             parser->failed = true;
         }
     }

@@ -33,7 +33,7 @@ namespace AST::FuncDef
 
         if(func_def->is_redefinition)
         {
-            error_func_def_redefinition(parser_source_file(parser),
+            error_func_def_redefinition(Parser::source_file(parser),
                 func_def->range.start, symbol->name);
 
             parser->failed = true;

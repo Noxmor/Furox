@@ -12,11 +12,11 @@ namespace AST::Namespace
 
         core::Namespace* old_namespace = parser->current_namespace;
 
-        parser_eat(parser, TokenType::KW_NAMESPACE);
+        Parser::eat(parser, TokenType::KW_NAMESPACE);
 
-        parser_push_namespace(parser, parser->token->identifier);
+        Parser::push_namespace(parser, parser->token->identifier);
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
         Namespace* namespace_root = new(&parser->arena, parser->current_namespace);
 
@@ -24,11 +24,11 @@ namespace AST::Namespace
 
         while(parser->token->type == TokenType::NAMESPACE_RESOLUTION)
         {
-            parser_eat(parser, TokenType::NAMESPACE_RESOLUTION);
+            Parser::eat(parser, TokenType::NAMESPACE_RESOLUTION);
 
-            parser_push_namespace(parser, parser->token->identifier);
+            Parser::push_namespace(parser, parser->token->identifier);
 
-            parser_eat(parser, TokenType::IDENTIFIER);
+            Parser::eat(parser, TokenType::IDENTIFIER);
 
             Namespace* child_namespace = new(&parser->arena, parser->current_namespace);
 
@@ -39,20 +39,20 @@ namespace AST::Namespace
             current_namespace = child_namespace;
         }
 
-        parser_eat(parser, TokenType::LBRACE);
+        Parser::eat(parser, TokenType::LBRACE);
 
-        parser_push_scope(parser);
+        Parser::push_scope(parser);
 
-        while(parser_loop_until(parser, TokenType::RBRACE))
+        while(Parser::loop_until(parser, TokenType::RBRACE))
         {
             AST::NamespaceScope* child = AST::NamespaceScope::parse(parser);
             list_push(&current_namespace->namespace_scope, child);
         }
 
-        parser_eat(parser, TokenType::RBRACE);
+        Parser::eat(parser, TokenType::RBRACE);
 
         pop_back_namespace_until(parser, old_namespace);
-        parser_pop_scope(parser);
+        Parser::pop_scope(parser);
 
         return namespace_root;
     }
@@ -64,6 +64,6 @@ void pop_back_namespace_until(Parser* parser, core::Namespace* old_namespace)
 
     while(parser->current_namespace != old_namespace)
     {
-        parser_pop_namespace(parser);
+        Parser::pop_namespace(parser);
     }
 }

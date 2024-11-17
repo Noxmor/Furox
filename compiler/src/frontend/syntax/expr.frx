@@ -28,10 +28,10 @@ namespace AST::Expr
         {
             case TokenType::IDENTIFIER:
             {
-                SourceLocation start = parser_current_location(parser);
+                SourceLocation start = Parser::current_location(parser);
                 core::Namespace* resolved_ns = AST::NamespaceResolution::parse(parser);
 
-                Token* next = parser_peek(parser, 1);
+                Token* next = Parser::peek(parser, 1);
 
                 if(next->type == TokenType::LPAREN)
                 {
@@ -70,7 +70,7 @@ namespace AST::Expr
             }
             case TokenType::KW_NULLPTR:
             {
-                parser_eat(parser, TokenType::KW_NULLPTR);
+                Parser::eat(parser, TokenType::KW_NULLPTR);
 
                 primary_expr = from_int_literal(&parser->arena,
                     AST::IntLiteral::new(&parser->arena, 0));
@@ -79,7 +79,7 @@ namespace AST::Expr
             }
             case TokenType::KW_TRUE:
             {
-                parser_eat(parser, TokenType::KW_TRUE);
+                Parser::eat(parser, TokenType::KW_TRUE);
 
                 primary_expr = from_int_literal(&parser->arena,
                     AST::IntLiteral::new(&parser->arena, 1));
@@ -88,7 +88,7 @@ namespace AST::Expr
             }
             case TokenType::KW_FALSE:
             {
-                parser_eat(parser, TokenType::KW_FALSE);
+                Parser::eat(parser, TokenType::KW_FALSE);
 
                 primary_expr = from_int_literal(&parser->arena,
                     AST::IntLiteral::new(&parser->arena, 0));
@@ -148,15 +148,15 @@ namespace AST::Expr
 
         if(parser->token->type == TokenType::LPAREN)
         {
-            parser_eat(parser, TokenType::LPAREN);
+            Parser::eat(parser, TokenType::LPAREN);
             expr = parse(parser);
-            parser_eat(parser, TokenType::RPAREN);
+            Parser::eat(parser, TokenType::RPAREN);
         }
         else if(TokenType::is_prefix_operator(parser->token->type))
         {
             TokenType type = parser->token->type;
 
-            parser_eat(parser, type);
+            Parser::eat(parser, type);
 
             Operator operator = TokenType::to_prefix_operator(type);
             Precedence precedence = Operator::to_precedence(operator);
@@ -184,12 +184,12 @@ namespace AST::Expr
                     break;
                 }
 
-                parser_eat(parser, type);
+                Parser::eat(parser, type);
 
                 if(operator == Operator::ARRAY_SUBSCRIPT)
                 {
                     Expr* index = parse(parser);
-                    parser_eat(parser, TokenType::RBRACKET);
+                    Parser::eat(parser, TokenType::RBRACKET);
 
                     BinaryExpr* binary_expr = AST::BinaryExpr::new(&parser->arena,
                         type, operator, expr, index);
@@ -213,7 +213,7 @@ namespace AST::Expr
                     break;
                 }
 
-                parser_eat(parser, type);
+                Parser::eat(parser, type);
 
                 BinaryExpr* binary_expr = AST::BinaryExpr::new(&parser->arena, type,
                     operator, expr, parse_with_precedence(parser, precedence));

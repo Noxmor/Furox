@@ -20,9 +20,9 @@ namespace AST::TypeSpecifier
 
         while(parser->token->type == TokenType::LBRACKET)
         {
-            parser_eat(parser, TokenType::LBRACKET);
+            Parser::eat(parser, TokenType::LBRACKET);
             list_push(&type->array_dimensions, AST::Expr::parse(parser));
-            parser_eat(parser, TokenType::RBRACKET);
+            Parser::eat(parser, TokenType::RBRACKET);
         }
     }
 }
@@ -33,7 +33,7 @@ namespace AST::TypeSpecifier
     {
         frx::assert(parser != nullptr);
 
-        SourceLocation start = parser_current_location(parser);
+        SourceLocation start = Parser::current_location(parser);
 
         mut Namespace* ns = nullptr;
         mut char* name = nullptr;
@@ -43,14 +43,14 @@ namespace AST::TypeSpecifier
         {
             primitive_type = parser->token->type;
 
-            parser_eat(parser, parser->token->type);
+            Parser::eat(parser, parser->token->type);
         }
         else
         {
             ns = AST::NamespaceResolution::parse(parser);
             name = parser->token->identifier;
 
-            parser_eat(parser, TokenType::IDENTIFIER);
+            Parser::eat(parser, TokenType::IDENTIFIER);
         }
 
         mut usize pointer_level = 0;
@@ -61,9 +61,9 @@ namespace AST::TypeSpecifier
         {
             pointer_level = pointer_level + 1;
 
-            end = parser_current_location(parser);
+            end = Parser::current_location(parser);
 
-            parser_eat(parser, TokenType::STAR);
+            Parser::eat(parser, TokenType::STAR);
         }
 
         mut TypeSpecifier* type_specifier = new(&parser->arena, ns, name,

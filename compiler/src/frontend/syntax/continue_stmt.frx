@@ -5,9 +5,9 @@ namespace AST::ContinueStmt
 {
     export ContinueStmt* parse(Parser* parser)
     {
-        parser_eat(parser, TokenType::KW_CONTINUE);
+        Parser::eat(parser, TokenType::KW_CONTINUE);
 
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
 
         return new(&parser->arena);
     }

@@ -11,16 +11,16 @@ namespace AST::ExternBlock
 
         ExternBlock* extern_block = new(&parser->arena);
 
-        parser_eat(parser, TokenType::KW_EXTERN);
+        Parser::eat(parser, TokenType::KW_EXTERN);
 
-        parser_eat(parser, TokenType::LBRACE);
+        Parser::eat(parser, TokenType::LBRACE);
 
-        while(parser_loop_until(parser, TokenType::RBRACE))
+        while(Parser::loop_until(parser, TokenType::RBRACE))
         {
             list_push(&extern_block->func_decls, AST::FuncDecl::parse(parser));
         }
 
-        parser_eat(parser, TokenType::RBRACE);
+        Parser::eat(parser, TokenType::RBRACE);
 
         return extern_block;
     }

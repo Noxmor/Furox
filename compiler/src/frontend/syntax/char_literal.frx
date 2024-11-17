@@ -9,7 +9,7 @@ namespace AST::CharLiteral
 
         char* literal = parser->token->identifier;
 
-        parser_eat(parser, TokenType::CHAR_LITERAL);
+        Parser::eat(parser, TokenType::CHAR_LITERAL);
 
         return new(&parser->arena, literal);
     }

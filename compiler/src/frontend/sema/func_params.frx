@@ -16,7 +16,7 @@ namespace AST::FuncParam
         {
             //FIXME: Print the correct location, this is only a placeholder
             SourceLocation loc;
-            error_var_redefinition(parser_source_file(parser), loc,
+            error_var_redefinition(Parser::source_file(parser), loc,
                 param->symbol.name);
 
             parser->failed = true;

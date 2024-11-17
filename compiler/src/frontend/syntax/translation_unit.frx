@@ -55,7 +55,7 @@ namespace AST::TranslationUnit
                 }
                 case TokenType::KW_EXTERN:
                 {
-                    Token* next = parser_peek(parser, 1);
+                    Token* next = Parser::peek(parser, 1);
                     if(next->type == TokenType::LBRACE)
                     {
                         global_scope = AST::GlobalScope::from_extern_block(&parser->arena,
@@ -68,7 +68,7 @@ namespace AST::TranslationUnit
                     }
                     else
                     {
-                        parser_eat(parser, TokenType::KW_EXTERN);
+                        Parser::eat(parser, TokenType::KW_EXTERN);
 
                         global_scope = AST::GlobalScope::from_func_decl(&parser->arena,
                             AST::FuncDecl::parse(parser));
@@ -78,7 +78,7 @@ namespace AST::TranslationUnit
                 }
                 case TokenType::KW_EXPORT:
                 {
-                    parser_eat(parser, TokenType::KW_EXPORT);
+                    Parser::eat(parser, TokenType::KW_EXPORT);
 
                     switch(parser->token->type)
                     {
@@ -191,7 +191,7 @@ namespace AST::TranslationUnit
                 {
                     TypeSpecifier* type_specifier = AST::TypeSpecifier::parse(parser);
 
-                    Token* next = parser_peek(parser, 1);
+                    Token* next = Parser::peek(parser, 1);
                     if(next->type == TokenType::LPAREN)
                     {
                         global_scope = AST::GlobalScope::from_func_def(&parser->arena,
@@ -207,7 +207,7 @@ namespace AST::TranslationUnit
                 }
                 case TokenType::KW_MUT:
                 {
-                    parser_eat(parser, TokenType::KW_MUT);
+                    Parser::eat(parser, TokenType::KW_MUT);
 
                     TypeSpecifier* type = AST::TypeSpecifier::parse(parser);
                     global_scope = AST::GlobalVarDeclOrDef::parse(parser, type, true);
@@ -216,9 +216,9 @@ namespace AST::TranslationUnit
                 }
                 default:
                 {
-                    parser_panic(parser);
+                    Parser::panic(parser);
 
-                    parser_advance(parser);
+                    Parser::advance(parser);
 
                     break;
                 }

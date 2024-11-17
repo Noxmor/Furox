@@ -7,14 +7,14 @@ namespace AST::Error
     {
         frx::assert(parser != nullptr);
 
-        SourceLocation start = parser_current_location(parser);
+        SourceLocation start = Parser::current_location(parser);
 
-        parser_panic(parser);
+        Parser::panic(parser);
 
         mut Error* error = new(&parser->arena);
 
         error->range.start = start;
-        error->range.end = parser_current_location(parser);
+        error->range.end = Parser::current_location(parser);
 
         return error;
     }

@@ -8,18 +8,18 @@ namespace AST::ReturnStmt
     {
         frx::assert(parser != nullptr);
 
-        parser_eat(parser, TokenType::KW_RETURN);
+        Parser::eat(parser, TokenType::KW_RETURN);
 
         if(parser->token->type != TokenType::SEMICOLON)
         {
             Expr* value = AST::Expr::parse(parser);
 
-            parser_eat(parser, TokenType::SEMICOLON);
+            Parser::eat(parser, TokenType::SEMICOLON);
 
             return with_value(&parser->arena, value);
         }
 
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
 
         return new(&parser->arena);
     }

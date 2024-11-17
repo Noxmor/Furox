@@ -106,21 +106,21 @@ i32 main(usize argc, char** argv)
     while(!queue_is_empty(&syntax_queue))
     {
         Parser* parser = queue_dequeue(&syntax_queue);
-        parser_parse(parser);
+        Parser::parse(parser);
         queue_enqueue(&resolve_imports_queue, parser);
     }
 
     while(!queue_is_empty(&resolve_imports_queue))
     {
         Parser* parser = queue_dequeue(&resolve_imports_queue);
-        parser_resolve_imports(parser);
+        Parser::resolve_imports(parser);
         queue_enqueue(&semantic_queue, parser);
     }
 
     while(!queue_is_empty(&semantic_queue))
     {
         Parser* parser = queue_dequeue(&semantic_queue);
-        parser_analyze(parser);
+        Parser::analyze(parser);
         failed = failed || parser->failed;
         list_push(&program->translation_units, parser->translation_unit);
     }

@@ -9,12 +9,12 @@ namespace AST::NamespaceResolution
 
         if(parser->token->type == TokenType::NAMESPACE_RESOLUTION)
         {
-            parser_eat(parser, TokenType::NAMESPACE_RESOLUTION);
+            Parser::eat(parser, TokenType::NAMESPACE_RESOLUTION);
 
             return namespace_create_global();
         }
 
-        mut Token* next = parser_peek(parser, 1);
+        mut Token* next = Parser::peek(parser, 1);
 
         mut core::Namespace* ns = nullptr;
         if(parser->token->type == TokenType::IDENTIFIER
@@ -28,10 +28,10 @@ namespace AST::NamespaceResolution
         {
             ns = namespace_create(ns, parser->token->identifier);
 
-            parser_eat(parser, TokenType::IDENTIFIER);
-            parser_eat(parser, TokenType::NAMESPACE_RESOLUTION);
+            Parser::eat(parser, TokenType::IDENTIFIER);
+            Parser::eat(parser, TokenType::NAMESPACE_RESOLUTION);
 
-            next = parser_peek(parser, 1);
+            next = Parser::peek(parser, 1);
         }
 
         return ns;

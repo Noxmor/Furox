@@ -8,14 +8,14 @@ namespace AST::UnresolvedName
     {
         frx::assert(parser != nullptr);
 
-        SourceLocation start = parser_current_location(parser);
+        SourceLocation start = Parser::current_location(parser);
 
         char* name = parser->token->identifier;
         core::Scope* scope = parser->current_scope;
 
-        SourceLocation end = parser_current_location(parser);
+        SourceLocation end = Parser::current_location(parser);
 
-        parser_eat(parser, TokenType::IDENTIFIER);
+        Parser::eat(parser, TokenType::IDENTIFIER);
 
         mut UnresolvedName* unresolved_name = new(&parser->arena, name, scope);
 

@@ -33,17 +33,17 @@ namespace AST::Sizeof
 
         if(sizeof_node->ns == nullptr)
         {
-            sizeof_node->struct_type = parser_find_struct_symbol_r(parser,
+            sizeof_node->struct_type = Parser::find_struct_symbol_r(parser,
                 parser->current_namespace, sizeof_node->name);
 
-            sizeof_node->enum_type = parser_find_enum_symbol_r(parser,
+            sizeof_node->enum_type = Parser::find_enum_symbol_r(parser,
                 parser->current_namespace, sizeof_node->name);
         }
         else
         {
-            sizeof_node->struct_type = parser_find_struct_symbol(parser,
+            sizeof_node->struct_type = Parser::find_struct_symbol(parser,
                 sizeof_node->ns, sizeof_node->name);
-            sizeof_node->enum_type = parser_find_enum_symbol(parser,
+            sizeof_node->enum_type = Parser::find_enum_symbol(parser,
                 sizeof_node->ns, sizeof_node->name);
         }
 
@@ -52,7 +52,7 @@ namespace AST::Sizeof
         {
             //FIXME: Print the correct location, this is only a placeholder
             SourceLocation loc;
-            error_sizeof_invalid_arg(parser_source_file(parser), loc,
+            error_sizeof_invalid_arg(Parser::source_file(parser), loc,
                 sizeof_node->name);
 
             parser->failed = true;
@@ -72,12 +72,12 @@ namespace AST::EnumCount
 
         if(enum_count->ns == nullptr)
         {
-            symbol = parser_find_enum_symbol_r(parser, parser->current_namespace,
+            symbol = Parser::find_enum_symbol_r(parser, parser->current_namespace,
                 enum_count->name);
         }
         else
         {
-            symbol = parser_find_enum_symbol(parser, enum_count->ns,
+            symbol = Parser::find_enum_symbol(parser, enum_count->ns,
                 enum_count->name);
         }
 

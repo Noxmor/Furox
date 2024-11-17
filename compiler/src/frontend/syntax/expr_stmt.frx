@@ -10,7 +10,7 @@ namespace AST::ExprStmt
 
         Expr* expr = AST::Expr::parse(parser);
 
-        parser_eat(parser, TokenType::SEMICOLON);
+        Parser::eat(parser, TokenType::SEMICOLON);
 
         return new(&parser->arena, expr);
     }

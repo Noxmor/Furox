@@ -32,7 +32,7 @@ export Parser* parser_table_find(char* filepath)
     {
         Parser* parser = entry->parser;
 
-        if(libc::strcmp(parser_source_file(parser), filepath) == 0)
+        if(libc::strcmp(Parser::source_file(parser), filepath) == 0)
         {
             return parser;
         }
@@ -75,7 +75,7 @@ export b8 parser_table_insert(char* filepath)
 
     while(entry != nullptr)
     {
-        if(libc::strcmp(parser_source_file(entry->parser), filepath) == 0)
+        if(libc::strcmp(Parser::source_file(entry->parser), filepath) == 0)
         {
             return false;
         }
@@ -85,7 +85,7 @@ export b8 parser_table_insert(char* filepath)
 
     mut ParserTableEntry* new_entry = libc::malloc(frx::sizeof(ParserTableEntry));
     new_entry->parser = libc::malloc(frx::sizeof(Parser));
-    parser_init(new_entry->parser, string_table_insert(filepath));
+    Parser::init(new_entry->parser, string_table_insert(filepath));
     new_entry->next = parser_table.entries[index];
 
     parser_table.entries[index] = new_entry;
