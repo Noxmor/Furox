@@ -27,10 +27,10 @@ export void transpile_program(mut Transpiler* transpiler, AST::Program* program)
 
         if(transpiler->mode == TranspilerMode::STRUCT_IMPL)
         {
-            while(!queue_is_empty(&transpiler->untranspiled_structs))
+            while(!Queue::is_empty(&transpiler->untranspiled_structs))
             {
                 AST::StructDef* struct_def =
-                    queue_dequeue(&transpiler->untranspiled_structs);
+                    Queue::dequeue(&transpiler->untranspiled_structs);
 
                 transpile_struct_def(transpiler, struct_def);
             }

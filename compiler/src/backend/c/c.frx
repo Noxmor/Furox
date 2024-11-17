@@ -49,7 +49,7 @@ export i32 c_generate_code(AST::Program* program)
 
     transpiler.current_namespace = nullptr;
 
-    queue_init(&transpiler.untranspiled_structs);
+    Queue::init(&transpiler.untranspiled_structs);
     list_init(&transpiler.transpiled_symbols);
 
     fprintf(transpiler.file, "#include <stddef.h>\n");

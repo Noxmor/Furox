@@ -36,7 +36,7 @@ export void compile(char* filepath)
 
     frx::assert(parser != nullptr);
 
-    queue_enqueue(&syntax_queue, parser);
+    Queue::enqueue(&syntax_queue, parser);
 }
 
 i32 main(usize argc, char** argv)
@@ -44,9 +44,9 @@ i32 main(usize argc, char** argv)
     config_init();
     lexer_init_keyword_table();
 
-    queue_init(&syntax_queue);
-    queue_init(&resolve_imports_queue);
-    queue_init(&semantic_queue);
+    Queue::init(&syntax_queue);
+    Queue::init(&resolve_imports_queue);
+    Queue::init(&semantic_queue);
 
     program = AST::Program::new();
 
@@ -103,23 +103,23 @@ i32 main(usize argc, char** argv)
         compile(fullpath);
     }
 
-    while(!queue_is_empty(&syntax_queue))
+    while(!Queue::is_empty(&syntax_queue))
     {
-        Parser* parser = queue_dequeue(&syntax_queue);
+        Parser* parser = Queue::dequeue(&syntax_queue);
         Parser::parse(parser);
-        queue_enqueue(&resolve_imports_queue, parser);
+        Queue::enqueue(&resolve_imports_queue, parser);
     }
 
-    while(!queue_is_empty(&resolve_imports_queue))
+    while(!Queue::is_empty(&resolve_imports_queue))
     {
-        Parser* parser = queue_dequeue(&resolve_imports_queue);
+        Parser* parser = Queue::dequeue(&resolve_imports_queue);
         Parser::resolve_imports(parser);
-        queue_enqueue(&semantic_queue, parser);
+        Queue::enqueue(&semantic_queue, parser);
     }
 
-    while(!queue_is_empty(&semantic_queue))
+    while(!Queue::is_empty(&semantic_queue))
     {
-        Parser* parser = queue_dequeue(&semantic_queue);
+        Parser* parser = Queue::dequeue(&semantic_queue);
         Parser::analyze(parser);
         failed = failed || parser->failed;
         list_push(&program->translation_units, parser->translation_unit);

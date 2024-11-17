@@ -62,10 +62,10 @@ export void transpile_struct_def(Transpiler* transpiler,
             {
                 should_transpile = false;
 
-                if(!queue_contains(&transpiler->untranspiled_structs,
+                if(!Queue::contains(&transpiler->untranspiled_structs,
                     struct_def))
                 {
-                    queue_enqueue(&transpiler->untranspiled_structs,
+                    Queue::enqueue(&transpiler->untranspiled_structs,
                         struct_def);
                 }
             }

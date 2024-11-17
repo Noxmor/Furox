@@ -12,74 +12,77 @@ export struct Queue
     QueueNode* rear;
 }
 
-export void queue_init(mut Queue* queue)
+namespace Queue
 {
-    frx::assert(queue != nullptr);
-
-    queue->front = nullptr;
-    queue->rear = nullptr;
-}
-
-export b8 queue_is_empty(Queue* queue)
-{
-    frx::assert(queue != nullptr);
-
-    return queue->front == nullptr;
-}
-
-export b8 queue_contains(Queue* queue, void* data)
-{
-    frx::assert(queue != nullptr);
-
-    mut QueueNode* node = queue->front;
-    while(node != nullptr)
+    export void init(mut Queue* queue)
     {
-        if(node->data == data)
+        frx::assert(queue != nullptr);
+
+        queue->front = nullptr;
+        queue->rear = nullptr;
+    }
+
+    export b8 is_empty(Queue* queue)
+    {
+        frx::assert(queue != nullptr);
+
+        return queue->front == nullptr;
+    }
+
+    export b8 contains(Queue* queue, void* data)
+    {
+        frx::assert(queue != nullptr);
+
+        mut QueueNode* node = queue->front;
+        while(node != nullptr)
         {
-            return true;
+            if(node->data == data)
+            {
+                return true;
+            }
+
+            node = node->next;
         }
 
-        node = node->next;
+        return false;
     }
 
-    return false;
-}
-
-export void queue_enqueue(mut Queue* queue, void* data)
-{
-    frx::assert(queue != nullptr);
-
-    mut QueueNode* node = libc::malloc(frx::sizeof(QueueNode));
-    node->data = data;
-    node->next = nullptr;
-
-    if(queue_is_empty(queue))
+    export void enqueue(mut Queue* queue, void* data)
     {
-        queue->front = node;
-        queue->rear = node;
+        frx::assert(queue != nullptr);
+
+        mut QueueNode* node = libc::malloc(frx::sizeof(QueueNode));
+        node->data = data;
+        node->next = nullptr;
+
+        if(is_empty(queue))
+        {
+            queue->front = node;
+            queue->rear = node;
+        }
+        else
+        {
+            queue->rear->next = node;
+            queue->rear = node;
+        }
     }
-    else
+
+    export void* dequeue(mut Queue* queue)
     {
-        queue->rear->next = node;
-        queue->rear = node;
+        frx::assert(queue != nullptr);
+
+        if(is_empty(queue))
+        {
+            return nullptr;
+        }
+
+        QueueNode* node = queue->front;
+        void* data = node->data;
+
+        queue->front = queue->front->next;
+
+        libc::free(node);
+
+        return data;
     }
-}
-
-export void* queue_dequeue(mut Queue* queue)
-{
-    frx::assert(queue != nullptr);
-
-    if(queue_is_empty(queue))
-    {
-        return nullptr;
-    }
-
-    QueueNode* node = queue->front;
-    void* data = node->data;
-
-    queue->front = queue->front->next;
-
-    libc::free(node);
-
-    return data;
 }
