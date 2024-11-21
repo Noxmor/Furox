@@ -19,7 +19,7 @@ namespace AST::Namespace
         {
             SourceLocation loc;
             error_namespace_is_reserved(parser->lexer.filepath, loc, ns);
-            parser->failed = true;
+            Parser::fail(parser);
         }
 
         core::Namespace* old_namespace = parser->current_namespace;

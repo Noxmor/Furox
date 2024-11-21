@@ -31,7 +31,7 @@ namespace AST::StructDecl
             error_struct_decl_redefinition(Parser::source_file(parser),
                 struct_decl->range.start, symbol->name);
 
-            parser->failed = true;
+            Parser::fail(parser);
         }
     }
 }

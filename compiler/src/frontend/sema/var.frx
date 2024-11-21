@@ -28,7 +28,7 @@ namespace AST::Var
             SourceLocation loc;
             error_undefined_var(Parser::source_file(parser), loc, var->name);
 
-            parser->failed = true;
+            Parser::fail(parser);
         }
     }
 }

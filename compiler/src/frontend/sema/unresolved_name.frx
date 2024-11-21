@@ -31,7 +31,7 @@ namespace AST::UnresolvedName
         {
             error_ambiguous_unresolved_name(Parser::source_file(parser),
                 unresolved_name->range.start, name);
-            parser->failed = true;
+            Parser::fail(parser);
         }
         else if(is_var)
         {
@@ -42,7 +42,7 @@ namespace AST::UnresolvedName
         {
             error_unresolved_name(Parser::source_file(parser),
                 unresolved_name->range.start, name);
-            parser->failed = true;
+            Parser::fail(parser);
         }
 
         if(!is_ambiguous && resolved)

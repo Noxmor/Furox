@@ -37,7 +37,7 @@ namespace AST::UnresolvedNamespacedName
         {
             error_ambiguous_unresolved_namespaced_name(Parser::source_file(parser),
                 unresolved_namespaced_name->range.start, ns, name);
-            parser->failed = true;
+            Parser::fail(parser);
         }
         else if(is_enum_constant)
         {
@@ -54,7 +54,7 @@ namespace AST::UnresolvedNamespacedName
         {
             error_unresolved_namespaced_name(Parser::source_file(parser),
                 unresolved_namespaced_name->range.start, ns, name);
-            parser->failed = true;
+            Parser::fail(parser);
         }
 
         if(!is_ambiguous && resolved)

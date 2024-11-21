@@ -17,7 +17,7 @@ namespace AST::ImportStmt
             error_import_stmt_invalid_filepath(Parser::source_file(parser), loc,
                 import_stmt->filepath);
 
-            parser->failed = true;
+            Parser::fail(parser);
         }
     }
 }

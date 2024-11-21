@@ -19,7 +19,7 @@ namespace AST::FuncParam
             error_var_redefinition(Parser::source_file(parser), loc,
                 param->symbol.name);
 
-            parser->failed = true;
+            Parser::fail(parser);
         }
 
         AST::TypeSpecifier::sema(parser, param->symbol.type);

@@ -30,7 +30,7 @@ namespace AST::FuncCall
             error_undefined_func_call(Parser::source_file(parser), loc,
                 func_call->name);
 
-            parser->failed = true;
+            Parser::fail(parser);
         }
 
         mut usize i;

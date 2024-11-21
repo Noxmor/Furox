@@ -46,7 +46,7 @@ namespace AST::StructDef
             error_struct_def_redefinition(Parser::source_file(parser),
                 struct_def->range.start, symbol->name);
 
-            parser->failed = true;
+            Parser::fail(parser);
         }
 
         for(i = 0; i < list_size(&symbol->fields); i = i + 1)

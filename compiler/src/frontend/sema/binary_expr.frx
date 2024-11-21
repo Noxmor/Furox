@@ -28,7 +28,7 @@ namespace AST::BinaryExpr
                     SourceLocation loc;
                     error_not_a_struct_member(Parser::source_file(parser), loc);
 
-                    parser->failed = true;
+                    Parser::fail(parser);
                 }
                 else
                 {
@@ -53,7 +53,7 @@ namespace AST::BinaryExpr
                     SourceLocation loc;
                     error_not_a_struct_member(Parser::source_file(parser), loc);
 
-                    parser->failed = true;
+                    Parser::fail(parser);
                 }
                 else
                 {
@@ -95,7 +95,7 @@ namespace AST::BinaryExpr
                     {
                         error_assignment_const_var(Parser::source_file(parser),
                             var->range.start, var->name);
-                        parser->failed = true;
+                        Parser::fail(parser);
                     }
                 }
 

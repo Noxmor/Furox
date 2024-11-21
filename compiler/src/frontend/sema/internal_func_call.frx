@@ -55,7 +55,7 @@ namespace AST::Sizeof
             error_sizeof_invalid_arg(Parser::source_file(parser), loc,
                 sizeof_node->name);
 
-            parser->failed = true;
+            Parser::fail(parser);
         }
     }
 }
@@ -87,7 +87,7 @@ namespace AST::EnumCount
             SourceLocation loc;
             error_enum_count_invalid_arg(parser->lexer.filepath, loc,
                 enum_count->name);
-            parser->failed = true;
+            Parser::fail(parser);
         }
         else
         {

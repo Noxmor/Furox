@@ -50,7 +50,7 @@ namespace AST::TypeSpecifier
             //FIXME: Print the correct location, this is only a placeholder
             SourceLocation loc;
             error_undefined_type_specifier(Parser::source_file(parser), loc, name);
-            parser->failed = true;
+            Parser::fail(parser);
         }
     }
 }

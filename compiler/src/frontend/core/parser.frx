@@ -93,7 +93,7 @@ namespace Parser
                 "Expected '%s', but found '%s'!", TokenType::to_str(type),
                 TokenType::to_str(parser->token->type));
 
-            parser->failed = true;
+            fail(parser);
             panic(parser);
             return;
         }
@@ -128,6 +128,13 @@ namespace Parser
 
             advance(parser);
         }
+    }
+
+    export void fail(mut Parser* parser)
+    {
+        frx::assert(parser != nullptr);
+
+        parser->failed = true;
     }
 
     export void parse(mut Parser* parser)

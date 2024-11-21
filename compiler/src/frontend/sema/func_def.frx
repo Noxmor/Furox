@@ -36,7 +36,7 @@ namespace AST::FuncDef
             error_func_def_redefinition(Parser::source_file(parser),
                 func_def->range.start, symbol->name);
 
-            parser->failed = true;
+            Parser::fail(parser);
         }
 
         AST::FuncParams::sema(parser, func_def->params);
