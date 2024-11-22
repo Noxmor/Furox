@@ -18,8 +18,7 @@ namespace AST::TranslationUnit
     {
         Compound* translation_unit = AST::Compound::new(&parser->arena);
 
-        while(parser->token->type != TokenType::EOF
-            && parser->token->type != TokenType::ERROR)
+        while(parser->token->type != TokenType::EOF)
         {
             mut AST::GlobalScope* global_scope = nullptr;
 

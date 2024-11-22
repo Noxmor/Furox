@@ -110,7 +110,6 @@ namespace Parser
         TokenType current_type = parser->token->type;
 
         return current_type != type
-            && current_type != TokenType::ERROR
             && current_type != TokenType::EOF
             && !TokenType::is_synchronizing(current_type);
     }
@@ -142,6 +141,11 @@ namespace Parser
         frx::assert(parser != nullptr);
 
         parser->translation_unit = AST::TranslationUnit::parse(parser);
+
+        if(Lexer::failed(&parser->lexer))
+        {
+            fail(parser);
+        }
     }
 
     b8 file_exists(char* filepath)

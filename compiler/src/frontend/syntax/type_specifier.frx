@@ -37,7 +37,7 @@ namespace AST::TypeSpecifier
 
         mut Namespace* ns = nullptr;
         mut char* name = nullptr;
-        mut TokenType primitive_type = TokenType::ERROR;
+        mut TokenType primitive_type = TokenType::EOF;
 
         if(TokenType::is_primitive(parser->token->type))
         {

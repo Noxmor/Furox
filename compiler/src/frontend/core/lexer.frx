@@ -135,7 +135,7 @@ namespace Lexer
 
         if(lexer->file == nullptr)
         {
-            lexer->failed = true;
+            fail(lexer);
         }
 
         lexer->filepath = filepath;
@@ -150,6 +150,18 @@ namespace Lexer
         read_token(lexer, &lexer->tokens[0]);
 
         lexer->tokens_count = 1;
+    }
+
+    export void fail(mut Lexer* lexer)
+    {
+        frx::assert(lexer != nullptr);
+
+        lexer->failed = true;
+    }
+
+    export b8 failed(Lexer* lexer)
+    {
+        return lexer->failed;
     }
 
     export Token* peek(mut Lexer* lexer, usize offset)
@@ -300,7 +312,7 @@ namespace Lexer
 
             if(current_char(lexer) == '\0')
             {
-                lexer->failed = true;
+                fail(lexer);
             }
         }
     }
@@ -526,7 +538,7 @@ namespace Lexer
 
                 default:
                 {
-                    lexer->failed = true;
+                    fail(lexer);
                 }
             }
 
@@ -537,7 +549,7 @@ namespace Lexer
 
         if(current_char(lexer) != '\'')
         {
-            lexer->failed = true;
+            fail(lexer);
         }
 
         token->range.end = lexer->location;
@@ -561,7 +573,7 @@ namespace Lexer
         {
             if(current == '\0')
             {
-                lexer->failed = true;
+                fail(lexer);
             }
 
             lexer->identifier_placeholder[identifier_index] = current;
@@ -590,9 +602,9 @@ namespace Lexer
 
         frx::assert(token != nullptr);
 
-        if(lexer->failed)
+        if(failed(lexer))
         {
-            token->type = TokenType::ERROR;
+            token->type = TokenType::EOF;
             return;
         }
 
@@ -941,7 +953,7 @@ namespace Lexer
 
             default:
             {
-                lexer->failed = true;
+                fail(lexer);
             }
         }
 
@@ -980,7 +992,7 @@ namespace Lexer
 
         if(libc::fseek(lexer->file, location->pos, Constants::SEEK_SET) != 0)
         {
-            lexer->failed = true;
+            fail(lexer);
             return;
         }
 

@@ -21,7 +21,7 @@ export void enum_symbol_init(mut EnumSymbol* symbol, TokenType type,
 {
     frx::assert(symbol != nullptr);
 
-    frx::assert(type != TokenType::ERROR && type < TokenType::COUNT);
+    frx::assert(type != TokenType::EOF && type < TokenType::COUNT);
 
     frx::assert(scope != nullptr);
 

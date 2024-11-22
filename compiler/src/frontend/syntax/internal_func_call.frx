@@ -49,7 +49,7 @@ namespace AST::Sizeof
 
             Parser::eat(parser, TokenType::IDENTIFIER);
 
-            return new(&parser->arena, ns, name, TokenType::ERROR, parser->current_scope);
+            return new(&parser->arena, ns, name, TokenType::EOF, parser->current_scope);
         }
     }
 }

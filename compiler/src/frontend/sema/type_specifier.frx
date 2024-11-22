@@ -21,7 +21,7 @@ namespace AST::TypeSpecifier
             AST::Expr::sema(parser, array_dimension);
         }
 
-        if(type_specifier->primitive_type != TokenType::ERROR)
+        if(type_specifier->primitive_type != TokenType::EOF)
         {
             return;
         }

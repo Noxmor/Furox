@@ -40,7 +40,7 @@ namespace AST
         export TypeSpecifier* new(Arena* arena, core::Namespace* ns, char* name,
             core::Scope* scope, TokenType primitive_type, usize pointer_level)
         {
-            frx::assert(name != nullptr || primitive_type != TokenType::ERROR);
+            frx::assert(name != nullptr || primitive_type != TokenType::EOF);
 
             frx::assert(scope != nullptr);
 

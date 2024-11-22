@@ -26,7 +26,7 @@ namespace AST::Sizeof
 
         frx::assert(sizeof_node != nullptr);
 
-        if(sizeof_node->primitive_type != TokenType::ERROR)
+        if(sizeof_node->primitive_type != TokenType::EOF)
         {
             return;
         }

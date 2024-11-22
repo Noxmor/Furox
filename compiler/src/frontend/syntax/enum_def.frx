@@ -46,7 +46,7 @@ namespace AST::EnumDef
 
         Parser::eat(parser, TokenType::COLON);
 
-        mut TokenType type = TokenType::ERROR;
+        mut TokenType type = TokenType::EOF;
 
         switch(parser->token->type)
         {

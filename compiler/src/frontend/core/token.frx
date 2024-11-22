@@ -2,7 +2,6 @@ export import "source_range.frx";
 
 //TODO: Replace with C-like direct indexing: [TOKEN_TYPE] = "string" to be indepentent of the order of declaration in the enum
 char* token_type_names[TokenType::COUNT] = {
-    "error",
     "eof",
 
     "identifier",
@@ -126,7 +125,6 @@ char* token_type_names[TokenType::COUNT] = {
 
 export enum TokenType : u8
 {
-    ERROR = 0,
     EOF,
 
     IDENTIFIER,
@@ -355,10 +353,6 @@ namespace TokenType
 
         switch(type)
         {
-            case TokenType::ERROR:
-            {
-
-            }
             case TokenType::EOF:
             {
 
