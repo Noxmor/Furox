@@ -28,12 +28,12 @@ export void transpile_func_call(Transpiler* transpiler, AST::FuncCall* func_call
     fprintf(transpiler->file, "%s(", name);
 
     mut usize i;
-    for(i = 0; i < list_size(&func_call->args); i = i + 1)
+    for(i = 0; i < List::size(&func_call->args); i = i + 1)
     {
-        AST::Expr* arg = list_get(&func_call->args, i);
+        AST::Expr* arg = List::get(&func_call->args, i);
         transpile_expr(transpiler, arg);
 
-        if(i < list_size(&func_call->args) - 1)
+        if(i < List::size(&func_call->args) - 1)
         {
             fprintf(transpiler->file, ", ");
         }

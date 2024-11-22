@@ -48,16 +48,16 @@ export void transpile_struct_def(Transpiler* transpiler,
         mut b8 should_transpile = true;
 
         mut usize i;
-        for(i = 0; i < list_size(&symbol->fields); i = i + 1)
+        for(i = 0; i < List::size(&symbol->fields); i = i + 1)
         {
-            AST::StructField* field = list_get(&symbol->fields, i);
+            AST::StructField* field = List::get(&symbol->fields, i);
             AST::TypeSpecifier* type = field->type;
             if(type->struct_type == nullptr || type->pointer_level > 0)
             {
                 continue;
             }
 
-            if(!list_contains(&transpiler->transpiled_symbols,
+            if(!List::contains(&transpiler->transpiled_symbols,
                 type->struct_type))
             {
                 should_transpile = false;
@@ -77,15 +77,15 @@ export void transpile_struct_def(Transpiler* transpiler,
             fprintf(transpiler->file, "\n");
             fprintf(transpiler->file, "{\n");
 
-            for(i = 0; i < list_size(&symbol->fields); i = i + 1)
+            for(i = 0; i < List::size(&symbol->fields); i = i + 1)
             {
-                AST::StructField* field = list_get(&symbol->fields, i);
+                AST::StructField* field = List::get(&symbol->fields, i);
                 transpile_struct_field(transpiler, field);
             }
 
             fprintf(transpiler->file, "};\n");
 
-            list_push(&transpiler->transpiled_symbols, symbol);
+            List::push(&transpiler->transpiled_symbols, symbol);
         }
     }
 }

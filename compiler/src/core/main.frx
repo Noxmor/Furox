@@ -83,7 +83,7 @@ i32 main(usize argc, char** argv)
             }
             case OptionID::LINK:
             {
-                list_push(&config->link_targets, get_arg());
+                List::push(&config->link_targets, get_arg());
                 break;
             }
             case OptionID::LIBRARY_PATH:
@@ -122,7 +122,7 @@ i32 main(usize argc, char** argv)
         Parser* parser = Queue::dequeue(&semantic_queue);
         Parser::analyze(parser);
         failed = failed || parser->failed;
-        list_push(&program->translation_units, parser->translation_unit);
+        List::push(&program->translation_units, parser->translation_unit);
     }
 
     if(emit_ast)

@@ -21,7 +21,7 @@ namespace AST::TypeSpecifier
         while(parser->token->type == TokenType::LBRACKET)
         {
             Parser::eat(parser, TokenType::LBRACKET);
-            list_push(&type->array_dimensions, AST::Expr::parse(parser));
+            List::push(&type->array_dimensions, AST::Expr::parse(parser));
             Parser::eat(parser, TokenType::RBRACKET);
         }
     }

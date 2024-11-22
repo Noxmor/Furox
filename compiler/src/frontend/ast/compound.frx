@@ -14,7 +14,7 @@ namespace AST
         {
             mut Compound* compound = Arena::alloc(arena, frx::sizeof(Compound));
 
-            list_init(&compound->nodes);
+            List::init(&compound->nodes);
 
             return compound;
         }
@@ -23,7 +23,7 @@ namespace AST
         {
             frx::assert(compound != nullptr);
 
-            list_push(&compound->nodes, node);
+            List::push(&compound->nodes, node);
         }
     }
 }

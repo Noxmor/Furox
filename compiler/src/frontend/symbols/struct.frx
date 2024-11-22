@@ -26,7 +26,7 @@ export void struct_symbol_init(mut StructSymbol* symbol, core::Scope* scope,
     symbol->scope = scope;
     symbol->ns = ns;
     symbol->name = name;
-    list_init(&symbol->fields);
+    List::init(&symbol->fields);
     symbol->exported = exported;
     symbol->external = external;
 }

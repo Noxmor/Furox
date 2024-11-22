@@ -63,7 +63,7 @@ namespace AST
                 frx::sizeof(FuncParams));
 
             func_params->variadic = false;
-            list_init(&func_params->params);
+            List::init(&func_params->params);
 
             return func_params;
         }
@@ -81,9 +81,9 @@ namespace AST
             fprintf(file, "variadic: %d\n", func_params->variadic);
 
             mut usize i;
-            for(i = 0; i < list_size(&func_params->params); i = i + 1)
+            for(i = 0; i < List::size(&func_params->params); i = i + 1)
             {
-                AST::FuncParam* param = list_get(&func_params->params, i);
+                AST::FuncParam* param = List::get(&func_params->params, i);
                 AST::FuncParam::print(param, file, depth + 1);
             }
         }

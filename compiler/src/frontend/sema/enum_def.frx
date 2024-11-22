@@ -15,10 +15,10 @@ namespace AST::EnumDef
         EnumSymbol* symbol = &enum_def->symbol;
 
         mut usize i;
-        for(i = 0; i < list_size(&parser->visible_parsers)
+        for(i = 0; i < List::size(&parser->visible_parsers)
             && !enum_def->is_redefinition; i = i + 1)
         {
-            Parser* visible_parser = list_get(&parser->visible_parsers, i);
+            Parser* visible_parser = List::get(&parser->visible_parsers, i);
             EnumSymbol* imported_symbol = enum_table_find(
                 &visible_parser->enum_table, symbol->ns, symbol->name);
 

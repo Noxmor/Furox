@@ -20,9 +20,9 @@ export void transpile_initializer_list(Transpiler* transpiler,
     fprintf(transpiler->file, "{\n");
 
     mut usize i;
-    for(i = 0; i < list_size(&list->values); i = i + 1)
+    for(i = 0; i < List::size(&list->values); i = i + 1)
     {
-        AST::Expr* value = list_get(&list->values, i);
+        AST::Expr* value = List::get(&list->values, i);
         transpile_expr(transpiler, value);
 
         fprintf(transpiler->file, ",\n");

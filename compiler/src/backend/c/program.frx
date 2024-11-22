@@ -17,9 +17,9 @@ export void transpile_program(mut Transpiler* transpiler, AST::Program* program)
         transpiler->mode = mode;
 
         mut usize i;
-        for(i = 0; i < list_size(&program->translation_units); i = i + 1)
+        for(i = 0; i < List::size(&program->translation_units); i = i + 1)
         {
-            AST::Compound* translation_unit = list_get(
+            AST::Compound* translation_unit = List::get(
                 &program->translation_units, i);
 
             transpile_translation_unit(transpiler, translation_unit);

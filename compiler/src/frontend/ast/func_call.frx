@@ -40,7 +40,7 @@ namespace AST
             func_call->ns = ns;
             func_call->name = name;
             func_call->scope = scope;
-            list_init(&func_call->args);
+            List::init(&func_call->args);
 
             return func_call;
         }
@@ -58,9 +58,9 @@ namespace AST
             fprintf(file, "%s)\n", func_call->name);
 
             mut usize i;
-            for(i = 0; i < list_size(&func_call->args); i = i + 1)
+            for(i = 0; i < List::size(&func_call->args); i = i + 1)
             {
-                AST::Expr* arg = list_get(&func_call->args, i);
+                AST::Expr* arg = List::get(&func_call->args, i);
                 AST::Expr::print(arg, file, depth + 1);
             }
         }

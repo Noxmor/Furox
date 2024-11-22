@@ -31,7 +31,7 @@ export void enum_symbol_init(mut EnumSymbol* symbol, TokenType type,
     symbol->scope = scope;
     symbol->ns = ns;
     symbol->name = name;
-    list_init(&symbol->constants);
+    List::init(&symbol->constants);
     symbol->exported = exported;
 }
 
@@ -42,9 +42,9 @@ export b8 enum_symbol_has_constant(EnumSymbol* symbol, char* name)
     frx::assert(name != nullptr);
 
     mut usize i;
-    for(i = 0; i < list_size(&symbol->constants); i = i + 1)
+    for(i = 0; i < List::size(&symbol->constants); i = i + 1)
     {
-        AST::EnumConstantDef* constant = list_get(&symbol->constants, i);
+        AST::EnumConstantDef* constant = List::get(&symbol->constants, i);
         if(libc::strcmp(constant->name, name) == 0)
         {
             return true;

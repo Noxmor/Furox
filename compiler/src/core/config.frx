@@ -28,7 +28,7 @@ export void config_init()
     config.output = "a.out";
     config.stdlib_path = "/usr/local/lib/furox/stdlib";
     config.library_path = nullptr;
-    list_init(&config.link_targets);
+    List::init(&config.link_targets);
 }
 
 export Config* get_config()

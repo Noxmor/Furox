@@ -23,7 +23,7 @@ namespace AST
         {
             InitializerList* list = Arena::alloc(arena, frx::sizeof(InitializerList));
 
-            list_init(&list->values);
+            List::init(&list->values);
 
             return list;
         }
@@ -39,9 +39,9 @@ namespace AST
             fprintf(file, "%s\n", "initializer-list");
 
             mut usize i;
-            for(i = 0; i < list_size(&list->values); i = i + 1)
+            for(i = 0; i < List::size(&list->values); i = i + 1)
             {
-                AST::Expr* value = list_get(&list->values, i);
+                AST::Expr* value = List::get(&list->values, i);
                 AST::Expr::print(value, file, depth);
             }
         }

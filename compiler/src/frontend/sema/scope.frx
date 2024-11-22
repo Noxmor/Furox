@@ -12,9 +12,9 @@ namespace AST::Scope
         frx::assert(scope != nullptr);
 
         mut usize i;
-        for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+        for(i = 0; i < List::size(&scope->stmts); i = i + 1)
         {
-            Stmt* stmt = list_get(&scope->stmts, i);
+            Stmt* stmt = List::get(&scope->stmts, i);
             AST::Stmt::sema(parser, stmt);
         }
     }

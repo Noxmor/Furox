@@ -7,81 +7,84 @@ export struct List
     usize capacity;
 }
 
-export void list_init(mut List* list)
+namespace List
 {
-    frx::assert(list != nullptr);
-
-    list->items = nullptr;
-    list->size = (list->capacity = 0);
-}
-
-export void list_push(mut List* list, void* item)
-{
-    frx::assert(list != nullptr);
-
-    if(list->size >= list->capacity)
+    export void init(mut List* list)
     {
-        if(list->capacity > 0)
-        {
-            list->capacity = list->capacity * 2;
-        }
-        else
-        {
-            list->capacity = 1;
-        }
+        frx::assert(list != nullptr);
 
-        //TODO: Change sizeof to use void* instead of usize
-        list->items = libc::realloc(list->items,
-            list->capacity * frx::sizeof(usize));
+        list->items = nullptr;
+        list->size = (list->capacity = 0);
     }
 
-    list->items[list->size] = item;
-    list->size = list->size + 1;
-}
-
-export void* list_get(List* list, usize index)
-{
-    frx::assert(list != nullptr);
-
-    frx::assert(index < list->size);
-
-    return list->items[index];
-}
-
-export b8 list_contains(List* list, void* item)
-{
-    frx::assert(list != nullptr);
-
-    mut usize i;
-    for(i = 0; i < list_size(list); i = i + 1)
+    export void push(mut List* list, void* item)
     {
-        void* list_item = list_get(list, i);
-        if(list_item == item)
+        frx::assert(list != nullptr);
+
+        if(list->size >= list->capacity)
         {
-            return true;
+            if(list->capacity > 0)
+            {
+                list->capacity = list->capacity * 2;
+            }
+            else
+            {
+                list->capacity = 1;
+            }
+
+            //TODO: Change sizeof to use void* instead of usize
+            list->items = libc::realloc(list->items,
+                list->capacity * frx::sizeof(usize));
         }
+
+        list->items[list->size] = item;
+        list->size = list->size + 1;
     }
 
-    return false;
-}
+    export void* get(List* list, usize index)
+    {
+        frx::assert(list != nullptr);
 
-export usize list_size(List* list)
-{
-    frx::assert(list != nullptr);
+        frx::assert(index < list->size);
 
-    return list->size;
-}
+        return list->items[index];
+    }
 
-export void list_clear(mut List* list)
-{
-    frx::assert(list != nullptr);
+    export b8 contains(List* list, void* item)
+    {
+        frx::assert(list != nullptr);
 
-    list->size = 0;
-}
+        mut usize i;
+        for(i = 0; i < size(list); i = i + 1)
+        {
+            void* list_item = get(list, i);
+            if(list_item == item)
+            {
+                return true;
+            }
+        }
 
-export void list_destroy(List* list)
-{
-    frx::assert(list != nullptr);
+        return false;
+    }
 
-    libc::free(list->items);
+    export usize size(List* list)
+    {
+        frx::assert(list != nullptr);
+
+        return list->size;
+    }
+
+    export void clear(mut List* list)
+    {
+        frx::assert(list != nullptr);
+
+        list->size = 0;
+    }
+
+    export void destroy(List* list)
+    {
+        frx::assert(list != nullptr);
+
+        libc::free(list->items);
+    }
 }

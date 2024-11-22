@@ -53,7 +53,7 @@ namespace AST
             type_specifier->enum_type = nullptr;
             type_specifier->struct_type = nullptr;
             type_specifier->pointer_level = pointer_level;
-            list_init(&type_specifier->array_dimensions);
+            List::init(&type_specifier->array_dimensions);
 
             return type_specifier;
         }
@@ -64,7 +64,7 @@ namespace AST
 
             frx::assert(array_dimension != nullptr);
 
-            list_push(&type_specifier->array_dimensions, array_dimension);
+            List::push(&type_specifier->array_dimensions, array_dimension);
         }
 
         export void print(TypeSpecifier* type_specifier, mut FILE* file, usize depth)
@@ -101,9 +101,9 @@ namespace AST
             fprintf(file, "array-dimensions\n");
 
             mut usize i;
-            for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
+            for(i = 0; i < List::size(&type_specifier->array_dimensions); i = i + 1)
             {
-                AST::Expr* array_dimension = list_get(&type_specifier->array_dimensions, i);
+                AST::Expr* array_dimension = List::get(&type_specifier->array_dimensions, i);
                 AST::Expr::print(array_dimension, file, depth + 2);
             }
         }

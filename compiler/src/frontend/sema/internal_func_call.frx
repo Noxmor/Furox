@@ -93,7 +93,7 @@ namespace AST::EnumCount
         {
             expr->type = AST::ExprType::INT_LITERAL;
             expr->int_literal = AST::IntLiteral::new(&parser->arena,
-                list_size(&symbol->constants));
+                List::size(&symbol->constants));
         }
     }
 }

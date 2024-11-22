@@ -44,7 +44,7 @@ namespace AST::FuncParams
 
         while(Parser::loop_until(parser, TokenType::RPAREN))
         {
-            if(list_size(&func_params->params) > 0)
+            if(List::size(&func_params->params) > 0)
             {
                 Parser::eat(parser, TokenType::COMMA);
 
@@ -58,7 +58,7 @@ namespace AST::FuncParams
                 }
             }
 
-            list_push(&func_params->params, AST::FuncParam::parse(parser));
+            List::push(&func_params->params, AST::FuncParam::parse(parser));
         }
 
         Parser::eat(parser, TokenType::RPAREN);

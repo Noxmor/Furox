@@ -22,9 +22,9 @@ namespace AST::EnumConstant
         mut b8 exists = false;
 
         mut usize i;
-        for(i = 0; i < list_size(&symbol->constants); i = i + 1)
+        for(i = 0; i < List::size(&symbol->constants); i = i + 1)
         {
-            EnumConstantDef* constant_def = list_get(&symbol->constants, i);
+            EnumConstantDef* constant_def = List::get(&symbol->constants, i);
 
             if(libc::strcmp(constant_def->name, constant->name) == 0)
             {

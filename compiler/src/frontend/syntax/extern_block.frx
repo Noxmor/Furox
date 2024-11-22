@@ -17,7 +17,7 @@ namespace AST::ExternBlock
 
         while(Parser::loop_until(parser, TokenType::RBRACE))
         {
-            list_push(&extern_block->func_decls, AST::FuncDecl::parse(parser));
+            List::push(&extern_block->func_decls, AST::FuncDecl::parse(parser));
         }
 
         Parser::eat(parser, TokenType::RBRACE);

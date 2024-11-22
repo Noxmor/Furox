@@ -18,9 +18,9 @@ export void transpile_namespace(mut Transpiler* transpiler,
     transpiler->current_namespace = namespace_node->ns;
 
     mut usize i;
-    for(i = 0; i < list_size(&namespace_node->namespace_scope); i = i + 1)
+    for(i = 0; i < List::size(&namespace_node->namespace_scope); i = i + 1)
     {
-        AST::NamespaceScope* namespace_scope = list_get(&namespace_node->namespace_scope, i);
+        AST::NamespaceScope* namespace_scope = List::get(&namespace_node->namespace_scope, i);
         transpile_namespace_scope(transpiler, namespace_scope);
     }
 

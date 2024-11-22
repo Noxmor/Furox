@@ -35,9 +35,9 @@ namespace AST::FuncParams
         frx::assert(params != nullptr);
 
         mut usize i;
-        for(i = 0; i < list_size(&params->params); i = i + 1)
+        for(i = 0; i < List::size(&params->params); i = i + 1)
         {
-            FuncParam* param = list_get(&params->params, i);
+            FuncParam* param = List::get(&params->params, i);
             AST::FuncParam::sema(parser, param);
         }
     }

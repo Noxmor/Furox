@@ -24,7 +24,7 @@ namespace AST
         {
             mut ExternBlock* extern_block = Arena::alloc(arena, frx::sizeof(ExternBlock));
 
-            list_init(&extern_block->func_decls);
+            List::init(&extern_block->func_decls);
 
             return extern_block;
         }
@@ -40,9 +40,9 @@ namespace AST
             fprintf(file, "%s\n", "extern-block");
 
             mut usize i;
-            for(i = 0; i < list_size(&extern_block->func_decls); i = i + 1)
+            for(i = 0; i < List::size(&extern_block->func_decls); i = i + 1)
             {
-                FuncDecl* func_decl = list_get(&extern_block->func_decls, i);
+                FuncDecl* func_decl = List::get(&extern_block->func_decls, i);
                 AST::FuncDecl::print(func_decl, file, depth + 1);
             }
         }

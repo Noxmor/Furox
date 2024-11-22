@@ -66,7 +66,7 @@ namespace AST
             mut SwitchStmt* switch_stmt = Arena::alloc(arena, frx::sizeof(SwitchStmt));
 
             switch_stmt->value = value;
-            list_init(&switch_stmt->cases);
+            List::init(&switch_stmt->cases);
             switch_stmt->default_scope = nullptr;
 
             return switch_stmt;
@@ -78,7 +78,7 @@ namespace AST
 
             frx::assert(switch_case != nullptr);
 
-            list_push(&switch_stmt->cases, switch_case);
+            List::push(&switch_stmt->cases, switch_case);
         }
 
         export void set_default_scope(mut SwitchStmt* switch_stmt, Scope* scope)
@@ -103,9 +103,9 @@ namespace AST
             AST::Expr::print(switch_stmt->value, file, depth + 1);
 
             mut usize i;
-            for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
+            for(i = 0; i < List::size(&switch_stmt->cases); i = i + 1)
             {
-                AST::SwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+                AST::SwitchCase* switch_case = List::get(&switch_stmt->cases, i);
                 AST::SwitchCase::print(switch_case, file, depth + 1);
             }
 

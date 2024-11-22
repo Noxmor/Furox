@@ -24,7 +24,7 @@ namespace AST
         {
             Program* program = libc::malloc(frx::sizeof(Program));
 
-            list_init(&program->translation_units);
+            List::init(&program->translation_units);
 
             return program;
         }
@@ -40,14 +40,14 @@ namespace AST
             fprintf(file, "%s\n", "program");
 
             mut usize i;
-            for(i = 0; i < list_size(&program->translation_units); i = i + 1)
+            for(i = 0; i < List::size(&program->translation_units); i = i + 1)
             {
-                Compound* translation_unit = list_get(&program->translation_units, i);
+                Compound* translation_unit = List::get(&program->translation_units, i);
 
                 mut usize j;
-                for(j = 0; j < list_size(&translation_unit->nodes); ++j)
+                for(j = 0; j < List::size(&translation_unit->nodes); ++j)
                 {
-                    AST::GlobalScope* global_scope = list_get(&translation_unit->nodes, j);
+                    AST::GlobalScope* global_scope = List::get(&translation_unit->nodes, j);
                     AST::GlobalScope::print(global_scope, file, depth + 1);
                 }
             }

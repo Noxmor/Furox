@@ -13,9 +13,9 @@ namespace AST::ExternBlock
         frx::assert(extern_block != nullptr);
 
         mut usize i;
-        for(i = 0; i < list_size(&extern_block->func_decls); i = i + 1)
+        for(i = 0; i < List::size(&extern_block->func_decls); i = i + 1)
         {
-            FuncDecl* func_decl = list_get(&extern_block->func_decls, i);
+            FuncDecl* func_decl = List::get(&extern_block->func_decls, i);
             AST::FuncDecl::sema(parser, func_decl);
         }
     }

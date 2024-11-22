@@ -80,9 +80,9 @@ namespace AST
             fprintf(file, "%s (%s)\n", "struct-definition", symbol->name);
 
             mut usize i;
-            for(i = 0; i < list_size(&symbol->fields); i = i + 1)
+            for(i = 0; i < List::size(&symbol->fields); i = i + 1)
             {
-                AST::StructField* field = list_get(&symbol->fields, i);
+                AST::StructField* field = List::get(&symbol->fields, i);
                 AST::StructField::print(field, file, depth + 1);
             }
         }

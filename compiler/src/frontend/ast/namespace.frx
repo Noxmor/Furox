@@ -30,7 +30,7 @@ namespace AST
 
             namespace_node->ns = ns;
 
-            list_init(&namespace_node->namespace_scope);
+            List::init(&namespace_node->namespace_scope);
 
             return namespace_node;
         }
@@ -47,9 +47,9 @@ namespace AST
                 namespace_node->ns->name);
 
             mut usize i;
-            for(i = 0; i < list_size(&namespace_node->namespace_scope); i = i + 1)
+            for(i = 0; i < List::size(&namespace_node->namespace_scope); i = i + 1)
             {
-                NamespaceScope* namespace_scope = list_get(&namespace_node->namespace_scope, i);
+                NamespaceScope* namespace_scope = List::get(&namespace_node->namespace_scope, i);
                 AST::NamespaceScope::print(namespace_scope, file, depth + 1);
             }
         }

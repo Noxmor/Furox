@@ -28,9 +28,9 @@ namespace AST::SwitchStmt
         AST::Expr::sema(parser, switch_stmt->value);
 
         mut usize i;
-        for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
+        for(i = 0; i < List::size(&switch_stmt->cases); i = i + 1)
         {
-            SwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+            SwitchCase* switch_case = List::get(&switch_stmt->cases, i);
             AST::SwitchCase::sema(parser, switch_case);
     }
 

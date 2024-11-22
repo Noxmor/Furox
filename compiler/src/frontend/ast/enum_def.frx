@@ -69,7 +69,7 @@ namespace AST
             {
                 mut Expr* new_value = nullptr;
 
-                if(list_size(constants) == 0)
+                if(List::size(constants) == 0)
                 {
                     IntLiteral* literal = AST::IntLiteral::new(arena, 0);
                     new_value = AST::Expr::from_int_literal(arena, literal);
@@ -78,8 +78,8 @@ namespace AST
                 {
                     IntLiteral* literal = AST::IntLiteral::new(arena, 1);
 
-                    EnumConstantDef* last_constant = list_get(constants,
-                        list_size(constants) - 1);
+                    EnumConstantDef* last_constant = List::get(constants,
+                        List::size(constants) - 1);
 
                     Expr* left = last_constant->value;
                     Expr* right = AST::Expr::from_int_literal(arena, literal);
@@ -93,7 +93,7 @@ namespace AST
                 constant->value = new_value;
             }
 
-            list_push(constants, constant);
+            List::push(constants, constant);
         }
 
         export void print(EnumDef* enum_def, mut FILE* file, usize depth)
@@ -107,9 +107,9 @@ namespace AST
             fprintf(file, "%s (%s)\n", "enum-definition", enum_def->symbol.name);
 
             mut usize i;
-            for(i = 0; i < list_size(&enum_def->symbol.constants); i = i + 1)
+            for(i = 0; i < List::size(&enum_def->symbol.constants); i = i + 1)
             {
-                EnumConstantDef* constant = list_get(&enum_def->symbol.constants, i);
+                EnumConstantDef* constant = List::get(&enum_def->symbol.constants, i);
 
                 print_depth(file, depth + 1);
                 fprintf(file, "%s\n", constant->name);

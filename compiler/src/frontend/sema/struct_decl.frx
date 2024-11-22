@@ -15,10 +15,10 @@ namespace AST::StructDecl
         StructSymbol* symbol = &struct_decl->symbol;
 
         mut usize i;
-        for(i = 0; i < list_size(&parser->visible_parsers)
+        for(i = 0; i < List::size(&parser->visible_parsers)
             && !struct_decl->is_redefinition; i = i + 1)
         {
-            Parser* visible_parser = list_get(&parser->visible_parsers, i);
+            Parser* visible_parser = List::get(&parser->visible_parsers, i);
             StructSymbol* imported_symbol = struct_table_find(
                 &visible_parser->struct_table, symbol->ns, symbol->name);
 

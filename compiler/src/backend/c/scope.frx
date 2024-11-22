@@ -19,9 +19,9 @@ export void transpile_scope(Transpiler* transpiler, AST::Scope* scope)
     fprintf(transpiler->file, "{\n");
 
     mut usize i;
-    for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+    for(i = 0; i < List::size(&scope->stmts); i = i + 1)
     {
-        AST::Stmt* stmt = list_get(&scope->stmts, i);
+        AST::Stmt* stmt = List::get(&scope->stmts, i);
         transpile_stmt(transpiler, stmt);
     }
 

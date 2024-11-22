@@ -30,10 +30,10 @@ namespace AST::StructDef
         b8 is_redefinition = false;
 
         mut usize i;
-        for(i = 0; i < list_size(&parser->visible_parsers)
+        for(i = 0; i < List::size(&parser->visible_parsers)
             && !struct_def->is_redefinition; i = i + 1)
         {
-            Parser* visible_parser = list_get(&parser->visible_parsers, i);
+            Parser* visible_parser = List::get(&parser->visible_parsers, i);
             StructSymbol* imported_symbol = struct_table_find(
                 &visible_parser->struct_table, symbol->ns, symbol->name);
 
@@ -49,9 +49,9 @@ namespace AST::StructDef
             Parser::fail(parser);
         }
 
-        for(i = 0; i < list_size(&symbol->fields); i = i + 1)
+        for(i = 0; i < List::size(&symbol->fields); i = i + 1)
         {
-            StructField* field = list_get(&symbol->fields, i);
+            StructField* field = List::get(&symbol->fields, i);
             AST::StructField::sema(parser, field);
         }
     }

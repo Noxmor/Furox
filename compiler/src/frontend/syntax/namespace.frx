@@ -34,7 +34,7 @@ namespace AST::Namespace
 
             NamespaceScope* namespace_scope = AST::NamespaceScope::from_namespace(&parser->arena, child_namespace);
 
-            list_push(&current_namespace->namespace_scope, namespace_scope);
+            List::push(&current_namespace->namespace_scope, namespace_scope);
 
             current_namespace = child_namespace;
         }
@@ -46,7 +46,7 @@ namespace AST::Namespace
         while(Parser::loop_until(parser, TokenType::RBRACE))
         {
             AST::NamespaceScope* child = AST::NamespaceScope::parse(parser);
-            list_push(&current_namespace->namespace_scope, child);
+            List::push(&current_namespace->namespace_scope, child);
         }
 
         Parser::eat(parser, TokenType::RBRACE);

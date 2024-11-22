@@ -26,7 +26,7 @@ namespace AST
         {
             mut Scope* scope = Arena::alloc(arena, frx::sizeof(Scope));
 
-            list_init(&scope->stmts);
+            List::init(&scope->stmts);
 
             return scope;
         }
@@ -37,7 +37,7 @@ namespace AST
 
             frx::assert(stmt != nullptr);
 
-            list_push(&scope->stmts, stmt);
+            List::push(&scope->stmts, stmt);
         }
 
         export void print(Scope* scope, mut FILE* file, usize depth)
@@ -51,9 +51,9 @@ namespace AST
             fprintf(file, "%s\n", "scope");
 
             mut usize i;
-            for(i = 0; i < list_size(&scope->stmts); i = i + 1)
+            for(i = 0; i < List::size(&scope->stmts); i = i + 1)
             {
-                AST::Stmt* stmt = list_get(&scope->stmts, i);
+                AST::Stmt* stmt = List::get(&scope->stmts, i);
                 AST::Stmt::print(stmt, file, depth + 1);
             }
         }

@@ -50,7 +50,7 @@ export i32 c_generate_code(AST::Program* program)
     transpiler.current_namespace = nullptr;
 
     Queue::init(&transpiler.untranspiled_structs);
-    list_init(&transpiler.transpiled_symbols);
+    List::init(&transpiler.transpiled_symbols);
 
     fprintf(transpiler.file, "#include <stddef.h>\n");
     fprintf(transpiler.file, "#include <stdint.h>\n");
@@ -84,9 +84,9 @@ export i32 c_generate_code(AST::Program* program)
     libc::strcat(command, config->output);
 
     mut usize i;
-    for(i = 0; i < list_size(&config->link_targets); i = i + 1)
+    for(i = 0; i < List::size(&config->link_targets); i = i + 1)
     {
-        char* link_target = list_get(&config->link_targets, i);
+        char* link_target = List::get(&config->link_targets, i);
         libc::strcat(command, " ");
         libc::strcat(command, link_target);
     }

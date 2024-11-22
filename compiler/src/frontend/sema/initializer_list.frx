@@ -11,9 +11,9 @@ namespace AST::InitializerList
         frx::assert(list != nullptr);
 
         mut usize i;
-        for(i = 0; i < list_size(&list->values); i = i + 1)
+        for(i = 0; i < List::size(&list->values); i = i + 1)
         {
-            Expr* value = list_get(&list->values, i);
+            Expr* value = List::get(&list->values, i);
             AST::Expr::sema(parser, value);
         }
     }

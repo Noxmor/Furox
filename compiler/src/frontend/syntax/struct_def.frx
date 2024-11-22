@@ -48,7 +48,7 @@ namespace AST::StructDef
 
         while(Parser::loop_until(parser, TokenType::RBRACE))
         {
-            list_push(&struct_def->symbol.fields, AST::StructField::parse(parser));
+            List::push(&struct_def->symbol.fields, AST::StructField::parse(parser));
         }
 
         struct_def->range.start = start;

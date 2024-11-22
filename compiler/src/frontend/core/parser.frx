@@ -65,7 +65,7 @@ namespace Parser
         parser->current_namespace = namespace_create_global();
         parser->current_scope = scope_create(nullptr);
 
-        list_init(&parser->visible_parsers);
+        List::init(&parser->visible_parsers);
 
         parser->panic = false;
         parser->failed = false;
@@ -199,9 +199,9 @@ namespace Parser
         frx::assert(visited_parsers != nullptr);
 
         mut usize i;
-        for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
+        for(i = 0; i < List::size(&parser->translation_unit->nodes); i = i + 1)
         {
-            AST::GlobalScope* global_scope = list_get(&parser->translation_unit->nodes, i);
+            AST::GlobalScope* global_scope = List::get(&parser->translation_unit->nodes, i);
             if(global_scope->type != AST::GlobalScopeType::IMPORT_STMT)
             {
                 continue;
@@ -214,15 +214,15 @@ namespace Parser
                 continue;
             }
 
-            if(import_stmt->exported && !list_contains(visible_parsers,
+            if(import_stmt->exported && !List::contains(visible_parsers,
                 imported_parser))
             {
-                list_push(visible_parsers, imported_parser);
+                List::push(visible_parsers, imported_parser);
             }
 
-            if(!list_contains(visited_parsers, imported_parser))
+            if(!List::contains(visited_parsers, imported_parser))
             {
-                list_push(visited_parsers, imported_parser);
+                List::push(visited_parsers, imported_parser);
                 resolve_imports_recursive(main_parser, visible_parsers,
                     imported_parser, visited_parsers);
             }
@@ -236,12 +236,12 @@ namespace Parser
         List* visible_parsers = &parser->visible_parsers;
 
         List visited_parsers;
-        list_init(&visited_parsers);
+        List::init(&visited_parsers);
 
         mut usize i;
-        for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
+        for(i = 0; i < List::size(&parser->translation_unit->nodes); i = i + 1)
         {
-            AST::GlobalScope* global_scope = list_get(&parser->translation_unit->nodes, i);
+            AST::GlobalScope* global_scope = List::get(&parser->translation_unit->nodes, i);
             if(global_scope->type != AST::GlobalScopeType::IMPORT_STMT)
             {
                 continue;
@@ -254,24 +254,24 @@ namespace Parser
                 continue;
             }
 
-            if(!list_contains(visible_parsers, imported_parser))
+            if(!List::contains(visible_parsers, imported_parser))
             {
-                list_push(visible_parsers, imported_parser);
+                List::push(visible_parsers, imported_parser);
             }
 
-            if(!list_contains(&visited_parsers, imported_parser))
+            if(!List::contains(&visited_parsers, imported_parser))
             {
-                list_push(&visited_parsers, imported_parser);
+                List::push(&visited_parsers, imported_parser);
                 resolve_imports_recursive(parser, visible_parsers,
                     imported_parser, &visited_parsers);
             }
         }
 
-        list_destroy(&visited_parsers);
+        List::destroy(&visited_parsers);
 
-        for(i = 0; i < list_size(visible_parsers); i = i + 1)
+        for(i = 0; i < List::size(visible_parsers); i = i + 1)
         {
-            Parser* visible_parser = list_get(visible_parsers, i);
+            Parser* visible_parser = List::get(visible_parsers, i);
             frx::assert(visible_parser != parser);
         }
     }
@@ -281,9 +281,9 @@ namespace Parser
         frx::assert(parser != nullptr);
 
         mut usize i;
-        for(i = 0; i < list_size(&parser->translation_unit->nodes); ++i)
+        for(i = 0; i < List::size(&parser->translation_unit->nodes); ++i)
         {
-            AST::GlobalScope* global_scope = list_get(&parser->translation_unit->nodes, i);
+            AST::GlobalScope* global_scope = List::get(&parser->translation_unit->nodes, i);
             AST::GlobalScope::sema(parser, global_scope);
         }
     }
@@ -325,9 +325,9 @@ namespace Parser
         }
 
         mut usize i;
-        for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
+        for(i = 0; i < List::size(&parser->visible_parsers); i = i + 1)
         {
-            Parser* visible_parser = list_get(&parser->visible_parsers, i);
+            Parser* visible_parser = List::get(&parser->visible_parsers, i);
 
             symbol = enum_table_find(&visible_parser->enum_table, ns, name);
             if(symbol != nullptr && symbol->exported)
@@ -364,9 +364,9 @@ namespace Parser
         }
 
         mut usize i;
-        for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
+        for(i = 0; i < List::size(&parser->visible_parsers); i = i + 1)
         {
-            Parser* visible_parser = list_get(&parser->visible_parsers, i);
+            Parser* visible_parser = List::get(&parser->visible_parsers, i);
 
             symbol = struct_table_find(&visible_parser->struct_table, ns, name);
             if(symbol != nullptr && symbol->exported)
@@ -402,9 +402,9 @@ namespace Parser
         }
 
         mut usize i;
-        for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
+        for(i = 0; i < List::size(&parser->visible_parsers); i = i + 1)
         {
-            Parser* visible_parser = list_get(&parser->visible_parsers, i);
+            Parser* visible_parser = List::get(&parser->visible_parsers, i);
 
             symbol = func_table_find(&visible_parser->func_table, ns, name);
             if(symbol != nullptr && symbol->exported)

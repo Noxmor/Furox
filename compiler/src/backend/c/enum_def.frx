@@ -30,9 +30,9 @@ export void transpile_enum_def(Transpiler* transpiler, AST::EnumDef* enum_def)
         symbol->name);
 
     mut usize i;
-    for(i = 0; i < list_size(&symbol->constants); i = i + 1)
+    for(i = 0; i < List::size(&symbol->constants); i = i + 1)
     {
-        AST::EnumConstantDef* constant = list_get(&symbol->constants, i);
+        AST::EnumConstantDef* constant = List::get(&symbol->constants, i);
 
         fprintf(transpiler->file, "%s_%s = ", mangled_name, constant->name);
         transpile_expr(transpiler, constant->value);

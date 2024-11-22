@@ -34,9 +34,9 @@ namespace AST::FuncCall
         }
 
         mut usize i;
-        for(i = 0; i < list_size(&func_call->args); i = i + 1)
+        for(i = 0; i < List::size(&func_call->args); i = i + 1)
         {
-            Expr* arg = list_get(&func_call->args, i);
+            Expr* arg = List::get(&func_call->args, i);
             AST::Expr::sema(parser, arg);
         }
     }

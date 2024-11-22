@@ -35,9 +35,9 @@ export void transpile_switch_stmt(Transpiler* transpiler,
     fprintf(transpiler->file, ")\n{\n");
 
     mut usize i;
-    for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
+    for(i = 0; i < List::size(&switch_stmt->cases); i = i + 1)
     {
-        AST::SwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+        AST::SwitchCase* switch_case = List::get(&switch_stmt->cases, i);
         transpile_switch_case(transpiler, switch_case);
     }
 

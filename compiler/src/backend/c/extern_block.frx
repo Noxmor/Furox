@@ -18,9 +18,9 @@ export void transpile_extern_block(Transpiler* transpiler,
     frx::assert(extern_block != nullptr);
 
     mut usize i;
-    for(i = 0; i < list_size(&extern_block->func_decls); i = i + 1)
+    for(i = 0; i < List::size(&extern_block->func_decls); i = i + 1)
     {
-        AST::FuncDecl* func_decl = list_get(&extern_block->func_decls, i);
+        AST::FuncDecl* func_decl = List::get(&extern_block->func_decls, i);
         transpile_func_decl(transpiler, func_decl);
     }
 }
