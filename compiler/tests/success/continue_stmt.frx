@@ -1,0 +1,17 @@
+i32 main()
+{
+    mut i32 value = 0;
+
+    mut usize i;
+    for(i = 0; i < 100; ++i)
+    {
+        if(i >= 50)
+        {
+            continue;
+        }
+
+        value += i;
+    }
+
+    return value - (49 * 50) / 2;
+}

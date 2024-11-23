@@ -1,0 +1,12 @@
+enum Foo : u8
+{
+    BAR,
+    BUZZ,
+    VALUE = 13,
+    NEXT_VALUE
+}
+
+i32 main()
+{
+    return ((Foo::NEXT_VALUE - Foo::VALUE - Foo::BUZZ) == Foo::BAR) - 1;
+}

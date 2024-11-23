@@ -1,0 +1,14 @@
+void func()
+{
+
+}
+
+i32 func(i32 x)
+{
+
+}
+
+i32 main()
+{
+    return -1;
+}

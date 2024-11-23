@@ -1,0 +1,6 @@
+import "lib1.frx";
+
+i32 main()
+{
+    return func1() + func2();
+}

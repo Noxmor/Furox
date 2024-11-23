@@ -1,0 +1,16 @@
+void do_nothing()
+{
+
+}
+
+i32 add(i32 a, i32 b)
+{
+    return a + b;
+}
+
+i32 main()
+{
+    do_nothing();
+
+    return add(-1, 1);
+}

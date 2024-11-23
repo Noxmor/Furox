@@ -1,0 +1,66 @@
+i32 main()
+{
+    mut i32 a = 1;
+    mut i32 b = 2;
+    mut i32 c = 3;
+    mut i32 d = 4;
+    mut i32 e = 5;
+    mut i32 f = 6;
+
+    // Arithmetic operations
+    i32 addition = a + b;
+    i32 subtraction = a - b;
+    i32 multiplication = a * b;
+    i32 division = c / b;
+    i32 modulus = d % c;
+
+    // Bitwise operations
+    i32 bitwise_and = a & b;
+    i32 bitwise_or = a | b;
+    i32 bitwise_xor = a ^ b;
+    i32 bitwise_not = ~a;
+    i32 left_shift = b << 2;
+    i32 right_shift = d >> 1;
+
+    // Logical operations
+    i32 logical_and = (a < b) && (c > d);
+    i32 logical_or = (a < b) || (c > d);
+    i32 logical_not = !(a < b);
+
+    // Relational operations
+    i32 less_than = a < b;
+    i32 greater_than = c > d;
+    i32 less_than_equal = a <= b;
+    i32 greater_than_equal = c >= d;
+    i32 equal_to = a == b;
+    i32 not_equal = a != b;
+/*
+    // Assignment operations
+    i32 assign = (a = b);
+    i32 add_assign = a += b;
+    i32 sub_assign = c -= d;
+    i32 mul_assign = e *= f;
+    i32 div_assign = e /= f;
+    i32 mod_assign = d %= c;
+    i32 and_assign = a &= b;
+    i32 or_assign = a |= b;
+    i32 xor_assign = a ^= b;
+    i32 left_shift_assign = b <<= 2;
+    i32 right_shift_assign = d >>= 1;
+
+    // Conditional operator
+    //i32 conditional = a == 1 ? b : c;
+
+    // Combining all expressions
+    mut i32 result = addition - subtraction + multiplication - division
+        + modulus & bitwise_and | bitwise_or ^ bitwise_xor & bitwise_not
+        + left_shift - right_shift && logical_and || logical_or && logical_not
+        == less_than || greater_than && less_than_equal || greater_than_equal
+        == equal_to != not_equal + assign + add_assign + sub_assign + mul_assign
+        + div_assign + mod_assign + and_assign + or_assign + xor_assign
+        + left_shift_assign + right_shift_assign /*+ conditional*/;
+
+    return result;
+*/
+    return 0; //TODO: Enable once all operators have been implemented
+}

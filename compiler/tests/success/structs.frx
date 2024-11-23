@@ -1,0 +1,19 @@
+struct Foo
+{
+    i32 x;
+}
+
+struct Bar
+{
+    Foo foo;
+    i32 y;
+    b8 bool;
+}
+
+i32 main()
+{
+    mut Foo foo;
+    Bar bar;
+
+    return 0;
+}

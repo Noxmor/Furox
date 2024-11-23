@@ -1,0 +1,46 @@
+enum Foo : u8
+{
+    BUZZ,
+    BAR
+}
+
+i32 main()
+{
+    mut i32 ret = 0;
+
+    Foo value = Foo::BAR;
+    switch(value)
+    {
+        case Foo::BAR:
+        {
+            ret = 0;
+            break;
+        }
+        case Foo::BUZZ:
+        {
+            ret = -1;
+            break;
+        }
+        default:
+        {
+            ret = -2;
+            break;
+        }
+    }
+
+    switch(value)
+    {
+        case Foo::BUZZ:
+        {
+            ret = -1;
+            break;
+        }
+        default:
+        {
+            ret = ret * 2;
+            break;
+        }
+    }
+
+    return ret;
+}

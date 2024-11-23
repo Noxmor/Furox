@@ -1,0 +1,14 @@
+mut i32 global = 0;
+
+void count()
+{
+    global = global + 1;
+}
+
+i32 main()
+{
+    count();
+    count();
+    count();
+    return global - 3;
+}

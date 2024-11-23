@@ -1,0 +1,25 @@
+namespace foo
+{
+    i32 func()
+    {
+        return 7;
+    }
+
+    namespace bar
+    {
+
+    }
+}
+
+namespace foo::bar
+{
+    i32 func()
+    {
+        return 5;
+    }
+}
+
+i32 main()
+{
+    return foo::func() + foo::bar::func() - 12;
+}
