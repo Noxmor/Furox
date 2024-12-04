@@ -5,7 +5,7 @@ import "../core/parser.frx";
 import "../symbols/var.frx";
 import "../ast/binary_expr.frx";
 import "../ast/struct_member.frx";
-import "../ast/unresolved_name.frx";
+import "../ast/unresolved_identifier.frx";
 import "../syntax/var.frx";
 
 namespace AST::BinaryExpr
@@ -22,7 +22,7 @@ namespace AST::BinaryExpr
             {
                 AST::Expr::sema(parser, expr->left);
 
-                if(expr->right->type != AST::ExprType::UNRESOLVED_NAME)
+                if(expr->right->type != AST::ExprType::UNRESOLVED_IDENTIFIER)
                 {
                     //FIXME: Print the correct location, this is only a placeholder
                     SourceLocation loc;
@@ -32,8 +32,8 @@ namespace AST::BinaryExpr
                 }
                 else
                 {
-                    UnresolvedName* unresolved_name = expr->right->unresolved_name;
-                    StructMember* member = AST::StructMember::new(&parser->arena, unresolved_name->name);
+                    UnresolvedIdentifier* unresolved_identifier = expr->right->unresolved_identifier;
+                    StructMember* member = AST::StructMember::new(&parser->arena, unresolved_identifier->name);
 
                     expr->right->type = AST::ExprType::STRUCT_MEMBER;
                     expr->right->struct_member = member;
@@ -47,7 +47,7 @@ namespace AST::BinaryExpr
             {
                 AST::Expr::sema(parser, expr->left);
 
-                if(expr->right->type != AST::ExprType::UNRESOLVED_NAME)
+                if(expr->right->type != AST::ExprType::UNRESOLVED_IDENTIFIER)
                 {
                     //FIXME: Print the correct location, this is only a placeholder
                     SourceLocation loc;
@@ -57,8 +57,8 @@ namespace AST::BinaryExpr
                 }
                 else
                 {
-                    UnresolvedName* unresolved_name = expr->right->unresolved_name;
-                    StructMember* member = AST::StructMember::new(&parser->arena, unresolved_name->name);
+                    UnresolvedIdentifier* unresolved_identifier = expr->right->unresolved_identifier;
+                    StructMember* member = AST::StructMember::new(&parser->arena, unresolved_identifier->name);
 
                     expr->right->type = AST::ExprType::STRUCT_MEMBER;
                     expr->right->struct_member = member;

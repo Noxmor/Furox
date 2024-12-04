@@ -1,0 +1,76 @@
+import "expr.frx";
+import "../ast/enum_constant.frx";
+import "../core/errors.frx";
+import "../core/namespace.frx";
+import "../core/parser.frx";
+import "../core/scope.frx";
+import "../symbols/enum.frx";
+import "../symbols/var.frx";
+import "../ast/unresolved_identifier.frx";
+import "../ast/var.frx";
+
+namespace AST::UnresolvedIdentifier
+{
+    export void sema(mut Parser* parser, UnresolvedIdentifier* unresolved_identifier, mut Expr* expr)
+    {
+        frx::assert(parser != nullptr);
+
+        frx::assert(unresolved_identifier != nullptr);
+
+        core::Namespace* ns = unresolved_identifier->ns;
+        char* name = unresolved_identifier->name;
+        core::Scope* scope = unresolved_identifier->scope;
+
+        mut EnumSymbol* enum_symbol = nullptr;
+        if(ns != nullptr)
+        {
+            enum_symbol = Parser::find_enum_symbol(parser, ns->parent, ns->name);
+        }
+
+        b8 is_enum_constant = enum_symbol != nullptr && enum_symbol_has_constant(
+            enum_symbol, name);
+
+        b8 is_global_var = var_table_find_by_namespace(&parser->var_table, ns, name)
+            != nullptr && ns != nullptr;
+
+        b8 is_var = var_table_find_by_scope(&parser->var_table, scope, name)
+            != nullptr;
+
+        b8 is_ambiguous = (is_enum_constant + is_global_var + is_var) > 1;
+        b8 resolved = is_enum_constant || is_global_var || is_var;
+
+        if(is_ambiguous)
+        {
+            error_ambiguous_unresolved_identifier(Parser::source_file(parser),
+                unresolved_identifier->range.start, ns, name);
+            Parser::fail(parser);
+        }
+        else if(is_enum_constant)
+        {
+            expr->type = AST::ExprType::ENUM_CONSTANT;
+            expr->enum_constant = AST::EnumConstant::new(&parser->arena, ns->parent, ns->name,
+                name, scope);
+        }
+        else if(is_global_var)
+        {
+            expr->type = AST::ExprType::VAR;
+            expr->var = AST::Var::new(&parser->arena, ns, scope, name);
+        }
+        else if(is_var)
+        {
+            expr->type = AST::ExprType::VAR;
+            expr->var = AST::Var::new(&parser->arena, nullptr, scope, name);
+        }
+        else
+        {
+            error_unresolved_identifier(Parser::source_file(parser),
+                unresolved_identifier->range.start, ns, name);
+            Parser::fail(parser);
+        }
+
+        if(!is_ambiguous && resolved)
+        {
+            AST::Expr::sema(parser, expr);
+        }
+    }
+}

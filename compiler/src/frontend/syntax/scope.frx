@@ -13,7 +13,7 @@ import "namespace_resolution.frx";
 import "return_stmt.frx";
 import "switch_stmt.frx";
 import "type_specifier.frx";
-import "unresolved_namespaced_name.frx";
+import "unresolved_identifier.frx";
 import "var_decl.frx";
 import "var_decl_or_def.frx";
 import "var_def.frx";
@@ -220,12 +220,12 @@ namespace AST::Scope
 
                                 break;
                             }
-                            case AST::ExprType::UNRESOLVED_NAMESPACED_NAME:
+                            case AST::ExprType::UNRESOLVED_IDENTIFIER:
                             {
-                                mut UnresolvedNamespacedName* unresolved_namespaced_name =
-                                    expr->unresolved_namespaced_name;
+                                mut UnresolvedIdentifier* unresolved_identifier =
+                                    expr->unresolved_identifier;
 
-                                unresolved_namespaced_name->ns = resolved_ns;
+                                unresolved_identifier->ns = resolved_ns;
 
                                 break;
                             }

@@ -10,8 +10,7 @@ export import "func_call.frx";
 export import "internal_func_call.frx";
 export import "var.frx";
 export import "struct_member.frx";
-export import "unresolved_name.frx";
-export import "unresolved_namespaced_name.frx";
+export import "unresolved_identifier.frx";
 export import "initializer_list.frx";
 export import "unary_expr.frx";
 export import "binary_expr.frx";
@@ -33,8 +32,7 @@ namespace AST
         INTERNAL_FUNC_CALL,
         VAR,
         STRUCT_MEMBER,
-        UNRESOLVED_NAME,
-        UNRESOLVED_NAMESPACED_NAME,
+        UNRESOLVED_IDENTIFIER,
         INITIALIZER_LIST,
         UNARY_EXPR,
         BINARY_EXPR
@@ -54,8 +52,7 @@ namespace AST
         InternalFuncCall* internal_func_call;
         Var* var;
         StructMember* struct_member;
-        UnresolvedName* unresolved_name;
-        UnresolvedNamespacedName* unresolved_namespaced_name;
+        UnresolvedIdentifier* unresolved_identifier;
         InitializerList* initializer_list;
         UnaryExpr* unary_expr;
         BinaryExpr* binary_expr;
@@ -192,26 +189,14 @@ namespace AST
             return expr;
         }
 
-        export Expr* from_unresolved_name(Arena* arena, UnresolvedName* unresolved_name)
+        export Expr* from_unresolved_identifier(Arena* arena, UnresolvedIdentifier* unresolved_identifier)
         {
-            frx::assert(unresolved_name != nullptr);
+            frx::assert(unresolved_identifier != nullptr);
 
             mut Expr* expr = new(arena);
 
-            expr->type = AST::ExprType::UNRESOLVED_NAME;
-            expr->unresolved_name = unresolved_name;
-
-            return expr;
-        }
-
-        export Expr* from_unresolved_namespaced_name(Arena* arena, UnresolvedNamespacedName* unresolved_namespaced_name)
-        {
-            frx::assert(unresolved_namespaced_name != nullptr);
-
-            mut Expr* expr = new(arena);
-
-            expr->type = AST::ExprType::UNRESOLVED_NAMESPACED_NAME;
-            expr->unresolved_namespaced_name = unresolved_namespaced_name;
+            expr->type = AST::ExprType::UNRESOLVED_IDENTIFIER;
+            expr->unresolved_identifier = unresolved_identifier;
 
             return expr;
         }
@@ -323,16 +308,9 @@ namespace AST
                     break;
                 }
 
-                case AST::ExprType::UNRESOLVED_NAME:
+                case AST::ExprType::UNRESOLVED_IDENTIFIER:
                 {
-                    AST::UnresolvedName::print(expr->unresolved_name, file, depth);
-
-                    break;
-                }
-
-                case AST::ExprType::UNRESOLVED_NAMESPACED_NAME:
-                {
-                    AST::UnresolvedNamespacedName::print(expr->unresolved_namespaced_name, file, depth);
+                    AST::UnresolvedIdentifier::print(expr->unresolved_identifier, file, depth);
 
                     break;
                 }

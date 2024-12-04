@@ -13,8 +13,7 @@ import "internal_func_call.frx";
 import "namespace_resolution.frx";
 import "string_literal.frx";
 import "../ast/unary_expr.frx";
-import "unresolved_name.frx";
-import "unresolved_namespaced_name.frx";
+import "unresolved_identifier.frx";
 
 namespace AST::Expr
 {
@@ -46,15 +45,10 @@ namespace AST::Expr
                             AST::FuncCall::parse(parser, resolved_ns));
                     }
                 }
-                else if(resolved_ns == nullptr)
-                {
-                    primary_expr = from_unresolved_name(&parser->arena,
-                        AST::UnresolvedName::parse(parser));
-                }
                 else
                 {
-                    primary_expr = from_unresolved_namespaced_name(&parser->arena,
-                        AST::UnresolvedNamespacedName::parse(parser, resolved_ns, start));
+                    primary_expr = from_unresolved_identifier(&parser->arena,
+                        AST::UnresolvedIdentifier::parse(parser, resolved_ns, start));
                 }
 
                 break;

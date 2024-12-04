@@ -1,0 +1,57 @@
+import "../../core/arena.frx";
+import "ast.frx";
+import "namespace_resolution.frx";
+export import "../core/source_range.frx";
+export import "../core/namespace.frx";
+export import "../core/scope.frx";
+
+extern struct FILE;
+
+extern
+{
+    i32 fprintf(mut FILE* stream, char* format, ...);
+}
+
+namespace AST
+{
+    export struct UnresolvedIdentifier
+    {
+        SourceRange range;
+
+        core::Namespace* ns;
+        char* name;
+        core::Scope* scope;
+    }
+
+    namespace UnresolvedIdentifier
+    {
+        export UnresolvedIdentifier* new(Arena* arena, core::Namespace* ns,
+            char* name, core::Scope* scope)
+        {
+            frx::assert(name != nullptr);
+
+            mut UnresolvedIdentifier* unresolved_identifier = Arena::alloc(arena, frx::sizeof(UnresolvedIdentifier));
+
+            unresolved_identifier->ns = ns;
+            unresolved_identifier->name = name;
+            unresolved_identifier->scope = scope;
+
+            return unresolved_identifier;
+        }
+
+        export void print(UnresolvedIdentifier* unresolved_identifier, mut FILE* file, usize depth)
+        {
+            frx::assert(unresolved_identifier != nullptr);
+
+            frx::assert(file != nullptr);
+
+            print_depth(file, depth);
+
+            fprintf(file, "%s (", "unresolved-identifier");
+
+            AST::NamespaceResolution::print(file, unresolved_identifier->ns);
+
+            fprintf(file, "%s)\n", unresolved_identifier->name);
+        }
+    }
+}

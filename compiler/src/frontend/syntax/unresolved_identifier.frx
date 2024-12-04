@@ -1,0 +1,27 @@
+export import "../ast/unresolved_identifier.frx";
+import "namespace_resolution.frx";
+import "../core/namespace.frx";
+import "../core/parser.frx";
+import "../core/scope.frx";
+
+namespace AST::UnresolvedIdentifier
+{
+    export UnresolvedIdentifier* parse(Parser* parser, core::Namespace* ns, SourceLocation start)
+    {
+        frx::assert(parser != nullptr);
+
+        char* name = parser->token->identifier;
+        core::Scope* scope = parser->current_scope;
+
+        SourceLocation end = Parser::current_location(parser);
+
+        Parser::eat(parser, TokenType::IDENTIFIER);
+
+        mut UnresolvedIdentifier* unresolved_identifier = new(&parser->arena, ns, name, scope);
+
+        unresolved_identifier->range.start = start;
+        unresolved_identifier->range.end = end;
+
+        return unresolved_identifier;
+    }
+}

@@ -22,19 +22,12 @@ export void error_undefined_enum_constant(char* filepath, SourceLocation loc,
         constant_name, enum_name);
 }
 
-export void error_ambiguous_unresolved_name(char* filepath, SourceLocation loc,
-    char* name)
-{
-    log_error(filepath, loc, "Encountered ambiguous %s %s!",
-        "unresolved-name", name);
-}
-
-export void error_ambiguous_unresolved_namespaced_name(char* filepath,
+export void error_ambiguous_unresolved_identifier(char* filepath,
     SourceLocation loc, mut core::Namespace* ns, char* name)
 {
-    mut usize size = 1 + libc::strlen(ns->name);
+    mut usize size = 1;
 
-    mut core::Namespace* temp = ns->parent;
+    mut core::Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + libc::strlen(TokenType::to_str(TokenType::NAMESPACE_RESOLUTION))
@@ -43,9 +36,7 @@ export void error_ambiguous_unresolved_namespaced_name(char* filepath,
     }
 
     char ns_str[size];
-    libc::strcpy(ns_str, ns->name);
-
-    ns = ns->parent;
+    libc::strcpy(ns_str, "");
 
     while(ns != nullptr)
     {
@@ -56,7 +47,7 @@ export void error_ambiguous_unresolved_namespaced_name(char* filepath,
     }
 
     log_error(filepath, loc, "Encountered ambiguous %s %s%s!",
-        "unresolved-namespaced-name", ns_str, name);
+        "unresolved-identifier", ns_str, name);
 }
 
 export void error_namespace_is_reserved(char* filepath, SourceLocation loc,
@@ -170,18 +161,12 @@ export void error_enum_count_invalid_arg(char* filepath, SourceLocation loc,
         name);
 }
 
-export void error_unresolved_name(char* filepath, SourceLocation loc,
-    char* name)
-{
-    log_error(filepath, loc, "Could not resolve name %s!", name);
-}
-
-export void error_unresolved_namespaced_name(char* filepath, SourceLocation loc,
+export void error_unresolved_identifier(char* filepath, SourceLocation loc,
     mut core::Namespace* ns, char* name)
 {
-    mut usize size = 1 + libc::strlen(ns->name);
+    mut usize size = 1;
 
-    mut core::Namespace* temp = ns->parent;
+    mut core::Namespace* temp = ns;
     while(temp != nullptr)
     {
         size = size + libc::strlen(TokenType::to_str(TokenType::NAMESPACE_RESOLUTION))
@@ -190,9 +175,7 @@ export void error_unresolved_namespaced_name(char* filepath, SourceLocation loc,
     }
 
     char ns_str[size];
-    libc::strcpy(ns_str, ns->name);
-
-    ns = ns->parent;
+    libc::strcpy(ns_str, "");
 
     while(ns != nullptr)
     {
@@ -202,6 +185,6 @@ export void error_unresolved_namespaced_name(char* filepath, SourceLocation loc,
         ns = ns->parent;
     }
 
-    log_error(filepath, loc, "Could not resolve namespaced name %s%s%s!",
+    log_error(filepath, loc, "Could not resolve identifier %s%s%s!",
         ns_str, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION), name);
 }

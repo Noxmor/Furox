@@ -5,8 +5,7 @@ import "func_call.frx";
 import "internal_func_call.frx";
 import "var.frx";
 import "struct_member.frx";
-import "unresolved_name.frx";
-import "unresolved_namespaced_name.frx";
+import "unresolved_identifier.frx";
 import "initializer_list.frx";
 import "unary_expr.frx";
 import "binary_expr.frx";
@@ -72,16 +71,9 @@ namespace AST::Expr
                 break;
             }
 
-            case AST::ExprType::UNRESOLVED_NAME:
+            case AST::ExprType::UNRESOLVED_IDENTIFIER:
             {
-                AST::UnresolvedName::sema(parser, expr->unresolved_name, expr);
-
-                break;
-            }
-
-            case AST::ExprType::UNRESOLVED_NAMESPACED_NAME:
-            {
-                AST::UnresolvedNamespacedName::sema(parser, expr->unresolved_namespaced_name, expr);
+                AST::UnresolvedIdentifier::sema(parser, expr->unresolved_identifier, expr);
 
                 break;
             }
