@@ -1,0 +1,9 @@
+struct Data
+{
+    i32 i;
+}
+
+i32 main()
+{
+    return frx::sizeof(Data) - frx::sizeof(i32);
+}
