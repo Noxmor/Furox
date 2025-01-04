@@ -6,7 +6,7 @@ import "../core/scope.frx";
 
 namespace AST::UnresolvedIdentifier
 {
-    export UnresolvedIdentifier* parse(Parser* parser, core::Namespace* ns, SourceLocation start)
+    export UnresolvedIdentifier* parse(Parser* parser, NamespaceResolution* resolution, SourceLocation start)
     {
         frx::assert(parser != nullptr);
 
@@ -17,7 +17,7 @@ namespace AST::UnresolvedIdentifier
 
         Parser::eat(parser, TokenType::IDENTIFIER);
 
-        mut UnresolvedIdentifier* unresolved_identifier = new(&parser->arena, ns, name, scope);
+        mut UnresolvedIdentifier* unresolved_identifier = new(&parser->arena, resolution, name, scope);
 
         unresolved_identifier->range.start = start;
         unresolved_identifier->range.end = end;

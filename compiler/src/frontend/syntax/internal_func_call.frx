@@ -34,22 +34,23 @@ namespace AST::Sizeof
     {
         frx::assert(parser != nullptr);
 
+        NamespaceResolution* resolution = AST::NamespaceResolution::parse(parser);
+
         if(TokenType::is_primitive(parser->token->type))
         {
             TokenType type = parser->token->type;
 
             Parser::eat(parser, parser->token->type);
 
-            return new(&parser->arena, nullptr, nullptr, type, parser->current_scope);
+            return new(&parser->arena, resolution, nullptr, type, parser->current_scope);
         }
         else
         {
-            Namespace* ns = AST::NamespaceResolution::parse(parser);
             char* name = parser->token->identifier;
 
             Parser::eat(parser, TokenType::IDENTIFIER);
 
-            return new(&parser->arena, ns, name, TokenType::EOF, parser->current_scope);
+            return new(&parser->arena, resolution, name, TokenType::EOF, parser->current_scope);
         }
     }
 }
@@ -60,12 +61,12 @@ namespace AST::EnumCount
     {
         frx::assert(parser != nullptr);
 
-        Namespace* ns = AST::NamespaceResolution::parse(parser);
+        NamespaceResolution* resolution = AST::NamespaceResolution::parse(parser);
         char* name = parser->token->identifier;
 
         Parser::eat(parser, TokenType::IDENTIFIER);
 
-        return new(&parser->arena, ns, name, parser->current_scope);
+        return new(&parser->arena, resolution, name, parser->current_scope);
     }
 }
 

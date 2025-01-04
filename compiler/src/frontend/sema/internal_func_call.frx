@@ -31,20 +31,20 @@ namespace AST::Sizeof
             return;
         }
 
-        if(sizeof_node->ns == nullptr)
+        core::Namespace* ns = sizeof_node->resolution->ns;
+
+        if(ns == nullptr && !AST::NamespaceResolution::is_absolute(sizeof_node->resolution))
         {
             sizeof_node->struct_type = Parser::find_struct_symbol_r(parser,
-                parser->current_namespace, sizeof_node->name);
+                nullptr, sizeof_node->name);
 
             sizeof_node->enum_type = Parser::find_enum_symbol_r(parser,
-                parser->current_namespace, sizeof_node->name);
+                nullptr, sizeof_node->name);
         }
         else
         {
-            sizeof_node->struct_type = Parser::find_struct_symbol(parser,
-                sizeof_node->ns, sizeof_node->name);
-            sizeof_node->enum_type = Parser::find_enum_symbol(parser,
-                sizeof_node->ns, sizeof_node->name);
+            sizeof_node->struct_type = Parser::find_struct_symbol(parser, ns, sizeof_node->name);
+            sizeof_node->enum_type = Parser::find_enum_symbol(parser, ns, sizeof_node->name);
         }
 
         if(sizeof_node->enum_type == nullptr
@@ -69,16 +69,15 @@ namespace AST::EnumCount
         frx::assert(enum_count != nullptr);
 
         mut EnumSymbol* symbol = nullptr;
+        core::Namespace* ns = enum_count->resolution->ns;
 
-        if(enum_count->ns == nullptr)
+        if(ns == nullptr && !AST::NamespaceResolution::is_absolute(enum_count->resolution))
         {
-            symbol = Parser::find_enum_symbol_r(parser, parser->current_namespace,
-                enum_count->name);
+            symbol = Parser::find_enum_symbol_r(parser, nullptr, enum_count->name);
         }
         else
         {
-            symbol = Parser::find_enum_symbol(parser, enum_count->ns,
-                enum_count->name);
+            symbol = Parser::find_enum_symbol(parser, ns, enum_count->name);
         }
 
         if(symbol == nullptr)

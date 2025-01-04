@@ -26,16 +26,16 @@ namespace AST::TypeSpecifier
             return;
         }
 
-        core::Namespace* ns = type_specifier->ns;
+        core::Namespace* ns = type_specifier->resolution->ns;
         char* name = type_specifier->name;
         core::Scope* scope = type_specifier->scope;
 
-        if(type_specifier->ns == nullptr)
+        if(ns == nullptr)
         {
             type_specifier->enum_type = Parser::find_enum_symbol_r(parser,
-                parser->current_namespace, name);
+                nullptr, name);
             type_specifier->struct_type = Parser::find_struct_symbol_r(parser,
-                parser->current_namespace, name);
+                nullptr, name);
         }
         else
         {

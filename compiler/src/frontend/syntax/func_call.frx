@@ -9,7 +9,7 @@ import "../../core/list.frx";
 
 namespace AST::FuncCall
 {
-    export FuncCall* parse(Parser* parser, Namespace* ns)
+    export FuncCall* parse(Parser* parser, NamespaceResolution* resolution)
     {
         frx::assert(parser != nullptr);
 
@@ -17,7 +17,7 @@ namespace AST::FuncCall
 
         Parser::eat(parser, TokenType::IDENTIFIER);
 
-        FuncCall* func_call = new(&parser->arena, ns, name, parser->current_scope);
+        FuncCall* func_call = new(&parser->arena, resolution, name, parser->current_scope);
 
         Parser::eat(parser, TokenType::LPAREN);
 

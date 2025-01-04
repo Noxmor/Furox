@@ -58,7 +58,7 @@ namespace AST
 
     export struct Sizeof
     {
-        core::Namespace* ns;
+        NamespaceResolution* resolution;
         char* name;
         TokenType primitive_type;
         EnumSymbol* enum_type;
@@ -68,16 +68,18 @@ namespace AST
 
     namespace Sizeof
     {
-        export Sizeof* new(Arena* arena, core::Namespace* ns, char* name,
+        export Sizeof* new(Arena* arena, NamespaceResolution* resolution, char* name,
             TokenType primitive_type, core::Scope* scope)
         {
+            frx::assert(resolution != nullptr);
+
             frx::assert(primitive_type < TokenType::COUNT);
 
             frx::assert(scope != nullptr);
 
             mut Sizeof* sizeof_node = Arena::alloc(arena, frx::sizeof(Sizeof));
 
-            sizeof_node->ns = ns;
+            sizeof_node->resolution = resolution;
             sizeof_node->name = name;
             sizeof_node->primitive_type = primitive_type;
             sizeof_node->scope = scope;
@@ -96,7 +98,7 @@ namespace AST
             fprintf(file, "%s\n", "sizeof");
 
             print_depth(file, depth + 1);
-            AST::NamespaceResolution::print(file, sizeof_node->ns);
+            AST::NamespaceResolution::print(file, sizeof_node->resolution);
 
             if(sizeof_node->name != nullptr)
             {
@@ -111,22 +113,24 @@ namespace AST
 
     export struct EnumCount
     {
-        core::Namespace* ns;
+        NamespaceResolution* resolution;
         char* name;
         core::Scope* scope;
     }
 
     namespace EnumCount
     {
-        export EnumCount* new(Arena* arena, core::Namespace* ns, char* name, core::Scope* scope)
+        export EnumCount* new(Arena* arena, NamespaceResolution* resolution, char* name, core::Scope* scope)
         {
+            frx::assert(resolution != nullptr);
+
             frx::assert(name != nullptr);
 
             frx::assert(scope != nullptr);
 
             mut EnumCount* enum_count = Arena::alloc(arena, frx::sizeof(EnumCount));
 
-            enum_count->ns = ns;
+            enum_count->resolution = resolution;
             enum_count->name = name;
             enum_count->scope = scope;
 
@@ -145,7 +149,7 @@ namespace AST
 
             print_depth(file, depth + 1);
 
-            AST::NamespaceResolution::print(file, enum_count->ns);
+            AST::NamespaceResolution::print(file, enum_count->resolution);
             fprintf(file, "%s\n", enum_count->name);
         }
     }

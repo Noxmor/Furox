@@ -19,7 +19,7 @@ namespace AST::StructDecl
         char* name = parser->token->identifier;
 
         mut StructDecl* struct_decl = new(&parser->arena, parser->current_scope,
-            parser->current_namespace, name);
+            nullptr, name);
 
         struct_decl->is_redefinition = !struct_table_insert(&parser->struct_table,
             &struct_decl->symbol);

@@ -1,5 +1,6 @@
 import "../core/namespace.frx";
 import "../core/token.frx";
+import "../../core/arena.frx";
 
 extern struct FILE;
 
@@ -8,17 +9,44 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST::NamespaceResolution
+namespace AST
 {
-    export void print(mut FILE* file, mut core::Namespace* ns)
+    export struct NamespaceResolution
     {
-        frx::assert(file != nullptr);
+        core::Namespace* ns;
+        b8 absolute;
+    }
 
-        while(ns != nullptr)
+    namespace NamespaceResolution
+    {
+        export NamespaceResolution* new(Arena* arena, core::Namespace* ns, b8 absolute)
         {
-            fprintf(file, "%s%s", ns->name, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
+            mut NamespaceResolution* namespace_resolution = Arena::alloc(arena, frx::sizeof(NamespaceResolution));
 
-            ns = ns->parent;
+            namespace_resolution->ns = ns;
+            namespace_resolution->absolute = absolute;
+
+            return namespace_resolution;
+        }
+
+        export b8 is_absolute(NamespaceResolution* namespace_resolution)
+        {
+            frx::assert(namespace_resolution != nullptr);
+
+            return namespace_resolution->absolute;
+        }
+
+        export void print(mut FILE* file, NamespaceResolution* namespace_resolution)
+        {
+            frx::assert(file != nullptr);
+
+            mut core::Namespace* ns = namespace_resolution->ns;
+            while(ns != nullptr)
+            {
+                fprintf(file, "%s%s", ns->name, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
+
+                ns = ns->parent;
+            }
         }
     }
 }

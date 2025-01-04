@@ -22,7 +22,7 @@ namespace AST
     {
         SourceRange range;
 
-        core::Namespace* ns;
+        NamespaceResolution* resolution;
         char* name;
         core::Scope* scope;
 
@@ -37,16 +37,18 @@ namespace AST
 
     namespace TypeSpecifier
     {
-        export TypeSpecifier* new(Arena* arena, core::Namespace* ns, char* name,
+        export TypeSpecifier* new(Arena* arena, NamespaceResolution* resolution, char* name,
             core::Scope* scope, TokenType primitive_type, usize pointer_level)
         {
+            frx::assert(resolution != nullptr);
+
             frx::assert(name != nullptr || primitive_type != TokenType::EOF);
 
             frx::assert(scope != nullptr);
 
             mut TypeSpecifier* type_specifier = Arena::alloc(arena, frx::sizeof(TypeSpecifier));
 
-            type_specifier->ns = ns;
+            type_specifier->resolution= resolution;
             type_specifier->name = name;
             type_specifier->scope = scope;
             type_specifier->primitive_type = primitive_type;
@@ -86,7 +88,7 @@ namespace AST
             }
             else
             {
-                AST::NamespaceResolution::print(file, type_specifier->ns);
+                AST::NamespaceResolution::print(file, type_specifier->resolution);
                 fprintf(file, "%s", type_specifier->name);
             }
 

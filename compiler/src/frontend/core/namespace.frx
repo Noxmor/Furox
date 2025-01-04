@@ -19,11 +19,6 @@ export core::Namespace* namespace_create(core::Namespace* parent, char* name)
     return ns;
 }
 
-export core::Namespace* namespace_create_global()
-{
-    return namespace_create(nullptr, "");
-}
-
 export void namespace_destroy(core::Namespace* ns)
 {
     if(ns == nullptr)
@@ -33,6 +28,35 @@ export void namespace_destroy(core::Namespace* ns)
 
     namespace_destroy(ns->parent);
     libc::free(ns);
+}
+
+export b8 namespace_is_subset_of(core::Namespace* child, core::Namespace* parent)
+{
+    if(child == nullptr)
+    {
+        return true;
+    }
+
+    if(parent == nullptr)
+    {
+        return false;
+    }
+
+    mut core::Namespace* child_iter = child;
+    mut core::Namespace* parent_iter  = parent;
+
+    while(child_iter != nullptr && parent_iter != nullptr)
+    {
+        if(libc::strcmp(child_iter->name, parent_iter->name) != 0)
+        {
+            return false;
+        }
+
+        child_iter = child_iter->parent;
+        parent_iter = parent_iter->parent;
+    }
+
+    return child_iter == nullptr;
 }
 
 export b8 namespace_equals(core::Namespace* left, core::Namespace* right)
@@ -62,7 +86,7 @@ export b8 namespace_equals(core::Namespace* left, core::Namespace* right)
 
 export b8 namespace_is_global(core::Namespace* ns)
 {
-    return ns != nullptr && libc::strcmp(ns->name, "") == 0 && ns->parent == nullptr;
+    return ns == nullptr;
 }
 
 export b8 namespace_is_internal(core::Namespace* ns)

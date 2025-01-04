@@ -16,7 +16,7 @@ namespace AST::FuncDef
         char* name = parser->token->identifier;
 
         mut FuncDef* func_def = AST::FuncDef::new(&parser->arena,
-            parser->current_scope, parser->current_namespace, name, return_type,
+            parser->current_scope, nullptr, name, return_type,
             exported);
 
         func_def->is_redefinition = !func_table_insert(&parser->func_table,

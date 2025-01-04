@@ -23,18 +23,19 @@ namespace AST::Expr
 
         mut Expr* primary_expr = nullptr;
 
+        NamespaceResolution* resolution = AST::NamespaceResolution::parse(parser);
+
         switch(parser->token->type)
         {
             case TokenType::IDENTIFIER:
             {
                 SourceLocation start = Parser::current_location(parser);
-                core::Namespace* resolved_ns = AST::NamespaceResolution::parse(parser);
 
                 Token* next = Parser::peek(parser, 1);
 
                 if(next->type == TokenType::LPAREN)
                 {
-                    if(namespace_is_internal(resolved_ns))
+                    if(namespace_is_internal(resolution->ns))
                     {
                         primary_expr = from_internal_func_call(&parser->arena,
                             AST::InternalFuncCall::parse(parser));
@@ -42,23 +43,14 @@ namespace AST::Expr
                     else
                     {
                         primary_expr = from_func_call(&parser->arena,
-                            AST::FuncCall::parse(parser, resolved_ns));
+                            AST::FuncCall::parse(parser, resolution));
                     }
                 }
                 else
                 {
                     primary_expr = from_unresolved_identifier(&parser->arena,
-                        AST::UnresolvedIdentifier::parse(parser, resolved_ns, start));
+                        AST::UnresolvedIdentifier::parse(parser, resolution, start));
                 }
-
-                break;
-            }
-            case TokenType::NAMESPACE_RESOLUTION:
-            {
-                core::Namespace* resolved_ns = AST::NamespaceResolution::parse(parser);
-
-                primary_expr = from_func_call(&parser->arena,
-                    AST::FuncCall::parse(parser, resolved_ns));
 
                 break;
             }

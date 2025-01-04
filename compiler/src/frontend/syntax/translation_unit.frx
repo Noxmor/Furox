@@ -6,7 +6,6 @@ import "func_decl.frx";
 import "func_def.frx";
 import "global_var_decl_or_def.frx";
 import "import_stmt.frx";
-import "namespace.frx";
 import "struct_decl.frx";
 import "struct_def.frx";
 import "type_specifier.frx";
@@ -28,13 +27,6 @@ namespace AST::TranslationUnit
                 {
                     global_scope = AST::GlobalScope::from_import_stmt(&parser->arena,
                         AST::ImportStmt::parse(parser, false));
-
-                    break;
-                }
-                case TokenType::KW_NAMESPACE:
-                {
-                    global_scope = AST::GlobalScope::from_namespace(&parser->arena,
-                        AST::Namespace::parse(parser));
 
                     break;
                 }

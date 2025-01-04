@@ -3,7 +3,6 @@ import "import_stmt.frx";
 import "extern_block.frx";
 import "struct_decl.frx";
 import "func_decl.frx";
-import "namespace.frx";
 import "enum_def.frx";
 import "struct_def.frx";
 import "func_def.frx";
@@ -45,13 +44,6 @@ namespace AST::GlobalScope
             case AST::GlobalScopeType::FUNC_DECL:
             {
                 AST::FuncDecl::sema(parser, global_scope->func_decl);
-
-                break;
-            }
-
-            case AST::GlobalScopeType::NAMESPACE:
-            {
-                AST::Namespace::sema(parser, global_scope->ns);
 
                 break;
             }

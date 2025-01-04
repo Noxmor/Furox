@@ -25,7 +25,7 @@ namespace AST::FuncDef
         {
             Parser* visible_parser = List::get(&parser->visible_parsers, i);
             FuncSymbol* imported_symbol = func_table_find(
-                &visible_parser->func_table, symbol->ns, symbol->name);
+                &visible_parser->func_table, symbol->ns, symbol->name, nullptr);
 
             func_def->is_redefinition = imported_symbol != nullptr
                 && imported_symbol->exported;

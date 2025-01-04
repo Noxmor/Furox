@@ -13,8 +13,8 @@ namespace AST::GlobalVarDef
     {
         frx::assert(parser != nullptr);
 
-        mut GlobalVarDef* var_def = new(&parser->arena, parser->current_namespace,
-            type, parser->current_scope, name, mutable);
+        mut GlobalVarDef* var_def = new(&parser->arena, nullptr, type,
+            parser->current_scope, name, mutable);
 
         var_table_insert(&parser->var_table, &var_def->symbol);
 

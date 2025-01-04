@@ -37,7 +37,7 @@ namespace AST::StructDef
         char* name = parser->token->identifier;
 
         mut StructDef* struct_def = new(&parser->arena, parser->current_scope,
-            parser->current_namespace, name, exported);
+            nullptr, name, exported);
 
         struct_def->is_redefinition = !struct_table_insert(&parser->struct_table,
             &struct_def->symbol);

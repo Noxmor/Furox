@@ -95,7 +95,7 @@ namespace AST::EnumDef
         }
 
         mut EnumDef* enum_def = new(&parser->arena,
-            parser->current_scope, parser->current_namespace, name, type, exported);
+            parser->current_scope, nullptr, name, type, exported);
 
         enum_def->is_redefinition = !enum_table_insert(&parser->enum_table,
             &enum_def->symbol);

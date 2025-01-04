@@ -1,27 +1,23 @@
-import "../core/namespace.frx";
+export import "../ast/namespace_resolution.frx";
 import "../core/parser.frx";
 
 namespace AST::NamespaceResolution
 {
-    export core::Namespace* parse(Parser* parser)
+    export NamespaceResolution* parse(Parser* parser)
     {
         frx::assert(parser != nullptr);
+
+        mut b8 absolute = false;
 
         if(parser->token->type == TokenType::NAMESPACE_RESOLUTION)
         {
             Parser::eat(parser, TokenType::NAMESPACE_RESOLUTION);
 
-            return namespace_create_global();
+            absolute = true;
         }
-
-        mut Token* next = Parser::peek(parser, 1);
 
         mut core::Namespace* ns = nullptr;
-        if(parser->token->type == TokenType::IDENTIFIER
-            && next->type == TokenType::NAMESPACE_RESOLUTION)
-        {
-            ns = namespace_create_global();
-        }
+        mut Token* next = Parser::peek(parser, 1);
 
         while(parser->token->type == TokenType::IDENTIFIER
             && next->type == TokenType::NAMESPACE_RESOLUTION)
@@ -34,6 +30,6 @@ namespace AST::NamespaceResolution
             next = Parser::peek(parser, 1);
         }
 
-        return ns;
+        return new(&parser->arena, ns, absolute);
     }
 }

@@ -21,7 +21,7 @@ namespace AST::FuncDecl
         Parser::eat(parser, TokenType::IDENTIFIER);
 
         mut FuncDecl* func_decl = new(&parser->arena, parser->current_scope,
-            parser->current_namespace, name, return_type);
+            nullptr, name, return_type);
 
         func_decl->is_redefinition = !func_table_insert(&parser->func_table,
             &func_decl->symbol);

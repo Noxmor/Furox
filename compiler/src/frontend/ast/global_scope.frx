@@ -4,7 +4,6 @@ export import "import_stmt.frx";
 export import "extern_block.frx";
 export import "struct_decl.frx";
 export import "func_decl.frx";
-export import "namespace.frx";
 export import "enum_def.frx";
 export import "struct_def.frx";
 export import "func_def.frx";
@@ -27,7 +26,6 @@ namespace AST
         EXTERN_BLOCK,
         STRUCT_DECL,
         FUNC_DECL,
-        NAMESPACE,
         ENUM_DEF,
         STRUCT_DEF,
         FUNC_DEF,
@@ -43,7 +41,6 @@ namespace AST
         ExternBlock* extern_block;
         StructDecl* struct_decl;
         FuncDecl* func_decl;
-        Namespace* ns;
         EnumDef* enum_def;
         StructDef* struct_def;
         FuncDef* func_def;
@@ -107,18 +104,6 @@ namespace AST
 
             global_scope->type = AST::GlobalScopeType::FUNC_DECL;
             global_scope->func_decl = func_decl;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_namespace(Arena* arena, Namespace* ns)
-        {
-            frx::assert(ns != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::NAMESPACE;
-            global_scope->ns = ns;
 
             return global_scope;
         }
@@ -215,13 +200,6 @@ namespace AST
                 case AST::GlobalScopeType::FUNC_DECL:
                 {
                     AST::FuncDecl::print(global_scope->func_decl, file, depth);
-
-                    break;
-                }
-
-                case AST::GlobalScopeType::NAMESPACE:
-                {
-                    AST::Namespace::print(global_scope->ns, file, depth);
 
                     break;
                 }

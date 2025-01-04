@@ -189,20 +189,20 @@ namespace AST::Scope
                 }
                 case TokenType::IDENTIFIER:
                 {
-                    mut Namespace* resolved_ns = nullptr;
+                    mut NamespaceResolution* resolution = nullptr;
 
                     if(parser->token->type != TokenType::IDENTIFIER ||
                         libc::strcmp(parser->token->identifier, "frx") != 0)
                     {
-                        resolved_ns = AST::NamespaceResolution::parse(parser);
+                        resolution = AST::NamespaceResolution::parse(parser);
                     }
 
                     Token* next = Parser::peek(parser, 1);
-                    if(next->type == TokenType::STAR
-                        || next->type == TokenType::IDENTIFIER)
+                    if((next->type == TokenType::STAR || next->type == TokenType::IDENTIFIER)
+                        && resolution != nullptr)
                     {
                         mut TypeSpecifier* type = AST::TypeSpecifier::parse(parser);
-                        type->ns = resolved_ns;
+                        type->resolution = resolution;
 
                         add_stmt(scope, AST::VarDeclOrDef::parse(parser, type, false));
                     }
@@ -216,7 +216,7 @@ namespace AST::Scope
                             case AST::ExprType::FUNC_CALL:
                             {
                                 mut FuncCall* func_call = expr->func_call;
-                                func_call->ns = resolved_ns;
+                                func_call->resolution = resolution;
 
                                 break;
                             }
@@ -225,7 +225,7 @@ namespace AST::Scope
                                 mut UnresolvedIdentifier* unresolved_identifier =
                                     expr->unresolved_identifier;
 
-                                unresolved_identifier->ns = resolved_ns;
+                                unresolved_identifier->resolution = resolution;
 
                                 break;
                             }

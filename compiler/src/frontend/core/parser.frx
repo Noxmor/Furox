@@ -32,7 +32,6 @@ export struct Parser
 
     Token* token;
 
-    core::Namespace* current_namespace;
     core::Scope* current_scope;
 
     List visible_parsers;
@@ -62,7 +61,6 @@ namespace Parser
 
         parser->token = Lexer::peek(&parser->lexer, 0);
 
-        parser->current_namespace = namespace_create_global();
         parser->current_scope = scope_create(nullptr);
 
         List::init(&parser->visible_parsers);
@@ -378,24 +376,12 @@ namespace Parser
         return nullptr;
     }
 
-    export FuncSymbol* find_func_symbol_r(Parser* parser, mut core::Namespace* ns,
+    export FuncSymbol* find_func_symbol(Parser* parser, AST::NamespaceResolution* resolution,
         char* name)
-    {
-        mut FuncSymbol* symbol = find_func_symbol(parser, ns, name);
-        while(symbol == nullptr && ns != nullptr)
-        {
-            ns = ns->parent;
-            symbol = find_func_symbol(parser, ns, name);
-        }
-
-        return symbol;
-    }
-
-    export FuncSymbol* find_func_symbol(Parser* parser, core::Namespace* ns, char* name)
     {
         frx::assert(parser != nullptr);
 
-        mut FuncSymbol* symbol = func_table_find(&parser->func_table, ns, name);
+        mut FuncSymbol* symbol = func_table_find(&parser->func_table, resolution, name, nullptr);
         if(symbol != nullptr)
         {
             return symbol;
@@ -406,7 +392,7 @@ namespace Parser
         {
             Parser* visible_parser = List::get(&parser->visible_parsers, i);
 
-            symbol = func_table_find(&visible_parser->func_table, ns, name);
+            symbol = func_table_find(&visible_parser->func_table, resolution, name, nullptr);
             if(symbol != nullptr && symbol->exported)
             {
                 return symbol;
@@ -435,23 +421,6 @@ namespace Parser
         frx::assert(parser != nullptr);
 
         Lexer::destroy(&parser->lexer);
-    }
-
-    export void push_namespace(mut Parser* parser, char* name)
-    {
-        frx::assert(parser != nullptr);
-
-        parser->current_namespace = namespace_create(parser->current_namespace,
-            name);
-    }
-
-    export void pop_namespace(mut Parser* parser)
-    {
-        frx::assert(parser != nullptr);
-
-        frx::assert(parser->current_namespace != nullptr);
-
-        parser->current_namespace = parser->current_namespace->parent;
     }
 
     export void push_scope(mut Parser* parser)

@@ -2,7 +2,6 @@ import "c.frx";
 import "extern_block.frx";
 import "struct_decl.frx";
 import "func_decl.frx";
-import "namespace.frx";
 import "enum_def.frx";
 import "struct_def.frx";
 import "func_def.frx";
@@ -41,13 +40,6 @@ export void transpile_global_scope(Transpiler* transpiler, AST::GlobalScope* glo
         case AST::GlobalScopeType::FUNC_DECL:
         {
             transpile_func_decl(transpiler, global_scope->func_decl);
-
-            break;
-        }
-
-        case AST::GlobalScopeType::NAMESPACE:
-        {
-            transpile_namespace(transpiler, global_scope->ns);
 
             break;
         }

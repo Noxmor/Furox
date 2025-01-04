@@ -17,7 +17,7 @@ namespace AST::UnresolvedIdentifier
 
         frx::assert(unresolved_identifier != nullptr);
 
-        core::Namespace* ns = unresolved_identifier->ns;
+        core::Namespace* ns = unresolved_identifier->resolution->ns;
         char* name = unresolved_identifier->name;
         core::Scope* scope = unresolved_identifier->scope;
 

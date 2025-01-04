@@ -31,8 +31,6 @@ export struct Transpiler
     TranspilerMode mode;
     FILE* file;
 
-    core::Namespace* current_namespace;
-
     Queue untranspiled_structs;
     List transpiled_symbols;
 }
@@ -46,8 +44,6 @@ export i32 c_generate_code(AST::Program* program)
     {
         return 1;
     }
-
-    transpiler.current_namespace = nullptr;
 
     Queue::init(&transpiler.untranspiled_structs);
     List::init(&transpiler.transpiled_symbols);

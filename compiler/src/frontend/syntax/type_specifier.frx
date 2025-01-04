@@ -1,6 +1,5 @@
 export import "../ast/type_specifier.frx";
 import "expr.frx";
-import "namespace.frx";
 import "namespace_resolution.frx";
 import "../core/namespace.frx";
 import "../core/parser.frx";
@@ -35,7 +34,7 @@ namespace AST::TypeSpecifier
 
         SourceLocation start = Parser::current_location(parser);
 
-        mut Namespace* ns = nullptr;
+        NamespaceResolution* resolution = AST::NamespaceResolution::parse(parser);
         mut char* name = nullptr;
         mut TokenType primitive_type = TokenType::EOF;
 
@@ -47,7 +46,6 @@ namespace AST::TypeSpecifier
         }
         else
         {
-            ns = AST::NamespaceResolution::parse(parser);
             name = parser->token->identifier;
 
             Parser::eat(parser, TokenType::IDENTIFIER);
@@ -66,7 +64,7 @@ namespace AST::TypeSpecifier
             Parser::eat(parser, TokenType::STAR);
         }
 
-        mut TypeSpecifier* type_specifier = new(&parser->arena, ns, name,
+        mut TypeSpecifier* type_specifier = new(&parser->arena, resolution, name,
             parser->current_scope, primitive_type, pointer_level);
 
         type_specifier->range.start = start;
