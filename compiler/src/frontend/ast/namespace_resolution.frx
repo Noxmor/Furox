@@ -9,44 +9,38 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct NamespaceResolution
 {
-    export struct NamespaceResolution
+    CoreNamespace* ns;
+    b8 absolute;
+}
+
+export NamespaceResolution* namespace_resolution_new(Arena* arena, CoreNamespace* ns, b8 absolute)
+{
+    mut NamespaceResolution* namespace_resolution = arena_alloc(arena, frx::sizeof(NamespaceResolution));
+
+    namespace_resolution->ns = ns;
+    namespace_resolution->absolute = absolute;
+
+    return namespace_resolution;
+}
+
+export b8 namespace_resolution_is_absolute(NamespaceResolution* namespace_resolution)
+{
+    frx::assert(namespace_resolution != nullptr);
+
+    return namespace_resolution->absolute;
+}
+
+export void namespace_resolution_print(mut FILE* file, NamespaceResolution* namespace_resolution)
+{
+    frx::assert(file != nullptr);
+
+    mut CoreNamespace* ns = namespace_resolution->ns;
+    while(ns != nullptr)
     {
-        core::Namespace* ns;
-        b8 absolute;
-    }
+        fprintf(file, "%s%s", ns->name, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
 
-    namespace NamespaceResolution
-    {
-        export NamespaceResolution* new(Arena* arena, core::Namespace* ns, b8 absolute)
-        {
-            mut NamespaceResolution* namespace_resolution = Arena::alloc(arena, frx::sizeof(NamespaceResolution));
-
-            namespace_resolution->ns = ns;
-            namespace_resolution->absolute = absolute;
-
-            return namespace_resolution;
-        }
-
-        export b8 is_absolute(NamespaceResolution* namespace_resolution)
-        {
-            frx::assert(namespace_resolution != nullptr);
-
-            return namespace_resolution->absolute;
-        }
-
-        export void print(mut FILE* file, NamespaceResolution* namespace_resolution)
-        {
-            frx::assert(file != nullptr);
-
-            mut core::Namespace* ns = namespace_resolution->ns;
-            while(ns != nullptr)
-            {
-                fprintf(file, "%s%s", ns->name, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
-
-                ns = ns->parent;
-            }
-        }
+        ns = ns->parent;
     }
 }

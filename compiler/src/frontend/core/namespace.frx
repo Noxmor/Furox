@@ -1,17 +1,14 @@
 import "std/libc.frx";
 
-namespace core
+export struct CoreNamespace
 {
-    export struct Namespace
-    {
-        char* name;
-        core::Namespace* parent;
-    }
+    char* name;
+    CoreNamespace* parent;
 }
 
-export core::Namespace* namespace_create(core::Namespace* parent, char* name)
+export CoreNamespace* namespace_create(CoreNamespace* parent, char* name)
 {
-    mut core::Namespace* ns = libc::malloc(frx::sizeof(core::Namespace));
+    mut CoreNamespace* ns = libc_malloc(frx::sizeof(CoreNamespace));
 
     ns->name = name;
     ns->parent = parent;
@@ -19,7 +16,7 @@ export core::Namespace* namespace_create(core::Namespace* parent, char* name)
     return ns;
 }
 
-export void namespace_destroy(core::Namespace* ns)
+export void namespace_destroy(CoreNamespace* ns)
 {
     if(ns == nullptr)
     {
@@ -27,10 +24,10 @@ export void namespace_destroy(core::Namespace* ns)
     }
 
     namespace_destroy(ns->parent);
-    libc::free(ns);
+    libc_free(ns);
 }
 
-export b8 namespace_is_subset_of(core::Namespace* child, core::Namespace* parent)
+export b8 namespace_is_subset_of(CoreNamespace* child, CoreNamespace* parent)
 {
     if(child == nullptr)
     {
@@ -42,12 +39,12 @@ export b8 namespace_is_subset_of(core::Namespace* child, core::Namespace* parent
         return false;
     }
 
-    mut core::Namespace* child_iter = child;
-    mut core::Namespace* parent_iter  = parent;
+    mut CoreNamespace* child_iter = child;
+    mut CoreNamespace* parent_iter  = parent;
 
     while(child_iter != nullptr && parent_iter != nullptr)
     {
-        if(libc::strcmp(child_iter->name, parent_iter->name) != 0)
+        if(libc_strcmp(child_iter->name, parent_iter->name) != 0)
         {
             return false;
         }
@@ -59,7 +56,7 @@ export b8 namespace_is_subset_of(core::Namespace* child, core::Namespace* parent
     return child_iter == nullptr;
 }
 
-export b8 namespace_equals(core::Namespace* left, core::Namespace* right)
+export b8 namespace_equals(CoreNamespace* left, CoreNamespace* right)
 {
     if(left == nullptr && right == nullptr)
     {
@@ -76,7 +73,7 @@ export b8 namespace_equals(core::Namespace* left, core::Namespace* right)
         return false;
     }
 
-    if(libc::strcmp(left->name, right->name) != 0)
+    if(libc_strcmp(left->name, right->name) != 0)
     {
         return false;
     }
@@ -84,13 +81,13 @@ export b8 namespace_equals(core::Namespace* left, core::Namespace* right)
     return namespace_equals(left->parent, right->parent);
 }
 
-export b8 namespace_is_global(core::Namespace* ns)
+export b8 namespace_is_global(CoreNamespace* ns)
 {
     return ns == nullptr;
 }
 
-export b8 namespace_is_internal(core::Namespace* ns)
+export b8 namespace_is_internal(CoreNamespace* ns)
 {
-    return ns != nullptr && libc::strcmp(ns->name, "frx") == 0
+    return ns != nullptr && libc_strcmp(ns->name, "frx") == 0
         && namespace_is_global(ns->parent);
 }

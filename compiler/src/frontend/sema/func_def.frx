@@ -7,40 +7,37 @@ import "../symbols/func.frx";
 import "../ast/func_def.frx";
 import "../../core/list.frx";
 
-namespace AST::FuncDef
+export void func_def_sema(mut Parser* parser, mut FuncDef* func_def)
 {
-    export void sema(mut Parser* parser, mut FuncDef* func_def)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        frx::assert(func_def != nullptr);
+    frx::assert(func_def != nullptr);
 
-        AST::TypeSpecifier::sema(parser, func_def->return_type);
+    type_specifier_sema(parser, func_def->return_type);
 
-        FuncSymbol* symbol = &func_def->symbol;
+    FuncSymbol* symbol = &func_def->symbol;
 
-        mut usize i;
-        for(i = 0; i < List::size(&parser->visible_parsers)
+    mut usize i;
+    for(i = 0; i < list_size(&parser->visible_parsers)
             && !func_def->is_redefinition; i = i + 1)
-        {
-            Parser* visible_parser = List::get(&parser->visible_parsers, i);
-            FuncSymbol* imported_symbol = func_table_find(
+    {
+        Parser* visible_parser = list_get(&parser->visible_parsers, i);
+        FuncSymbol* imported_symbol = func_table_find(
                 &visible_parser->func_table, symbol->ns, symbol->name, nullptr);
 
-            func_def->is_redefinition = imported_symbol != nullptr
-                && imported_symbol->exported;
-        }
+        func_def->is_redefinition = imported_symbol != nullptr
+            && imported_symbol->exported;
+    }
 
-        if(func_def->is_redefinition)
-        {
-            error_func_def_redefinition(Parser::source_file(parser),
+    if(func_def->is_redefinition)
+    {
+        error_func_def_redefinition(parser_source_file(parser),
                 func_def->range.start, symbol->name);
 
-            Parser::fail(parser);
-        }
-
-        AST::FuncParams::sema(parser, func_def->params);
-
-        AST::Scope::sema(parser, func_def->body);
+        parser_fail(parser);
     }
+
+    func_params_sema(parser, func_def->params);
+
+    scope_sema(parser, func_def->body);
 }

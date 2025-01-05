@@ -6,39 +6,36 @@ import "../ast/enum_constant.frx";
 import "../ast/enum_def.frx";
 import "../../core/list.frx";
 
-namespace AST::EnumConstant
+export void enum_constant_sema(Parser* parser, mut EnumConstant* constant)
 {
-    export void sema(Parser* parser, mut EnumConstant* constant)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        frx::assert(constant != nullptr);
+    frx::assert(constant != nullptr);
 
-        constant->symbol = Parser::find_enum_symbol(parser, constant->enum_namespace,
+    constant->symbol = parser_find_enum_symbol(parser, constant->enum_namespace,
             constant->enum_name);
 
-        EnumSymbol* symbol = constant->symbol;
+    EnumSymbol* symbol = constant->symbol;
 
-        mut b8 exists = false;
+    mut b8 exists = false;
 
-        mut usize i;
-        for(i = 0; i < List::size(&symbol->constants); i = i + 1)
+    mut usize i;
+    for(i = 0; i < list_size(&symbol->constants); i = i + 1)
+    {
+        EnumConstantDef* constant_def = list_get(&symbol->constants, i);
+
+        if(libc_strcmp(constant_def->name, constant->name) == 0)
         {
-            EnumConstantDef* constant_def = List::get(&symbol->constants, i);
-
-            if(libc::strcmp(constant_def->name, constant->name) == 0)
-            {
-                exists = true;
-                break;
-            }
+            exists = true;
+            break;
         }
+    }
 
-        if(!exists)
-        {
-            //FIXME: Print the correct location, this is only a placeholder
-            SourceLocation loc;
-            error_undefined_enum_constant(Parser::source_file(parser), loc,
+    if(!exists)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_undefined_enum_constant(parser_source_file(parser), loc,
                 symbol->name, constant->name);
-        }
     }
 }

@@ -8,35 +8,29 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct StructMember
 {
-    export struct StructMember
-    {
-        char* name;
-    }
+    char* name;
+}
 
-    namespace StructMember
-    {
-        export StructMember* new(Arena* arena, char* name)
-        {
-            frx::assert(name != nullptr);
+export StructMember* struct_member_new(Arena* arena, char* name)
+{
+    frx::assert(name != nullptr);
 
-            mut StructMember* member = Arena::alloc(arena, frx::sizeof(StructMember));
+    mut StructMember* member = arena_alloc(arena, frx::sizeof(StructMember));
 
-            member->name = name;
+    member->name = name;
 
-            return member;
-        }
+    return member;
+}
 
-        export void print(StructMember* member, mut FILE* file, usize depth)
-        {
-            frx::assert(member != nullptr);
+export void struct_member_print(StructMember* member, mut FILE* file, usize depth)
+{
+    frx::assert(member != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s (%s)\n", "struct-member", member->name);
-        }
-    }
+    fprintf(file, "%s (%s)\n", "struct-member", member->name);
 }

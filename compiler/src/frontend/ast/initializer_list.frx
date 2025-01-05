@@ -10,40 +10,34 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct InitializerList
 {
-    export struct InitializerList
+    List values;
+}
+
+export InitializerList* initializer_list_new(Arena* arena)
+{
+    InitializerList* list = arena_alloc(arena, frx::sizeof(InitializerList));
+
+    list_init(&list->values);
+
+    return list;
+}
+
+export void initializer_list_print(InitializerList* list, mut FILE* file, usize depth)
+{
+    frx::assert(list != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_depth(file, depth);
+
+    fprintf(file, "%s\n", "initializer-list");
+
+    mut usize i;
+    for(i = 0; i < list_size(&list->values); i = i + 1)
     {
-        List values;
-    }
-
-    namespace InitializerList
-    {
-        export InitializerList* new(Arena* arena)
-        {
-            InitializerList* list = Arena::alloc(arena, frx::sizeof(InitializerList));
-
-            List::init(&list->values);
-
-            return list;
-        }
-
-        export void print(InitializerList* list, mut FILE* file, usize depth)
-        {
-            frx::assert(list != nullptr);
-
-            frx::assert(file != nullptr);
-
-            print_depth(file, depth);
-
-            fprintf(file, "%s\n", "initializer-list");
-
-            mut usize i;
-            for(i = 0; i < List::size(&list->values); i = i + 1)
-            {
-                AST::Expr* value = List::get(&list->values, i);
-                AST::Expr::print(value, file, depth);
-            }
-        }
+        Expr* value = list_get(&list->values, i);
+        expr_print(value, file, depth);
     }
 }

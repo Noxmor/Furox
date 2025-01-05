@@ -23,25 +23,25 @@ export void error_undefined_enum_constant(char* filepath, SourceLocation loc,
 }
 
 export void error_ambiguous_unresolved_identifier(char* filepath,
-    SourceLocation loc, mut core::Namespace* ns, char* name)
+    SourceLocation loc, mut CoreNamespace* ns, char* name)
 {
     mut usize size = 1;
 
-    mut core::Namespace* temp = ns;
+    mut CoreNamespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(TokenType::to_str(TokenType::NAMESPACE_RESOLUTION))
-            + libc::strlen(temp->name);
+        size = size + libc_strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
+            + libc_strlen(temp->name);
         temp = temp->parent;
     }
 
     char ns_str[size];
-    libc::strcpy(ns_str, "");
+    libc_strcpy(ns_str, "");
 
     while(ns != nullptr)
     {
-        libc::strcat(ns_str, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
-        libc::strcat(ns_str, ns->name);
+        libc_strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+        libc_strcat(ns_str, ns->name);
 
         ns = ns->parent;
     }
@@ -51,27 +51,27 @@ export void error_ambiguous_unresolved_identifier(char* filepath,
 }
 
 export void error_namespace_is_reserved(char* filepath, SourceLocation loc,
-    mut core::Namespace* ns)
+    mut CoreNamespace* ns)
 {
-    mut usize size = 1 + libc::strlen(ns->name);
+    mut usize size = 1 + libc_strlen(ns->name);
 
-    mut core::Namespace* temp = ns->parent;
+    mut CoreNamespace* temp = ns->parent;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(TokenType::to_str(TokenType::NAMESPACE_RESOLUTION))
-            + libc::strlen(temp->name);
+        size = size + libc_strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
+            + libc_strlen(temp->name);
         temp = temp->parent;
     }
 
     char ns_str[size];
-    libc::strcpy(ns_str, ns->name);
+    libc_strcpy(ns_str, ns->name);
 
     ns = ns->parent;
 
     while(ns != nullptr)
     {
-        libc::strcat(ns_str, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
-        libc::strcat(ns_str, ns->name);
+        libc_strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+        libc_strcat(ns_str, ns->name);
 
         ns = ns->parent;
     }
@@ -162,29 +162,29 @@ export void error_enum_count_invalid_arg(char* filepath, SourceLocation loc,
 }
 
 export void error_unresolved_identifier(char* filepath, SourceLocation loc,
-    mut core::Namespace* ns, char* name)
+    mut CoreNamespace* ns, char* name)
 {
     mut usize size = 1;
 
-    mut core::Namespace* temp = ns;
+    mut CoreNamespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(TokenType::to_str(TokenType::NAMESPACE_RESOLUTION))
-            + libc::strlen(temp->name);
+        size = size + libc_strlen(token_type_to_str(TokenType::NAMESPACE_RESOLUTION))
+            + libc_strlen(temp->name);
         temp = temp->parent;
     }
 
     char ns_str[size];
-    libc::strcpy(ns_str, "");
+    libc_strcpy(ns_str, "");
 
     while(ns != nullptr)
     {
-        libc::strcat(ns_str, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION));
-        libc::strcat(ns_str, ns->name);
+        libc_strcat(ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION));
+        libc_strcat(ns_str, ns->name);
 
         ns = ns->parent;
     }
 
     log_error(filepath, loc, "Could not resolve identifier %s%s%s!",
-        ns_str, TokenType::to_str(TokenType::NAMESPACE_RESOLUTION), name);
+        ns_str, token_type_to_str(TokenType::NAMESPACE_RESOLUTION), name);
 }

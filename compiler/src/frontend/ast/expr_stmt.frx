@@ -9,34 +9,28 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct ExprStmt
 {
-    export struct ExprStmt
-    {
-        Expr* expr;
-    }
+    Expr* expr;
+}
 
-    namespace ExprStmt
-    {
-        export ExprStmt* new(Arena* arena, Expr* expr)
-        {
-            mut ExprStmt* expr_stmt = Arena::alloc(arena, frx::sizeof(ExprStmt));
+export ExprStmt* expr_stmt_new(Arena* arena, Expr* expr)
+{
+    mut ExprStmt* expr_stmt = arena_alloc(arena, frx::sizeof(ExprStmt));
 
-            expr_stmt->expr = expr;
+    expr_stmt->expr = expr;
 
-            return expr_stmt;
-        }
+    return expr_stmt;
+}
 
-        export void print(ExprStmt* expr_stmt, mut FILE* file, usize depth)
-        {
-            frx::assert(expr_stmt != nullptr);
+export void expr_stmt_print(ExprStmt* expr_stmt, mut FILE* file, usize depth)
+{
+    frx::assert(expr_stmt != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s\n", "expression-statement");
-            AST::Expr::print(expr_stmt->expr, file, depth + 1);
-        }
-    }
+    fprintf(file, "%s\n", "expression-statement");
+    expr_print(expr_stmt->expr, file, depth + 1);
 }

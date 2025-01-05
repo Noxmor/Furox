@@ -35,18 +35,18 @@ export struct Transpiler
     List transpiled_symbols;
 }
 
-export i32 c_generate_code(AST::Program* program)
+export i32 c_generate_code(Program* program)
 {
     mut Transpiler transpiler;
-    transpiler.file = libc::fopen("/tmp/output.c", "w");
+    transpiler.file = libc_fopen("/tmp/output.c", "w");
 
     if(transpiler.file == nullptr)
     {
         return 1;
     }
 
-    Queue::init(&transpiler.untranspiled_structs);
-    List::init(&transpiler.transpiled_symbols);
+    queue_init(&transpiler.untranspiled_structs);
+    list_init(&transpiler.transpiled_symbols);
 
     fprintf(transpiler.file, "#include <stddef.h>\n");
     fprintf(transpiler.file, "#include <stdint.h>\n");
@@ -71,21 +71,21 @@ export i32 c_generate_code(AST::Program* program)
 
     transpile_program(&transpiler, program);
 
-    libc::fclose(transpiler.file);
+    libc_fclose(transpiler.file);
 
     Config* config = get_config();
 
     char command[4096];
-    libc::strcpy(command, "gcc /tmp/output.c -o ");
-    libc::strcat(command, config->output);
+    libc_strcpy(command, "gcc /tmp/output.c -o ");
+    libc_strcat(command, config->output);
 
     mut usize i;
-    for(i = 0; i < List::size(&config->link_targets); i = i + 1)
+    for(i = 0; i < list_size(&config->link_targets); i = i + 1)
     {
-        char* link_target = List::get(&config->link_targets, i);
-        libc::strcat(command, " ");
-        libc::strcat(command, link_target);
+        char* link_target = list_get(&config->link_targets, i);
+        libc_strcat(command, " ");
+        libc_strcat(command, link_target);
     }
 
-    return libc::system(command);
+    return libc_system(command);
 }

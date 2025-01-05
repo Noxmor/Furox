@@ -2,17 +2,14 @@ import "expr.frx";
 import "../core/parser.frx";
 import "../ast/return_stmt.frx";
 
-namespace AST::ReturnStmt
+export void return_stmt_sema(Parser* parser, ReturnStmt* return_stmt)
 {
-    export void sema(Parser* parser, ReturnStmt* return_stmt)
+    frx::assert(parser != nullptr);
+
+    frx::assert(return_stmt != nullptr);
+
+    if(return_stmt->value != nullptr)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(return_stmt != nullptr);
-
-        if(return_stmt->value != nullptr)
-        {
-            AST::Expr::sema(parser, return_stmt->value);
-        }
+        expr_sema(parser, return_stmt->value);
     }
 }

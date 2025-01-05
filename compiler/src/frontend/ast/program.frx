@@ -11,46 +11,40 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct Program
 {
-    export struct Program
+    List translation_units;
+}
+
+export Program* program_new()
+{
+    Program* program = libc_malloc(frx::sizeof(Program));
+
+    list_init(&program->translation_units);
+
+    return program;
+}
+
+export void program_print(Program* program, mut FILE* file, usize depth)
+{
+    frx::assert(program != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_depth(file, depth);
+
+    fprintf(file, "%s\n", "program");
+
+    mut usize i;
+    for(i = 0; i < list_size(&program->translation_units); i = i + 1)
     {
-        List translation_units;
-    }
+        Compound* translation_unit = list_get(&program->translation_units, i);
 
-    namespace Program
-    {
-        export Program* new()
+        mut usize j;
+        for(j = 0; j < list_size(&translation_unit->nodes); ++j)
         {
-            Program* program = libc::malloc(frx::sizeof(Program));
-
-            List::init(&program->translation_units);
-
-            return program;
-        }
-
-        export void print(Program* program, mut FILE* file, usize depth)
-        {
-            frx::assert(program != nullptr);
-
-            frx::assert(file != nullptr);
-
-            print_depth(file, depth);
-
-            fprintf(file, "%s\n", "program");
-
-            mut usize i;
-            for(i = 0; i < List::size(&program->translation_units); i = i + 1)
-            {
-                Compound* translation_unit = List::get(&program->translation_units, i);
-
-                mut usize j;
-                for(j = 0; j < List::size(&translation_unit->nodes); ++j)
-                {
-                    AST::GlobalScope* global_scope = List::get(&translation_unit->nodes, j);
-                    AST::GlobalScope::print(global_scope, file, depth + 1);
-                }
-            }
+            GlobalScope* global_scope = list_get(&translation_unit->nodes, j);
+            global_scope_print(global_scope, file, depth + 1);
         }
     }
 }

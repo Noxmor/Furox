@@ -4,24 +4,21 @@ import "../core/namespace.frx";
 import "../core/parser.frx";
 import "../core/scope.frx";
 
-namespace AST::UnresolvedIdentifier
+export UnresolvedIdentifier* unresolved_identifier_parse(Parser* parser, NamespaceResolution* resolution, SourceLocation start)
 {
-    export UnresolvedIdentifier* parse(Parser* parser, NamespaceResolution* resolution, SourceLocation start)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        char* name = parser->token->identifier;
-        core::Scope* scope = parser->current_scope;
+    char* name = parser->token->identifier;
+    CoreScope* scope = parser->current_scope;
 
-        SourceLocation end = Parser::current_location(parser);
+    SourceLocation end = parser_current_location(parser);
 
-        Parser::eat(parser, TokenType::IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
-        mut UnresolvedIdentifier* unresolved_identifier = new(&parser->arena, resolution, name, scope);
+    mut UnresolvedIdentifier* unresolved_identifier = unresolved_identifier_new(&parser->arena, resolution, name, scope);
 
-        unresolved_identifier->range.start = start;
-        unresolved_identifier->range.end = end;
+    unresolved_identifier->range.start = start;
+    unresolved_identifier->range.end = end;
 
-        return unresolved_identifier;
-    }
+    return unresolved_identifier;
 }

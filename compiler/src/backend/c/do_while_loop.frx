@@ -11,7 +11,7 @@ extern
 }
 
 export void transpile_do_while_loop(Transpiler* transpiler,
-    AST::DoWhileLoop* do_while_loop)
+    DoWhileLoop* do_while_loop)
 {
     frx::assert(transpiler != nullptr);
 

@@ -27,120 +27,117 @@ extern
     i32 toupper(i32 c);
 }
 
-namespace libc
+export void libc_exit(i32 status)
 {
-    export void exit(i32 status)
-    {
-        return ::exit(status);
-    }
+    return exit(status);
+}
 
-    export i32 fclose(mut FILE* stream)
-    {
-        return ::fclose(stream);
-    }
+export i32 libc_fclose(mut FILE* stream)
+{
+    return fclose(stream);
+}
 
-    export FILE* fopen(char* filepath, char* mode)
-    {
-        return ::fopen(filepath, mode);
-    }
+export FILE* libc_fopen(char* filepath, char* mode)
+{
+    return fopen(filepath, mode);
+}
 
-    export usize fread(mut void* ptr, usize size, usize n, mut FILE* stream)
-    {
-        return ::fread(ptr, size, n, stream);
-    }
+export usize libc_fread(mut void* ptr, usize size, usize n, mut FILE* stream)
+{
+    return fread(ptr, size, n, stream);
+}
 
-    export void free(void* ptr)
-    {
-        ::free(ptr);
-    }
+export void libc_free(void* ptr)
+{
+    free(ptr);
+}
 
-    export i32 fseek(mut FILE* stream, i64 offset, i32 whence)
-    {
-        return ::fseek(stream, offset, whence);
-    }
+export i32 libc_fseek(mut FILE* stream, i64 offset, i32 whence)
+{
+    return fseek(stream, offset, whence);
+}
 
-    export i32 isalnum(i32 c)
-    {
-        return ::isalnum(c);
-    }
+export i32 libc_isalnum(i32 c)
+{
+    return isalnum(c);
+}
 
-    export i32 isalpha(i32 c)
-    {
-        return ::isalpha(c);
-    }
+export i32 libc_isalpha(i32 c)
+{
+    return isalpha(c);
+}
 
-    export i32 isdigit(i32 c)
-    {
-        return ::isdigit(c);
-    }
+export i32 libc_isdigit(i32 c)
+{
+    return isdigit(c);
+}
 
-    export void* malloc(usize size)
-    {
-        return ::malloc(size);
-    }
+export void* libc_malloc(usize size)
+{
+    return malloc(size);
+}
 
-    export void* memcpy(mut void* dest, void* src, usize n)
-    {
-        return ::memcpy(dest, src, n);
-    }
+export void* libc_memcpy(mut void* dest, void* src, usize n)
+{
+    return memcpy(dest, src, n);
+}
 
-    export void* memset(mut void* ptr, i32 value, usize n)
-    {
-        return ::memset(ptr, value, n);
-    }
+export void* libc_memset(mut void* ptr, i32 value, usize n)
+{
+    return memset(ptr, value, n);
+}
 
-    export void* realloc(mut void* ptr, usize size)
-    {
-        return ::realloc(ptr, size);
-    }
+export void* libc_realloc(mut void* ptr, usize size)
+{
+    return realloc(ptr, size);
+}
 
-    export char* strcat(mut char* dest, char* src)
-    {
-        return ::strcat(dest, src);
-    }
+export char* libc_strcat(mut char* dest, char* src)
+{
+    return strcat(dest, src);
+}
 
-    export char* strchr(char* str, i32 c)
-    {
-        return ::strchr(str, c);
-    }
+export char* libc_strchr(char* str, i32 c)
+{
+    return strchr(str, c);
+}
 
-    export i32 strcmp(char* str1, char* str2)
-    {
-        return ::strcmp(str1, str2);
-    }
+export i32 libc_strcmp(char* str1, char* str2)
+{
+    return strcmp(str1, str2);
+}
 
-    export char* strcpy(mut char* dest, char* src)
-    {
-        return ::strcpy(dest, src);
-    }
+export char* libc_strcpy(mut char* dest, char* src)
+{
+    return strcpy(dest, src);
+}
 
-    export char* strdup(char* str)
-    {
-        return ::strdup(str);
-    }
+export char* libc_strdup(char* str)
+{
+    return strdup(str);
+}
 
-    export usize strlen(char* str)
-    {
-        return ::strlen(str);
-    }
+export usize libc_strlen(char* str)
+{
+    return strlen(str);
+}
 
-    export char* strrchr(char* str, i32 c)
-    {
-        return ::strrchr(str, c);
-    }
+export char* libc_strrchr(char* str, i32 c)
+{
+    return strrchr(str, c);
+}
 
-    export i32 strncmp(char* str1, char* str2, usize n)
-    {
-        return ::strncmp(str1, str2, n);
-    }
+export i32 libc_strncmp(char* str1, char* str2, usize n)
+{
+    return strncmp(str1, str2, n);
+}
 
-    export i32 system(char* command)
-    {
-        return ::system(command);
-    }
+export i32 libc_system(char* command)
+{
+    return system(command);
+}
 
-    export i32 toupper(i32 c)
-    {
-        return ::toupper(c);
-    }
+export i32 libc_toupper(i32 c)
+{
+    return toupper(c);
 }

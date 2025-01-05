@@ -9,43 +9,37 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct Var
 {
-    export struct Var
-    {
-        SourceRange range;
-        VarSymbol* symbol;
+    SourceRange range;
+    VarSymbol* symbol;
 
-        core::Namespace* ns;
-        core::Scope* scope;
-        char* name;
-    }
+    CoreNamespace* ns;
+    CoreScope* scope;
+    char* name;
+}
 
-    namespace Var
-    {
-        export Var* new(Arena* arena, core::Namespace* ns, core::Scope* scope, char* name)
-        {
-            frx::assert(name != nullptr);
+export Var* var_new(Arena* arena, CoreNamespace* ns, CoreScope* scope, char* name)
+{
+    frx::assert(name != nullptr);
 
-            mut Var* var = Arena::alloc(arena, frx::sizeof(Var));
+    mut Var* var = arena_alloc(arena, frx::sizeof(Var));
 
-            var->symbol = nullptr;
-            var->ns = ns;
-            var->scope = scope;
-            var->name = name;
+    var->symbol = nullptr;
+    var->ns = ns;
+    var->scope = scope;
+    var->name = name;
 
-            return var;
-        }
+    return var;
+}
 
-        export void print(Var* var, mut FILE* file, usize depth)
-        {
-            frx::assert(var != nullptr);
+export void var_print(Var* var, mut FILE* file, usize depth)
+{
+    frx::assert(var != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s (%s)\n", "variable", var->name);
-        }
-    }
+    fprintf(file, "%s (%s)\n", "variable", var->name);
 }

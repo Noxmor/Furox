@@ -7,31 +7,28 @@ import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/var.frx";
 
-namespace AST::GlobalVarDef
+export GlobalVarDef* global_var_def_parse(Parser* parser, TypeSpecifier* type, char* name, b8 mutable)
 {
-    export GlobalVarDef* parse(Parser* parser, TypeSpecifier* type, char* name, b8 mutable)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        mut GlobalVarDef* var_def = new(&parser->arena, nullptr, type,
+    mut GlobalVarDef* var_def = global_var_def_new(&parser->arena, nullptr, type,
             parser->current_scope, name, mutable);
 
-        var_table_insert(&parser->var_table, &var_def->symbol);
+    var_table_insert(&parser->var_table, &var_def->symbol);
 
-        Parser::eat(parser, TokenType::EQ);
+    parser_eat(parser, TokenType::EQ);
 
-        if(parser->token->type == TokenType::LBRACE)
-        {
-            var_def->value = AST::Expr::from_initializer_list(&parser->arena,
-                AST::InitializerList::parse(parser));
-        }
-        else
-        {
-            var_def->value = AST::Expr::parse(parser);
-        }
-
-        Parser::eat(parser, TokenType::SEMICOLON);
-
-        return var_def;
+    if(parser->token->type == TokenType::LBRACE)
+    {
+        var_def->value = expr_from_initializer_list(&parser->arena,
+                initializer_list_parse(parser));
     }
+    else
+    {
+        var_def->value = expr_parse(parser);
+    }
+
+    parser_eat(parser, TokenType::SEMICOLON);
+
+    return var_def;
 }

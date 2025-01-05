@@ -10,7 +10,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_for_loop(Transpiler* transpiler, AST::ForLoop* for_loop)
+export void transpile_for_loop(Transpiler* transpiler, ForLoop* for_loop)
 {
     frx::assert(transpiler != nullptr);
 

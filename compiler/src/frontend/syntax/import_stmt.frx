@@ -13,52 +13,49 @@ extern
     i32 sprintf(mut char* str, char* format, ...);
 }
 
-namespace AST::ImportStmt
+export ImportStmt* import_stmt_parse(Parser* parser, b8 exported)
 {
-    export ImportStmt* parse(Parser* parser, b8 exported)
+    parser_eat(parser, TokenType::KW_IMPORT);
+
+    mut char* filepath = parser->token->identifier;
+
+    parser_eat(parser, TokenType::STRING_LITERAL);
+
+    char* std_prefix = "std/";
+    char* lib_prefix = "lib/";
+
+    Config* config = get_config();
+    mut Parser* imported_parser = nullptr;
+
+    if(libc_strncmp(filepath, std_prefix, libc_strlen(std_prefix)) == 0)
     {
-        Parser::eat(parser, TokenType::KW_IMPORT);
+        char stdlib_path[1024];
+        sprintf(stdlib_path, "%s/%s", config->stdlib_path, filepath + 4);
+        filepath = string_table_insert(stdlib_path);
 
-        mut char* filepath = parser->token->identifier;
+        compile(filepath);
+        imported_parser = parser_table_find(filepath);
+    }
+    else if(libc_strncmp(filepath, lib_prefix, libc_strlen(lib_prefix)) == 0)
+    {
+        frx::assert(config->library_path != nullptr);
 
-        Parser::eat(parser, TokenType::STRING_LITERAL);
+        char library_path[1024];
+        sprintf(library_path, "%s/%s", config->library_path, filepath + 4);
+        filepath = string_table_insert(library_path);
 
-        char* std_prefix = "std/";
-        char* lib_prefix = "lib/";
+        compile(filepath);
+        imported_parser = parser_table_find(filepath);
+    }
+    else
+    {
+        imported_parser = parser_compile(parser, filepath);
+    }
 
-        Config* config = get_config();
-        mut Parser* imported_parser = nullptr;
-
-        if(libc::strncmp(filepath, std_prefix, libc::strlen(std_prefix)) == 0)
-        {
-            char stdlib_path[1024];
-            sprintf(stdlib_path, "%s/%s", config->stdlib_path, filepath + 4);
-            filepath = string_table_insert(stdlib_path);
-
-            compile(filepath);
-            imported_parser = parser_table_find(filepath);
-        }
-        else if(libc::strncmp(filepath, lib_prefix, libc::strlen(lib_prefix)) == 0)
-        {
-            frx::assert(config->library_path != nullptr);
-
-            char library_path[1024];
-            sprintf(library_path, "%s/%s", config->library_path, filepath + 4);
-            filepath = string_table_insert(library_path);
-
-            compile(filepath);
-            imported_parser = parser_table_find(filepath);
-        }
-        else
-        {
-            imported_parser = Parser::compile(parser, filepath);
-        }
-
-        ImportStmt* import_stmt = new(&parser->arena, imported_parser, filepath,
+    ImportStmt* import_stmt = import_stmt_new(&parser->arena, imported_parser, filepath,
             exported);
 
-        Parser::eat(parser, TokenType::SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
-        return import_stmt;
-    }
+    return import_stmt;
 }

@@ -6,134 +6,122 @@ import "../symbols/struct.frx";
 import "../ast/int_literal.frx";
 import "../ast/internal_func_call.frx";
 
-namespace AST::Assert
+export void assert_sema(Parser* parser, Assert* assert_node)
 {
-    export void sema(Parser* parser, Assert* assert_node)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        frx::assert(assert_node != nullptr);
+    frx::assert(assert_node != nullptr);
 
-        AST::Expr::sema(parser, assert_node->expr);
-    }
+    expr_sema(parser, assert_node->expr);
 }
 
-namespace AST::Sizeof
+export void sizeof_sema(mut Parser* parser, mut Sizeof* sizeof_node)
 {
-    export void sema(mut Parser* parser, mut Sizeof* sizeof_node)
+    frx::assert(parser != nullptr);
+
+    frx::assert(sizeof_node != nullptr);
+
+    if(sizeof_node->primitive_type != TokenType::EOF)
     {
-        frx::assert(parser != nullptr);
+        return;
+    }
 
-        frx::assert(sizeof_node != nullptr);
+    CoreNamespace* ns = sizeof_node->resolution->ns;
 
-        if(sizeof_node->primitive_type != TokenType::EOF)
-        {
-            return;
-        }
-
-        core::Namespace* ns = sizeof_node->resolution->ns;
-
-        if(ns == nullptr && !AST::NamespaceResolution::is_absolute(sizeof_node->resolution))
-        {
-            sizeof_node->struct_type = Parser::find_struct_symbol_r(parser,
+    if(ns == nullptr && !namespace_resolution_is_absolute(sizeof_node->resolution))
+    {
+        sizeof_node->struct_type = parser_find_struct_symbol_r(parser,
                 nullptr, sizeof_node->name);
 
-            sizeof_node->enum_type = Parser::find_enum_symbol_r(parser,
+        sizeof_node->enum_type = parser_find_enum_symbol_r(parser,
                 nullptr, sizeof_node->name);
-        }
-        else
-        {
-            sizeof_node->struct_type = Parser::find_struct_symbol(parser, ns, sizeof_node->name);
-            sizeof_node->enum_type = Parser::find_enum_symbol(parser, ns, sizeof_node->name);
-        }
+    }
+    else
+    {
+        sizeof_node->struct_type = parser_find_struct_symbol(parser, ns, sizeof_node->name);
+        sizeof_node->enum_type = parser_find_enum_symbol(parser, ns, sizeof_node->name);
+    }
 
-        if(sizeof_node->enum_type == nullptr
+    if(sizeof_node->enum_type == nullptr
             && sizeof_node->struct_type == nullptr)
-        {
-            //FIXME: Print the correct location, this is only a placeholder
-            SourceLocation loc;
-            error_sizeof_invalid_arg(Parser::source_file(parser), loc,
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_sizeof_invalid_arg(parser_source_file(parser), loc,
                 sizeof_node->name);
 
-            Parser::fail(parser);
-        }
+        parser_fail(parser);
     }
 }
 
-namespace AST::EnumCount
+export void enum_count_sema(mut Parser* parser, EnumCount* enum_count, mut Expr* expr)
 {
-    export void sema(mut Parser* parser, EnumCount* enum_count, mut Expr* expr)
+    frx::assert(parser != nullptr);
+
+    frx::assert(enum_count != nullptr);
+
+    mut EnumSymbol* symbol = nullptr;
+    CoreNamespace* ns = enum_count->resolution->ns;
+
+    if(ns == nullptr && !namespace_resolution_is_absolute(enum_count->resolution))
     {
-        frx::assert(parser != nullptr);
+        symbol = parser_find_enum_symbol_r(parser, nullptr, enum_count->name);
+    }
+    else
+    {
+        symbol = parser_find_enum_symbol(parser, ns, enum_count->name);
+    }
 
-        frx::assert(enum_count != nullptr);
-
-        mut EnumSymbol* symbol = nullptr;
-        core::Namespace* ns = enum_count->resolution->ns;
-
-        if(ns == nullptr && !AST::NamespaceResolution::is_absolute(enum_count->resolution))
-        {
-            symbol = Parser::find_enum_symbol_r(parser, nullptr, enum_count->name);
-        }
-        else
-        {
-            symbol = Parser::find_enum_symbol(parser, ns, enum_count->name);
-        }
-
-        if(symbol == nullptr)
-        {
-            //FIXME: Print the correct location, this is only a placeholder
-            SourceLocation loc;
-            error_enum_count_invalid_arg(parser->lexer.filepath, loc,
+    if(symbol == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_enum_count_invalid_arg(parser->lexer.filepath, loc,
                 enum_count->name);
-            Parser::fail(parser);
-        }
-        else
-        {
-            expr->type = AST::ExprType::INT_LITERAL;
-            expr->int_literal = AST::IntLiteral::new(&parser->arena,
-                List::size(&symbol->constants));
-        }
+        parser_fail(parser);
+    }
+    else
+    {
+        expr->type = ExprType::INT_LITERAL;
+        expr->int_literal = int_literal_new(&parser->arena,
+                list_size(&symbol->constants));
     }
 }
 
-namespace AST::InternalFuncCall
+export void internal_func_call_sema(Parser* parser, InternalFuncCall* internal_func_call, mut Expr* expr)
 {
-    export void sema(Parser* parser, InternalFuncCall* internal_func_call, mut Expr* expr)
+    frx::assert(parser != nullptr);
+
+    frx::assert(internal_func_call != nullptr);
+
+    switch(internal_func_call->type)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(internal_func_call != nullptr);
-
-        switch(internal_func_call->type)
-        {
-            case AST::InternalFuncCallType::ASSERT:
+        case InternalFuncCallType::ASSERT:
             {
-                AST::Assert::sema(parser, internal_func_call->assert_node);
+                assert_sema(parser, internal_func_call->assert_node);
 
                 break;
             }
 
-            case AST::InternalFuncCallType::SIZEOF:
+        case InternalFuncCallType::SIZEOF:
             {
-                AST::Sizeof::sema(parser, internal_func_call->sizeof_node);
+                sizeof_sema(parser, internal_func_call->sizeof_node);
 
                 break;
             }
 
-            case AST::InternalFuncCallType::ENUM_COUNT:
+        case InternalFuncCallType::ENUM_COUNT:
             {
-                AST::EnumCount::sema(parser, internal_func_call->enum_count_node, expr);
+                enum_count_sema(parser, internal_func_call->enum_count_node, expr);
 
                 break;
             }
 
-            default:
+        default:
             {
                 frx::assert(false);
 
                 break;
             }
-        }
     }
 }

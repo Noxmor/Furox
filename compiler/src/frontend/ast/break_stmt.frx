@@ -8,30 +8,24 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct BreakStmt
 {
-    export struct BreakStmt
-    {
-        b8 value; //Placeholder, since the arena allocator can't handle
-                  //allocations for structs with a size of 0.
-    }
+    b8 value; //Placeholder, since the arena allocator can't handle
+              //allocations for structs with a size of 0.
+}
 
-    namespace BreakStmt
-    {
-        export BreakStmt* new(Arena* arena)
-        {
-            return Arena::alloc(arena, frx::sizeof(BreakStmt));
-        }
+export BreakStmt* break_stmt_new(Arena* arena)
+{
+    return arena_alloc(arena, frx::sizeof(BreakStmt));
+}
 
-        export void print(BreakStmt* break_stmt, mut FILE* file, usize depth)
-        {
-            frx::assert(break_stmt != nullptr);
+export void break_stmt_print(BreakStmt* break_stmt, mut FILE* file, usize depth)
+{
+    frx::assert(break_stmt != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s\n", "break-statement");
-        }
-    }
+    fprintf(file, "%s\n", "break-statement");
 }

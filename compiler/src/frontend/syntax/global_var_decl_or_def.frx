@@ -4,46 +4,43 @@ import "global_var_def.frx";
 import "type_specifier.frx";
 import "../core/parser.frx";
 
-namespace AST::GlobalVarDeclOrDef
+export GlobalScope* global_var_decl_or_def_parse(Parser* parser, TypeSpecifier* type, b8 mutable)
 {
-    export GlobalScope* parse(Parser* parser, TypeSpecifier* type, b8 mutable)
+    frx::assert(parser != nullptr);
+
+    frx::assert(type != nullptr);
+
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TokenType::IDENTIFIER);
+
+    type_specifier_parse_array_dimensions(parser, type);
+
+    mut GlobalScope* global_scope = nullptr;
+
+    switch(parser->token->type)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(type != nullptr);
-
-        char* name = parser->token->identifier;
-
-        Parser::eat(parser, TokenType::IDENTIFIER);
-
-        AST::TypeSpecifier::parse_array_dimensions(parser, type);
-
-        mut GlobalScope* global_scope = nullptr;
-
-        switch(parser->token->type)
-        {
-            case TokenType::SEMICOLON:
+        case TokenType::SEMICOLON:
             {
-                global_scope = AST::GlobalScope::from_global_var_decl(&parser->arena,
-                    AST::GlobalVarDecl::parse(parser, type, name, mutable));
+                global_scope = global_scope_from_global_var_decl(&parser->arena,
+                        global_var_decl_parse(parser, type, name, mutable));
 
                 break;
             }
-            case TokenType::EQ:
+        case TokenType::EQ:
             {
-                global_scope = AST::GlobalScope::from_global_var_def(&parser->arena,
-                    AST::GlobalVarDef::parse(parser, type, name, mutable));
+                global_scope = global_scope_from_global_var_def(&parser->arena,
+                        global_var_def_parse(parser, type, name, mutable));
 
                 break;
             }
-            default:
+        default:
             {
-                Parser::panic(parser);
+                parser_panic(parser);
 
                 break;
             }
-        }
-
-        return global_scope;
     }
+
+    return global_scope;
 }

@@ -10,44 +10,37 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct UnaryExpr
 {
-    export struct UnaryExpr
-    {
-        TokenType type;
-        Operator operator;
-        Expr* operand;
-    }
+    TokenType type;
+    Operator operator;
+    Expr* operand;
+}
 
-    namespace UnaryExpr
-    {
-        export UnaryExpr* new(Arena* arena, TokenType type, Operator operator, Expr* operand)
-        {
-            frx::assert(operator != Operator::INVALID && operator < Operator::COUNT);
+export UnaryExpr* unary_expr_new(Arena* arena, TokenType type, Operator operator, Expr* operand)
+{
+    frx::assert(operator != Operator::INVALID && operator < Operator::COUNT);
 
-            frx::assert(operand != nullptr);
+    frx::assert(operand != nullptr);
 
-            mut UnaryExpr* unary_expr = Arena::alloc(arena, frx::sizeof(UnaryExpr));
+    mut UnaryExpr* unary_expr = arena_alloc(arena, frx::sizeof(UnaryExpr));
 
-            unary_expr->type = type;
-            unary_expr->operator = operator;
-            unary_expr->operand = operand;
+    unary_expr->type = type;
+    unary_expr->operator = operator;
+    unary_expr->operand = operand;
 
-            return unary_expr;
-        }
+    return unary_expr;
+}
 
-        export void print(UnaryExpr* expr, mut FILE* file, usize depth)
-        {
-            frx::assert(expr != nullptr);
+export void unary_expr_print(UnaryExpr* expr, mut FILE* file, usize depth)
+{
+    frx::assert(expr != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s (%s)\n", "unary-expression",
-                TokenType::to_str(expr->type));
+    fprintf(file, "%s (%s)\n", "unary-expression", token_type_to_str(expr->type));
 
-            AST::Expr::print(expr->operand, file, depth + 1);
-        }
-    }
+    expr_print(expr->operand, file, depth + 1);
 }

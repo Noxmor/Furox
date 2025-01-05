@@ -4,7 +4,7 @@ import "translation_unit.frx";
 import "../../core/queue.frx";
 import "../../frontend/ast/program.frx";
 
-export void transpile_program(mut Transpiler* transpiler, AST::Program* program)
+export void transpile_program(mut Transpiler* transpiler, Program* program)
 {
     frx::assert(transpiler != nullptr);
 
@@ -17,9 +17,9 @@ export void transpile_program(mut Transpiler* transpiler, AST::Program* program)
         transpiler->mode = mode;
 
         mut usize i;
-        for(i = 0; i < List::size(&program->translation_units); i = i + 1)
+        for(i = 0; i < list_size(&program->translation_units); i = i + 1)
         {
-            AST::Compound* translation_unit = List::get(
+            Compound* translation_unit = list_get(
                 &program->translation_units, i);
 
             transpile_translation_unit(transpiler, translation_unit);
@@ -27,10 +27,10 @@ export void transpile_program(mut Transpiler* transpiler, AST::Program* program)
 
         if(transpiler->mode == TranspilerMode::STRUCT_IMPL)
         {
-            while(!Queue::is_empty(&transpiler->untranspiled_structs))
+            while(!queue_is_empty(&transpiler->untranspiled_structs))
             {
-                AST::StructDef* struct_def =
-                    Queue::dequeue(&transpiler->untranspiled_structs);
+                StructDef* struct_def =
+                    queue_dequeue(&transpiler->untranspiled_structs);
 
                 transpile_struct_def(transpiler, struct_def);
             }

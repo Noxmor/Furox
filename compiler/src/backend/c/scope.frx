@@ -10,7 +10,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_scope(Transpiler* transpiler, AST::Scope* scope)
+export void transpile_scope(Transpiler* transpiler, Scope* scope)
 {
     frx::assert(transpiler != nullptr);
 
@@ -19,9 +19,9 @@ export void transpile_scope(Transpiler* transpiler, AST::Scope* scope)
     fprintf(transpiler->file, "{\n");
 
     mut usize i;
-    for(i = 0; i < List::size(&scope->stmts); i = i + 1)
+    for(i = 0; i < list_size(&scope->stmts); i = i + 1)
     {
-        AST::Stmt* stmt = List::get(&scope->stmts, i);
+        Stmt* stmt = list_get(&scope->stmts, i);
         transpile_stmt(transpiler, stmt);
     }
 

@@ -32,7 +32,7 @@ export Parser* parser_table_find(char* filepath)
     {
         Parser* parser = entry->parser;
 
-        if(libc::strcmp(Parser::source_file(parser), filepath) == 0)
+        if(libc_strcmp(parser_source_file(parser), filepath) == 0)
         {
             return parser;
         }
@@ -54,8 +54,8 @@ b8 is_real_path(mut char* filepath)
 
     while(filepath[0] != '\0')
     {
-        if(libc::strncmp(filepath, "/./",libc::strlen("/./")) == 0
-            || libc::strncmp(filepath, "/../", libc::strlen("/../")) == 0)
+        if(libc_strncmp(filepath, "/./",libc_strlen("/./")) == 0
+            || libc_strncmp(filepath, "/../", libc_strlen("/../")) == 0)
         {
             return false;
         }
@@ -75,7 +75,7 @@ export b8 parser_table_insert(char* filepath)
 
     while(entry != nullptr)
     {
-        if(libc::strcmp(Parser::source_file(entry->parser), filepath) == 0)
+        if(libc_strcmp(parser_source_file(entry->parser), filepath) == 0)
         {
             return false;
         }
@@ -83,9 +83,9 @@ export b8 parser_table_insert(char* filepath)
         entry = entry->next;
     }
 
-    mut ParserTableEntry* new_entry = libc::malloc(frx::sizeof(ParserTableEntry));
-    new_entry->parser = libc::malloc(frx::sizeof(Parser));
-    Parser::init(new_entry->parser, string_table_insert(filepath));
+    mut ParserTableEntry* new_entry = libc_malloc(frx::sizeof(ParserTableEntry));
+    new_entry->parser = libc_malloc(frx::sizeof(Parser));
+    parser_init(new_entry->parser, string_table_insert(filepath));
     new_entry->next = parser_table.entries[index];
 
     parser_table.entries[index] = new_entry;

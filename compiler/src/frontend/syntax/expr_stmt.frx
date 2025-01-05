@@ -2,16 +2,13 @@ export import "../ast/expr_stmt.frx";
 import "expr.frx";
 import "../core/parser.frx";
 
-namespace AST::ExprStmt
+export ExprStmt* expr_stmt_parse(Parser* parser)
 {
-    export ExprStmt* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        Expr* expr = AST::Expr::parse(parser);
+    Expr* expr = expr_parse(parser);
 
-        Parser::eat(parser, TokenType::SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
-        return new(&parser->arena, expr);
-    }
+    return expr_stmt_new(&parser->arena, expr);
 }

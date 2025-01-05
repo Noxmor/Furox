@@ -17,235 +17,229 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export enum GlobalScopeType : u8
 {
-    export enum GlobalScopeType : u8
+    INVALID,
+    IMPORT_STMT,
+    EXTERN_BLOCK,
+    STRUCT_DECL,
+    FUNC_DECL,
+    ENUM_DEF,
+    STRUCT_DEF,
+    FUNC_DEF,
+    GLOBAL_VAR_DECL,
+    GLOBAL_VAR_DEF
+}
+
+export struct GlobalScope
+{
+    GlobalScopeType type;
+
+    ImportStmt* import_stmt;
+    ExternBlock* extern_block;
+    StructDecl* struct_decl;
+    FuncDecl* func_decl;
+    EnumDef* enum_def;
+    StructDef* struct_def;
+    FuncDef* func_def;
+    GlobalVarDecl* global_var_decl;
+    GlobalVarDef* global_var_def;
+}
+
+GlobalScope* global_scope_new(Arena* arena)
+{
+    mut GlobalScope* global_scope = arena_alloc(arena, frx::sizeof(GlobalScope));
+
+    libc_memset(global_scope, 0, frx::sizeof(GlobalScope));
+    global_scope->type = GlobalScopeType::INVALID;
+
+    return global_scope;
+}
+
+export GlobalScope* global_scope_from_import_stmt(Arena* arena, ImportStmt* import_stmt)
+{
+    frx::assert(import_stmt != nullptr);
+
+    mut GlobalScope* global_scope = global_scope_new(arena);
+
+    global_scope->type = GlobalScopeType::IMPORT_STMT;
+    global_scope->import_stmt = import_stmt;
+
+    return global_scope;
+}
+
+export GlobalScope* global_scope_from_extern_block(Arena* arena, ExternBlock* extern_block)
+{
+    frx::assert(extern_block != nullptr);
+
+    mut GlobalScope* global_scope = global_scope_new(arena);
+
+    global_scope->type = GlobalScopeType::EXTERN_BLOCK;
+    global_scope->extern_block = extern_block;
+
+    return global_scope;
+}
+
+export GlobalScope* global_scope_from_struct_decl(Arena* arena, StructDecl* struct_decl)
+{
+    frx::assert(struct_decl != nullptr);
+
+    mut GlobalScope* global_scope = global_scope_new(arena);
+
+    global_scope->type = GlobalScopeType::STRUCT_DECL;
+    global_scope->struct_decl = struct_decl;
+
+    return global_scope;
+}
+
+export GlobalScope* global_scope_from_func_decl(Arena* arena, FuncDecl* func_decl)
+{
+    frx::assert(func_decl != nullptr);
+
+    mut GlobalScope* global_scope = global_scope_new(arena);
+
+    global_scope->type = GlobalScopeType::FUNC_DECL;
+    global_scope->func_decl = func_decl;
+
+    return global_scope;
+}
+
+export GlobalScope* global_scope_from_enum_def(Arena* arena, EnumDef* enum_def)
+{
+    frx::assert(enum_def != nullptr);
+
+    mut GlobalScope* global_scope = global_scope_new(arena);
+
+    global_scope->type = GlobalScopeType::ENUM_DEF;
+    global_scope->enum_def = enum_def;
+
+    return global_scope;
+}
+
+export GlobalScope* global_scope_from_struct_def(Arena* arena, StructDef* struct_def)
+{
+    frx::assert(struct_def != nullptr);
+
+    mut GlobalScope* global_scope = global_scope_new(arena);
+
+    global_scope->type = GlobalScopeType::STRUCT_DEF;
+    global_scope->struct_def = struct_def;
+
+    return global_scope;
+}
+
+export GlobalScope* global_scope_from_func_def(Arena* arena, FuncDef* func_def)
+{
+    frx::assert(func_def != nullptr);
+
+    mut GlobalScope* global_scope = global_scope_new(arena);
+
+    global_scope->type = GlobalScopeType::FUNC_DEF;
+    global_scope->func_def = func_def;
+
+    return global_scope;
+}
+
+export GlobalScope* global_scope_from_global_var_decl(Arena* arena, GlobalVarDecl* global_var_decl)
+{
+    frx::assert(global_var_decl != nullptr);
+
+    mut GlobalScope* global_scope = global_scope_new(arena);
+
+    global_scope->type = GlobalScopeType::GLOBAL_VAR_DECL;
+    global_scope->global_var_decl = global_var_decl;
+
+    return global_scope;
+}
+
+export GlobalScope* global_scope_from_global_var_def(Arena* arena, GlobalVarDef* global_var_def)
+{
+    frx::assert(global_var_def != nullptr);
+
+    mut GlobalScope* global_scope = global_scope_new(arena);
+
+    global_scope->type = GlobalScopeType::GLOBAL_VAR_DEF;
+    global_scope->global_var_def = global_var_def;
+
+    return global_scope;
+}
+
+export void global_scope_print(GlobalScope* global_scope, mut FILE* file, usize depth)
+{
+    frx::assert(global_scope != nullptr);
+
+    frx::assert(file != nullptr);
+
+    switch(global_scope->type)
     {
-        INVALID,
-        IMPORT_STMT,
-        EXTERN_BLOCK,
-        STRUCT_DECL,
-        FUNC_DECL,
-        ENUM_DEF,
-        STRUCT_DEF,
-        FUNC_DEF,
-        GLOBAL_VAR_DECL,
-        GLOBAL_VAR_DEF
-    }
-
-    export struct GlobalScope
-    {
-        GlobalScopeType type;
-
-        ImportStmt* import_stmt;
-        ExternBlock* extern_block;
-        StructDecl* struct_decl;
-        FuncDecl* func_decl;
-        EnumDef* enum_def;
-        StructDef* struct_def;
-        FuncDef* func_def;
-        GlobalVarDecl* global_var_decl;
-        GlobalVarDef* global_var_def;
-    }
-
-    namespace GlobalScope
-    {
-        GlobalScope* new(Arena* arena)
-        {
-            mut GlobalScope* global_scope = Arena::alloc(arena, frx::sizeof(GlobalScope));
-
-            libc::memset(global_scope, 0, frx::sizeof(GlobalScope));
-            global_scope->type = AST::GlobalScopeType::INVALID;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_import_stmt(Arena* arena, ImportStmt* import_stmt)
-        {
-            frx::assert(import_stmt != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::IMPORT_STMT;
-            global_scope->import_stmt = import_stmt;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_extern_block(Arena* arena, ExternBlock* extern_block)
-        {
-            frx::assert(extern_block != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::EXTERN_BLOCK;
-            global_scope->extern_block = extern_block;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_struct_decl(Arena* arena, StructDecl* struct_decl)
-        {
-            frx::assert(struct_decl != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::STRUCT_DECL;
-            global_scope->struct_decl = struct_decl;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_func_decl(Arena* arena, FuncDecl* func_decl)
-        {
-            frx::assert(func_decl != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::FUNC_DECL;
-            global_scope->func_decl = func_decl;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_enum_def(Arena* arena, EnumDef* enum_def)
-        {
-            frx::assert(enum_def != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::ENUM_DEF;
-            global_scope->enum_def = enum_def;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_struct_def(Arena* arena, StructDef* struct_def)
-        {
-            frx::assert(struct_def != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::STRUCT_DEF;
-            global_scope->struct_def = struct_def;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_func_def(Arena* arena, FuncDef* func_def)
-        {
-            frx::assert(func_def != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::FUNC_DEF;
-            global_scope->func_def = func_def;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_global_var_decl(Arena* arena, GlobalVarDecl* global_var_decl)
-        {
-            frx::assert(global_var_decl != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::GLOBAL_VAR_DECL;
-            global_scope->global_var_decl = global_var_decl;
-
-            return global_scope;
-        }
-
-        export GlobalScope* from_global_var_def(Arena* arena, GlobalVarDef* global_var_def)
-        {
-            frx::assert(global_var_def != nullptr);
-
-            mut GlobalScope* global_scope = new(arena);
-
-            global_scope->type = AST::GlobalScopeType::GLOBAL_VAR_DEF;
-            global_scope->global_var_def = global_var_def;
-
-            return global_scope;
-        }
-
-        export void print(GlobalScope* global_scope, mut FILE* file, usize depth)
-        {
-            frx::assert(global_scope != nullptr);
-
-            frx::assert(file != nullptr);
-
-            switch(global_scope->type)
+        case GlobalScopeType::IMPORT_STMT:
             {
-                case AST::GlobalScopeType::IMPORT_STMT:
-                {
-                    AST::ImportStmt::print(global_scope->import_stmt, file, depth);
+                import_stmt_print(global_scope->import_stmt, file, depth);
 
-                    break;
-                }
-
-                case AST::GlobalScopeType::EXTERN_BLOCK:
-                {
-                    AST::ExternBlock::print(global_scope->extern_block, file, depth);
-
-                    break;
-                }
-
-                case AST::GlobalScopeType::STRUCT_DECL:
-                {
-                    AST::StructDecl::print(global_scope->struct_decl, file, depth);
-
-                    break;
-                }
-
-                case AST::GlobalScopeType::FUNC_DECL:
-                {
-                    AST::FuncDecl::print(global_scope->func_decl, file, depth);
-
-                    break;
-                }
-
-                case AST::GlobalScopeType::ENUM_DEF:
-                {
-                    AST::EnumDef::print(global_scope->enum_def, file, depth);
-
-                    break;
-                }
-
-                case AST::GlobalScopeType::STRUCT_DEF:
-                {
-                    AST::StructDef::print(global_scope->struct_def, file, depth);
-
-                    break;
-                }
-
-                case AST::GlobalScopeType::FUNC_DEF:
-                {
-                    AST::FuncDef::print(global_scope->func_def, file, depth);
-
-                    break;
-                }
-
-                case AST::GlobalScopeType::GLOBAL_VAR_DECL:
-                {
-                    AST::GlobalVarDecl::print(global_scope->global_var_decl, file, depth);
-
-                    break;
-                }
-
-                case AST::GlobalScopeType::GLOBAL_VAR_DEF:
-                {
-                    AST::GlobalVarDef::print(global_scope->global_var_def, file, depth);
-
-                    break;
-                }
-
-                default:
-                {
-                    frx::assert(false);
-
-                    break;
-                }
+                break;
             }
-        }
+
+        case GlobalScopeType::EXTERN_BLOCK:
+            {
+                extern_block_print(global_scope->extern_block, file, depth);
+
+                break;
+            }
+
+        case GlobalScopeType::STRUCT_DECL:
+            {
+                struct_decl_print(global_scope->struct_decl, file, depth);
+
+                break;
+            }
+
+        case GlobalScopeType::FUNC_DECL:
+            {
+                func_decl_print(global_scope->func_decl, file, depth);
+
+                break;
+            }
+
+        case GlobalScopeType::ENUM_DEF:
+            {
+                enum_def_print(global_scope->enum_def, file, depth);
+
+                break;
+            }
+
+        case GlobalScopeType::STRUCT_DEF:
+            {
+                struct_def_print(global_scope->struct_def, file, depth);
+
+                break;
+            }
+
+        case GlobalScopeType::FUNC_DEF:
+            {
+                func_def_print(global_scope->func_def, file, depth);
+
+                break;
+            }
+
+        case GlobalScopeType::GLOBAL_VAR_DECL:
+            {
+                global_var_decl_print(global_scope->global_var_decl, file, depth);
+
+                break;
+            }
+
+        case GlobalScopeType::GLOBAL_VAR_DEF:
+            {
+                global_var_def_print(global_scope->global_var_def, file, depth);
+
+                break;
+            }
+
+        default:
+            {
+                frx::assert(false);
+
+                break;
+            }
     }
 }

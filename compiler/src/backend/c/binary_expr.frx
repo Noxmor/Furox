@@ -9,7 +9,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_binary_expr(Transpiler* transpiler, AST::BinaryExpr* expr)
+export void transpile_binary_expr(Transpiler* transpiler, BinaryExpr* expr)
 {
     frx::assert(transpiler != nullptr);
 
@@ -30,7 +30,7 @@ export void transpile_binary_expr(Transpiler* transpiler, AST::BinaryExpr* expr)
         {
             fprintf(transpiler->file, "(");
             transpile_expr(transpiler, expr->left);
-            fprintf(transpiler->file, " %s ", TokenType::to_str(expr->type));
+            fprintf(transpiler->file, " %s ", token_type_to_str(expr->type));
             transpile_expr(transpiler, expr->right);
             fprintf(transpiler->file, ")");
 

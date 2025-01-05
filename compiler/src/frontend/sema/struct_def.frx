@@ -5,54 +5,48 @@ import "../symbols/struct.frx";
 import "../ast/struct_def.frx";
 import "../../core/list.frx";
 
-namespace AST::StructField
+void struct_field_sema(Parser* parser, StructField* field)
 {
-    void sema(Parser* parser, StructField* field)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        frx::assert(field != nullptr);
+    frx::assert(field != nullptr);
 
-        AST::TypeSpecifier::sema(parser, field->type);
-    }
+    type_specifier_sema(parser, field->type);
 }
 
-namespace AST::StructDef
+export void struct_def_sema(mut Parser* parser, mut StructDef* struct_def)
 {
-    export void sema(mut Parser* parser, mut StructDef* struct_def)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        frx::assert(struct_def != nullptr);
+    frx::assert(struct_def != nullptr);
 
-        StructSymbol* symbol = &struct_def->symbol;
+    StructSymbol* symbol = &struct_def->symbol;
 
-        b8 is_redefinition = false;
+    b8 is_redefinition = false;
 
-        mut usize i;
-        for(i = 0; i < List::size(&parser->visible_parsers)
+    mut usize i;
+    for(i = 0; i < list_size(&parser->visible_parsers)
             && !struct_def->is_redefinition; i = i + 1)
-        {
-            Parser* visible_parser = List::get(&parser->visible_parsers, i);
-            StructSymbol* imported_symbol = struct_table_find(
+    {
+        Parser* visible_parser = list_get(&parser->visible_parsers, i);
+        StructSymbol* imported_symbol = struct_table_find(
                 &visible_parser->struct_table, symbol->ns, symbol->name);
 
-            struct_def->is_redefinition = imported_symbol != nullptr
-                && imported_symbol->exported;
-        }
+        struct_def->is_redefinition = imported_symbol != nullptr
+            && imported_symbol->exported;
+    }
 
-        if(struct_def->is_redefinition)
-        {
-            error_struct_def_redefinition(Parser::source_file(parser),
+    if(struct_def->is_redefinition)
+    {
+        error_struct_def_redefinition(parser_source_file(parser),
                 struct_def->range.start, symbol->name);
 
-            Parser::fail(parser);
-        }
+        parser_fail(parser);
+    }
 
-        for(i = 0; i < List::size(&symbol->fields); i = i + 1)
-        {
-            StructField* field = List::get(&symbol->fields, i);
-            AST::StructField::sema(parser, field);
-        }
+    for(i = 0; i < list_size(&symbol->fields); i = i + 1)
+    {
+        StructField* field = list_get(&symbol->fields, i);
+        struct_field_sema(parser, field);
     }
 }

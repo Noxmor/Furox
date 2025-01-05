@@ -3,7 +3,7 @@ import "assert.frx";
 import "sizeof.frx";
 import "../../frontend/ast/internal_func_call.frx";
 
-export void transpile_internal_func_call(Transpiler* transpiler, AST::InternalFuncCall* internal_func_call)
+export void transpile_internal_func_call(Transpiler* transpiler, InternalFuncCall* internal_func_call)
 {
     frx::assert(transpiler != nullptr);
 
@@ -11,14 +11,14 @@ export void transpile_internal_func_call(Transpiler* transpiler, AST::InternalFu
 
     switch(internal_func_call->type)
     {
-        case AST::InternalFuncCallType::ASSERT:
+        case InternalFuncCallType::ASSERT:
         {
             transpile_assert(transpiler, internal_func_call->assert_node);
 
             break;
         }
 
-        case AST::InternalFuncCallType::SIZEOF:
+        case InternalFuncCallType::SIZEOF:
         {
             transpile_sizeof(transpiler, internal_func_call->sizeof_node);
 

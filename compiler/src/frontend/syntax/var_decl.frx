@@ -4,18 +4,15 @@ import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/var.frx";
 
-namespace AST::VarDecl
+export VarDecl* var_decl_parse(Parser* parser, TypeSpecifier* type, char* name, b8 mutable)
 {
-    export VarDecl* parse(Parser* parser, TypeSpecifier* type, char* name, b8 mutable)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        VarDecl* var_decl = new(&parser->arena, type, parser->current_scope, name, mutable);
+    VarDecl* var_decl = var_decl_new(&parser->arena, type, parser->current_scope, name, mutable);
 
-        var_table_insert(&parser->var_table, &var_decl->symbol);
+    var_table_insert(&parser->var_table, &var_decl->symbol);
 
-        Parser::eat(parser, TokenType::SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
-        return var_decl;
-    }
+    return var_decl;
 }

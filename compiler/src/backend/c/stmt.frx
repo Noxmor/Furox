@@ -13,88 +13,88 @@ import "switch_stmt.frx";
 import "scope.frx";
 import "../../frontend/ast/stmt.frx";
 
-export void transpile_stmt(Transpiler* transpiler, AST::Stmt* stmt)
+export void transpile_stmt(Transpiler* transpiler, Stmt* stmt)
 {
     switch(stmt->type)
     {
-        case AST::StmtType::BREAK_STMT:
+        case StmtType::BREAK_STMT:
         {
             transpile_break_stmt(transpiler, stmt->break_stmt);
 
             break;
         }
 
-        case AST::StmtType::CONTINUE_STMT:
+        case StmtType::CONTINUE_STMT:
         {
             transpile_continue_stmt(transpiler, stmt->continue_stmt);
 
             break;
         }
 
-        case AST::StmtType::RETURN_STMT:
+        case StmtType::RETURN_STMT:
         {
             transpile_return_stmt(transpiler, stmt->return_stmt);
 
             break;
         }
 
-        case AST::StmtType::EXPR_STMT:
+        case StmtType::EXPR_STMT:
         {
             transpile_expr_stmt(transpiler, stmt->expr_stmt);
 
             break;
         }
 
-        case AST::StmtType::VAR_DECL:
+        case StmtType::VAR_DECL:
         {
             transpile_var_decl(transpiler, stmt->var_decl);
 
             break;
         }
 
-        case AST::StmtType::VAR_DEF:
+        case StmtType::VAR_DEF:
         {
             transpile_var_def(transpiler, stmt->var_def);
 
             break;
         }
 
-        case AST::StmtType::IF_STMT:
+        case StmtType::IF_STMT:
         {
             transpile_if_stmt(transpiler, stmt->if_stmt);
 
             break;
         }
 
-        case AST::StmtType::FOR_LOOP:
+        case StmtType::FOR_LOOP:
         {
             transpile_for_loop(transpiler, stmt->for_loop);
 
             break;
         }
 
-        case AST::StmtType::WHILE_LOOP:
+        case StmtType::WHILE_LOOP:
         {
             transpile_while_loop(transpiler, stmt->while_loop);
 
             break;
         }
 
-        case AST::StmtType::DO_WHILE_LOOP:
+        case StmtType::DO_WHILE_LOOP:
         {
             transpile_do_while_loop(transpiler, stmt->do_while_loop);
 
             break;
         }
 
-        case AST::StmtType::SWITCH_STMT:
+        case StmtType::SWITCH_STMT:
         {
             transpile_switch_stmt(transpiler, stmt->switch_stmt);
 
             break;
         }
 
-        case AST::StmtType::SCOPE:
+        case StmtType::SCOPE:
         {
             transpile_scope(transpiler, stmt->scope);
 

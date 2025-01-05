@@ -1,14 +1,11 @@
 export import "../ast/continue_stmt.frx";
 import "../core/parser.frx";
 
-namespace AST::ContinueStmt
+export ContinueStmt* continue_stmt_parse(Parser* parser)
 {
-    export ContinueStmt* parse(Parser* parser)
-    {
-        Parser::eat(parser, TokenType::KW_CONTINUE);
+    parser_eat(parser, TokenType::KW_CONTINUE);
 
-        Parser::eat(parser, TokenType::SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
-        return new(&parser->arena);
-    }
+    return continue_stmt_new(&parser->arena);
 }

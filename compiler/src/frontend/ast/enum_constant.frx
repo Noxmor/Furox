@@ -12,49 +12,43 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct EnumConstant
 {
-    export struct EnumConstant
-    {
-        EnumSymbol* symbol;
+    EnumSymbol* symbol;
 
-        core::Namespace* enum_namespace;
-        char* enum_name;
-        char* name;
-        core::Scope* scope;
-    }
+    CoreNamespace* enum_namespace;
+    char* enum_name;
+    char* name;
+    CoreScope* scope;
+}
 
-    namespace EnumConstant
-    {
-        export EnumConstant* new(Arena* arena, core::Namespace* enum_namespace,
-            char* enum_name, char* name, core::Scope* scope)
-        {
-            frx::assert(enum_name != nullptr);
+export EnumConstant* enum_constant_new(Arena* arena, CoreNamespace* enum_namespace,
+        char* enum_name, char* name, CoreScope* scope)
+{
+    frx::assert(enum_name != nullptr);
 
-            frx::assert(name != nullptr);
+    frx::assert(name != nullptr);
 
-            mut EnumConstant* constant = Arena::alloc(arena, frx::sizeof(EnumConstant));
+    mut EnumConstant* constant = arena_alloc(arena, frx::sizeof(EnumConstant));
 
-            constant->symbol = nullptr;
-            constant->enum_namespace = enum_namespace;
-            constant->enum_name = enum_name;
-            constant->name = name;
-            constant->scope = scope;
+    constant->symbol = nullptr;
+    constant->enum_namespace = enum_namespace;
+    constant->enum_name = enum_name;
+    constant->name = name;
+    constant->scope = scope;
 
-            return constant;
-        }
+    return constant;
+}
 
-        export void print(EnumConstant* constant, mut FILE* file, usize depth)
-        {
-            frx::assert(constant != nullptr);
+export void enum_constant_print(EnumConstant* constant, mut FILE* file, usize depth)
+{
+    frx::assert(constant != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s (", "enum-constant");
-            AST::NamespaceResolution::print(file, constant->enum_namespace);
-            fprintf(file, "%s::%s)\n", constant->enum_name, constant->name);
-        }
-    }
+    fprintf(file, "%s (", "enum-constant");
+    namespace_resolution_print(file, constant->enum_namespace);
+    fprintf(file, "%s::%s)\n", constant->enum_name, constant->name);
 }

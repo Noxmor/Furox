@@ -6,16 +6,16 @@ import "../../core/hash.frx";
 
 export struct VarSymbol
 {
-    core::Namespace* ns;
-    AST::TypeSpecifier* type;
-    core::Scope* scope;
+    CoreNamespace* ns;
+    TypeSpecifier* type;
+    CoreScope* scope;
     char* name;
     b8 global;
     b8 mutable;
 }
 
-export void var_symbol_init(mut VarSymbol* symbol, core::Namespace* ns,
-    AST::TypeSpecifier* type, core::Scope* scope, char* name, b8 global, b8 mutable)
+export void var_symbol_init(mut VarSymbol* symbol, CoreNamespace* ns,
+    TypeSpecifier* type, CoreScope* scope, char* name, b8 global, b8 mutable)
 {
     frx::assert(symbol != nullptr);
 
@@ -53,10 +53,10 @@ export void var_table_init(VarTable* table)
 {
     frx::assert(table != nullptr);
 
-    libc::memset(table, 0, frx::sizeof(VarTable));
+    libc_memset(table, 0, frx::sizeof(VarTable));
 }
 
-export VarSymbol* var_table_find_by_namespace(VarTable* table, core::Namespace* ns,
+export VarSymbol* var_table_find_by_namespace(VarTable* table, CoreNamespace* ns,
     char* name)
 {
     frx::assert(table != nullptr);
@@ -70,7 +70,7 @@ export VarSymbol* var_table_find_by_namespace(VarTable* table, core::Namespace* 
     {
         VarSymbol* symbol = entry->symbol;
 
-        if(libc::strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(libc_strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -81,7 +81,7 @@ export VarSymbol* var_table_find_by_namespace(VarTable* table, core::Namespace* 
     return nullptr;
 }
 
-export VarSymbol* var_table_find_by_scope(VarTable* table, core::Scope* scope,
+export VarSymbol* var_table_find_by_scope(VarTable* table, CoreScope* scope,
     char* name)
 {
     frx::assert(table != nullptr);
@@ -97,7 +97,7 @@ export VarSymbol* var_table_find_by_scope(VarTable* table, core::Scope* scope,
     {
         VarSymbol* symbol = entry->symbol;
 
-        if(libc::strcmp(symbol->name, name) == 0
+        if(libc_strcmp(symbol->name, name) == 0
             && scope_is_child_of(scope, symbol->scope))
         {
             return symbol;
@@ -122,7 +122,7 @@ export b8 var_table_insert(VarTable* table, VarSymbol* symbol)
     {
         VarSymbol* existing_symbol = entry->symbol;
 
-        if(libc::strcmp(existing_symbol->name, symbol->name) == 0
+        if(libc_strcmp(existing_symbol->name, symbol->name) == 0
             && scope_is_child_of(symbol->scope, existing_symbol->scope))
         {
             return false;
@@ -131,7 +131,7 @@ export b8 var_table_insert(VarTable* table, VarSymbol* symbol)
         entry = entry->next;
     }
 
-    mut VarTableEntry* new_entry = libc::malloc(frx::sizeof(VarTableEntry));
+    mut VarTableEntry* new_entry = libc_malloc(frx::sizeof(VarTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

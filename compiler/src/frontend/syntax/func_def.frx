@@ -7,34 +7,31 @@ import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/func.frx";
 
-namespace AST::FuncDef
+export FuncDef* func_def_parse(Parser* parser, TypeSpecifier* return_type, b8 exported)
 {
-    export FuncDef* parse(Parser* parser, TypeSpecifier* return_type, b8 exported)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        char* name = parser->token->identifier;
+    char* name = parser->token->identifier;
 
-        mut FuncDef* func_def = AST::FuncDef::new(&parser->arena,
+    mut FuncDef* func_def = func_def_new(&parser->arena,
             parser->current_scope, nullptr, name, return_type,
             exported);
 
-        func_def->is_redefinition = !func_table_insert(&parser->func_table,
+    func_def->is_redefinition = !func_table_insert(&parser->func_table,
             &func_def->symbol);
 
-        Parser::eat(parser, TokenType::IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
-        Parser::push_scope(parser);
+    parser_push_scope(parser);
 
-        func_def->params = AST::FuncParams::parse(parser);
+    func_def->params = func_params_parse(parser);
 
-        func_def->body = AST::Scope::parse(parser);
+    func_def->body = scope_parse(parser);
 
-        Parser::pop_scope(parser);
+    parser_pop_scope(parser);
 
-        func_def->range.start = return_type->range.start;
-        func_def->range.end = func_def->body->range.end;
+    func_def->range.start = return_type->range.start;
+    func_def->range.end = func_def->body->range.end;
 
-        return func_def;
-    }
+    return func_def;
 }

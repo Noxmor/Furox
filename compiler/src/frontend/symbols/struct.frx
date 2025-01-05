@@ -6,16 +6,16 @@ import "../../core/hash.frx";
 
 export struct StructSymbol
 {
-    core::Scope* scope;
-    core::Namespace* ns;
+    CoreScope* scope;
+    CoreNamespace* ns;
     char* name;
     List fields;
     b8 exported;
     b8 external;
 }
 
-export void struct_symbol_init(mut StructSymbol* symbol, core::Scope* scope,
-    core::Namespace* ns, char* name, b8 exported, b8 external)
+export void struct_symbol_init(mut StructSymbol* symbol, CoreScope* scope,
+    CoreNamespace* ns, char* name, b8 exported, b8 external)
 {
     frx::assert(symbol != nullptr);
 
@@ -26,7 +26,7 @@ export void struct_symbol_init(mut StructSymbol* symbol, core::Scope* scope,
     symbol->scope = scope;
     symbol->ns = ns;
     symbol->name = name;
-    List::init(&symbol->fields);
+    list_init(&symbol->fields);
     symbol->exported = exported;
     symbol->external = external;
 }
@@ -51,10 +51,10 @@ export void struct_table_init(StructTable* table)
 {
     frx::assert(table != nullptr);
 
-    libc::memset(table, 0, frx::sizeof(StructTable));
+    libc_memset(table, 0, frx::sizeof(StructTable));
 }
 
-export StructSymbol* struct_table_find_r(StructTable* table, mut core::Namespace* ns,
+export StructSymbol* struct_table_find_r(StructTable* table, mut CoreNamespace* ns,
     char* name)
 {
     mut StructSymbol* symbol = struct_table_find(table, ns, name);
@@ -67,7 +67,7 @@ export StructSymbol* struct_table_find_r(StructTable* table, mut core::Namespace
     return symbol;
 }
 
-export StructSymbol* struct_table_find(StructTable* table, core::Namespace* ns,
+export StructSymbol* struct_table_find(StructTable* table, CoreNamespace* ns,
     char* name)
 {
     frx::assert(table != nullptr);
@@ -81,7 +81,7 @@ export StructSymbol* struct_table_find(StructTable* table, core::Namespace* ns,
     {
         StructSymbol* symbol = entry->symbol;
 
-        if(libc::strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(libc_strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -105,7 +105,7 @@ export b8 struct_table_insert(StructTable* table, StructSymbol* symbol)
     {
         StructSymbol* existing_symbol = entry->symbol;
 
-        if(libc::strcmp(existing_symbol->name, symbol->name) == 0
+        if(libc_strcmp(existing_symbol->name, symbol->name) == 0
             && namespace_equals(existing_symbol->ns, symbol->ns))
         {
             return false;
@@ -114,7 +114,7 @@ export b8 struct_table_insert(StructTable* table, StructSymbol* symbol)
         entry = entry->next;
     }
 
-    mut StructTableEntry* new_entry = libc::malloc(frx::sizeof(StructTableEntry));
+    mut StructTableEntry* new_entry = libc_malloc(frx::sizeof(StructTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

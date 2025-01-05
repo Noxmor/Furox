@@ -10,7 +10,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_sizeof(Transpiler* transpiler, AST::Sizeof* sizeof_node)
+export void transpile_sizeof(Transpiler* transpiler, Sizeof* sizeof_node)
 {
     frx::assert(transpiler != nullptr);
 
@@ -21,7 +21,7 @@ export void transpile_sizeof(Transpiler* transpiler, AST::Sizeof* sizeof_node)
     if(sizeof_node->primitive_type != TokenType::EOF)
     {
         fprintf(transpiler->file, "%s",
-            TokenType::to_str(sizeof_node->primitive_type));
+            token_type_to_str(sizeof_node->primitive_type));
     }
     else if(sizeof_node->enum_type != nullptr)
     {

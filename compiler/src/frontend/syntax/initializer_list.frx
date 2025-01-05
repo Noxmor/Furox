@@ -3,29 +3,26 @@ import "expr.frx";
 import "../core/parser.frx";
 import "../../core/list.frx";
 
-namespace AST::InitializerList
+export InitializerList* initializer_list_parse(Parser* parser)
 {
-    export InitializerList* parse(Parser* parser)
+    frx::assert(parser != nullptr);
+
+    parser_eat(parser, TokenType::LBRACE);
+
+    InitializerList* list = initializer_list_new(&parser->arena);
+
+    while(parser_loop_until(parser, TokenType::RBRACE))
     {
-        frx::assert(parser != nullptr);
-
-        Parser::eat(parser, TokenType::LBRACE);
-
-        InitializerList* list = new(&parser->arena);
-
-        while(Parser::loop_until(parser, TokenType::RBRACE))
+        if(list_size(&list->values) > 0)
         {
-            if(List::size(&list->values) > 0)
-            {
-                Parser::eat(parser, TokenType::COMMA);
-            }
-
-            Expr* value = AST::Expr::parse(parser);
-            List::push(&list->values, value);
+            parser_eat(parser, TokenType::COMMA);
         }
 
-        Parser::eat(parser, TokenType::RBRACE);
-
-        return list;
+        Expr* value = expr_parse(parser);
+        list_push(&list->values, value);
     }
+
+    parser_eat(parser, TokenType::RBRACE);
+
+    return list;
 }

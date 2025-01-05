@@ -1,14 +1,11 @@
 export import "../ast/break_stmt.frx";
 import "../core/parser.frx";
 
-namespace AST::BreakStmt
+export BreakStmt* break_stmt_parse(Parser* parser)
 {
-    export BreakStmt* parse(Parser* parser)
-    {
-        Parser::eat(parser, TokenType::KW_BREAK);
+    parser_eat(parser, TokenType::KW_BREAK);
 
-        Parser::eat(parser, TokenType::SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
-        return new(&parser->arena);
-    }
+    return break_stmt_new(&parser->arena);
 }

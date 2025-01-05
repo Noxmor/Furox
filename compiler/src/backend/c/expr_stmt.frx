@@ -9,7 +9,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_expr_stmt(Transpiler* transpiler, AST::ExprStmt* expr_stmt)
+export void transpile_expr_stmt(Transpiler* transpiler, ExprStmt* expr_stmt)
 {
     frx::assert(transpiler != nullptr);
 

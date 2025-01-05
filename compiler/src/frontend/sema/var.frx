@@ -3,32 +3,29 @@ import "../core/parser.frx";
 import "../symbols/var.frx";
 import "../ast/var.frx";
 
-namespace AST::Var
+export void var_sema(mut Parser* parser, mut Var* var)
 {
-    export void sema(mut Parser* parser, mut Var* var)
+    frx::assert(parser != nullptr);
+
+    frx::assert(var != nullptr);
+
+    if(var->ns == nullptr)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(var != nullptr);
-
-        if(var->ns == nullptr)
-        {
-            var->symbol = var_table_find_by_scope(&parser->var_table, var->scope,
+        var->symbol = var_table_find_by_scope(&parser->var_table, var->scope,
                 var->name);
-        }
-        else
-        {
-            var->symbol = var_table_find_by_namespace(&parser->var_table, var->ns,
+    }
+    else
+    {
+        var->symbol = var_table_find_by_namespace(&parser->var_table, var->ns,
                 var->name);
-        }
+    }
 
-        if(var->symbol == nullptr)
-        {
-            //FIXME: Print the correct location, this is only a placeholder
-            SourceLocation loc;
-            error_undefined_var(Parser::source_file(parser), loc, var->name);
+    if(var->symbol == nullptr)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_undefined_var(parser_source_file(parser), loc, var->name);
 
-            Parser::fail(parser);
-        }
+        parser_fail(parser);
     }
 }

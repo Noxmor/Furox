@@ -9,7 +9,7 @@ extern
 }
 
 export void transpile_int_literal(Transpiler* transpiler,
-    AST::IntLiteral* literal)
+    IntLiteral* literal)
 {
     frx::assert(transpiler != nullptr);
 

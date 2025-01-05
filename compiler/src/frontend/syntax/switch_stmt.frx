@@ -4,51 +4,45 @@ import "scope.frx";
 import "../core/parser.frx";
 import "../../core/list.frx";
 
-namespace AST::SwitchCase
+SwitchCase* switch_case_parse(Parser* parser)
 {
-    SwitchCase* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        Parser::eat(parser, TokenType::KW_CASE);
-        Expr* value = AST::Expr::parse(parser);
-        Parser::eat(parser, TokenType::COLON);
-        Scope* scope = AST::Scope::parse(parser);
+    parser_eat(parser, TokenType::KW_CASE);
+    Expr* value = expr_parse(parser);
+    parser_eat(parser, TokenType::COLON);
+    Scope* scope = scope_parse(parser);
 
-        return new(&parser->arena, value, scope);
-    }
+    return switch_case_new(&parser->arena, value, scope);
 }
 
-namespace AST::SwitchStmt
+export SwitchStmt* switch_stmt_parse(Parser* parser)
 {
-    export SwitchStmt* parse(Parser* parser)
+    frx::assert(parser != nullptr);
+
+    parser_eat(parser, TokenType::KW_SWITCH);
+    parser_eat(parser, TokenType::LPAREN);
+    Expr* value = expr_parse(parser);
+    parser_eat(parser, TokenType::RPAREN);
+
+    mut SwitchStmt* switch_stmt = switch_stmt_new(&parser->arena, value);
+
+    parser_eat(parser, TokenType::LBRACE);
+    while(parser->token->type == TokenType::KW_CASE)
     {
-        frx::assert(parser != nullptr);
-
-        Parser::eat(parser, TokenType::KW_SWITCH);
-        Parser::eat(parser, TokenType::LPAREN);
-        Expr* value = AST::Expr::parse(parser);
-        Parser::eat(parser, TokenType::RPAREN);
-
-        mut SwitchStmt* switch_stmt = new(&parser->arena, value);
-
-        Parser::eat(parser, TokenType::LBRACE);
-        while(parser->token->type == TokenType::KW_CASE)
-        {
-            SwitchCase* switch_case = AST::SwitchCase::parse(parser);
-            add_case(switch_stmt, switch_case);
-        }
-
-        if(parser->token->type == TokenType::KW_DEFAULT)
-        {
-            Parser::eat(parser, TokenType::KW_DEFAULT);
-            Parser::eat(parser, TokenType::COLON);
-
-            set_default_scope(switch_stmt, AST::Scope::parse(parser));
-        }
-
-        Parser::eat(parser, TokenType::RBRACE);
-
-        return switch_stmt;
+        SwitchCase* switch_case = switch_case_parse(parser);
+        switch_stmt_add_case(switch_stmt, switch_case);
     }
+
+    if(parser->token->type == TokenType::KW_DEFAULT)
+    {
+        parser_eat(parser, TokenType::KW_DEFAULT);
+        parser_eat(parser, TokenType::COLON);
+
+        switch_stmt_set_default_scope(switch_stmt, scope_parse(parser));
+    }
+
+    parser_eat(parser, TokenType::RBRACE);
+
+    return switch_stmt;
 }

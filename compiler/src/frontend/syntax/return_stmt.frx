@@ -2,25 +2,22 @@ export import "../ast/return_stmt.frx";
 import "expr.frx";
 import "../core/parser.frx";
 
-namespace AST::ReturnStmt
+export ReturnStmt* return_stmt_parse(Parser* parser)
 {
-    export ReturnStmt* parse(Parser* parser)
+    frx::assert(parser != nullptr);
+
+    parser_eat(parser, TokenType::KW_RETURN);
+
+    if(parser->token->type != TokenType::SEMICOLON)
     {
-        frx::assert(parser != nullptr);
+        Expr* value = expr_parse(parser);
 
-        Parser::eat(parser, TokenType::KW_RETURN);
+        parser_eat(parser, TokenType::SEMICOLON);
 
-        if(parser->token->type != TokenType::SEMICOLON)
-        {
-            Expr* value = AST::Expr::parse(parser);
-
-            Parser::eat(parser, TokenType::SEMICOLON);
-
-            return with_value(&parser->arena, value);
-        }
-
-        Parser::eat(parser, TokenType::SEMICOLON);
-
-        return new(&parser->arena);
+        return return_stmt_with_value(&parser->arena, value);
     }
+
+    parser_eat(parser, TokenType::SEMICOLON);
+
+    return return_stmt_new(&parser->arena);
 }

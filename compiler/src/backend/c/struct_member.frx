@@ -9,7 +9,7 @@ extern
 }
 
 export void transpile_struct_member(Transpiler* transpiler,
-    AST::StructMember* member)
+    StructMember* member)
 {
     frx::assert(transpiler != nullptr);
 

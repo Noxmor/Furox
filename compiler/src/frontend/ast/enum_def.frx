@@ -10,110 +10,100 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct EnumConstantDef
 {
-    export struct EnumConstantDef
+    char* name;
+    Expr* value;
+}
+
+export EnumConstantDef* enum_constant_def_new(Arena* arena, char* name, Expr* value)
+{
+    frx::assert(name != nullptr);
+
+    mut EnumConstantDef* constant = arena_alloc(arena, frx::sizeof(EnumConstantDef));
+
+    constant->name = name;
+    constant->value = value;
+
+    return constant;
+}
+
+export struct EnumDef
+{
+    SourceRange range;
+
+    EnumSymbol symbol;
+
+    b8 is_redefinition;
+}
+
+export EnumDef* enum_def_new(Arena* arena, CoreScope* scope, CoreNamespace* ns,
+        char* name, TokenType type, b8 exported)
+{
+    mut EnumDef* enum_def = arena_alloc(arena, frx::sizeof(EnumDef));
+
+    enum_symbol_init(&enum_def->symbol, type, scope, ns, name, exported);
+
+    enum_def->is_redefinition = false;
+
+    return enum_def;
+}
+
+export void enum_def_add_constant(Arena* arena, EnumDef* enum_def, mut EnumConstantDef* constant)
+{
+    frx::assert(enum_def != nullptr);
+
+    frx::assert(constant != nullptr);
+
+    List* constants = &enum_def->symbol.constants;
+
+    if(constant->value == nullptr)
     {
-        char* name;
-        Expr* value;
+        mut Expr* new_value = nullptr;
+
+        if(list_size(constants) == 0)
+        {
+            IntLiteral* literal = int_literal_new(arena, 0);
+            new_value = expr_from_int_literal(arena, literal);
+        }
+        else
+        {
+            IntLiteral* literal = int_literal_new(arena, 1);
+
+            EnumConstantDef* last_constant = list_get(constants,
+                    list_size(constants) - 1);
+
+            Expr* left = last_constant->value;
+            Expr* right = expr_from_int_literal(arena, literal);
+
+            BinaryExpr* expr = binary_expr_new(arena, TokenType::PLUS,
+                    Operator::ADD, left, right);
+
+            new_value = expr_from_binary_expr(arena, expr);
+        }
+
+        constant->value = new_value;
     }
 
-    namespace EnumConstantDef
+    list_push(constants, constant);
+}
+
+export void enum_def_print(EnumDef* enum_def, mut FILE* file, usize depth)
+{
+    frx::assert(enum_def != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_depth(file, depth);
+
+    fprintf(file, "%s (%s)\n", "enum-definition", enum_def->symbol.name);
+
+    mut usize i;
+    for(i = 0; i < list_size(&enum_def->symbol.constants); i = i + 1)
     {
-        export EnumConstantDef* new(Arena* arena, char* name, Expr* value)
-        {
-            frx::assert(name != nullptr);
+        EnumConstantDef* constant = list_get(&enum_def->symbol.constants, i);
 
-            mut EnumConstantDef* constant = Arena::alloc(arena, frx::sizeof(EnumConstantDef));
-
-            constant->name = name;
-            constant->value = value;
-
-            return constant;
-        }
-    }
-
-    export struct EnumDef
-    {
-        SourceRange range;
-
-        EnumSymbol symbol;
-
-        b8 is_redefinition;
-    }
-
-    namespace EnumDef
-    {
-        export EnumDef* new(Arena* arena, core::Scope* scope, core::Namespace* ns,
-            char* name, TokenType type, b8 exported)
-        {
-            mut EnumDef* enum_def = Arena::alloc(arena, frx::sizeof(EnumDef));
-
-            enum_symbol_init(&enum_def->symbol, type, scope, ns, name, exported);
-
-            enum_def->is_redefinition = false;
-
-            return enum_def;
-        }
-
-        export void add_constant(Arena* arena, EnumDef* enum_def,
-            mut EnumConstantDef* constant)
-        {
-            frx::assert(enum_def != nullptr);
-
-            frx::assert(constant != nullptr);
-
-            List* constants = &enum_def->symbol.constants;
-
-            if(constant->value == nullptr)
-            {
-                mut Expr* new_value = nullptr;
-
-                if(List::size(constants) == 0)
-                {
-                    IntLiteral* literal = AST::IntLiteral::new(arena, 0);
-                    new_value = AST::Expr::from_int_literal(arena, literal);
-                }
-                else
-                {
-                    IntLiteral* literal = AST::IntLiteral::new(arena, 1);
-
-                    EnumConstantDef* last_constant = List::get(constants,
-                        List::size(constants) - 1);
-
-                    Expr* left = last_constant->value;
-                    Expr* right = AST::Expr::from_int_literal(arena, literal);
-
-                    BinaryExpr* expr = AST::BinaryExpr::new(arena, TokenType::PLUS,
-                        Operator::ADD, left, right);
-
-                    new_value = AST::Expr::from_binary_expr(arena, expr);
-                }
-
-                constant->value = new_value;
-            }
-
-            List::push(constants, constant);
-        }
-
-        export void print(EnumDef* enum_def, mut FILE* file, usize depth)
-        {
-            frx::assert(enum_def != nullptr);
-
-            frx::assert(file != nullptr);
-
-            print_depth(file, depth);
-
-            fprintf(file, "%s (%s)\n", "enum-definition", enum_def->symbol.name);
-
-            mut usize i;
-            for(i = 0; i < List::size(&enum_def->symbol.constants); i = i + 1)
-            {
-                EnumConstantDef* constant = List::get(&enum_def->symbol.constants, i);
-
-                print_depth(file, depth + 1);
-                fprintf(file, "%s\n", constant->name);
-            }
-        }
+        print_depth(file, depth + 1);
+        fprintf(file, "%s\n", constant->name);
     }
 }

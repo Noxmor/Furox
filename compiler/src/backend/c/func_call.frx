@@ -11,7 +11,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_func_call(Transpiler* transpiler, AST::FuncCall* func_call)
+export void transpile_func_call(Transpiler* transpiler, FuncCall* func_call)
 {
     frx::assert(transpiler != nullptr);
 
@@ -28,12 +28,12 @@ export void transpile_func_call(Transpiler* transpiler, AST::FuncCall* func_call
     fprintf(transpiler->file, "%s(", name);
 
     mut usize i;
-    for(i = 0; i < List::size(&func_call->args); i = i + 1)
+    for(i = 0; i < list_size(&func_call->args); i = i + 1)
     {
-        AST::Expr* arg = List::get(&func_call->args, i);
+        Expr* arg = list_get(&func_call->args, i);
         transpile_expr(transpiler, arg);
 
-        if(i < List::size(&func_call->args) - 1)
+        if(i < list_size(&func_call->args) - 1)
         {
             fprintf(transpiler->file, ", ");
         }

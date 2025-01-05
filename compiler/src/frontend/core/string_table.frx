@@ -28,7 +28,7 @@ export char* string_table_insert(char* str)
 
     while(entry != nullptr)
     {
-        if(libc::strcmp(entry->str, str) == 0)
+        if(libc_strcmp(entry->str, str) == 0)
         {
             return entry->str;
         }
@@ -36,8 +36,8 @@ export char* string_table_insert(char* str)
         entry = entry->next;
     }
 
-    mut StringTableEntry* new_entry = libc::malloc(frx::sizeof(StringTableEntry));
-    new_entry->str = libc::strdup(str);
+    mut StringTableEntry* new_entry = libc_malloc(frx::sizeof(StringTableEntry));
+    new_entry->str = libc_strdup(str);
     new_entry->next = string_table.entries[index];
 
     string_table.entries[index] = new_entry;

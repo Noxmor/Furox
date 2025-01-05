@@ -2,22 +2,19 @@ import "../core/errors.frx";
 import "../core/parser.frx";
 import "../ast/import_stmt.frx";
 
-namespace AST::ImportStmt
+export void import_stmt_sema(mut Parser* parser, ImportStmt* import_stmt)
 {
-    export void sema(mut Parser* parser, ImportStmt* import_stmt)
+    frx::assert(parser != nullptr);
+
+    frx::assert(import_stmt != nullptr);
+
+    if(import_stmt->imported_parser == nullptr)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(import_stmt != nullptr);
-
-        if(import_stmt->imported_parser == nullptr)
-        {
-            //FIXME: Print the correct location, this is only a placeholder
-            SourceLocation loc;
-            error_import_stmt_invalid_filepath(Parser::source_file(parser), loc,
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_import_stmt_invalid_filepath(parser_source_file(parser), loc,
                 import_stmt->filepath);
 
-            Parser::fail(parser);
-        }
+        parser_fail(parser);
     }
 }

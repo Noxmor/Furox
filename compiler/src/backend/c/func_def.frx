@@ -12,7 +12,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_func_def(Transpiler* transpiler, AST::FuncDef* func_def)
+export void transpile_func_def(Transpiler* transpiler, FuncDef* func_def)
 {
     frx::assert(transpiler != nullptr);
 

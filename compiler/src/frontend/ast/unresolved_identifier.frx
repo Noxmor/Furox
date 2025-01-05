@@ -12,46 +12,40 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct UnresolvedIdentifier
 {
-    export struct UnresolvedIdentifier
-    {
-        SourceRange range;
+    SourceRange range;
 
-        NamespaceResolution* resolution;
-        char* name;
-        core::Scope* scope;
-    }
+    NamespaceResolution* resolution;
+    char* name;
+    CoreScope* scope;
+}
 
-    namespace UnresolvedIdentifier
-    {
-        export UnresolvedIdentifier* new(Arena* arena, NamespaceResolution* resolution,
-            char* name, core::Scope* scope)
-        {
-            frx::assert(name != nullptr);
+export UnresolvedIdentifier* unresolved_identifier_new(Arena* arena, NamespaceResolution* resolution,
+        char* name, CoreScope* scope)
+{
+    frx::assert(name != nullptr);
 
-            mut UnresolvedIdentifier* unresolved_identifier = Arena::alloc(arena, frx::sizeof(UnresolvedIdentifier));
+    mut UnresolvedIdentifier* unresolved_identifier = arena_alloc(arena, frx::sizeof(UnresolvedIdentifier));
 
-            unresolved_identifier->resolution = resolution;
-            unresolved_identifier->name = name;
-            unresolved_identifier->scope = scope;
+    unresolved_identifier->resolution = resolution;
+    unresolved_identifier->name = name;
+    unresolved_identifier->scope = scope;
 
-            return unresolved_identifier;
-        }
+    return unresolved_identifier;
+}
 
-        export void print(UnresolvedIdentifier* unresolved_identifier, mut FILE* file, usize depth)
-        {
-            frx::assert(unresolved_identifier != nullptr);
+export void unresolved_identifier_print(UnresolvedIdentifier* unresolved_identifier, mut FILE* file, usize depth)
+{
+    frx::assert(unresolved_identifier != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s (", "unresolved-identifier");
+    fprintf(file, "%s (", "unresolved-identifier");
 
-            AST::NamespaceResolution::print(file, unresolved_identifier->resolution);
+    namespace_resolution_print(file, unresolved_identifier->resolution);
 
-            fprintf(file, "%s)\n", unresolved_identifier->name);
-        }
-    }
+    fprintf(file, "%s)\n", unresolved_identifier->name);
 }

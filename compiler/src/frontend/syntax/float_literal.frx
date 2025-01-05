@@ -1,16 +1,13 @@
 export import "../ast/float_literal.frx";
 import "../core/parser.frx";
 
-namespace AST::FloatLiteral
+export FloatLiteral* float_literal_parse(Parser* parser)
 {
-    export FloatLiteral* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        FloatLiteral* literal = new(&parser->arena, parser->token->float_literal);
+    FloatLiteral* literal = float_literal_new(&parser->arena, parser->token->float_literal);
 
-        Parser::eat(parser, TokenType::FLOAT_LITERAL);
+    parser_eat(parser, TokenType::FLOAT_LITERAL);
 
-        return literal;
-    }
+    return literal;
 }

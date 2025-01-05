@@ -9,15 +9,15 @@ export import "../../core/list.frx";
 export struct EnumSymbol
 {
     TokenType type;
-    core::Scope* scope;
-    core::Namespace* ns;
+    CoreScope* scope;
+    CoreNamespace* ns;
     char* name;
     List constants;
     b8 exported;
 }
 
 export void enum_symbol_init(mut EnumSymbol* symbol, TokenType type,
-    core::Scope* scope, core::Namespace* ns, char* name, b8 exported)
+    CoreScope* scope, CoreNamespace* ns, char* name, b8 exported)
 {
     frx::assert(symbol != nullptr);
 
@@ -31,7 +31,7 @@ export void enum_symbol_init(mut EnumSymbol* symbol, TokenType type,
     symbol->scope = scope;
     symbol->ns = ns;
     symbol->name = name;
-    List::init(&symbol->constants);
+    list_init(&symbol->constants);
     symbol->exported = exported;
 }
 
@@ -42,10 +42,10 @@ export b8 enum_symbol_has_constant(EnumSymbol* symbol, char* name)
     frx::assert(name != nullptr);
 
     mut usize i;
-    for(i = 0; i < List::size(&symbol->constants); i = i + 1)
+    for(i = 0; i < list_size(&symbol->constants); i = i + 1)
     {
-        AST::EnumConstantDef* constant = List::get(&symbol->constants, i);
-        if(libc::strcmp(constant->name, name) == 0)
+        EnumConstantDef* constant = list_get(&symbol->constants, i);
+        if(libc_strcmp(constant->name, name) == 0)
         {
             return true;
         }
@@ -74,10 +74,10 @@ export void enum_table_init(EnumTable* table)
 {
     frx::assert(table != nullptr);
 
-    libc::memset(table, 0, frx::sizeof(EnumTable));
+    libc_memset(table, 0, frx::sizeof(EnumTable));
 }
 
-export EnumSymbol* enum_table_find_r(EnumTable* table, mut core::Namespace* ns,
+export EnumSymbol* enum_table_find_r(EnumTable* table, mut CoreNamespace* ns,
     char* name)
 {
     mut EnumSymbol* symbol = enum_table_find(table, ns, name);
@@ -90,7 +90,7 @@ export EnumSymbol* enum_table_find_r(EnumTable* table, mut core::Namespace* ns,
     return symbol;
 }
 
-export EnumSymbol* enum_table_find(EnumTable* table, core::Namespace* ns, char* name)
+export EnumSymbol* enum_table_find(EnumTable* table, CoreNamespace* ns, char* name)
 {
     frx::assert(table != nullptr);
 
@@ -103,7 +103,7 @@ export EnumSymbol* enum_table_find(EnumTable* table, core::Namespace* ns, char* 
     {
         EnumSymbol* symbol = entry->symbol;
 
-        if(libc::strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(libc_strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -127,7 +127,7 @@ export b8 enum_table_insert(EnumTable* table, EnumSymbol* symbol)
     {
         EnumSymbol* existing_symbol = entry->symbol;
 
-        if(libc::strcmp(existing_symbol->name, symbol->name) == 0
+        if(libc_strcmp(existing_symbol->name, symbol->name) == 0
             && namespace_equals(existing_symbol->ns, symbol->ns))
         {
             return false;
@@ -136,7 +136,7 @@ export b8 enum_table_insert(EnumTable* table, EnumSymbol* symbol)
         entry = entry->next;
     }
 
-    mut EnumTableEntry* new_entry = libc::malloc(frx::sizeof(EnumTableEntry));
+    mut EnumTableEntry* new_entry = libc_malloc(frx::sizeof(EnumTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

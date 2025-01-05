@@ -10,7 +10,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-void transpile_func_param(Transpiler* transpiler, AST::FuncParam* param)
+void transpile_func_param(Transpiler* transpiler, FuncParam* param)
 {
     frx::assert(transpiler != nullptr);
 
@@ -22,7 +22,7 @@ void transpile_func_param(Transpiler* transpiler, AST::FuncParam* param)
     fprintf(transpiler->file, "%s", symbol->name);
 }
 
-export void transpile_func_params(Transpiler* transpiler, AST::FuncParams* params)
+export void transpile_func_params(Transpiler* transpiler, FuncParams* params)
 {
     frx::assert(transpiler != nullptr);
 
@@ -30,9 +30,9 @@ export void transpile_func_params(Transpiler* transpiler, AST::FuncParams* param
 
     fprintf(transpiler->file, "(");
 
-    if(List::size(&params->params) > 0)
+    if(list_size(&params->params) > 0)
     {
-        transpile_func_param(transpiler, List::get(&params->params, 0));
+        transpile_func_param(transpiler, list_get(&params->params, 0));
     }
     else
     {
@@ -40,10 +40,10 @@ export void transpile_func_params(Transpiler* transpiler, AST::FuncParams* param
     }
 
     mut usize i;
-    for(i = 1; i < List::size(&params->params); i = i + 1)
+    for(i = 1; i < list_size(&params->params); i = i + 1)
     {
         fprintf(transpiler->file, ", ");
-        transpile_func_param(transpiler, List::get(&params->params, i));
+        transpile_func_param(transpiler, list_get(&params->params, i));
     }
 
     if(params->variadic)

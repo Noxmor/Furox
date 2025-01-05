@@ -11,7 +11,7 @@ extern
 }
 
 export void transpile_enum_constant(Transpiler* transpiler,
-    AST::EnumConstant* constant)
+    EnumConstant* constant)
 {
     frx::assert(transpiler != nullptr);
 

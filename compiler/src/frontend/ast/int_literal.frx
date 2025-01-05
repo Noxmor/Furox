@@ -8,33 +8,27 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct IntLiteral
 {
-    export struct IntLiteral
-    {
-        u64 value;
-    }
+    u64 value;
+}
 
-    namespace IntLiteral
-    {
-        export IntLiteral* new(Arena* arena, u64 value)
-        {
-            mut IntLiteral* int_literal = Arena::alloc(arena, frx::sizeof(IntLiteral));
+export IntLiteral* int_literal_new(Arena* arena, u64 value)
+{
+    mut IntLiteral* int_literal = arena_alloc(arena, frx::sizeof(IntLiteral));
 
-            int_literal->value = value;
+    int_literal->value = value;
 
-            return int_literal;
-        }
+    return int_literal;
+}
 
-        export void print(IntLiteral* literal, mut FILE* file, usize depth)
-        {
-            frx::assert(literal != nullptr);
+export void int_literal_print(IntLiteral* literal, mut FILE* file, usize depth)
+{
+    frx::assert(literal != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s (%zu)\n", "int-literal", literal->value);
-        }
-    }
+    fprintf(file, "%s (%zu)\n", "int-literal", literal->value);
 }

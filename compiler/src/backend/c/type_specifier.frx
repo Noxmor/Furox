@@ -12,7 +12,7 @@ extern
 }
 
 export void transpile_type_specifier(Transpiler* transpiler,
-    AST::TypeSpecifier* type_specifier)
+    TypeSpecifier* type_specifier)
 {
     frx::assert(transpiler != nullptr);
 
@@ -21,7 +21,7 @@ export void transpile_type_specifier(Transpiler* transpiler,
     if(type_specifier->primitive_type != 0)
     {
         fprintf(transpiler->file, "%s",
-            TokenType::to_str(type_specifier->primitive_type));
+            token_type_to_str(type_specifier->primitive_type));
     }
     else if(type_specifier->enum_type != nullptr)
     {
@@ -52,17 +52,17 @@ export void transpile_type_specifier(Transpiler* transpiler,
 }
 
 export void transpile_type_specifier_array_dimensions(Transpiler* transpiler,
-    AST::TypeSpecifier* type_specifier)
+    TypeSpecifier* type_specifier)
 {
     frx::assert(transpiler != nullptr);
 
     frx::assert(type_specifier != nullptr);
 
     mut usize i;
-    for(i = 0; i < List::size(&type_specifier->array_dimensions); i = i + 1)
+    for(i = 0; i < list_size(&type_specifier->array_dimensions); i = i + 1)
     {
         fprintf(transpiler->file, "[");
-        AST::Expr* dimension_size = List::get(&type_specifier->array_dimensions, i);
+        Expr* dimension_size = list_get(&type_specifier->array_dimensions, i);
         transpile_expr(transpiler, dimension_size);
         fprintf(transpiler->file, "]");
     }

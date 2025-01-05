@@ -3,36 +3,33 @@ import "expr.frx";
 import "scope.frx";
 import "../core/parser.frx";
 
-namespace AST::IfStmt
+export IfStmt* if_stmt_parse(Parser* parser)
 {
-    export IfStmt* parse(Parser* parser)
+    frx::assert(parser != nullptr);
+
+    parser_eat(parser, TokenType::KW_IF);
+
+    parser_eat(parser, TokenType::LPAREN);
+    Expr* condition = expr_parse(parser);
+    parser_eat(parser, TokenType::RPAREN);
+    Scope* if_block = scope_parse(parser);
+
+    mut Scope* else_block = nullptr;
+    if(parser->token->type == TokenType::KW_ELSE)
     {
-        frx::assert(parser != nullptr);
+        parser_eat(parser, TokenType::KW_ELSE);
 
-        Parser::eat(parser, TokenType::KW_IF);
-
-        Parser::eat(parser, TokenType::LPAREN);
-        Expr* condition = AST::Expr::parse(parser);
-        Parser::eat(parser, TokenType::RPAREN);
-        Scope* if_block = AST::Scope::parse(parser);
-
-        mut Scope* else_block = nullptr;
-        if(parser->token->type == TokenType::KW_ELSE)
+        if(parser->token->type == TokenType::KW_IF)
         {
-            Parser::eat(parser, TokenType::KW_ELSE);
-
-            if(parser->token->type == TokenType::KW_IF)
-            {
-                else_block = AST::Scope::new(&parser->arena);
-                AST::Scope::add_stmt(else_block,
-                    AST::Stmt::from_if_stmt(&parser->arena, AST::IfStmt::parse(parser)));
-            }
-            else
-            {
-                else_block = AST::Scope::parse(parser);
-            }
+            else_block = scope_new(&parser->arena);
+            scope_add_stmt(else_block,
+                    stmt_from_if_stmt(&parser->arena, if_stmt_parse(parser)));
         }
-
-        return new(&parser->arena, condition, if_block, else_block);
+        else
+        {
+            else_block = scope_parse(parser);
+        }
     }
+
+    return if_stmt_new(&parser->arena, condition, if_block, else_block);
 }

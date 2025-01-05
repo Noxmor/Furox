@@ -11,7 +11,7 @@ extern
 }
 
 export void transpile_global_var_decl(Transpiler* transpiler,
-    AST::GlobalVarDecl* var_decl)
+    GlobalVarDecl* var_decl)
 {
     frx::assert(transpiler != nullptr);
 

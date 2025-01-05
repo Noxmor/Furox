@@ -4,33 +4,30 @@ import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/struct.frx";
 
-namespace AST::StructDecl
+export StructDecl* struct_decl_parse(Parser* parser)
 {
-    export StructDecl* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        SourceLocation start = Parser::current_location(parser);
+    SourceLocation start = parser_current_location(parser);
 
-        Parser::eat(parser, TokenType::KW_EXTERN);
+    parser_eat(parser, TokenType::KW_EXTERN);
 
-        Parser::eat(parser, TokenType::KW_STRUCT);
+    parser_eat(parser, TokenType::KW_STRUCT);
 
-        char* name = parser->token->identifier;
+    char* name = parser->token->identifier;
 
-        mut StructDecl* struct_decl = new(&parser->arena, parser->current_scope,
+    mut StructDecl* struct_decl = struct_decl_new(&parser->arena, parser->current_scope,
             nullptr, name);
 
-        struct_decl->is_redefinition = !struct_table_insert(&parser->struct_table,
+    struct_decl->is_redefinition = !struct_table_insert(&parser->struct_table,
             &struct_decl->symbol);
 
-        Parser::eat(parser, TokenType::IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
-        Parser::eat(parser, TokenType::SEMICOLON);
+    parser_eat(parser, TokenType::SEMICOLON);
 
-        struct_decl->range.start = start;
-        struct_decl->range.end = Parser::current_location(parser);
+    struct_decl->range.start = start;
+    struct_decl->range.end = parser_current_location(parser);
 
-        return struct_decl;
-    }
+    return struct_decl;
 }

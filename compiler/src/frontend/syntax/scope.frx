@@ -23,248 +23,245 @@ import "../core/parser.frx";
 import "../core/scope.frx";
 import "../../core/list.frx";
 
-namespace AST::Scope
+export Scope* scope_parse(Parser* parser)
 {
-    export Scope* parse(Parser* parser)
+    frx::assert(parser != nullptr);
+
+    SourceLocation start = parser_current_location(parser);
+
+    parser_eat(parser, TokenType::LBRACE);
+
+    parser_push_scope(parser);
+
+    mut usize pushed_scopes = 1;
+
+    mut Scope* scope = scope_new(&parser->arena);
+
+    while(parser_loop_until(parser, TokenType::RBRACE))
     {
-        frx::assert(parser != nullptr);
-
-        SourceLocation start = Parser::current_location(parser);
-
-        Parser::eat(parser, TokenType::LBRACE);
-
-        Parser::push_scope(parser);
-
-        mut usize pushed_scopes = 1;
-
-        mut Scope* scope = new(&parser->arena);
-
-        while(Parser::loop_until(parser, TokenType::RBRACE))
+        switch(parser->token->type)
         {
-            switch(parser->token->type)
-            {
-                case TokenType::LBRACE:
+            case TokenType::LBRACE:
                 {
-                    add_stmt(scope, AST::Stmt::from_scope(&parser->arena, parse(parser)));
+                    scope_add_stmt(scope, stmt_from_scope(&parser->arena, scope_parse(parser)));
 
-                    Parser::push_scope(parser);
+                    parser_push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
                 }
-                case TokenType::KW_BREAK:
+            case TokenType::KW_BREAK:
                 {
-                    add_stmt(scope, AST::Stmt::from_break_stmt(&parser->arena, AST::BreakStmt::parse(parser)));
+                    scope_add_stmt(scope, stmt_from_break_stmt(&parser->arena, break_stmt_parse(parser)));
 
                     break;
                 }
-                case TokenType::KW_CONTINUE:
+            case TokenType::KW_CONTINUE:
                 {
-                    add_stmt(scope, AST::Stmt::from_continue_stmt(&parser->arena, AST::ContinueStmt::parse(parser)));
+                    scope_add_stmt(scope, stmt_from_continue_stmt(&parser->arena, continue_stmt_parse(parser)));
 
                     break;
                 }
-                case TokenType::KW_RETURN:
+            case TokenType::KW_RETURN:
                 {
-                    add_stmt(scope, AST::Stmt::from_return_stmt(&parser->arena, AST::ReturnStmt::parse(parser)));
+                    scope_add_stmt(scope, stmt_from_return_stmt(&parser->arena, return_stmt_parse(parser)));
 
                     break;
                 }
-                case TokenType::KW_IF:
+            case TokenType::KW_IF:
                 {
-                    add_stmt(scope, AST::Stmt::from_if_stmt(&parser->arena, AST::IfStmt::parse(parser)));
+                    scope_add_stmt(scope, stmt_from_if_stmt(&parser->arena, if_stmt_parse(parser)));
 
-                    Parser::push_scope(parser);
+                    parser_push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
                 }
-                case TokenType::KW_FOR:
+            case TokenType::KW_FOR:
                 {
-                    add_stmt(scope, AST::Stmt::from_for_loop(&parser->arena, AST::ForLoop::parse(parser)));
+                    scope_add_stmt(scope, stmt_from_for_loop(&parser->arena, for_loop_parse(parser)));
 
-                    Parser::push_scope(parser);
+                    parser_push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
                 }
-                case TokenType::KW_WHILE:
+            case TokenType::KW_WHILE:
                 {
-                    add_stmt(scope, AST::Stmt::from_while_loop(&parser->arena, AST::WhileLoop::parse(parser)));
+                    scope_add_stmt(scope, stmt_from_while_loop(&parser->arena, while_loop_parse(parser)));
 
-                    Parser::push_scope(parser);
+                    parser_push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
                 }
-                case TokenType::KW_DO:
+            case TokenType::KW_DO:
                 {
-                    add_stmt(scope, AST::Stmt::from_do_while_loop(&parser->arena, AST::DoWhileLoop::parse(parser)));
+                    scope_add_stmt(scope, stmt_from_do_while_loop(&parser->arena, do_while_loop_parse(parser)));
 
-                    Parser::push_scope(parser);
+                    parser_push_scope(parser);
                     pushed_scopes = pushed_scopes + 1;
 
                     break;
                 }
-                case TokenType::KW_SWITCH:
+            case TokenType::KW_SWITCH:
                 {
-                    add_stmt(scope, AST::Stmt::from_switch_stmt(&parser->arena, AST::SwitchStmt::parse(parser)));
+                    scope_add_stmt(scope, stmt_from_switch_stmt(&parser->arena, switch_stmt_parse(parser)));
 
                     break;
                 }
-                case TokenType::KW_U8:
+            case TokenType::KW_U8:
                 {
 
                 }
-                case TokenType::KW_U16:
+            case TokenType::KW_U16:
                 {
 
                 }
-                case TokenType::KW_U32:
+            case TokenType::KW_U32:
                 {
 
                 }
-                case TokenType::KW_U64:
+            case TokenType::KW_U64:
                 {
 
                 }
-                case TokenType::KW_USIZE:
+            case TokenType::KW_USIZE:
                 {
 
                 }
-                case TokenType::KW_I8:
+            case TokenType::KW_I8:
                 {
 
                 }
-                case TokenType::KW_I16:
+            case TokenType::KW_I16:
                 {
 
                 }
-                case TokenType::KW_I32:
+            case TokenType::KW_I32:
                 {
 
                 }
-                case TokenType::KW_I64:
+            case TokenType::KW_I64:
                 {
 
                 }
-                case TokenType::KW_ISIZE:
+            case TokenType::KW_ISIZE:
                 {
 
                 }
-                case TokenType::KW_B8:
+            case TokenType::KW_B8:
                 {
 
                 }
-                case TokenType::KW_B16:
+            case TokenType::KW_B16:
                 {
 
                 }
-                case TokenType::KW_B32:
+            case TokenType::KW_B32:
                 {
 
                 }
-                case TokenType::KW_B64:
+            case TokenType::KW_B64:
                 {
 
                 }
-                case TokenType::KW_CHAR:
+            case TokenType::KW_CHAR:
                 {
 
                 }
-                case TokenType::KW_F32:
+            case TokenType::KW_F32:
                 {
 
                 }
-                case TokenType::KW_F64:
+            case TokenType::KW_F64:
                 {
 
                 }
-                case TokenType::KW_VOID:
+            case TokenType::KW_VOID:
                 {
-                    TypeSpecifier* type = AST::TypeSpecifier::parse(parser);
-                    add_stmt(scope, AST::VarDeclOrDef::parse(parser, type, false));
+                    TypeSpecifier* type = type_specifier_parse(parser);
+                    scope_add_stmt(scope, var_decl_or_def_parse(parser, type, false));
 
                     break;
                 }
-                case TokenType::IDENTIFIER:
+            case TokenType::IDENTIFIER:
                 {
                     mut NamespaceResolution* resolution = nullptr;
 
                     if(parser->token->type != TokenType::IDENTIFIER ||
-                        libc::strcmp(parser->token->identifier, "frx") != 0)
+                            libc_strcmp(parser->token->identifier, "frx") != 0)
                     {
-                        resolution = AST::NamespaceResolution::parse(parser);
+                        resolution = namespace_resolution_parse(parser);
                     }
 
-                    Token* next = Parser::peek(parser, 1);
+                    Token* next = parser_peek(parser, 1);
                     if((next->type == TokenType::STAR || next->type == TokenType::IDENTIFIER)
-                        && resolution != nullptr)
+                            && resolution != nullptr)
                     {
-                        mut TypeSpecifier* type = AST::TypeSpecifier::parse(parser);
+                        mut TypeSpecifier* type = type_specifier_parse(parser);
                         type->resolution = resolution;
 
-                        add_stmt(scope, AST::VarDeclOrDef::parse(parser, type, false));
+                        scope_add_stmt(scope, var_decl_or_def_parse(parser, type, false));
                     }
                     else
                     {
-                        ExprStmt* expr_stmt = AST::ExprStmt::parse(parser);
+                        ExprStmt* expr_stmt = expr_stmt_parse(parser);
                         Expr* expr = expr_stmt->expr;
 
                         switch(expr->type)
                         {
-                            case AST::ExprType::FUNC_CALL:
-                            {
-                                mut FuncCall* func_call = expr->func_call;
-                                func_call->resolution = resolution;
+                            case ExprType::FUNC_CALL:
+                                {
+                                    mut FuncCall* func_call = expr->func_call;
+                                    func_call->resolution = resolution;
 
-                                break;
-                            }
-                            case AST::ExprType::UNRESOLVED_IDENTIFIER:
-                            {
-                                mut UnresolvedIdentifier* unresolved_identifier =
-                                    expr->unresolved_identifier;
+                                    break;
+                                }
+                            case ExprType::UNRESOLVED_IDENTIFIER:
+                                {
+                                    mut UnresolvedIdentifier* unresolved_identifier =
+                                        expr->unresolved_identifier;
 
-                                unresolved_identifier->resolution = resolution;
+                                    unresolved_identifier->resolution = resolution;
 
-                                break;
-                            }
+                                    break;
+                                }
                         }
 
-                        add_stmt(scope, AST::Stmt::from_expr_stmt(&parser->arena, expr_stmt));
+                        scope_add_stmt(scope, stmt_from_expr_stmt(&parser->arena, expr_stmt));
                     }
 
                     break;
                 }
-                case TokenType::KW_MUT:
+            case TokenType::KW_MUT:
                 {
-                    Parser::eat(parser, TokenType::KW_MUT);
+                    parser_eat(parser, TokenType::KW_MUT);
 
-                    TypeSpecifier* type = AST::TypeSpecifier::parse(parser);
-                    add_stmt(scope, AST::VarDeclOrDef::parse(parser, type, true));
+                    TypeSpecifier* type = type_specifier_parse(parser);
+                    scope_add_stmt(scope, var_decl_or_def_parse(parser, type, true));
 
                     break;
                 }
-                default:
+            default:
                 {
-                    add_stmt(scope, AST::Stmt::from_expr_stmt(&parser->arena, AST::ExprStmt::parse(parser)));
+                    scope_add_stmt(scope, stmt_from_expr_stmt(&parser->arena, expr_stmt_parse(parser)));
 
                     break;
                 }
-            }
         }
-
-        scope->range.start = start;
-        scope->range.end = Parser::current_location(parser);
-
-        Parser::eat(parser, TokenType::RBRACE);
-
-        while(pushed_scopes > 0)
-        {
-            Parser::pop_scope(parser);
-            pushed_scopes = pushed_scopes - 1;
-        }
-
-        return scope;
     }
+
+    scope->range.start = start;
+    scope->range.end = parser_current_location(parser);
+
+    parser_eat(parser, TokenType::RBRACE);
+
+    while(pushed_scopes > 0)
+    {
+        parser_pop_scope(parser);
+        pushed_scopes = pushed_scopes - 1;
+    }
+
+    return scope;
 }

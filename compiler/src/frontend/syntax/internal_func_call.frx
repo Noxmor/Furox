@@ -8,97 +8,85 @@ import "../core/scope.frx";
 import "../symbols/enum.frx";
 import "../symbols/struct.frx";
 
-namespace AST::Assert
+Assert* assert_parse(Parser* parser)
 {
-    Assert* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        SourceLocation start = Parser::current_location(parser);
+    SourceLocation start = parser_current_location(parser);
 
-        Expr* expr = AST::Expr::parse(parser);
-        mut Assert* assert_node = new(&parser->arena, Parser::source_file(parser), expr);
+    Expr* expr = expr_parse(parser);
+    mut Assert* assert_node = assert_new(&parser->arena, parser_source_file(parser), expr);
 
-        SourceLocation end = Parser::current_location(parser);
+    SourceLocation end = parser_current_location(parser);
 
-        assert_node->range.start = start;
-        assert_node->range.end = end;
+    assert_node->range.start = start;
+    assert_node->range.end = end;
 
-        return assert_node;
-    }
+    return assert_node;
 }
 
-namespace AST::Sizeof
+Sizeof* sizeof_parse(Parser* parser)
 {
-    Sizeof* parse(Parser* parser)
+    frx::assert(parser != nullptr);
+
+    NamespaceResolution* resolution = namespace_resolution_parse(parser);
+
+    if(token_type_is_primitive(parser->token->type))
     {
-        frx::assert(parser != nullptr);
+        TokenType type = parser->token->type;
 
-        NamespaceResolution* resolution = AST::NamespaceResolution::parse(parser);
+        parser_eat(parser, parser->token->type);
 
-        if(TokenType::is_primitive(parser->token->type))
-        {
-            TokenType type = parser->token->type;
-
-            Parser::eat(parser, parser->token->type);
-
-            return new(&parser->arena, resolution, nullptr, type, parser->current_scope);
-        }
-        else
-        {
-            char* name = parser->token->identifier;
-
-            Parser::eat(parser, TokenType::IDENTIFIER);
-
-            return new(&parser->arena, resolution, name, TokenType::EOF, parser->current_scope);
-        }
+        return sizeof_new(&parser->arena, resolution, nullptr, type, parser->current_scope);
     }
-}
-
-namespace AST::EnumCount
-{
-    EnumCount* parse(Parser* parser)
+    else
     {
-        frx::assert(parser != nullptr);
-
-        NamespaceResolution* resolution = AST::NamespaceResolution::parse(parser);
         char* name = parser->token->identifier;
 
-        Parser::eat(parser, TokenType::IDENTIFIER);
+        parser_eat(parser, TokenType::IDENTIFIER);
 
-        return new(&parser->arena, resolution, name, parser->current_scope);
+        return sizeof_new(&parser->arena, resolution, name, TokenType::EOF, parser->current_scope);
     }
 }
 
-namespace AST::InternalFuncCall
+EnumCount* enum_count_parse(Parser* parser)
 {
-    export InternalFuncCall* parse(Parser* parser)
+    frx::assert(parser != nullptr);
+
+    NamespaceResolution* resolution = namespace_resolution_parse(parser);
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TokenType::IDENTIFIER);
+
+    return enum_count_new(&parser->arena, resolution, name, parser->current_scope);
+}
+
+export InternalFuncCall* internal_func_call_parse(Parser* parser)
+{
+    frx::assert(parser != nullptr);
+
+    mut InternalFuncCall* internal_func_call = nullptr;
+
+    char* name = parser->token->identifier;
+
+    parser_eat(parser, TokenType::IDENTIFIER);
+
+    parser_eat(parser, TokenType::LPAREN);
+
+    if(libc_strcmp(name, "assert") == 0)
     {
-        frx::assert(parser != nullptr);
-
-        mut InternalFuncCall* internal_func_call = nullptr;
-
-        char* name = parser->token->identifier;
-
-        Parser::eat(parser, TokenType::IDENTIFIER);
-
-        Parser::eat(parser, TokenType::LPAREN);
-
-        if(libc::strcmp(name, "assert") == 0)
-        {
-            internal_func_call = from_assert(&parser->arena, AST::Assert::parse(parser));
-        }
-        else if(libc::strcmp(name, "sizeof") == 0)
-        {
-            internal_func_call = from_sizeof(&parser->arena, AST::Sizeof::parse(parser));
-        }
-        else if(libc::strcmp(name, "enum_count") == 0)
-        {
-            internal_func_call = from_enum_count(&parser->arena, AST::EnumCount::parse(parser));
-        }
-
-        Parser::eat(parser, TokenType::RPAREN);
-
-        return internal_func_call;
+        internal_func_call = internal_func_call_from_assert(&parser->arena, assert_parse(parser));
     }
+    else if(libc_strcmp(name, "sizeof") == 0)
+    {
+        internal_func_call = internal_func_call_from_sizeof(&parser->arena, sizeof_parse(parser));
+    }
+    else if(libc_strcmp(name, "enum_count") == 0)
+    {
+        internal_func_call = internal_func_call_from_enum_count(&parser->arena, enum_count_parse(parser));
+    }
+
+    parser_eat(parser, TokenType::RPAREN);
+
+    return internal_func_call;
 }

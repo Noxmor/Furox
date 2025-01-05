@@ -12,59 +12,53 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct FuncCall
 {
-    export struct FuncCall
+    FuncSymbol* symbol;
+
+    NamespaceResolution* resolution;
+    char* name;
+
+    CoreScope* scope;
+
+    List args;
+}
+
+export FuncCall* func_call_new(Arena* arena, NamespaceResolution* resolution, char* name, CoreScope* scope)
+{
+    frx::assert(resolution != nullptr);
+
+    frx::assert(name != nullptr);
+
+    frx::assert(scope != nullptr);
+
+    mut FuncCall* func_call = arena_alloc(arena, frx::sizeof(FuncCall));
+
+    func_call->symbol = nullptr;
+    func_call->resolution = resolution;
+    func_call->name = name;
+    func_call->scope = scope;
+    list_init(&func_call->args);
+
+    return func_call;
+}
+
+export void func_call_print(FuncCall* func_call, mut FILE* file, usize depth)
+{
+    frx::assert(func_call != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_depth(file, depth);
+
+    fprintf(file, "%s (", "function-call");
+    namespace_resolution_print(file, func_call->resolution);
+    fprintf(file, "%s)\n", func_call->name);
+
+    mut usize i;
+    for(i = 0; i < list_size(&func_call->args); i = i + 1)
     {
-        FuncSymbol* symbol;
-
-        NamespaceResolution* resolution;
-        char* name;
-
-        core::Scope* scope;
-
-        List args;
-    }
-
-    namespace FuncCall
-    {
-        export FuncCall* new(Arena* arena, NamespaceResolution* resolution, char* name, core::Scope* scope)
-        {
-            frx::assert(resolution != nullptr);
-
-            frx::assert(name != nullptr);
-
-            frx::assert(scope != nullptr);
-
-            mut FuncCall* func_call = Arena::alloc(arena, frx::sizeof(FuncCall));
-
-            func_call->symbol = nullptr;
-            func_call->resolution = resolution;
-            func_call->name = name;
-            func_call->scope = scope;
-            List::init(&func_call->args);
-
-            return func_call;
-        }
-
-        export void print(FuncCall* func_call, mut FILE* file, usize depth)
-        {
-            frx::assert(func_call != nullptr);
-
-            frx::assert(file != nullptr);
-
-            print_depth(file, depth);
-
-            fprintf(file, "%s (", "function-call");
-            AST::NamespaceResolution::print(file, func_call->resolution);
-            fprintf(file, "%s)\n", func_call->name);
-
-            mut usize i;
-            for(i = 0; i < List::size(&func_call->args); i = i + 1)
-            {
-                AST::Expr* arg = List::get(&func_call->args, i);
-                AST::Expr::print(arg, file, depth + 1);
-            }
-        }
+        Expr* arg = list_get(&func_call->args, i);
+        expr_print(arg, file, depth + 1);
     }
 }

@@ -9,7 +9,7 @@ export enum BackendType : u8
     COUNT
 }
 
-export i32 backend_generate_code(BackendType backend, AST::Program* program)
+export i32 backend_generate_code(BackendType backend, Program* program)
 {
     frx::assert(backend < BackendType::COUNT);
 

@@ -10,101 +10,98 @@ import "initializer_list.frx";
 import "unary_expr.frx";
 import "binary_expr.frx";
 
-namespace AST::Expr
+export void expr_sema(Parser* parser, mut Expr* expr)
 {
-    export void sema(Parser* parser, mut Expr* expr)
+    switch(expr->type)
     {
-        switch(expr->type)
-        {
-            case AST::ExprType::INT_LITERAL:
+        case ExprType::INT_LITERAL:
             {
                 break;
             }
 
-            case AST::ExprType::FLOAT_LITERAL:
+        case ExprType::FLOAT_LITERAL:
             {
                 break;
             }
 
-            case AST::ExprType::CHAR_LITERAL:
+        case ExprType::CHAR_LITERAL:
             {
                 break;
             }
 
-            case AST::ExprType::STRING_LITERAL:
+        case ExprType::STRING_LITERAL:
             {
                 break;
             }
 
-            case AST::ExprType::ENUM_CONSTANT:
+        case ExprType::ENUM_CONSTANT:
             {
-                AST::EnumConstant::sema(parser, expr->enum_constant);
+                enum_constant_sema(parser, expr->enum_constant);
 
                 break;
             }
 
-            case AST::ExprType::FUNC_CALL:
+        case ExprType::FUNC_CALL:
             {
-                AST::FuncCall::sema(parser, expr->func_call);
+                func_call_sema(parser, expr->func_call);
 
                 break;
             }
 
-            case AST::ExprType::INTERNAL_FUNC_CALL:
+        case ExprType::INTERNAL_FUNC_CALL:
             {
-                AST::InternalFuncCall::sema(parser, expr->internal_func_call, expr);
+                internal_func_call_sema(parser, expr->internal_func_call, expr);
 
                 break;
             }
 
-            case AST::ExprType::VAR:
+        case ExprType::VAR:
             {
-                AST::Var::sema(parser, expr->var);
+                var_sema(parser, expr->var);
 
                 break;
             }
 
-            case AST::ExprType::STRUCT_MEMBER:
+        case ExprType::STRUCT_MEMBER:
             {
-                AST::StructMember::sema(parser, expr->struct_member);
+                struct_member_sema(parser, expr->struct_member);
 
                 break;
             }
 
-            case AST::ExprType::UNRESOLVED_IDENTIFIER:
+        case ExprType::UNRESOLVED_IDENTIFIER:
             {
-                AST::UnresolvedIdentifier::sema(parser, expr->unresolved_identifier, expr);
+                unresolved_identifier_sema(parser, expr->unresolved_identifier, expr);
 
                 break;
             }
 
-            case AST::ExprType::INITIALIZER_LIST:
+        case ExprType::INITIALIZER_LIST:
             {
-                AST::InitializerList::sema(parser, expr->initializer_list);
+                initializer_list_sema(parser, expr->initializer_list);
 
                 break;
             }
 
-            case AST::ExprType::UNARY_EXPR:
+        case ExprType::UNARY_EXPR:
             {
-                AST::UnaryExpr::sema(parser, expr->unary_expr);
+                unary_expr_sema(parser, expr->unary_expr);
 
                 break;
             }
 
-            case AST::ExprType::BINARY_EXPR:
+        case ExprType::BINARY_EXPR:
             {
-                AST::BinaryExpr::sema(parser, expr->binary_expr);
+                binary_expr_sema(parser, expr->binary_expr);
 
                 break;
             }
 
-            default:
+        default:
             {
                 frx::assert(false);
 
                 break;
             }
-        }
     }
 }

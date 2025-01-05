@@ -6,15 +6,15 @@ import "../../core/hash.frx";
 
 export struct FuncSymbol
 {
-    core::Scope* scope;
-    core::Namespace* ns;
+    CoreScope* scope;
+    CoreNamespace* ns;
     char* name;
     b8 exported;
     b8 external;
 }
 
-export void func_symbol_init(mut FuncSymbol* symbol, core::Scope* scope,
-    core::Namespace* ns, char* name, b8 exported, b8 external)
+export void func_symbol_init(mut FuncSymbol* symbol, CoreScope* scope,
+    CoreNamespace* ns, char* name, b8 exported, b8 external)
 {
     frx::assert(symbol != nullptr);
 
@@ -49,18 +49,18 @@ export void func_table_init(FuncTable* table)
 {
     frx::assert(table != nullptr);
 
-    libc::memset(table, 0, frx::sizeof(FuncTable));
+    libc_memset(table, 0, frx::sizeof(FuncTable));
 }
 
-export FuncSymbol* func_table_find(FuncTable* table, AST::NamespaceResolution* resolution,
-    char* name, core::Namespace* current_namespace)
+export FuncSymbol* func_table_find(FuncTable* table, NamespaceResolution* resolution,
+    char* name, CoreNamespace* current_namespace)
 {
-    if(resolution != nullptr && AST::NamespaceResolution::is_absolute(resolution))
+    if(resolution != nullptr && namespace_resolution_is_absolute(resolution))
     {
         return func_table_find_explicit(table, resolution->ns, name);
     }
 
-    mut core::Namespace* ns = current_namespace;
+    mut CoreNamespace* ns = current_namespace;
     if(resolution != nullptr)
     {
         ns = resolution->ns;
@@ -69,7 +69,7 @@ export FuncSymbol* func_table_find(FuncTable* table, AST::NamespaceResolution* r
     return func_table_find_r(table, ns, name);
 }
 
-FuncSymbol* func_table_find_r(FuncTable* table, mut core::Namespace* ns,
+FuncSymbol* func_table_find_r(FuncTable* table, mut CoreNamespace* ns,
     char* name)
 {
     frx::assert(table != nullptr);
@@ -83,7 +83,7 @@ FuncSymbol* func_table_find_r(FuncTable* table, mut core::Namespace* ns,
     {
         FuncSymbol* symbol = entry->symbol;
 
-        if(libc::strcmp(symbol->name, name) == 0 && namespace_is_subset_of(ns, symbol->ns))
+        if(libc_strcmp(symbol->name, name) == 0 && namespace_is_subset_of(ns, symbol->ns))
         {
             return symbol;
         }
@@ -94,7 +94,7 @@ FuncSymbol* func_table_find_r(FuncTable* table, mut core::Namespace* ns,
     return nullptr;
 }
 
-FuncSymbol* func_table_find_explicit(FuncTable* table, core::Namespace* ns, char* name)
+FuncSymbol* func_table_find_explicit(FuncTable* table, CoreNamespace* ns, char* name)
 {
     frx::assert(table != nullptr);
 
@@ -107,7 +107,7 @@ FuncSymbol* func_table_find_explicit(FuncTable* table, core::Namespace* ns, char
     {
         FuncSymbol* symbol = entry->symbol;
 
-        if(libc::strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
+        if(libc_strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
         {
             return symbol;
         }
@@ -131,7 +131,7 @@ export b8 func_table_insert(FuncTable* table, FuncSymbol* symbol)
     {
         FuncSymbol* existing_symbol = entry->symbol;
 
-        if(libc::strcmp(existing_symbol->name, symbol->name) == 0
+        if(libc_strcmp(existing_symbol->name, symbol->name) == 0
             && namespace_equals(existing_symbol->ns, symbol->ns))
         {
             return false;
@@ -140,7 +140,7 @@ export b8 func_table_insert(FuncTable* table, FuncSymbol* symbol)
         entry = entry->next;
     }
 
-    mut FuncTableEntry* new_entry = libc::malloc(frx::sizeof(FuncTableEntry));
+    mut FuncTableEntry* new_entry = libc_malloc(frx::sizeof(FuncTableEntry));
     new_entry->symbol = symbol;
     new_entry->next = table->entries[index];
 

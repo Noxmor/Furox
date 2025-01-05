@@ -9,7 +9,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_var_decl(Transpiler* transpiler, AST::VarDecl* var_decl)
+export void transpile_var_decl(Transpiler* transpiler, VarDecl* var_decl)
 {
     frx::assert(transpiler != nullptr);
 

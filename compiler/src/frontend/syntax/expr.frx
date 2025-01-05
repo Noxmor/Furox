@@ -15,202 +15,199 @@ import "string_literal.frx";
 import "../ast/unary_expr.frx";
 import "unresolved_identifier.frx";
 
-namespace AST::Expr
+export Expr* expr_parse_primary(Parser* parser)
 {
-    export Expr* parse_primary(Parser* parser)
+    frx::assert(parser != nullptr);
+
+    mut Expr* primary_expr = nullptr;
+
+    NamespaceResolution* resolution = namespace_resolution_parse(parser);
+
+    switch(parser->token->type)
     {
-        frx::assert(parser != nullptr);
-
-        mut Expr* primary_expr = nullptr;
-
-        NamespaceResolution* resolution = AST::NamespaceResolution::parse(parser);
-
-        switch(parser->token->type)
-        {
-            case TokenType::IDENTIFIER:
+        case TokenType::IDENTIFIER:
             {
-                SourceLocation start = Parser::current_location(parser);
+                SourceLocation start = parser_current_location(parser);
 
-                Token* next = Parser::peek(parser, 1);
+                Token* next = parser_peek(parser, 1);
 
                 if(next->type == TokenType::LPAREN)
                 {
                     if(namespace_is_internal(resolution->ns))
                     {
-                        primary_expr = from_internal_func_call(&parser->arena,
-                            AST::InternalFuncCall::parse(parser));
+                        primary_expr = expr_from_internal_func_call(&parser->arena,
+                                internal_func_call_parse(parser));
                     }
                     else
                     {
-                        primary_expr = from_func_call(&parser->arena,
-                            AST::FuncCall::parse(parser, resolution));
+                        primary_expr = expr_from_func_call(&parser->arena,
+                                func_call_parse(parser, resolution));
                     }
                 }
                 else
                 {
-                    primary_expr = from_unresolved_identifier(&parser->arena,
-                        AST::UnresolvedIdentifier::parse(parser, resolution, start));
+                    primary_expr = expr_from_unresolved_identifier(&parser->arena,
+                            unresolved_identifier_parse(parser, resolution, start));
                 }
 
                 break;
             }
-            case TokenType::KW_NULLPTR:
+        case TokenType::KW_NULLPTR:
             {
-                Parser::eat(parser, TokenType::KW_NULLPTR);
+                parser_eat(parser, TokenType::KW_NULLPTR);
 
-                primary_expr = from_int_literal(&parser->arena,
-                    AST::IntLiteral::new(&parser->arena, 0));
+                primary_expr = expr_from_int_literal(&parser->arena,
+                        int_literal_new(&parser->arena, 0));
 
                 break;
             }
-            case TokenType::KW_TRUE:
+        case TokenType::KW_TRUE:
             {
-                Parser::eat(parser, TokenType::KW_TRUE);
+                parser_eat(parser, TokenType::KW_TRUE);
 
-                primary_expr = from_int_literal(&parser->arena,
-                    AST::IntLiteral::new(&parser->arena, 1));
+                primary_expr = expr_from_int_literal(&parser->arena,
+                        int_literal_new(&parser->arena, 1));
 
                 break;
             }
-            case TokenType::KW_FALSE:
+        case TokenType::KW_FALSE:
             {
-                Parser::eat(parser, TokenType::KW_FALSE);
+                parser_eat(parser, TokenType::KW_FALSE);
 
-                primary_expr = from_int_literal(&parser->arena,
-                    AST::IntLiteral::new(&parser->arena, 0));
+                primary_expr = expr_from_int_literal(&parser->arena,
+                        int_literal_new(&parser->arena, 0));
 
                 break;
             }
-            case TokenType::FLOAT_LITERAL:
+        case TokenType::FLOAT_LITERAL:
             {
-                primary_expr = from_float_literal(&parser->arena,
-                    AST::FloatLiteral::parse(parser));
+                primary_expr = expr_from_float_literal(&parser->arena,
+                        float_literal_parse(parser));
 
                 break;
             }
-            case TokenType::INT_LITERAL:
+        case TokenType::INT_LITERAL:
             {
-                primary_expr = from_int_literal(&parser->arena,
-                    AST::IntLiteral::parse(parser));
+                primary_expr = expr_from_int_literal(&parser->arena,
+                        int_literal_parse(parser));
 
                 break;
             }
-            case TokenType::CHAR_LITERAL:
+        case TokenType::CHAR_LITERAL:
             {
-                primary_expr = from_char_literal(&parser->arena,
-                    AST::CharLiteral::parse(parser));
+                primary_expr = expr_from_char_literal(&parser->arena,
+                        char_literal_parse(parser));
 
                 break;
             }
-            case TokenType::STRING_LITERAL:
+        case TokenType::STRING_LITERAL:
             {
-                primary_expr = from_string_literal(&parser->arena,
-                    AST::StringLiteral::parse(parser));
+                primary_expr = expr_from_string_literal(&parser->arena,
+                        string_literal_parse(parser));
 
                 break;
             }
-            default:
+        default:
             {
-                primary_expr = from_error(&parser->arena,
-                    AST::Error::parse(parser));
+                primary_expr = expr_from_error(&parser->arena,
+                        error_parse(parser));
 
                 break;
             }
-        }
-
-        return primary_expr;
     }
 
-    export Expr* parse(Parser* parser)
+    return primary_expr;
+}
+
+export Expr* expr_parse(Parser* parser)
+{
+    return expr_parse_with_precedence(parser, Precedence::MIN);
+}
+
+Expr* expr_parse_with_precedence(Parser* parser, Precedence min_precedence)
+{
+    frx::assert(parser != nullptr);
+
+    mut Expr* expr = nullptr;
+
+    if(parser->token->type == TokenType::LPAREN)
     {
-        return parse_with_precedence(parser, Precedence::MIN);
+        parser_eat(parser, TokenType::LPAREN);
+        expr = expr_parse(parser);
+        parser_eat(parser, TokenType::RPAREN);
+    }
+    else if(token_type_is_prefix_operator(parser->token->type))
+    {
+        TokenType type = parser->token->type;
+
+        parser_eat(parser, type);
+
+        Operator operator = token_type_to_prefix_operator(type);
+        Precedence precedence = operator_to_precedence(operator);
+        UnaryExpr* unary_expr = unary_expr_new(&parser->arena, type,
+                operator, expr_parse_with_precedence(parser, precedence));
+        expr = expr_from_unary_expr(&parser->arena, unary_expr);
+    }
+    else
+    {
+        expr = expr_parse_primary(parser);
     }
 
-    Expr* parse_with_precedence(Parser* parser, Precedence min_precedence)
+    frx::assert(expr != nullptr);
+
+    while(true)
     {
-        frx::assert(parser != nullptr);
+        TokenType type = parser->token->type;
 
-        mut Expr* expr = nullptr;
-
-        if(parser->token->type == TokenType::LPAREN)
+        if(token_type_is_postfix_operator(type))
         {
-            Parser::eat(parser, TokenType::LPAREN);
-            expr = parse(parser);
-            Parser::eat(parser, TokenType::RPAREN);
-        }
-        else if(TokenType::is_prefix_operator(parser->token->type))
-        {
-            TokenType type = parser->token->type;
-
-            Parser::eat(parser, type);
-
-            Operator operator = TokenType::to_prefix_operator(type);
-            Precedence precedence = Operator::to_precedence(operator);
-            UnaryExpr* unary_expr = AST::UnaryExpr::new(&parser->arena, type,
-                operator, parse_with_precedence(parser, precedence));
-            expr = from_unary_expr(&parser->arena, unary_expr);
-        }
-        else
-        {
-            expr = parse_primary(parser);
-        }
-
-        frx::assert(expr != nullptr);
-
-        while(true)
-        {
-            TokenType type = parser->token->type;
-
-            if(TokenType::is_postfix_operator(type))
+            Operator operator = token_type_to_postfix_operator(type);
+            Precedence precedence = operator_to_precedence(operator);
+            if(precedence >= min_precedence)
             {
-                Operator operator = TokenType::to_postfix_operator(type);
-                Precedence precedence = Operator::to_precedence(operator);
-                if(precedence >= min_precedence)
-                {
-                    break;
-                }
+                break;
+            }
 
-                Parser::eat(parser, type);
+            parser_eat(parser, type);
 
-                if(operator == Operator::ARRAY_SUBSCRIPT)
-                {
-                    Expr* index = parse(parser);
-                    Parser::eat(parser, TokenType::RBRACKET);
+            if(operator == Operator::ARRAY_SUBSCRIPT)
+            {
+                Expr* index = expr_parse(parser);
+                parser_eat(parser, TokenType::RBRACKET);
 
-                    BinaryExpr* binary_expr = AST::BinaryExpr::new(&parser->arena,
+                BinaryExpr* binary_expr = binary_expr_new(&parser->arena,
                         type, operator, expr, index);
-                    expr = from_binary_expr(&parser->arena, binary_expr);
-                }
-                else
-                {
-                    UnaryExpr* unary_expr = AST::UnaryExpr::new(&parser->arena, type,
-                        operator, expr);
-                    expr = from_unary_expr(&parser->arena, unary_expr);
-                }
-
-                continue;
+                expr = expr_from_binary_expr(&parser->arena, binary_expr);
             }
-            else if(TokenType::is_infix_operator(type))
+            else
             {
-                Operator operator = TokenType::to_infix_operator(type);
-                Precedence precedence = Operator::to_precedence(operator);
-                if(precedence >= min_precedence)
-                {
-                    break;
-                }
-
-                Parser::eat(parser, type);
-
-                BinaryExpr* binary_expr = AST::BinaryExpr::new(&parser->arena, type,
-                    operator, expr, parse_with_precedence(parser, precedence));
-                expr = from_binary_expr(&parser->arena, binary_expr);
-
-                continue;
+                UnaryExpr* unary_expr = unary_expr_new(&parser->arena, type,
+                        operator, expr);
+                expr = expr_from_unary_expr(&parser->arena, unary_expr);
             }
 
-            break;
+            continue;
+        }
+        else if(token_type_is_infix_operator(type))
+        {
+            Operator operator = token_type_to_infix_operator(type);
+            Precedence precedence = operator_to_precedence(operator);
+            if(precedence >= min_precedence)
+            {
+                break;
+            }
+
+            parser_eat(parser, type);
+
+            BinaryExpr* binary_expr = binary_expr_new(&parser->arena, type,
+                    operator, expr, expr_parse_with_precedence(parser, precedence));
+            expr = expr_from_binary_expr(&parser->arena, binary_expr);
+
+            continue;
         }
 
-        return expr;
+        break;
     }
+
+    return expr;
 }

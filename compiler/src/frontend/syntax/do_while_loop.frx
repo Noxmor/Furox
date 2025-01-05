@@ -3,22 +3,19 @@ import "expr.frx";
 import "scope.frx";
 import "../core/parser.frx";
 
-namespace AST::DoWhileLoop
+export DoWhileLoop* do_while_loop_parse(Parser* parser)
 {
-    export DoWhileLoop* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        Parser::eat(parser, TokenType::KW_DO);
+    parser_eat(parser, TokenType::KW_DO);
 
-        Scope* scope = AST::Scope::parse(parser);
+    Scope* scope = scope_parse(parser);
 
-        Parser::eat(parser, TokenType::KW_WHILE);
-        Parser::eat(parser, TokenType::LPAREN);
-        Expr* condition = AST::Expr::parse(parser);
-        Parser::eat(parser, TokenType::RPAREN);
-        Parser::eat(parser, TokenType::SEMICOLON);
+    parser_eat(parser, TokenType::KW_WHILE);
+    parser_eat(parser, TokenType::LPAREN);
+    Expr* condition = expr_parse(parser);
+    parser_eat(parser, TokenType::RPAREN);
+    parser_eat(parser, TokenType::SEMICOLON);
 
-        return new(&parser->arena, scope, condition);
-    }
+    return do_while_loop_new(&parser->arena, scope, condition);
 }

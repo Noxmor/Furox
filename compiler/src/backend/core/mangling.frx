@@ -22,10 +22,10 @@ void validate_buffer_size(mut usize size)
     }
 
     buffer_size = size;
-    buffer = libc::realloc(buffer, buffer_size * frx::sizeof(char));
+    buffer = libc_realloc(buffer, buffer_size * frx::sizeof(char));
 }
 
-void mangle_namespace(core::Namespace* ns)
+void mangle_namespace(CoreNamespace* ns)
 {
     if(ns == nullptr)
     {
@@ -34,155 +34,155 @@ void mangle_namespace(core::Namespace* ns)
 
     mangle_namespace(ns->parent);
 
-    if(libc::strcmp(ns->name, "") != 0)
+    if(libc_strcmp(ns->name, "") != 0)
     {
-        usize size = libc::strlen(buffer) + libc::strlen(ns->name) + libc::strlen("_");
+        usize size = libc_strlen(buffer) + libc_strlen(ns->name) + libc_strlen("_");
         validate_buffer_size(size);
 
-        libc::strcat(buffer, ns->name);
-        libc::strcat(buffer, "_");
+        libc_strcat(buffer, ns->name);
+        libc_strcat(buffer, "_");
     }
 }
 
-export char* mangle_enum_name(core::Scope* scope, core::Namespace* ns, char* name)
+export char* mangle_enum_name(CoreScope* scope, CoreNamespace* ns, char* name)
 {
     frx::assert(scope != nullptr);
 
     frx::assert(name != nullptr);
 
-    mut usize size = libc::strlen(name);
+    mut usize size = libc_strlen(name);
 
-    mut core::Namespace* temp = ns;
+    mut CoreNamespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(ns->name) + 1;
+        size = size + libc_strlen(ns->name) + 1;
 
         temp = temp->parent;
     }
 
     validate_buffer_size(size);
 
-    libc::strcpy(buffer, "");
+    libc_strcpy(buffer, "");
 
     mangle_namespace(ns);
 
-    libc::strcat(buffer, name);
+    libc_strcat(buffer, name);
 
-    char* buffer_end = libc::strrchr(buffer, '\0');
+    char* buffer_end = libc_strrchr(buffer, '\0');
     sprintf(buffer_end, "%zu", scope->id);
 
-    libc::strcat(buffer, "E");
+    libc_strcat(buffer, "E");
 
     return buffer;
 }
 
-export char* mangle_struct_name(core::Scope* scope, core::Namespace* ns, char* name)
+export char* mangle_struct_name(CoreScope* scope, CoreNamespace* ns, char* name)
 {
     frx::assert(scope != nullptr);
 
     frx::assert(name != nullptr);
 
-    mut usize size = libc::strlen(name);
+    mut usize size = libc_strlen(name);
 
-    mut core::Namespace* temp = ns;
+    mut CoreNamespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(ns->name) + 1;
+        size = size + libc_strlen(ns->name) + 1;
 
         temp = temp->parent;
     }
 
     validate_buffer_size(size);
 
-    libc::strcpy(buffer, "");
+    libc_strcpy(buffer, "");
 
     mangle_namespace(ns);
 
-    libc::strcat(buffer, name);
+    libc_strcat(buffer, name);
 
-    char* buffer_end = libc::strrchr(buffer, '\0');
+    char* buffer_end = libc_strrchr(buffer, '\0');
     sprintf(buffer_end, "%zu", scope->id);
 
-    libc::strcat(buffer, "S");
+    libc_strcat(buffer, "S");
 
     return buffer;
 }
 
-export char* mangle_function_name(core::Scope* scope, core::Namespace* ns, char* name)
+export char* mangle_function_name(CoreScope* scope, CoreNamespace* ns, char* name)
 {
     frx::assert(scope != nullptr);
 
     frx::assert(name != nullptr);
 
-    mut usize size = libc::strlen(name);
+    mut usize size = libc_strlen(name);
 
-    if(namespace_is_global(ns) && libc::strcmp(name, "main") == 0)
+    if(namespace_is_global(ns) && libc_strcmp(name, "main") == 0)
     {
         validate_buffer_size(size);
 
-        libc::strcpy(buffer, name);
+        libc_strcpy(buffer, name);
 
         return buffer;
     }
 
-    mut core::Namespace* temp = ns;
+    mut CoreNamespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(ns->name) + 1;
+        size = size + libc_strlen(ns->name) + 1;
 
         temp = temp->parent;
     }
 
     validate_buffer_size(size);
 
-    if(namespace_is_global(ns) && libc::strcmp(name, "main") == 0)
+    if(namespace_is_global(ns) && libc_strcmp(name, "main") == 0)
     {
-        libc::strcpy(buffer, "main");
+        libc_strcpy(buffer, "main");
         return buffer;
     }
 
-    libc::strcpy(buffer, "");
+    libc_strcpy(buffer, "");
 
     mangle_namespace(ns);
 
-    libc::strcat(buffer, name);
+    libc_strcat(buffer, name);
 
-    char* buffer_end = libc::strrchr(buffer, '\0');
+    char* buffer_end = libc_strrchr(buffer, '\0');
     sprintf(buffer_end, "%zu", scope->id);
 
-    libc::strcat(buffer, "F");
+    libc_strcat(buffer, "F");
 
     return buffer;
 }
 
-export char* mangle_global_var_name(core::Scope* scope, core::Namespace* ns, char* name)
+export char* mangle_global_var_name(CoreScope* scope, CoreNamespace* ns, char* name)
 {
     frx::assert(scope != nullptr);
 
     frx::assert(name != nullptr);
 
-    mut usize size = libc::strlen(name);
+    mut usize size = libc_strlen(name);
 
-    mut core::Namespace* temp = ns;
+    mut CoreNamespace* temp = ns;
     while(temp != nullptr)
     {
-        size = size + libc::strlen(ns->name) + 1;
+        size = size + libc_strlen(ns->name) + 1;
 
         temp = temp->parent;
     }
 
     validate_buffer_size(size);
 
-    libc::strcpy(buffer, "");
+    libc_strcpy(buffer, "");
 
     mangle_namespace(ns);
 
-    libc::strcat(buffer, name);
+    libc_strcat(buffer, name);
 
-    char* buffer_end = libc::strrchr(buffer, '\0');
+    char* buffer_end = libc_strrchr(buffer, '\0');
     sprintf(buffer_end, "%zu", scope->id);
 
-    libc::strcat(buffer, "V");
+    libc_strcat(buffer, "V");
 
     return buffer;
 }

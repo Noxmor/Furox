@@ -3,26 +3,23 @@ import "expr.frx";
 import "scope.frx";
 import "../core/parser.frx";
 
-namespace AST::ForLoop
+export ForLoop* for_loop_parse(Parser* parser)
 {
-    export ForLoop* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        Parser::eat(parser, TokenType::KW_FOR);
+    parser_eat(parser, TokenType::KW_FOR);
 
-        Parser::eat(parser, TokenType::LPAREN);
+    parser_eat(parser, TokenType::LPAREN);
 
-        Expr* initialization = AST::Expr::parse(parser);
-        Parser::eat(parser, TokenType::SEMICOLON);
-        Expr* condition = AST::Expr::parse(parser);
-        Parser::eat(parser, TokenType::SEMICOLON);
-        Expr* iteration = AST::Expr::parse(parser);
+    Expr* initialization = expr_parse(parser);
+    parser_eat(parser, TokenType::SEMICOLON);
+    Expr* condition = expr_parse(parser);
+    parser_eat(parser, TokenType::SEMICOLON);
+    Expr* iteration = expr_parse(parser);
 
-        Parser::eat(parser, TokenType::RPAREN);
+    parser_eat(parser, TokenType::RPAREN);
 
-        Scope* scope = AST::Scope::parse(parser);
+    Scope* scope = scope_parse(parser);
 
-        return new(&parser->arena, initialization, condition, iteration, scope);
-    }
+    return for_loop_new(&parser->arena, initialization, condition, iteration, scope);
 }

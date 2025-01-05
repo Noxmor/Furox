@@ -10,41 +10,35 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct DoWhileLoop
 {
-    export struct DoWhileLoop
-    {
-        Scope* scope;
-        Expr* condition;
-    }
+    Scope* scope;
+    Expr* condition;
+}
 
-    namespace DoWhileLoop
-    {
-        export DoWhileLoop* new(Arena* arena, Scope* scope, Expr* condition)
-        {
-            frx::assert(scope != nullptr);
+export DoWhileLoop* do_while_loop_new(Arena* arena, Scope* scope, Expr* condition)
+{
+    frx::assert(scope != nullptr);
 
-            frx::assert(condition != nullptr);
+    frx::assert(condition != nullptr);
 
-            mut DoWhileLoop* do_while_loop = Arena::alloc(arena, frx::sizeof(DoWhileLoop));
+    mut DoWhileLoop* do_while_loop = arena_alloc(arena, frx::sizeof(DoWhileLoop));
 
-            do_while_loop->scope = scope;
-            do_while_loop->condition = condition;
+    do_while_loop->scope = scope;
+    do_while_loop->condition = condition;
 
-            return do_while_loop;
-        }
+    return do_while_loop;
+}
 
-        export void print(DoWhileLoop* do_while_loop, mut FILE* file, usize depth)
-        {
-            frx::assert(do_while_loop != nullptr);
+export void do_while_loop_print(DoWhileLoop* do_while_loop, mut FILE* file, usize depth)
+{
+    frx::assert(do_while_loop != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s\n", "do-while-loop");
-            AST::Scope::print(do_while_loop->scope, file, depth + 1);
-            AST::Expr::print(do_while_loop->condition, file, depth + 1);
-        }
-    }
+    fprintf(file, "%s\n", "do-while-loop");
+    scope_print(do_while_loop->scope, file, depth + 1);
+    expr_print(do_while_loop->condition, file, depth + 1);
 }

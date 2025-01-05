@@ -11,108 +11,99 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct SwitchCase
 {
-    export struct SwitchCase
+    Expr* value;
+    Scope* scope;
+}
+
+export SwitchCase* switch_case_new(Arena* arena, Expr* value, Scope* scope)
+{
+    frx::assert(value != nullptr);
+
+    frx::assert(scope != nullptr);
+
+    mut SwitchCase* switch_case = arena_alloc(arena, frx::sizeof(SwitchCase));
+
+    switch_case->value = value;
+    switch_case->scope = scope;
+
+    return switch_case;
+}
+
+void switch_case_print(SwitchCase* switch_case, mut FILE* file, usize depth)
+{
+    frx::assert(switch_case != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_depth(file, depth);
+
+    fprintf(file, "case\n");
+
+    expr_print(switch_case->value, file, depth + 1);
+    scope_print(switch_case->scope, file, depth + 1);
+}
+
+export struct SwitchStmt
+{
+    Expr* value;
+    List cases;
+    Scope* default_scope;
+}
+
+export SwitchStmt* switch_stmt_new(Arena* arena, Expr* value)
+{
+    frx::assert(value != nullptr);
+
+    mut SwitchStmt* switch_stmt = arena_alloc(arena, frx::sizeof(SwitchStmt));
+
+    switch_stmt->value = value;
+    list_init(&switch_stmt->cases);
+    switch_stmt->default_scope = nullptr;
+
+    return switch_stmt;
+}
+
+export void switch_stmt_add_case(mut SwitchStmt* switch_stmt, SwitchCase* switch_case)
+{
+    frx::assert(switch_stmt != nullptr);
+
+    frx::assert(switch_case != nullptr);
+
+    list_push(&switch_stmt->cases, switch_case);
+}
+
+export void switch_stmt_set_default_scope(mut SwitchStmt* switch_stmt, Scope* scope)
+{
+    frx::assert(switch_stmt != nullptr);
+
+    frx::assert(scope != nullptr);
+
+    switch_stmt->default_scope = scope;
+}
+
+export void switch_stmt_print(SwitchStmt* switch_stmt, mut FILE* file, usize depth)
+{
+    frx::assert(switch_stmt != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_depth(file, depth);
+
+    fprintf(file, "%s\n", "switch-statement");
+
+    expr_print(switch_stmt->value, file, depth + 1);
+
+    mut usize i;
+    for(i = 0; i < list_size(&switch_stmt->cases); i = i + 1)
     {
-        Expr* value;
-        Scope* scope;
+        SwitchCase* switch_case = list_get(&switch_stmt->cases, i);
+        switch_case_print(switch_case, file, depth + 1);
     }
 
-    namespace SwitchCase
+    if(switch_stmt->default_scope != nullptr)
     {
-        export SwitchCase* new(Arena* arena, Expr* value, Scope* scope)
-        {
-            frx::assert(value != nullptr);
-
-            frx::assert(scope != nullptr);
-
-            mut SwitchCase* switch_case = Arena::alloc(arena, frx::sizeof(SwitchCase));
-
-            switch_case->value = value;
-            switch_case->scope = scope;
-
-            return switch_case;
-        }
-
-        void print(SwitchCase* switch_case, mut FILE* file, usize depth)
-        {
-            frx::assert(switch_case != nullptr);
-
-            frx::assert(file != nullptr);
-
-            print_depth(file, depth);
-
-            fprintf(file, "case\n");
-
-            AST::Expr::print(switch_case->value, file, depth + 1);
-            AST::Scope::print(switch_case->scope, file, depth + 1);
-        }
-    }
-
-    export struct SwitchStmt
-    {
-        Expr* value;
-        List cases;
-        Scope* default_scope;
-    }
-
-    namespace SwitchStmt
-    {
-        export SwitchStmt* new(Arena* arena, Expr* value)
-        {
-            frx::assert(value != nullptr);
-
-            mut SwitchStmt* switch_stmt = Arena::alloc(arena, frx::sizeof(SwitchStmt));
-
-            switch_stmt->value = value;
-            List::init(&switch_stmt->cases);
-            switch_stmt->default_scope = nullptr;
-
-            return switch_stmt;
-        }
-
-        export void add_case(mut SwitchStmt* switch_stmt, SwitchCase* switch_case)
-        {
-            frx::assert(switch_stmt != nullptr);
-
-            frx::assert(switch_case != nullptr);
-
-            List::push(&switch_stmt->cases, switch_case);
-        }
-
-        export void set_default_scope(mut SwitchStmt* switch_stmt, Scope* scope)
-        {
-            frx::assert(switch_stmt != nullptr);
-
-            frx::assert(scope != nullptr);
-
-            switch_stmt->default_scope = scope;
-        }
-
-        export void print(AST::SwitchStmt* switch_stmt, mut FILE* file, usize depth)
-        {
-            frx::assert(switch_stmt != nullptr);
-
-            frx::assert(file != nullptr);
-
-            print_depth(file, depth);
-
-            fprintf(file, "%s\n", "switch-statement");
-
-            AST::Expr::print(switch_stmt->value, file, depth + 1);
-
-            mut usize i;
-            for(i = 0; i < List::size(&switch_stmt->cases); i = i + 1)
-            {
-                AST::SwitchCase* switch_case = List::get(&switch_stmt->cases, i);
-                AST::SwitchCase::print(switch_case, file, depth + 1);
-            }
-
-            if(switch_stmt->default_scope != nullptr)
-            {
-                AST::Scope::print(switch_stmt->default_scope, file, depth + 1);
-            }
-        }
+        scope_print(switch_stmt->default_scope, file, depth + 1);
     }
 }

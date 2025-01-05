@@ -12,51 +12,45 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct FuncDecl
 {
-    export struct FuncDecl
-    {
-        SourceRange range;
+    SourceRange range;
 
-        TypeSpecifier* return_type;
-        FuncSymbol symbol;
-        FuncParams* params;
+    TypeSpecifier* return_type;
+    FuncSymbol symbol;
+    FuncParams* params;
 
-        b8 is_redefinition;
-    }
+    b8 is_redefinition;
+}
 
-    namespace FuncDecl
-    {
-        export FuncDecl* new(Arena* arena, core::Scope* scope, core::Namespace* ns,
-            char* name, TypeSpecifier* return_type)
-        {
-            frx::assert(return_type != nullptr);
+export FuncDecl* func_decl_new(Arena* arena, CoreScope* scope, CoreNamespace* ns,
+        char* name, TypeSpecifier* return_type)
+{
+    frx::assert(return_type != nullptr);
 
-            mut FuncDecl* func_decl = Arena::alloc(arena, frx::sizeof(FuncDecl));
+    mut FuncDecl* func_decl = arena_alloc(arena, frx::sizeof(FuncDecl));
 
-            func_symbol_init(&func_decl->symbol, scope, ns, name, false, true);
+    func_symbol_init(&func_decl->symbol, scope, ns, name, false, true);
 
-            func_decl->return_type = return_type;
-            func_decl->params = nullptr;
-            func_decl->is_redefinition = false;
+    func_decl->return_type = return_type;
+    func_decl->params = nullptr;
+    func_decl->is_redefinition = false;
 
-            return func_decl;
-        }
+    return func_decl;
+}
 
-        export void print(FuncDecl* func_decl, mut FILE* file, usize depth)
-        {
-            frx::assert(func_decl != nullptr);
+export void func_decl_print(FuncDecl* func_decl, mut FILE* file, usize depth)
+{
+    frx::assert(func_decl != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            FuncSymbol* symbol = &func_decl->symbol;
+    FuncSymbol* symbol = &func_decl->symbol;
 
-            fprintf(file, "%s (%s)\n", "function-declaration", symbol->name);
+    fprintf(file, "%s (%s)\n", "function-declaration", symbol->name);
 
-            AST::TypeSpecifier::print(func_decl->return_type, file, depth + 1);
-            AST::FuncParams::print(func_decl->params, file, depth + 1);
-        }
-    }
+    type_specifier_print(func_decl->return_type, file, depth + 1);
+    func_params_print(func_decl->params, file, depth + 1);
 }

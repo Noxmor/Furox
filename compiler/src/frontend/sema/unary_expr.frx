@@ -2,14 +2,11 @@ import "expr.frx";
 import "../core/parser.frx";
 import "../ast/unary_expr.frx";
 
-namespace AST::UnaryExpr
+export void unary_expr_sema(Parser* parser, UnaryExpr* expr)
 {
-    export void sema(Parser* parser, UnaryExpr* expr)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        frx::assert(expr != nullptr);
+    frx::assert(expr != nullptr);
 
-        AST::Expr::sema(parser, expr->operand);
-    }
+    expr_sema(parser, expr->operand);
 }

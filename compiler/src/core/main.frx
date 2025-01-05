@@ -13,7 +13,7 @@ extern
     char* realpath(char* filename, mut char* resolved_name);
 }
 
-mut AST::Program* program;
+mut Program* program;
 mut b8 failed = false;
 
 mut Queue syntax_queue;
@@ -36,7 +36,7 @@ export void compile(char* filepath)
 
     frx::assert(parser != nullptr);
 
-    Queue::enqueue(&syntax_queue, parser);
+    queue_enqueue(&syntax_queue, parser);
 }
 
 i32 main(usize argc, char** argv)
@@ -44,11 +44,11 @@ i32 main(usize argc, char** argv)
     config_init();
     lexer_init_keyword_table();
 
-    Queue::init(&syntax_queue);
-    Queue::init(&resolve_imports_queue);
-    Queue::init(&semantic_queue);
+    queue_init(&syntax_queue);
+    queue_init(&resolve_imports_queue);
+    queue_init(&semantic_queue);
 
-    program = AST::Program::new();
+    program = program_new();
 
     mut Option options[7];
 
@@ -83,7 +83,7 @@ i32 main(usize argc, char** argv)
             }
             case OptionID::LINK:
             {
-                List::push(&config->link_targets, get_arg());
+                list_push(&config->link_targets, get_arg());
                 break;
             }
             case OptionID::LIBRARY_PATH:
@@ -103,35 +103,35 @@ i32 main(usize argc, char** argv)
         compile(fullpath);
     }
 
-    while(!Queue::is_empty(&syntax_queue))
+    while(!queue_is_empty(&syntax_queue))
     {
-        Parser* parser = Queue::dequeue(&syntax_queue);
-        Parser::parse(parser);
-        Queue::enqueue(&resolve_imports_queue, parser);
+        Parser* parser = queue_dequeue(&syntax_queue);
+        parser_parse(parser);
+        queue_enqueue(&resolve_imports_queue, parser);
     }
 
-    while(!Queue::is_empty(&resolve_imports_queue))
+    while(!queue_is_empty(&resolve_imports_queue))
     {
-        Parser* parser = Queue::dequeue(&resolve_imports_queue);
-        Parser::resolve_imports(parser);
-        Queue::enqueue(&semantic_queue, parser);
+        Parser* parser = queue_dequeue(&resolve_imports_queue);
+        parser_resolve_imports(parser);
+        queue_enqueue(&semantic_queue, parser);
     }
 
-    while(!Queue::is_empty(&semantic_queue))
+    while(!queue_is_empty(&semantic_queue))
     {
-        Parser* parser = Queue::dequeue(&semantic_queue);
-        Parser::analyze(parser);
+        Parser* parser = queue_dequeue(&semantic_queue);
+        parser_analyze(parser);
         failed = failed || parser->failed;
-        List::push(&program->translation_units, parser->translation_unit);
+        list_push(&program->translation_units, parser->translation_unit);
     }
 
     if(emit_ast)
     {
-        FILE* file = libc::fopen("frx.ast", "w");
+        FILE* file = libc_fopen("frx.ast", "w");
         if(file != nullptr)
         {
-            AST::Program::print(program, file, 0);
-            libc::fclose(file);
+            program_print(program, file, 0);
+            libc_fclose(file);
         }
     }
 

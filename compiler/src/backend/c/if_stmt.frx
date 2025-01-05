@@ -10,7 +10,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_if_stmt(Transpiler* transpiler, AST::IfStmt* if_stmt)
+export void transpile_if_stmt(Transpiler* transpiler, IfStmt* if_stmt)
 {
     frx::assert(transpiler != nullptr);
 

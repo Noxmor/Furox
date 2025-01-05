@@ -9,7 +9,7 @@ extern
 }
 
 export void transpile_break_stmt(Transpiler* transpiler,
-    AST::BreakStmt* break_stmt)
+    BreakStmt* break_stmt)
 {
     frx::assert(transpiler != nullptr);
 

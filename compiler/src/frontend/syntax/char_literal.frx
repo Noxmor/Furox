@@ -1,16 +1,13 @@
 export import "../ast/char_literal.frx";
 import "../core/parser.frx";
 
-namespace AST::CharLiteral
+export CharLiteral* char_literal_parse(Parser* parser)
 {
-    export CharLiteral* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        char* literal = parser->token->identifier;
+    char* literal = parser->token->identifier;
 
-        Parser::eat(parser, TokenType::CHAR_LITERAL);
+    parser_eat(parser, TokenType::CHAR_LITERAL);
 
-        return new(&parser->arena, literal);
-    }
+    return char_literal_new(&parser->arena, literal);
 }

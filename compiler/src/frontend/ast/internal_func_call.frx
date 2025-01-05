@@ -17,244 +17,229 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-namespace AST
+export struct Assert
 {
-    export struct Assert
+    SourceRange range;
+    char* filepath;
+    Expr* expr;
+}
+
+export Assert* assert_new(Arena* arena, char* filepath, Expr* expr)
+{
+    frx::assert(filepath != nullptr);
+
+    frx::assert(expr != nullptr);
+
+    mut Assert* assert_node = arena_alloc(arena, frx::sizeof(Assert));
+
+    assert_node->filepath = filepath;
+    assert_node->expr = expr;
+
+    return assert_node;
+}
+
+export void assert_print(Assert* assert_node, mut FILE* file, usize depth)
+{
+    frx::assert(assert_node != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_depth(file, depth);
+
+    fprintf(file, "%s\n", "assert");
+
+    expr_print(assert_node->expr, file, depth + 1);
+}
+
+export struct Sizeof
+{
+    NamespaceResolution* resolution;
+    char* name;
+    TokenType primitive_type;
+    EnumSymbol* enum_type;
+    StructSymbol* struct_type;
+    CoreScope* scope;
+}
+
+export Sizeof* sizeof_new(Arena* arena, NamespaceResolution* resolution, char* name,
+        TokenType primitive_type, CoreScope* scope)
+{
+    frx::assert(resolution != nullptr);
+
+    frx::assert(primitive_type < TokenType::COUNT);
+
+    frx::assert(scope != nullptr);
+
+    mut Sizeof* sizeof_node = arena_alloc(arena, frx::sizeof(Sizeof));
+
+    sizeof_node->resolution = resolution;
+    sizeof_node->name = name;
+    sizeof_node->primitive_type = primitive_type;
+    sizeof_node->scope = scope;
+
+    return sizeof_node;
+}
+
+export void sizeof_print(Sizeof* sizeof_node, mut FILE* file, usize depth)
+{
+    frx::assert(sizeof_node != nullptr);
+
+    frx::assert(file != nullptr);
+
+    print_depth(file, depth);
+
+    fprintf(file, "%s\n", "sizeof");
+
+    print_depth(file, depth + 1);
+    namespace_resolution_print(file, sizeof_node->resolution);
+
+    if(sizeof_node->name != nullptr)
     {
-        SourceRange range;
-        char* filepath;
-        Expr* expr;
+        fprintf(file, "%s\n", sizeof_node->name);
     }
-
-    namespace Assert
+    else
     {
-        export Assert* new(Arena* arena, char* filepath, Expr* expr)
-        {
-            frx::assert(filepath != nullptr);
-
-            frx::assert(expr != nullptr);
-
-            mut Assert* assert_node = Arena::alloc(arena, frx::sizeof(Assert));
-
-            assert_node->filepath = filepath;
-            assert_node->expr = expr;
-
-            return assert_node;
-        }
-
-        export void print(Assert* assert_node, mut FILE* file, usize depth)
-        {
-            frx::assert(assert_node != nullptr);
-
-            frx::assert(file != nullptr);
-
-            print_depth(file, depth);
-
-            fprintf(file, "%s\n", "assert");
-
-            AST::Expr::print(assert_node->expr, file, depth + 1);
-        }
+        fprintf(file, "%s\n", token_type_to_str(sizeof_node->primitive_type));
     }
+}
 
-    export struct Sizeof
-    {
-        NamespaceResolution* resolution;
-        char* name;
-        TokenType primitive_type;
-        EnumSymbol* enum_type;
-        StructSymbol* struct_type;
-        core::Scope* scope;
-    }
+export struct EnumCount
+{
+    NamespaceResolution* resolution;
+    char* name;
+    CoreScope* scope;
+}
 
-    namespace Sizeof
-    {
-        export Sizeof* new(Arena* arena, NamespaceResolution* resolution, char* name,
-            TokenType primitive_type, core::Scope* scope)
-        {
-            frx::assert(resolution != nullptr);
+export EnumCount* enum_count_new(Arena* arena, NamespaceResolution* resolution, char* name, CoreScope* scope)
+{
+    frx::assert(resolution != nullptr);
 
-            frx::assert(primitive_type < TokenType::COUNT);
+    frx::assert(name != nullptr);
 
-            frx::assert(scope != nullptr);
+    frx::assert(scope != nullptr);
 
-            mut Sizeof* sizeof_node = Arena::alloc(arena, frx::sizeof(Sizeof));
+    mut EnumCount* enum_count = arena_alloc(arena, frx::sizeof(EnumCount));
 
-            sizeof_node->resolution = resolution;
-            sizeof_node->name = name;
-            sizeof_node->primitive_type = primitive_type;
-            sizeof_node->scope = scope;
+    enum_count->resolution = resolution;
+    enum_count->name = name;
+    enum_count->scope = scope;
 
-            return sizeof_node;
-        }
+    return enum_count;
+}
 
-        export void print(Sizeof* sizeof_node, mut FILE* file, usize depth)
-        {
-            frx::assert(sizeof_node != nullptr);
+export void enum_count_print(EnumCount* enum_count, mut FILE* file, usize depth)
+{
+    frx::assert(enum_count != nullptr);
 
-            frx::assert(file != nullptr);
+    frx::assert(file != nullptr);
 
-            print_depth(file, depth);
+    print_depth(file, depth);
 
-            fprintf(file, "%s\n", "sizeof");
+    fprintf(file, "%s\n", "enum-count");
 
-            print_depth(file, depth + 1);
-            AST::NamespaceResolution::print(file, sizeof_node->resolution);
+    print_depth(file, depth + 1);
 
-            if(sizeof_node->name != nullptr)
-            {
-                fprintf(file, "%s\n", sizeof_node->name);
-            }
-            else
-            {
-                fprintf(file, "%s\n", TokenType::to_str(sizeof_node->primitive_type));
-            }
-        }
-    }
+    namespace_resolution_print(file, enum_count->resolution);
+    fprintf(file, "%s\n", enum_count->name);
+}
 
-    export struct EnumCount
-    {
-        NamespaceResolution* resolution;
-        char* name;
-        core::Scope* scope;
-    }
-
-    namespace EnumCount
-    {
-        export EnumCount* new(Arena* arena, NamespaceResolution* resolution, char* name, core::Scope* scope)
-        {
-            frx::assert(resolution != nullptr);
-
-            frx::assert(name != nullptr);
-
-            frx::assert(scope != nullptr);
-
-            mut EnumCount* enum_count = Arena::alloc(arena, frx::sizeof(EnumCount));
-
-            enum_count->resolution = resolution;
-            enum_count->name = name;
-            enum_count->scope = scope;
-
-            return enum_count;
-        }
-
-        export void print(EnumCount* enum_count, mut FILE* file, usize depth)
-        {
-            frx::assert(enum_count != nullptr);
-
-            frx::assert(file != nullptr);
-
-            print_depth(file, depth);
-
-            fprintf(file, "%s\n", "enum-count");
-
-            print_depth(file, depth + 1);
-
-            AST::NamespaceResolution::print(file, enum_count->resolution);
-            fprintf(file, "%s\n", enum_count->name);
-        }
-    }
-
-    export enum InternalFuncCallType : u8
-    {
-        INVALID,
+export enum InternalFuncCallType : u8
+{
+    INVALID,
         ASSERT,
         SIZEOF,
         ENUM_COUNT
-    }
+}
 
-    export struct InternalFuncCall
+export struct InternalFuncCall
+{
+    InternalFuncCallType type;
+
+    Assert* assert_node;
+    Sizeof* sizeof_node;
+    EnumCount* enum_count_node;
+}
+
+export InternalFuncCall* internal_func_call_new(Arena* arena)
+{
+    mut InternalFuncCall* internal_func_call = arena_alloc(arena, frx::sizeof(InternalFuncCall));
+
+    libc_memset(internal_func_call, 0, frx::sizeof(InternalFuncCall));
+    internal_func_call->type = InternalFuncCallType::INVALID;
+
+    return internal_func_call;
+}
+
+export InternalFuncCall* internal_func_call_from_assert(Arena* arena, Assert* assert_node)
+{
+    frx::assert(assert_node != nullptr);
+
+    mut InternalFuncCall* internal_func_call = internal_func_call_new(arena);
+
+    internal_func_call->type = InternalFuncCallType::ASSERT;
+    internal_func_call->assert_node = assert_node;
+
+    return internal_func_call;
+}
+
+export InternalFuncCall* internal_func_call_from_sizeof(Arena* arena, Sizeof* sizeof_node)
+{
+    frx::assert(sizeof_node != nullptr);
+
+    mut InternalFuncCall* internal_func_call = internal_func_call_new(arena);
+
+    internal_func_call->type = InternalFuncCallType::SIZEOF;
+    internal_func_call->sizeof_node = sizeof_node;
+
+    return internal_func_call;
+}
+
+export InternalFuncCall* internal_func_call_from_enum_count(Arena* arena, EnumCount* enum_count_node)
+{
+    frx::assert(enum_count_node != nullptr);
+
+    mut InternalFuncCall* internal_func_call = internal_func_call_new(arena);
+
+    internal_func_call->type = InternalFuncCallType::ENUM_COUNT;
+    internal_func_call->enum_count_node = enum_count_node;
+
+    return internal_func_call;
+}
+
+export void internal_func_call_print(InternalFuncCall* internal_func_call, mut FILE* file, usize depth)
+{
+    frx::assert(internal_func_call != nullptr);
+
+    frx::assert(file != nullptr);
+
+    switch(internal_func_call->type)
     {
-        InternalFuncCallType type;
-
-        Assert* assert_node;
-        Sizeof* sizeof_node;
-        EnumCount* enum_count_node;
-    }
-
-    namespace InternalFuncCall
-    {
-        export InternalFuncCall* new(Arena* arena)
-        {
-            mut InternalFuncCall* internal_func_call = Arena::alloc(arena, frx::sizeof(InternalFuncCall));
-
-            libc::memset(internal_func_call, 0, frx::sizeof(InternalFuncCall));
-            internal_func_call->type = AST::InternalFuncCallType::INVALID;
-
-            return internal_func_call;
-        }
-
-        export InternalFuncCall* from_assert(Arena* arena, Assert* assert_node)
-        {
-            frx::assert(assert_node != nullptr);
-
-            mut InternalFuncCall* internal_func_call = new(arena);
-
-            internal_func_call->type = AST::InternalFuncCallType::ASSERT;
-            internal_func_call->assert_node = assert_node;
-
-            return internal_func_call;
-        }
-
-        export InternalFuncCall* from_sizeof(Arena* arena, Sizeof* sizeof_node)
-        {
-            frx::assert(sizeof_node != nullptr);
-
-            mut InternalFuncCall* internal_func_call = new(arena);
-
-            internal_func_call->type = AST::InternalFuncCallType::SIZEOF;
-            internal_func_call->sizeof_node = sizeof_node;
-
-            return internal_func_call;
-        }
-
-        export InternalFuncCall* from_enum_count(Arena* arena, EnumCount* enum_count_node)
-        {
-            frx::assert(enum_count_node != nullptr);
-
-            mut InternalFuncCall* internal_func_call = new(arena);
-
-            internal_func_call->type = AST::InternalFuncCallType::ENUM_COUNT;
-            internal_func_call->enum_count_node = enum_count_node;
-
-            return internal_func_call;
-        }
-
-        export void print(InternalFuncCall* internal_func_call, mut FILE* file, usize depth)
-        {
-            frx::assert(internal_func_call != nullptr);
-
-            frx::assert(file != nullptr);
-
-            switch(internal_func_call->type)
+        case InternalFuncCallType::ASSERT:
             {
-                case AST::InternalFuncCallType::ASSERT:
-                {
-                    AST::Assert::print(internal_func_call->assert_node, file, depth);
+                assert_print(internal_func_call->assert_node, file, depth);
 
-                    break;
-                }
-
-                case AST::InternalFuncCallType::SIZEOF:
-                {
-                    AST::Sizeof::print(internal_func_call->sizeof_node, file, depth);
-
-                    break;
-                }
-
-                case AST::InternalFuncCallType::ENUM_COUNT:
-                {
-                    AST::EnumCount::print(internal_func_call->enum_count_node, file, depth);
-
-                    break;
-                }
-
-                default:
-                {
-                    frx::assert(false);
-
-                    break;
-                }
+                break;
             }
-        }
+
+        case InternalFuncCallType::SIZEOF:
+            {
+                sizeof_print(internal_func_call->sizeof_node, file, depth);
+
+                break;
+            }
+
+        case InternalFuncCallType::ENUM_COUNT:
+            {
+                enum_count_print(internal_func_call->enum_count_node, file, depth);
+
+                break;
+            }
+
+        default:
+            {
+                frx::assert(false);
+
+                break;
+            }
     }
 }

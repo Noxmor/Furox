@@ -10,7 +10,7 @@ extern
 }
 
 export void transpile_return_stmt(Transpiler* transpiler,
-    AST::ReturnStmt* return_stmt)
+    ReturnStmt* return_stmt)
 {
     frx::assert(transpiler != nullptr);
 

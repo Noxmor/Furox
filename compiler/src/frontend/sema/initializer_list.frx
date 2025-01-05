@@ -2,19 +2,16 @@ import "../core/parser.frx";
 import "../ast/initializer_list.frx";
 import "expr.frx";
 
-namespace AST::InitializerList
+export void initializer_list_sema(Parser* parser, InitializerList* list)
 {
-    export void sema(Parser* parser, InitializerList* list)
+    frx::assert(parser != nullptr);
+
+    frx::assert(list != nullptr);
+
+    mut usize i;
+    for(i = 0; i < list_size(&list->values); i = i + 1)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(list != nullptr);
-
-        mut usize i;
-        for(i = 0; i < List::size(&list->values); i = i + 1)
-        {
-            Expr* value = List::get(&list->values, i);
-            AST::Expr::sema(parser, value);
-        }
+        Expr* value = list_get(&list->values, i);
+        expr_sema(parser, value);
     }
 }

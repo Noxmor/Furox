@@ -5,20 +5,17 @@ import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/var.frx";
 
-namespace AST::Var
+export Var* var_parse(Parser* parser, CoreNamespace* ns)
 {
-    export Var* parse(Parser* parser, core::Namespace* ns)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        mut Var* var = new(&parser->arena, ns, parser->current_scope, parser->token->identifier);
+    mut Var* var = var_new(&parser->arena, ns, parser->current_scope, parser->token->identifier);
 
-        var->range.start = Parser::current_location(parser);
-        var->range.end = Parser::current_location(parser);
-        var->range.end.column = var->range.end.column + libc::strlen(var->name);
+    var->range.start = parser_current_location(parser);
+    var->range.end = parser_current_location(parser);
+    var->range.end.column = var->range.end.column + libc_strlen(var->name);
 
-        Parser::eat(parser, TokenType::IDENTIFIER);
+    parser_eat(parser, TokenType::IDENTIFIER);
 
-        return var;
-    }
+    return var;
 }

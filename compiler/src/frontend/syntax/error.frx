@@ -1,21 +1,18 @@
 export import "../ast/error.frx";
 import "../core/parser.frx";
 
-namespace AST::Error
+export Error* error_parse(Parser* parser)
 {
-    export Error* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        SourceLocation start = Parser::current_location(parser);
+    SourceLocation start = parser_current_location(parser);
 
-        Parser::panic(parser);
+    parser_panic(parser);
 
-        mut Error* error = new(&parser->arena);
+    mut Error* error = error_new(&parser->arena);
 
-        error->range.start = start;
-        error->range.end = Parser::current_location(parser);
+    error->range.start = start;
+    error->range.end = parser_current_location(parser);
 
-        return error;
-    }
+    return error;
 }

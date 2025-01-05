@@ -2,12 +2,12 @@ import "c.frx";
 import "global_scope.frx";
 
 export void transpile_translation_unit(Transpiler* transpiler,
-    AST::Compound* translation_unit)
+    Compound* translation_unit)
 {
     mut usize i;
-    for(i = 0; i < List::size(&translation_unit->nodes); i = i + 1)
+    for(i = 0; i < list_size(&translation_unit->nodes); i = i + 1)
     {
-        AST::GlobalScope* global_scope = List::get(&translation_unit->nodes, i);
+        GlobalScope* global_scope = list_get(&translation_unit->nodes, i);
 
         transpile_global_scope(transpiler, global_scope);
     }

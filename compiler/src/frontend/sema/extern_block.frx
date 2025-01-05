@@ -4,19 +4,16 @@ import "../ast/extern_block.frx";
 import "../ast/func_decl.frx";
 import "../../core/list.frx";
 
-namespace AST::ExternBlock
+export void extern_block_sema(Parser* parser, ExternBlock* extern_block)
 {
-    export void sema(Parser* parser, ExternBlock* extern_block)
+    frx::assert(parser != nullptr);
+
+    frx::assert(extern_block != nullptr);
+
+    mut usize i;
+    for(i = 0; i < list_size(&extern_block->func_decls); i = i + 1)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(extern_block != nullptr);
-
-        mut usize i;
-        for(i = 0; i < List::size(&extern_block->func_decls); i = i + 1)
-        {
-            FuncDecl* func_decl = List::get(&extern_block->func_decls, i);
-            AST::FuncDecl::sema(parser, func_decl);
-        }
+        FuncDecl* func_decl = list_get(&extern_block->func_decls, i);
+        func_decl_sema(parser, func_decl);
     }
 }

@@ -11,7 +11,7 @@ extern
     i32 fprintf(mut FILE* stream, char* format, ...);
 }
 
-export void transpile_func_decl(Transpiler* transpiler, AST::FuncDecl* func_decl)
+export void transpile_func_decl(Transpiler* transpiler, FuncDecl* func_decl)
 {
     frx::assert(transpiler != nullptr);
 
@@ -24,8 +24,8 @@ export void transpile_func_decl(Transpiler* transpiler, AST::FuncDecl* func_decl
 
     FuncSymbol* symbol = &func_decl->symbol;
 
-    if(libc::strcmp(symbol->name, "va_start") == 0
-        || libc::strcmp(symbol->name, "va_end") == 0)
+    if(libc_strcmp(symbol->name, "va_start") == 0
+        || libc_strcmp(symbol->name, "va_end") == 0)
     {
         return;
     }

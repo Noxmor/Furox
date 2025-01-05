@@ -4,41 +4,35 @@ import "../core/parser.frx";
 import "../ast/func_params.frx";
 import "../../core/list.frx";
 
-namespace AST::FuncParam
+void func_param_sema(mut Parser* parser, FuncParam* param)
 {
-    void sema(mut Parser* parser, FuncParam* param)
+    frx::assert(parser != nullptr);
+
+    frx::assert(param != nullptr);
+
+    if(param->is_redefinition)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(param != nullptr);
-
-        if(param->is_redefinition)
-        {
-            //FIXME: Print the correct location, this is only a placeholder
-            SourceLocation loc;
-            error_var_redefinition(Parser::source_file(parser), loc,
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_var_redefinition(parser_source_file(parser), loc,
                 param->symbol.name);
 
-            Parser::fail(parser);
-        }
-
-        AST::TypeSpecifier::sema(parser, param->symbol.type);
+        parser_fail(parser);
     }
+
+    type_specifier_sema(parser, param->symbol.type);
 }
 
-namespace AST::FuncParams
+export void func_params_sema(Parser* parser, FuncParams* params)
 {
-    export void sema(Parser* parser, FuncParams* params)
+    frx::assert(parser != nullptr);
+
+    frx::assert(params != nullptr);
+
+    mut usize i;
+    for(i = 0; i < list_size(&params->params); i = i + 1)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(params != nullptr);
-
-        mut usize i;
-        for(i = 0; i < List::size(&params->params); i = i + 1)
-        {
-            FuncParam* param = List::get(&params->params, i);
-            AST::FuncParam::sema(parser, param);
-        }
+        FuncParam* param = list_get(&params->params, i);
+        func_param_sema(parser, param);
     }
 }

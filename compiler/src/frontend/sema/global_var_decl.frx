@@ -4,28 +4,25 @@ import "../core/parser.frx";
 import "../symbols/var.frx";
 import "../ast/global_var_decl.frx";
 
-namespace AST::GlobalVarDecl
+export void global_var_decl_sema(mut Parser* parser, GlobalVarDecl* var_decl)
 {
-    export void sema(mut Parser* parser, GlobalVarDecl* var_decl)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        frx::assert(var_decl != nullptr);
+    frx::assert(var_decl != nullptr);
 
-        VarSymbol* symbol = &var_decl->symbol;
+    VarSymbol* symbol = &var_decl->symbol;
 
-        AST::TypeSpecifier::sema(parser, symbol->type);
+    type_specifier_sema(parser, symbol->type);
 
-        b8 is_redefinition = var_table_find_by_scope(&parser->var_table,
+    b8 is_redefinition = var_table_find_by_scope(&parser->var_table,
             symbol->scope, symbol->name) != symbol;
 
-        if(is_redefinition)
-        {
-            //FIXME: Print the correct location, this is only a placeholder
-            SourceLocation loc;
-            error_var_redefinition(Parser::source_file(parser), loc, symbol->name);
+    if(is_redefinition)
+    {
+        //FIXME: Print the correct location, this is only a placeholder
+        SourceLocation loc;
+        error_var_redefinition(parser_source_file(parser), loc, symbol->name);
 
-            Parser::fail(parser);
-        }
+        parser_fail(parser);
     }
 }

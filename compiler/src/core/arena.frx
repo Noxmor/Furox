@@ -8,47 +8,44 @@ export struct Arena
     void* buffer;
 }
 
-namespace Arena
+export void arena_init(mut Arena* arena, usize size)
 {
-    export void init(mut Arena* arena, usize size)
-    {
-        frx::assert(arena != nullptr);
+    frx::assert(arena != nullptr);
 
-        frx::assert(size > 0);
+    frx::assert(size > 0);
 
-        arena->size = size;
-        arena->pos = 0;
-        arena->buffer = libc::malloc(arena->size);
-    }
+    arena->size = size;
+    arena->pos = 0;
+    arena->buffer = libc_malloc(arena->size);
+}
 
-    export void* alloc(mut Arena* arena, usize size)
-    {
-        frx::assert(arena != nullptr);
+export void* arena_alloc(mut Arena* arena, usize size)
+{
+    frx::assert(arena != nullptr);
 
-        frx::assert(size > 0);
+    frx::assert(size > 0);
 
-        frx::assert(arena->buffer != nullptr);
+    frx::assert(arena->buffer != nullptr);
 
-        frx::assert(arena->pos + size <= arena->size);
+    frx::assert(arena->pos + size <= arena->size);
 
-        void* memory = arena->buffer + arena->pos;
+    void* memory = arena->buffer + arena->pos;
 
-        arena->pos = arena->pos + size;
+    arena->pos = arena->pos + size;
 
-        return memory;
-    }
+    return memory;
+}
 
-    export void reset(mut Arena* arena)
-    {
-        frx::assert(arena != nullptr);
+export void arena_reset(mut Arena* arena)
+{
+    frx::assert(arena != nullptr);
 
-        arena->pos = 0;
-    }
+    arena->pos = 0;
+}
 
-    export void destroy(Arena* arena)
-    {
-        frx::assert(arena != nullptr);
+export void arena_destroy(Arena* arena)
+{
+    frx::assert(arena != nullptr);
 
-        libc::free(arena->buffer);
-    }
+    libc_free(arena->buffer);
 }

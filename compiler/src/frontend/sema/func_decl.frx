@@ -6,38 +6,35 @@ import "../symbols/func.frx";
 import "../ast/func_decl.frx";
 import "../../core/list.frx";
 
-namespace AST::FuncDecl
+export void func_decl_sema(mut Parser* parser, mut FuncDecl* func_decl)
 {
-    export void sema(mut Parser* parser, mut FuncDecl* func_decl)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        frx::assert(func_decl != nullptr);
+    frx::assert(func_decl != nullptr);
 
-        AST::TypeSpecifier::sema(parser, func_decl->return_type);
+    type_specifier_sema(parser, func_decl->return_type);
 
-        FuncSymbol* symbol = &func_decl->symbol;
+    FuncSymbol* symbol = &func_decl->symbol;
 
-        mut usize i;
-        for(i = 0; i < List::size(&parser->visible_parsers)
+    mut usize i;
+    for(i = 0; i < list_size(&parser->visible_parsers)
             && !func_decl->is_redefinition; i = i + 1)
-        {
-            Parser* visible_parser = List::get(&parser->visible_parsers, i);
-            FuncSymbol* imported_symbol = func_table_find(
+    {
+        Parser* visible_parser = list_get(&parser->visible_parsers, i);
+        FuncSymbol* imported_symbol = func_table_find(
                 &visible_parser->func_table, symbol->ns, symbol->name, nullptr);
 
-            func_decl->is_redefinition = imported_symbol != nullptr
-                && imported_symbol->exported;
-        }
+        func_decl->is_redefinition = imported_symbol != nullptr
+            && imported_symbol->exported;
+    }
 
-        if(func_decl->is_redefinition)
-        {
-            error_func_decl_redefinition(Parser::source_file(parser),
+    if(func_decl->is_redefinition)
+    {
+        error_func_decl_redefinition(parser_source_file(parser),
                 func_decl->range.start, symbol->name);
 
-            Parser::fail(parser);
-        }
-
-        AST::FuncParams::sema(parser, func_decl->params);
+        parser_fail(parser);
     }
+
+    func_params_sema(parser, func_decl->params);
 }

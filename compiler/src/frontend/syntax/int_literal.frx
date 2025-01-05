@@ -1,16 +1,13 @@
 export import "../ast/int_literal.frx";
 import "../core/parser.frx";
 
-namespace AST::IntLiteral
+export IntLiteral* int_literal_parse(Parser* parser)
 {
-    export IntLiteral* parse(Parser* parser)
-    {
-        frx::assert(parser != nullptr);
+    frx::assert(parser != nullptr);
 
-        IntLiteral* literal = new(&parser->arena, parser->token->int_literal);
+    IntLiteral* literal = int_literal_new(&parser->arena, parser->token->int_literal);
 
-        Parser::eat(parser, TokenType::INT_LITERAL);
+    parser_eat(parser, TokenType::INT_LITERAL);
 
-        return literal;
-    }
+    return literal;
 }

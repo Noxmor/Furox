@@ -3,19 +3,16 @@ import "../core/parser.frx";
 import "../ast/scope.frx";
 import "../../core/list.frx";
 
-namespace AST::Scope
+export void scope_sema(Parser* parser, Scope* scope)
 {
-    export void sema(Parser* parser, Scope* scope)
+    frx::assert(parser != nullptr);
+
+    frx::assert(scope != nullptr);
+
+    mut usize i;
+    for(i = 0; i < list_size(&scope->stmts); i = i + 1)
     {
-        frx::assert(parser != nullptr);
-
-        frx::assert(scope != nullptr);
-
-        mut usize i;
-        for(i = 0; i < List::size(&scope->stmts); i = i + 1)
-        {
-            Stmt* stmt = List::get(&scope->stmts, i);
-            AST::Stmt::sema(parser, stmt);
-        }
+        Stmt* stmt = list_get(&scope->stmts, i);
+        stmt_sema(parser, stmt);
     }
 }

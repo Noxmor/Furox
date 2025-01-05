@@ -9,7 +9,7 @@ extern
 }
 
 export void transpile_float_literal(Transpiler* transpiler,
-    AST::FloatLiteral* literal)
+    FloatLiteral* literal)
 {
     frx::assert(transpiler != nullptr);
 
