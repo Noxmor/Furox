@@ -52,6 +52,8 @@ export i32 c_generate_code(Program* program)
     fprintf(transpiler.file, "#include <stdint.h>\n");
     fprintf(transpiler.file, "#include <stdarg.h>\n");
 
+    fprintf(transpiler.file, "#include <dirent.h>\n");
+
     fprintf(transpiler.file, "typedef size_t usize;\n");
     fprintf(transpiler.file, "typedef int64_t isize;\n");
     fprintf(transpiler.file, "typedef int8_t i8;\n");

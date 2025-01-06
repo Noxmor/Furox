@@ -3,17 +3,16 @@ export import "lexer.frx";
 import "namespace.frx";
 import "scope.frx";
 import "../ast/compound.frx";
-import "../symbols/enum.frx";
-import "../symbols/func.frx";
-import "../symbols/struct.frx";
-import "../symbols/var.frx";
 import "../sema/global_scope.frx";
+import "../resolution/global_scope.frx";
 import "../syntax/translation_unit.frx";
+import "../symbols/var.frx";
 export import "../../core/arena.frx";
 import "../../core/list.frx";
 import "../../core/log.frx";
 import "../../core/main.frx";
-import "../../core/parser_table.frx";
+import "../../core/module.frx";
+import "../../core/symbol_table.frx";
 
 extern struct FILE;
 
@@ -26,6 +25,8 @@ extern
 
 export struct Parser
 {
+    Module* module;
+
     Lexer lexer;
 
     Compound* translation_unit;
@@ -34,24 +35,24 @@ export struct Parser
 
     CoreScope* current_scope;
 
-    List visible_parsers;
-
     b8 panic;
     b8 failed;
 
     Arena arena;
 
-    EnumTable enum_table;
-    StructTable struct_table;
-    FuncTable func_table;
+    List import_stmts;
     VarTable var_table;
 }
 
-export void parser_init(mut Parser* parser, char* filepath)
+export void parser_init(mut Parser* parser, Module* module, char* filepath)
 {
     frx::assert(parser != nullptr);
 
+    frx::assert(module != nullptr);
+
     frx::assert(filepath != nullptr);
+
+    parser->module = module;
 
     lexer_init(&parser->lexer, filepath);
 
@@ -61,16 +62,12 @@ export void parser_init(mut Parser* parser, char* filepath)
 
     parser->current_scope = scope_create(nullptr);
 
-    list_init(&parser->visible_parsers);
-
     parser->panic = false;
     parser->failed = false;
 
     arena_init(&parser->arena, 1024 * 1024);
 
-    enum_table_init(&parser->enum_table);
-    struct_table_init(&parser->struct_table);
-    func_table_init(&parser->func_table);
+    list_init(&parser->import_stmts);
     var_table_init(&parser->var_table);
 }
 
@@ -144,131 +141,41 @@ export void parser_parse(mut Parser* parser)
     }
 }
 
-b8 file_exists(char* filepath)
-{
-    frx::assert(filepath != nullptr);
-
-    FILE* file = libc_fopen(filepath, "r");
-    if(file == nullptr)
-    {
-        return false;
-    }
-
-    libc_fclose(file);
-    return true;
-}
-
-export Parser* parser_compile(Parser* parser, char* filepath)
+export Symbol* parser_find_symbol(Parser* parser, SymbolType type, char* name)
 {
     frx::assert(parser != nullptr);
 
-    frx::assert(filepath != nullptr);
-
-    char directory[4096];
-    libc_strcpy(directory, parser_source_file(parser));
-    mut char* last_slash = libc_strrchr(directory, '/');
-    char temp = (last_slash[0] = '\0');
-
-    char resolved_filepath[4096];
-    sprintf(resolved_filepath, "%s/%s", directory, filepath);
-
-    char fullpath[4096];
-    realpath(resolved_filepath, fullpath);
-
-    if(file_exists(fullpath))
+    mut Symbol* symbol = symbol_table_find(&parser->module->symbol_table, type, name);
+    if(symbol == nullptr)
     {
-        compile(fullpath);
+        mut usize i;
+        for(i = 0; i < list_size(&parser->import_stmts); ++i)
+        {
+            ImportStmt* import_stmt = list_get(&parser->import_stmts, i);
+            if(libc_strcmp(import_stmt->symbol, name) != 0)
+            {
+                continue;
+            }
+
+            symbol = symbol_table_find(&import_stmt->module->symbol_table, type, name);
+
+            break;
+        }
+
     }
 
-    return parser_table_find(fullpath);
+    return symbol;
 }
 
-void parser_resolve_imports_recursive(Parser* main_parser, List* visible_parsers,
-        Parser* parser, List* visited_parsers)
+export void parser_resolve_symbols(Parser* parser)
 {
-    frx::assert(main_parser != nullptr);
-
-    frx::assert(visible_parsers != nullptr);
-
     frx::assert(parser != nullptr);
-
-    frx::assert(visited_parsers != nullptr);
 
     mut usize i;
-    for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
+    for(i = 0; i < list_size(&parser->translation_unit->nodes); ++i)
     {
         GlobalScope* global_scope = list_get(&parser->translation_unit->nodes, i);
-        if(global_scope->type != GlobalScopeType::IMPORT_STMT)
-        {
-            continue;
-        }
-
-        ImportStmt* import_stmt = global_scope->import_stmt;
-        Parser* imported_parser = import_stmt->imported_parser;
-        if(imported_parser == nullptr || imported_parser == main_parser)
-        {
-            continue;
-        }
-
-        if(import_stmt->exported && !list_contains(visible_parsers,
-                    imported_parser))
-        {
-            list_push(visible_parsers, imported_parser);
-        }
-
-        if(!list_contains(visited_parsers, imported_parser))
-        {
-            list_push(visited_parsers, imported_parser);
-            parser_resolve_imports_recursive(main_parser, visible_parsers,
-                    imported_parser, visited_parsers);
-        }
-    }
-}
-
-export void parser_resolve_imports(Parser* parser)
-{
-    frx::assert(parser != nullptr);
-
-    List* visible_parsers = &parser->visible_parsers;
-
-    List visited_parsers;
-    list_init(&visited_parsers);
-
-    mut usize i;
-    for(i = 0; i < list_size(&parser->translation_unit->nodes); i = i + 1)
-    {
-        GlobalScope* global_scope = list_get(&parser->translation_unit->nodes, i);
-        if(global_scope->type != GlobalScopeType::IMPORT_STMT)
-        {
-            continue;
-        }
-
-        ImportStmt* import_stmt = global_scope->import_stmt;
-        Parser* imported_parser = import_stmt->imported_parser;
-        if(imported_parser == nullptr || imported_parser == parser)
-        {
-            continue;
-        }
-
-        if(!list_contains(visible_parsers, imported_parser))
-        {
-            list_push(visible_parsers, imported_parser);
-        }
-
-        if(!list_contains(&visited_parsers, imported_parser))
-        {
-            list_push(&visited_parsers, imported_parser);
-            parser_resolve_imports_recursive(parser, visible_parsers,
-                    imported_parser, &visited_parsers);
-        }
-    }
-
-    list_destroy(&visited_parsers);
-
-    for(i = 0; i < list_size(visible_parsers); i = i + 1)
-    {
-        Parser* visible_parser = list_get(visible_parsers, i);
-        frx::assert(visible_parser != parser);
+        global_scope_resolve_symbols(parser, global_scope);
     }
 }
 
@@ -294,110 +201,6 @@ export Token* parser_peek(Parser* parser, usize offset)
     frx::assert(parser != nullptr);
 
     return lexer_peek(&parser->lexer, offset);
-}
-
-export EnumSymbol* parser_find_enum_symbol_r(Parser* parser, mut CoreNamespace* ns,
-        char* name)
-{
-    mut EnumSymbol* symbol = parser_find_enum_symbol(parser, ns, name);
-    while(symbol == nullptr && ns != nullptr)
-    {
-        ns = ns->parent;
-        symbol = parser_find_enum_symbol(parser, ns, name);
-    }
-
-    return symbol;
-}
-
-export EnumSymbol* parser_find_enum_symbol(Parser* parser, CoreNamespace* ns,
-        char* name)
-{
-    frx::assert(parser != nullptr);
-
-    mut EnumSymbol* symbol = enum_table_find(&parser->enum_table, ns, name);
-    if(symbol != nullptr)
-    {
-        return symbol;
-    }
-
-    mut usize i;
-    for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
-    {
-        Parser* visible_parser = list_get(&parser->visible_parsers, i);
-
-        symbol = enum_table_find(&visible_parser->enum_table, ns, name);
-        if(symbol != nullptr && symbol->exported)
-        {
-            return symbol;
-        }
-    }
-
-    return nullptr;
-}
-
-export StructSymbol* parser_find_struct_symbol_r(Parser* parser,
-        mut CoreNamespace* ns, char* name)
-{
-    mut StructSymbol* symbol = parser_find_struct_symbol(parser, ns, name);
-    while(symbol == nullptr && ns != nullptr)
-    {
-        ns = ns->parent;
-        symbol = parser_find_struct_symbol(parser, ns, name);
-    }
-
-    return symbol;
-}
-
-export StructSymbol* parser_find_struct_symbol(Parser* parser, CoreNamespace* ns,
-        char* name)
-{
-    frx::assert(parser != nullptr);
-
-    mut StructSymbol* symbol = struct_table_find(&parser->struct_table, ns, name);
-    if(symbol != nullptr)
-    {
-        return symbol;
-    }
-
-    mut usize i;
-    for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
-    {
-        Parser* visible_parser = list_get(&parser->visible_parsers, i);
-
-        symbol = struct_table_find(&visible_parser->struct_table, ns, name);
-        if(symbol != nullptr && symbol->exported)
-        {
-            return symbol;
-        }
-    }
-
-    return nullptr;
-}
-
-export FuncSymbol* parser_find_func_symbol(Parser* parser, NamespaceResolution* resolution,
-        char* name)
-{
-    frx::assert(parser != nullptr);
-
-    mut FuncSymbol* symbol = func_table_find(&parser->func_table, resolution, name, nullptr);
-    if(symbol != nullptr)
-    {
-        return symbol;
-    }
-
-    mut usize i;
-    for(i = 0; i < list_size(&parser->visible_parsers); i = i + 1)
-    {
-        Parser* visible_parser = list_get(&parser->visible_parsers, i);
-
-        symbol = func_table_find(&visible_parser->func_table, resolution, name, nullptr);
-        if(symbol != nullptr && symbol->exported)
-        {
-            return symbol;
-        }
-    }
-
-    return nullptr;
 }
 
 export SourceLocation parser_current_location(Parser* parser)

@@ -136,7 +136,7 @@ export void lexer_init(mut Lexer* lexer, char* filepath)
         lexer_fail(lexer);
     }
 
-    lexer->filepath = filepath;
+    lexer->filepath = libc_strdup(filepath);
 
     lexer->location.pos = 0;
     lexer->location.line = 1;

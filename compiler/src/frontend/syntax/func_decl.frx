@@ -5,6 +5,7 @@ import "../core/namespace.frx";
 import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/func.frx";
+import "../../core/symbol_table.frx";
 
 export FuncDecl* func_decl_parse(Parser* parser)
 {
@@ -21,8 +22,8 @@ export FuncDecl* func_decl_parse(Parser* parser)
     mut FuncDecl* func_decl = func_decl_new(&parser->arena, parser->current_scope,
             nullptr, name, return_type);
 
-    func_decl->is_redefinition = !func_table_insert(&parser->func_table,
-            &func_decl->symbol);
+    FuncSymbol* symbol = &func_decl->symbol;
+    symbol_table_insert(&parser->module->symbol_table, SymbolType::FUNC, symbol->name, symbol->exported, symbol);
 
     parser_push_scope(parser);
 

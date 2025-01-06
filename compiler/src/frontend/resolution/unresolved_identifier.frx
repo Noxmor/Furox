@@ -1,0 +1,11 @@
+import "../ast/unresolved_identifier.frx";
+import "../core/parser.frx";
+
+extern i32 printf(char* format, ...);
+
+export void unresolved_identifier_resolve_symbols(Parser* parser, UnresolvedIdentifier* unresolved_identifier)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(unresolved_identifier != nullptr);
+}

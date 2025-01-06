@@ -1,0 +1,26 @@
+import "std/libc.frx";
+export import "../core/parser.frx";
+import "../../core/arena.frx";
+
+export struct ModulePath
+{
+    char* name;
+    ModulePath* next;
+}
+
+export ModulePath* module_path_init(Arena* arena, char* name)
+{
+    frx::assert(name != nullptr);
+
+    mut ModulePath* module_path = arena_alloc(arena, frx::sizeof(ModulePath));
+
+    module_path->name = name;
+    module_path->next = nullptr;
+
+    return module_path;
+}
+
+export b8 module_path_is_std(ModulePath* module_path)
+{
+    return module_path != nullptr && libc_strcmp(module_path->name, "std") == 0;
+}

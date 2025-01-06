@@ -47,6 +47,7 @@ char* token_type_names[TokenType::COUNT] = {
     "for",
     "while",
     "do",
+    "impl",
     "defer",
     "macro",
 
@@ -170,6 +171,7 @@ export enum TokenType : u8
     KW_FOR,
     KW_WHILE,
     KW_DO,
+    KW_IMPL,
     KW_DEFER,
     KW_MACRO,
 

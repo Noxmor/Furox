@@ -1,0 +1,15 @@
+import "../ast/return_stmt.frx";
+import "../core/parser.frx";
+import "expr.frx";
+
+export void return_stmt_resolve_symbols(Parser* parser, ReturnStmt* return_stmt)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(return_stmt != nullptr);
+
+    if(return_stmt->value != nullptr)
+    {
+        expr_resolve_symbols(parser, return_stmt->value);
+    }
+}

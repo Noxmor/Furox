@@ -12,8 +12,6 @@ export void func_call_sema(mut Parser* parser, mut FuncCall* func_call)
 
     CoreNamespace* ns = func_call->resolution->ns;
 
-    func_call->symbol = parser_find_func_symbol(parser, func_call->resolution, func_call->name);
-
     if(func_call->symbol == nullptr)
     {
         //FIXME: Print the correct location, this is only a placeholder

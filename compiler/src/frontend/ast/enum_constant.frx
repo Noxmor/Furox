@@ -22,16 +22,18 @@ export struct EnumConstant
     CoreScope* scope;
 }
 
-export EnumConstant* enum_constant_new(Arena* arena, CoreNamespace* enum_namespace,
-        char* enum_name, char* name, CoreScope* scope)
+export EnumConstant* enum_constant_new(Arena* arena, EnumSymbol* symbol,
+    CoreNamespace* enum_namespace, char* enum_name, char* name, CoreScope* scope)
 {
+    frx::assert(symbol != nullptr);
+
     frx::assert(enum_name != nullptr);
 
     frx::assert(name != nullptr);
 
     mut EnumConstant* constant = arena_alloc(arena, frx::sizeof(EnumConstant));
 
-    constant->symbol = nullptr;
+    constant->symbol = symbol;
     constant->enum_namespace = enum_namespace;
     constant->enum_name = enum_name;
     constant->name = name;

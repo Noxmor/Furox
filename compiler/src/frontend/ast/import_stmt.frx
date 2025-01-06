@@ -1,6 +1,7 @@
 import "../../core/arena.frx";
 import "ast.frx";
-export import "../core/parser.frx";
+export import "module_path.frx";
+export import "../../core/module.frx";
 
 extern struct FILE;
 
@@ -11,21 +12,21 @@ extern
 
 export struct ImportStmt
 {
-    Parser* imported_parser;
-    char* filepath;
-    b8 exported;
+    ModulePath* module_path;
+    char* symbol;
+    Module* module;
 }
 
-export ImportStmt* import_stmt_new(Arena* arena, Parser* imported_parser,
-        char* filepath, b8 exported)
+export ImportStmt* import_stmt_new(Arena* arena, ModulePath* module_path,
+    char* symbol, Module* module)
 {
-    frx::assert(filepath != nullptr);
+    frx::assert(symbol != nullptr);
 
     mut ImportStmt* import_stmt = arena_alloc(arena, frx::sizeof(ImportStmt));
 
-    import_stmt->imported_parser = imported_parser;
-    import_stmt->filepath = filepath;
-    import_stmt->exported = exported;
+    import_stmt->module_path = module_path;
+    import_stmt->symbol = symbol;
+    import_stmt->module = module;
 
     return import_stmt;
 }
@@ -38,5 +39,5 @@ export void import_stmt_print(ImportStmt* import_stmt, mut FILE* file, usize dep
 
     print_depth(file, depth);
 
-    fprintf(file, "%s (%s)\n", "import-statement", import_stmt->filepath);
+    fprintf(file, "%s\n", "import-statement");
 }

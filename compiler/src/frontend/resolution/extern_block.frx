@@ -1,0 +1,17 @@
+import "../ast/extern_block.frx";
+import "../core/parser.frx";
+import "func_decl.frx";
+
+export void extern_block_resolve_symbols(Parser* parser, ExternBlock* extern_block)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(extern_block != nullptr);
+
+    mut usize i;
+    for(i = 0; i < list_size(&extern_block->func_decls); ++i)
+    {
+        FuncDecl* func_decl = list_get(&extern_block->func_decls, i);
+        func_decl_resolve_symbols(parser, func_decl);
+    }
+}

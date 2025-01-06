@@ -1,42 +1,69 @@
 import "std/libc.frx";
 import "config.frx";
 import "options.frx";
-import "parser_table.frx";
 import "queue.frx";
 import "../backend/backend.frx";
 import "../frontend/ast/program.frx";
+import "module.frx";
 
 extern struct FILE;
 
 extern
 {
     char* realpath(char* filename, mut char* resolved_name);
+    i32 printf(char* format, ...);
 }
 
 mut Program* program;
 mut b8 failed = false;
 
+mut List root_modules;
+
 mut Queue syntax_queue;
-mut Queue resolve_imports_queue;
+mut Queue resolve_symbols_queue;
 mut Queue semantic_queue;
 
-export void compile(char* filepath)
+export void module_compile(mut Module* module)
 {
-    if(parser_table_find(filepath) != nullptr)
+    frx::assert(module != nullptr);
+
+    if(module->compiled)
     {
         return;
     }
 
-    if(!parser_table_insert(filepath))
+    mut usize i;
+    for(i = 0; i < list_size(&module->parsers); ++i)
     {
-        return;
+        Parser* parser = list_get(&module->parsers, i);
+        queue_enqueue(&syntax_queue, parser);
     }
 
-    Parser* parser = parser_table_find(filepath);
+    module->compiled = true;
+}
 
-    frx::assert(parser != nullptr);
+export Module* module_find_by_absolute_module_path(ModulePath* module_path)
+{
+    frx::assert(module_path != nullptr);
 
-    queue_enqueue(&syntax_queue, parser);
+    mut usize i;
+    for(i = 0; i < list_size(&root_modules); ++i)
+    {
+        Module* root_module = list_get(&root_modules, i);
+
+        if(libc_strcmp(root_module->name, module_path->name) != 0)
+        {
+            continue;
+        }
+
+        Module* found_module = module_find_submodule(root_module, module_path->next);
+        if(found_module != nullptr)
+        {
+            return found_module;
+        }
+    }
+
+    return nullptr;
 }
 
 i32 main(usize argc, char** argv)
@@ -44,8 +71,10 @@ i32 main(usize argc, char** argv)
     config_init();
     lexer_init_keyword_table();
 
+    list_init(&root_modules);
+
     queue_init(&syntax_queue);
-    queue_init(&resolve_imports_queue);
+    queue_init(&resolve_symbols_queue);
     queue_init(&semantic_queue);
 
     program = program_new();
@@ -94,26 +123,41 @@ i32 main(usize argc, char** argv)
         }
     }
 
+    mut Module* std_module = module_init("/usr/local/lib/furox/stdlib");
+    libc_strcpy(std_module->name, "std");
+    module_scan(std_module);
+    list_push(&root_modules, std_module);
+
     mut usize i;
     for(i = 0; i < get_positional_argc(); i = i + 1)
     {
         char* arg = argv[i + 1];
         char fullpath[4096];
         realpath(arg, fullpath);
-        compile(fullpath);
+
+        mut Module* root_module = module_init(fullpath);
+        libc_strcat(fullpath, "/src");
+        root_module->filepath = libc_strdup(fullpath);
+
+        module_scan(root_module);
+        printf("Loaded root module: %s\n", root_module->name);
+        list_push(&root_modules, root_module);
     }
+
+    Module* prj_root_module = list_get(&root_modules, 1);
+    module_compile(prj_root_module);
 
     while(!queue_is_empty(&syntax_queue))
     {
         Parser* parser = queue_dequeue(&syntax_queue);
         parser_parse(parser);
-        queue_enqueue(&resolve_imports_queue, parser);
+        queue_enqueue(&resolve_symbols_queue, parser);
     }
 
-    while(!queue_is_empty(&resolve_imports_queue))
+    while(!queue_is_empty(&resolve_symbols_queue))
     {
-        Parser* parser = queue_dequeue(&resolve_imports_queue);
-        parser_resolve_imports(parser);
+        Parser* parser = queue_dequeue(&resolve_symbols_queue);
+        parser_resolve_symbols(parser);
         queue_enqueue(&semantic_queue, parser);
     }
 

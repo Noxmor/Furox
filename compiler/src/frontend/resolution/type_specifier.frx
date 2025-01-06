@@ -1,0 +1,34 @@
+import "std/libc.frx";
+import "../ast/type_specifier.frx";
+import "../core/parser.frx";
+import "../../core/symbol_table.frx";
+
+extern i32 printf(char* format, ...);
+
+export void type_specifier_resolve_symbols(Parser* parser, mut TypeSpecifier* type_specifier)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(type_specifier != nullptr);
+
+    if(type_specifier->name == nullptr)
+    {
+        return;
+    }
+
+    Symbol* struct_symbol = parser_find_symbol(parser, SymbolType::STRUCT, type_specifier->name);
+    Symbol* enum_symbol = parser_find_symbol(parser, SymbolType::ENUM, type_specifier->name);
+
+    if(struct_symbol != nullptr)
+    {
+        type_specifier->struct_type = struct_symbol->data;
+    }
+    else if(enum_symbol != nullptr)
+    {
+        type_specifier->enum_type = enum_symbol->data;
+    }
+    else
+    {
+        printf("Failed to resolve symbol: %s\n", type_specifier->name);
+    }
+}

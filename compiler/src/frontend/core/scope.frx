@@ -20,6 +20,11 @@ export CoreScope* scope_create(CoreScope* parent)
     return scope;
 }
 
+export b8 scope_is_global(CoreScope* scope)
+{
+    return scope != nullptr && scope->parent == nullptr;
+}
+
 export b8 scope_is_child_of(CoreScope* child, CoreScope* parent)
 {
     frx::assert(child != nullptr && parent != nullptr);

@@ -25,7 +25,10 @@ export void transpile_func_decl(Transpiler* transpiler, FuncDecl* func_decl)
     FuncSymbol* symbol = &func_decl->symbol;
 
     if(libc_strcmp(symbol->name, "va_start") == 0
-        || libc_strcmp(symbol->name, "va_end") == 0)
+        || libc_strcmp(symbol->name, "va_end") == 0
+        || libc_strcmp(symbol->name, "opendir") == 0
+        || libc_strcmp(symbol->name, "readdir") == 0
+        || libc_strcmp(symbol->name, "closedir") == 0)
     {
         return;
     }

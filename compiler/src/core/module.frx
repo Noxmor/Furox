@@ -1,0 +1,137 @@
+import "std/libc.frx";
+import "list.frx";
+import "symbol_table.frx";
+import "../frontend/core/parser.frx";
+import "../frontend/ast/module_path.frx";
+
+extern struct dirent;
+extern struct DIR;
+
+extern
+{
+    DIR* opendir(mut char* dirname);
+    dirent* readdir(DIR* dir);
+    void closedir(DIR* dir);
+}
+
+export struct Module
+{
+    char* filepath;
+    char name[128];
+    b8 compiled;
+    List submodules;
+    List parsers;
+    SymbolTable symbol_table;
+}
+
+export Module* module_init(char* filepath)
+{
+    frx::assert(filepath != nullptr);
+
+    mut Module* module = libc_malloc(frx::sizeof(Module));
+
+    module->filepath = libc_strdup(filepath);
+    module->compiled = false;
+
+    mut char* name = libc_strrchr(filepath, '/');
+    if(name == nullptr)
+    {
+        name = filepath;
+    }
+    else
+    {
+        ++name;
+    }
+
+    libc_strcpy(module->name, name);
+
+    list_init(&module->submodules);
+    list_init(&module->parsers);
+
+    libc_memset(&module->symbol_table, 0, frx::sizeof(SymbolTable));
+
+    return module;
+}
+
+void module_add_submodule(Module* module, Module* submodule)
+{
+    frx::assert(module != nullptr);
+
+    frx::assert(submodule != nullptr);
+
+    list_push(&module->submodules, submodule);
+}
+
+export void module_scan(Module* module)
+{
+    frx::assert(module != nullptr);
+
+    mut dirent* entry;
+    DIR* dir = opendir(module->filepath);
+
+    frx::assert(dir != nullptr);
+
+    char filepath_buffer[libc_strlen(module->filepath) + 128];
+    libc_strcpy(filepath_buffer, module->filepath);
+    if(module->filepath[libc_strlen(module->filepath) - 1] != '/')
+    {
+        libc_strcat(filepath_buffer, "/");
+    }
+
+    while((entry = readdir(dir)))
+    {
+        if(entry->d_type == 4)
+        {
+            if(libc_strcmp(entry->d_name, ".") == 0
+                || libc_strcmp(entry->d_name, "..") == 0)
+            {
+                continue;
+            }
+
+            libc_strcat(filepath_buffer, entry->d_name);
+
+            Module* submodule = module_init(filepath_buffer);
+            module_scan(submodule);
+            module_add_submodule(module, submodule);
+
+            mut char* last_slash = libc_strrchr(filepath_buffer, '/');
+            last_slash[1] = '\0';
+        }
+        else
+        {
+            libc_strcat(filepath_buffer, entry->d_name);
+
+            Parser* parser = libc_malloc(frx::sizeof(Parser));
+            parser_init(parser, module, filepath_buffer);
+            list_push(&module->parsers, parser);
+
+            mut char* last_slash = libc_strrchr(filepath_buffer, '/');
+            last_slash[1] = '\0';
+        }
+    }
+
+    closedir(dir);
+}
+
+export Module* module_find_submodule(Module* module, ModulePath* path)
+{
+    frx::assert(module != nullptr);
+
+    if(path == nullptr)
+    {
+        return module;
+    }
+
+    mut usize i;
+    for(i = 0; i < list_size(&module->submodules); ++i)
+    {
+        Module* submodule = list_get(&module->submodules, i);
+
+        if(libc_strcmp(submodule->name, path->name) == 0)
+        {
+            return module_find_submodule(submodule, path->next);
+        }
+    }
+
+    return nullptr;
+}

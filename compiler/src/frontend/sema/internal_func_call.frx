@@ -28,7 +28,7 @@ export void sizeof_sema(mut Parser* parser, mut Sizeof* sizeof_node)
 
     CoreNamespace* ns = sizeof_node->resolution->ns;
 
-    if(ns == nullptr && !namespace_resolution_is_absolute(sizeof_node->resolution))
+    /*if(ns == nullptr && !namespace_resolution_is_absolute(sizeof_node->resolution))
     {
         sizeof_node->struct_type = parser_find_struct_symbol_r(parser,
                 nullptr, sizeof_node->name);
@@ -40,7 +40,7 @@ export void sizeof_sema(mut Parser* parser, mut Sizeof* sizeof_node)
     {
         sizeof_node->struct_type = parser_find_struct_symbol(parser, ns, sizeof_node->name);
         sizeof_node->enum_type = parser_find_enum_symbol(parser, ns, sizeof_node->name);
-    }
+    }*/
 
     if(sizeof_node->enum_type == nullptr
             && sizeof_node->struct_type == nullptr)
@@ -63,7 +63,7 @@ export void enum_count_sema(mut Parser* parser, EnumCount* enum_count, mut Expr*
     mut EnumSymbol* symbol = nullptr;
     CoreNamespace* ns = enum_count->resolution->ns;
 
-    if(ns == nullptr && !namespace_resolution_is_absolute(enum_count->resolution))
+    /*if(ns == nullptr && !namespace_resolution_is_absolute(enum_count->resolution))
     {
         symbol = parser_find_enum_symbol_r(parser, nullptr, enum_count->name);
     }
@@ -85,7 +85,7 @@ export void enum_count_sema(mut Parser* parser, EnumCount* enum_count, mut Expr*
         expr->type = ExprType::INT_LITERAL;
         expr->int_literal = int_literal_new(&parser->arena,
                 list_size(&symbol->constants));
-    }
+    }*/
 }
 
 export void internal_func_call_sema(Parser* parser, InternalFuncCall* internal_func_call, mut Expr* expr)

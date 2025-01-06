@@ -28,7 +28,7 @@ export void type_specifier_sema(mut Parser* parser, mut TypeSpecifier* type_spec
     char* name = type_specifier->name;
     CoreScope* scope = type_specifier->scope;
 
-    if(ns == nullptr)
+    /*if(ns == nullptr)
     {
         type_specifier->enum_type = parser_find_enum_symbol_r(parser,
                 nullptr, name);
@@ -40,7 +40,7 @@ export void type_specifier_sema(mut Parser* parser, mut TypeSpecifier* type_spec
         type_specifier->enum_type = parser_find_enum_symbol(parser, ns, name);
         type_specifier->struct_type = parser_find_struct_symbol(parser, ns,
                 name);
-    }
+    }*/
 
     if(type_specifier->enum_type == nullptr
             && type_specifier->struct_type == nullptr)

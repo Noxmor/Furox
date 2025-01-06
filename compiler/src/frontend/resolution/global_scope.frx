@@ -1,0 +1,59 @@
+import "../ast/global_scope.frx";
+import "../core/parser.frx";
+import "extern_block.frx";
+import "func_decl.frx";
+import "struct_def.frx";
+import "func_def.frx";
+import "global_var_decl.frx";
+import "global_var_def.frx";
+
+export void global_scope_resolve_symbols(Parser* parser, GlobalScope* global_scope)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(global_scope != nullptr);
+
+    switch(global_scope->type)
+    {
+        case GlobalScopeType::EXTERN_BLOCK:
+        {
+            extern_block_resolve_symbols(parser, global_scope->extern_block);
+
+            break;
+        }
+        case GlobalScopeType::FUNC_DECL:
+        {
+            func_decl_resolve_symbols(parser, global_scope->func_decl);
+
+            break;
+        }
+        case GlobalScopeType::STRUCT_DEF:
+        {
+            struct_def_resolve_symbols(parser, global_scope->struct_def);
+
+            break;
+        }
+        case GlobalScopeType::FUNC_DEF:
+        {
+            func_def_resolve_symbols(parser, global_scope->func_def);
+
+            break;
+        }
+        case GlobalScopeType::GLOBAL_VAR_DECL:
+        {
+            global_var_decl_resolve_symbols(parser, global_scope->global_var_decl);
+
+            break;
+        }
+        case GlobalScopeType::GLOBAL_VAR_DEF:
+        {
+            global_var_def_resolve_symbols(parser, global_scope->global_var_def);
+
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+}

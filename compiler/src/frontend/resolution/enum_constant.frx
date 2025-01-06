@@ -1,0 +1,11 @@
+import "../ast/enum_constant.frx";
+import "../core/parser.frx";
+
+export void enum_constant_resolve_symbols(Parser* parser, EnumConstant* enum_constant)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(enum_constant != nullptr);
+
+    //TODO: Implement
+}

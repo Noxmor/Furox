@@ -3,6 +3,7 @@ import "../core/namespace.frx";
 import "../core/parser.frx";
 import "../core/scope.frx";
 import "../symbols/struct.frx";
+import "../../core/symbol_table.frx";
 
 export StructDecl* struct_decl_parse(Parser* parser)
 {
@@ -19,8 +20,8 @@ export StructDecl* struct_decl_parse(Parser* parser)
     mut StructDecl* struct_decl = struct_decl_new(&parser->arena, parser->current_scope,
             nullptr, name);
 
-    struct_decl->is_redefinition = !struct_table_insert(&parser->struct_table,
-            &struct_decl->symbol);
+    StructSymbol* symbol = &struct_decl->symbol;
+    symbol_table_insert(&parser->module->symbol_table, SymbolType::STRUCT, symbol->name, symbol->exported, symbol);
 
     parser_eat(parser, TokenType::IDENTIFIER);
 

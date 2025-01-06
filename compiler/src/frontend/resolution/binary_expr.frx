@@ -1,0 +1,13 @@
+import "../ast/binary_expr.frx";
+import "../core/parser.frx";
+import "expr.frx";
+
+export void binary_expr_resolve_symbols(Parser* parser, BinaryExpr* binary_expr)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(binary_expr != nullptr);
+
+    expr_resolve_symbols(parser, binary_expr->left);
+    expr_resolve_symbols(parser, binary_expr->right);
+}

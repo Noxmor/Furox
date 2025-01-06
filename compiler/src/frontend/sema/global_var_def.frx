@@ -15,8 +15,7 @@ export void global_var_def_sema(mut Parser* parser, GlobalVarDef* var_def)
 
     type_specifier_sema(parser, symbol->type);
 
-    b8 is_redefinition = var_table_find_by_scope(&parser->var_table,
-            symbol->scope, symbol->name) != symbol;
+    b8 is_redefinition = var_table_find(&parser->var_table, symbol->scope, symbol->name) != symbol;
 
     if(is_redefinition)
     {

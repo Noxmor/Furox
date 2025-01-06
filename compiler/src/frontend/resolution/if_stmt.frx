@@ -1,0 +1,19 @@
+import "../ast/if_stmt.frx";
+import "../core/parser.frx";
+import "expr.frx";
+import "scope.frx";
+
+export void if_stmt_resolve_symbols(Parser* parser, IfStmt* if_stmt)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(if_stmt != nullptr);
+
+    expr_resolve_symbols(parser, if_stmt->condition);
+    scope_resolve_symbols(parser, if_stmt->if_block);
+
+    if(if_stmt->else_block != nullptr)
+    {
+        scope_resolve_symbols(parser, if_stmt->else_block);
+    }
+}

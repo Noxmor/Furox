@@ -1,0 +1,12 @@
+import "../ast/var_decl.frx";
+import "../core/parser.frx";
+import "type_specifier.frx";
+
+export void var_decl_resolve_symbols(Parser* parser, VarDecl* var_decl)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(var_decl != nullptr);
+
+    type_specifier_resolve_symbols(parser, var_decl->symbol.type);
+}

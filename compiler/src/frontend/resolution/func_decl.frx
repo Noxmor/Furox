@@ -1,0 +1,15 @@
+import "../ast/func_decl.frx";
+import "../core/parser.frx";
+import "func_params.frx";
+import "type_specifier.frx";
+
+export void func_decl_resolve_symbols(Parser* parser, FuncDecl* func_decl)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(func_decl != nullptr);
+
+    type_specifier_resolve_symbols(parser, func_decl->return_type);
+
+    func_params_resolve_symbols(parser, func_decl->params);
+}

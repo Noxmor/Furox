@@ -14,27 +14,5 @@ export void func_decl_sema(mut Parser* parser, mut FuncDecl* func_decl)
 
     type_specifier_sema(parser, func_decl->return_type);
 
-    FuncSymbol* symbol = &func_decl->symbol;
-
-    mut usize i;
-    for(i = 0; i < list_size(&parser->visible_parsers)
-            && !func_decl->is_redefinition; i = i + 1)
-    {
-        Parser* visible_parser = list_get(&parser->visible_parsers, i);
-        FuncSymbol* imported_symbol = func_table_find(
-                &visible_parser->func_table, symbol->ns, symbol->name, nullptr);
-
-        func_decl->is_redefinition = imported_symbol != nullptr
-            && imported_symbol->exported;
-    }
-
-    if(func_decl->is_redefinition)
-    {
-        error_func_decl_redefinition(parser_source_file(parser),
-                func_decl->range.start, symbol->name);
-
-        parser_fail(parser);
-    }
-
     func_params_sema(parser, func_decl->params);
 }

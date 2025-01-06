@@ -8,12 +8,15 @@ import "../symbols/enum.frx";
 import "../symbols/var.frx";
 import "../ast/unresolved_identifier.frx";
 import "../ast/var.frx";
+import "../../core/symbol_table.frx";
 
 export void unresolved_identifier_sema(mut Parser* parser, UnresolvedIdentifier* unresolved_identifier, mut Expr* expr)
 {
     frx::assert(parser != nullptr);
 
     frx::assert(unresolved_identifier != nullptr);
+
+    frx::assert(unresolved_identifier->resolution != nullptr);
 
     CoreNamespace* ns = unresolved_identifier->resolution->ns;
     char* name = unresolved_identifier->name;
@@ -22,17 +25,19 @@ export void unresolved_identifier_sema(mut Parser* parser, UnresolvedIdentifier*
     mut EnumSymbol* enum_symbol = nullptr;
     if(ns != nullptr)
     {
-        enum_symbol = parser_find_enum_symbol(parser, ns->parent, ns->name);
+        Symbol* symbol = parser_find_symbol(parser, SymbolType::ENUM, ns->name);
+        if(symbol != nullptr)
+        {
+            enum_symbol = symbol->data;
+        }
     }
 
     b8 is_enum_constant = enum_symbol != nullptr && enum_symbol_has_constant(
             enum_symbol, name);
 
-    b8 is_global_var = var_table_find_by_namespace(&parser->var_table, ns, name)
-        != nullptr && ns != nullptr;
-
-    b8 is_var = var_table_find_by_scope(&parser->var_table, scope, name)
-        != nullptr;
+    VarSymbol* var_symbol = var_table_find(&parser->var_table, scope, name);
+    b8 is_global_var = var_symbol != nullptr && scope_is_global(var_symbol->scope);
+    b8 is_var = var_symbol != nullptr && !is_global_var;
 
     b8 is_ambiguous = (is_enum_constant + is_global_var + is_var) > 1;
     b8 resolved = is_enum_constant || is_global_var || is_var;
@@ -46,8 +51,8 @@ export void unresolved_identifier_sema(mut Parser* parser, UnresolvedIdentifier*
     else if(is_enum_constant)
     {
         expr->type = ExprType::ENUM_CONSTANT;
-        expr->enum_constant = enum_constant_new(&parser->arena, ns->parent, ns->name,
-                name, scope);
+        expr->enum_constant = enum_constant_new(&parser->arena, enum_symbol,
+            ns->parent, ns->name, name, scope);
     }
     else if(is_global_var)
     {

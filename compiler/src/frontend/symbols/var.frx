@@ -56,33 +56,7 @@ export void var_table_init(VarTable* table)
     libc_memset(table, 0, frx::sizeof(VarTable));
 }
 
-export VarSymbol* var_table_find_by_namespace(VarTable* table, CoreNamespace* ns,
-    char* name)
-{
-    frx::assert(table != nullptr);
-
-    frx::assert(name != nullptr);
-
-    u64 index = hash_djb2(name) % Constants::VAR_TABLE_CAPACITY;
-    mut VarTableEntry* entry = table->entries[index];
-
-    while(entry != nullptr)
-    {
-        VarSymbol* symbol = entry->symbol;
-
-        if(libc_strcmp(symbol->name, name) == 0 && namespace_equals(symbol->ns, ns))
-        {
-            return symbol;
-        }
-
-        entry = entry->next;
-    }
-
-    return nullptr;
-}
-
-export VarSymbol* var_table_find_by_scope(VarTable* table, CoreScope* scope,
-    char* name)
+export VarSymbol* var_table_find(VarTable* table, CoreScope* scope, char* name)
 {
     frx::assert(table != nullptr);
 

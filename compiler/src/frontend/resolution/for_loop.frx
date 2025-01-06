@@ -1,0 +1,17 @@
+import "../ast/for_loop.frx";
+import "../core/parser.frx";
+import "expr.frx";
+import "scope.frx";
+
+export void for_loop_resolve_symbols(Parser* parser, ForLoop* for_loop)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(for_loop != nullptr);
+
+    expr_resolve_symbols(parser, for_loop->initialization);
+    expr_resolve_symbols(parser, for_loop->condition);
+    expr_resolve_symbols(parser, for_loop->iteration);
+
+    scope_resolve_symbols(parser, for_loop->scope);
+}

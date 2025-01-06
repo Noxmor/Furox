@@ -1,0 +1,63 @@
+import "../ast/internal_func_call.frx";
+import "../core/parser.frx";
+import "expr.frx";
+
+void assert_resolve_symbols(Parser* parser, Assert* assert_node)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(assert_node != nullptr);
+
+    expr_resolve_symbols(parser, assert_node->expr);
+}
+
+void sizeof_resolve_symbols(Parser* parser, Sizeof* sizeof_node)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(sizeof_node != nullptr);
+
+    //TODO: Implement
+}
+
+void enum_count_resolve_symbols(Parser* parser, EnumCount* enum_count_node)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(enum_count_node != nullptr);
+
+    //TODO: Implement
+}
+
+export void internal_func_call_resolve_symbols(Parser* parser, InternalFuncCall* internal_func_call)
+{
+    frx::assert(parser != nullptr);
+
+    frx::assert(internal_func_call != nullptr);
+
+    switch(internal_func_call->type)
+    {
+        case InternalFuncCallType::ASSERT:
+        {
+            assert_resolve_symbols(parser, internal_func_call->assert_node);
+
+            break;
+        }
+        case InternalFuncCallType::SIZEOF:
+        {
+            sizeof_resolve_symbols(parser, internal_func_call->sizeof_node);
+
+            break;
+        }
+        case InternalFuncCallType::ENUM_COUNT:
+        {
+            enum_count_resolve_symbols(parser, internal_func_call->enum_count_node);
+
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+}

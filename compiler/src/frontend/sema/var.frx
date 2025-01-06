@@ -9,16 +9,7 @@ export void var_sema(mut Parser* parser, mut Var* var)
 
     frx::assert(var != nullptr);
 
-    if(var->ns == nullptr)
-    {
-        var->symbol = var_table_find_by_scope(&parser->var_table, var->scope,
-                var->name);
-    }
-    else
-    {
-        var->symbol = var_table_find_by_namespace(&parser->var_table, var->ns,
-                var->name);
-    }
+    var->symbol = var_table_find(&parser->var_table, var->scope, var->name);
 
     if(var->symbol == nullptr)
     {

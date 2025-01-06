@@ -21,7 +21,8 @@ export void transpile_struct_decl(Transpiler* transpiler,
 
     if(transpiler->mode == TranspilerMode::STRUCT_DECL)
     {
-        if(libc_strcmp(name, "va_list") != 0)
+        if(libc_strcmp(name, "va_list") != 0
+            && libc_strcmp(name, "DIR") != 0)
         {
             fprintf(transpiler->file, "typedef struct %s %s;\n", name, name);
         }

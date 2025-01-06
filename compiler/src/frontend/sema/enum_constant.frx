@@ -12,8 +12,8 @@ export void enum_constant_sema(Parser* parser, mut EnumConstant* constant)
 
     frx::assert(constant != nullptr);
 
-    constant->symbol = parser_find_enum_symbol(parser, constant->enum_namespace,
-            constant->enum_name);
+    /*constant->symbol = parser_find_enum_symbol(parser, constant->enum_namespace,
+            constant->enum_name);*/
 
     EnumSymbol* symbol = constant->symbol;
 
