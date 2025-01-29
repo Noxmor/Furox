@@ -1,4 +1,0 @@
-export i32 func2()
-{
-    return 0;
-}

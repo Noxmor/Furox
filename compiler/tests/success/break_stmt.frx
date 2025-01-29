@@ -1,9 +1,0 @@
-i32 main()
-{
-    while(true)
-    {
-        break;
-    }
-
-    return 0;
-}

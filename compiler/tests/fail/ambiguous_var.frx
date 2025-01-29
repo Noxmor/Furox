@@ -1,8 +1,0 @@
-i32 var = -1;
-
-i32 main()
-{
-    i32 var = -1;
-
-    return var;
-}
