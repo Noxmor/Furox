@@ -19,6 +19,7 @@ Arena* arena_create(void)
 
 void* arena_alloc(Arena* arena, usize size)
 {
+    FRX_ASSERT(arena != NULL);
     FRX_ASSERT(size <= FRX_ARENA_CAPACITY);
 
     if (arena->current + size > arena->start + FRX_ARENA_CAPACITY)
@@ -41,6 +42,8 @@ void* arena_alloc(Arena* arena, usize size)
 
 void arena_reset(Arena* arena)
 {
+    FRX_ASSERT(arena != NULL);
+
     while (arena != NULL)
     {
         arena->current = arena->start;
@@ -50,6 +53,8 @@ void arena_reset(Arena* arena)
 
 void arena_destroy(Arena* arena)
 {
+    FRX_ASSERT(arena != NULL);
+
     while (arena)
     {
         Arena* next = arena->next;
