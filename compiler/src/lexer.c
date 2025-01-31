@@ -5,6 +5,7 @@
 #include <ctype.h>
 
 #include "assert.h"
+#include "log.h"
 #include "hash.h"
 #include "string_table.h"
 
@@ -58,6 +59,8 @@ static void lexer_grow_identifier_placeholder(Lexer* lexer)
 
 void lexer_init_keyword_table(void)
 {
+    FRX_LOG_INFO("Initializing keyword table...");
+
     for (TokenType type = FRX_TOKEN_TYPE_FIRST_KEYWORD; type <= FRX_TOKEN_TYPE_LAST_KEYWORD;
         ++type)
     {
