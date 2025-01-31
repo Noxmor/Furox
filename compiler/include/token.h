@@ -139,7 +139,7 @@ typedef struct Token
 
     SourceRange range;
 
-    char* identifier;
+    const char* identifier;
     u64 int_literal;
     f64 float_literal;
 } Token;
