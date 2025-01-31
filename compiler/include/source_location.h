@@ -5,6 +5,7 @@
 
 typedef struct SourceLocation
 {
+    usize pos;
     usize line;
     usize column;
 } SourceLocation;
