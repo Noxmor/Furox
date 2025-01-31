@@ -60,7 +60,7 @@ const char* string_table_intern(const char* str)
         entry = entry->next;
     }
 
-    StringTableEntry* new_entry = string_table_entry_create(str, entry);
+    StringTableEntry* new_entry = string_table_entry_create(str, table.entries[index]);
     table.entries[index] = new_entry;
 
     return new_entry->str;
