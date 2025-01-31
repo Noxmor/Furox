@@ -1,11 +1,14 @@
 #include <stdlib.h>
 
 #include "log.h"
+#include "lexer.h"
 #include "string_table.h"
 
 static void compiler_init(void)
 {
     FRX_LOG_INFO("Initializing compiler...");
+
+    lexer_init_keyword_table();
 }
 
 static void compiler_shutdown(void)
