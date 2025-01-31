@@ -144,4 +144,12 @@ typedef struct Token
     f64 float_literal;
 } Token;
 
+b8 token_type_is_primitive(TokenType type);
+
+usize primitive_type_to_size(TokenType primitive_type);
+
+b8 token_type_is_sync(TokenType type);
+
+char* token_type_to_str(TokenType type);
+
 #endif
