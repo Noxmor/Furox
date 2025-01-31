@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "assert.h"
+#include "log.h"
 #include "hash.h"
 
 typedef struct StringTableEntry
@@ -67,6 +68,8 @@ const char* string_table_intern(const char* str)
 
 void string_table_shutdown(void)
 {
+    FRX_LOG_INFO("Shutting down string table...");
+
     for (usize i = 0; i < FRX_STRING_TABLE_CAPACITY; ++i)
     {
         StringTableEntry* entry = table.entries[i];
