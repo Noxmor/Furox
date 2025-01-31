@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "log.h"
+#include "string_table.h"
 
 static void compiler_init(void)
 {
@@ -10,6 +11,8 @@ static void compiler_init(void)
 static void compiler_shutdown(void)
 {
     FRX_LOG_INFO("Shutting down compiler...");
+
+    string_table_shutdown();
 }
 
 int compiler_run(int argc, char** argv)
