@@ -3,4 +3,6 @@
 
 const char* string_table_intern(const char* str);
 
+void string_table_shutdown(void);
+
 #endif
