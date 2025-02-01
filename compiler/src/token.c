@@ -52,6 +52,7 @@ static char* token_type_names[] = {
     [FRX_TOKEN_TYPE_KW_DO] = "do",
     [FRX_TOKEN_TYPE_KW_IMPL] = "impl",
     [FRX_TOKEN_TYPE_KW_SELF] = "self",
+    [FRX_TOKEN_TYPE_KW_FN] = "fn",
     [FRX_TOKEN_TYPE_KW_DEFER] = "defer",
 
     [FRX_TOKEN_TYPE_PLUS] = "+",
