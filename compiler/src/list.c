@@ -33,6 +33,11 @@ usize list_size(const List* list)
     return list->size;
 }
 
+b8 list_empty(const List* list)
+{
+    return list_size(list) == 0;
+}
+
 void* list_get(const List* list, usize index)
 {
     FRX_ASSERT(list != NULL);
