@@ -9,6 +9,8 @@ void type_specifier_sema(TypeSpecifier* type);
 
 void item_sema(Item* item);
 
+void func_params_sema(FuncParams* params);
+
 void func_def_sema(FuncDef* func_def);
 
 void scope_sema(Scope* scope);

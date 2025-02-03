@@ -71,9 +71,22 @@ typedef struct Scope
     SourceRange range;
 } Scope;
 
+typedef struct FuncParam
+{
+    const char* name;
+    TypeSpecifier* type;
+} FuncParam;
+
+typedef struct FuncParams
+{
+    List params;
+    b8 variadic;
+} FuncParams;
+
 typedef struct FuncDef
 {
     const char* name;
+    FuncParams* params;
     TypeSpecifier* return_type;
     Scope* body;
     SourceRange range;

@@ -51,6 +51,8 @@ TypeSpecifier* type_specifier_parse(Parser* parser);
 
 Item* item_parse(Parser* parser);
 
+FuncParams* func_params_parse(Parser* parser);
+
 FuncDef* func_def_parse(Parser* parser);
 
 Scope* scope_parse(Parser* parser);
