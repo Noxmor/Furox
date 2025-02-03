@@ -216,8 +216,7 @@ b8 token_type_is_sync(TokenType type)
     switch(type)
     {
         case FRX_TOKEN_TYPE_EOF:
-        case FRX_TOKEN_TYPE_RBRACE:
-        case FRX_TOKEN_TYPE_SEMI:
+        case FRX_TOKEN_TYPE_KW_FN:
         {
             return FRX_TRUE;
         }
