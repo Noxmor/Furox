@@ -67,6 +67,8 @@ ContinueStmt* continue_stmt_parse(Parser* parser);
 
 ReturnStmt* return_stmt_parse(Parser* parser);
 
+IfStmt* if_stmt_parse(Parser* parser);
+
 Expr* expr_parse(Parser* parser);
 
 IntLiteral* int_literal_parse(Parser* parser);

@@ -25,6 +25,8 @@ void continue_stmt_sema(ContinueStmt* continue_stmt);
 
 void return_stmt_sema(ReturnStmt* return_stmt);
 
+void if_stmt_sema(IfStmt* if_stmt);
+
 void expr_sema(Expr* expr);
 
 void int_literal_sema(IntLiteral* literal);

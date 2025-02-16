@@ -130,12 +130,20 @@ typedef struct ReturnStmt
     SourceRange range;
 } ReturnStmt;
 
+typedef struct IfStmt
+{
+    Expr* condition;
+    Scope* if_block;
+    Scope* else_block;
+} IfStmt;
+
 enum
 {
     FRX_STMT_TYPE_EXPR_STMT,
     FRX_STMT_TYPE_BREAK_STMT,
     FRX_STMT_TYPE_CONTINUE_STMT,
     FRX_STMT_TYPE_RETURN_STMT,
+    FRX_STMT_TYPE_IF_STMT,
 
     FRX_STMT_TYPE_COUNT
 };

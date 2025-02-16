@@ -12,7 +12,8 @@ static const StmtSemaFunc stmt_type_to_sema[FRX_STMT_TYPE_COUNT] = {
     [FRX_STMT_TYPE_EXPR_STMT] = (StmtSemaFunc)expr_stmt_sema,
     [FRX_STMT_TYPE_BREAK_STMT] = (StmtSemaFunc)break_stmt_sema,
     [FRX_STMT_TYPE_CONTINUE_STMT] = (StmtSemaFunc)continue_stmt_sema,
-    [FRX_STMT_TYPE_RETURN_STMT] = (StmtSemaFunc)return_stmt_sema
+    [FRX_STMT_TYPE_RETURN_STMT] = (StmtSemaFunc)return_stmt_sema,
+    [FRX_STMT_TYPE_IF_STMT] = (StmtSemaFunc)if_stmt_sema
 };
 
 typedef void (*StmtCodegenFunc)(void*);
@@ -21,7 +22,8 @@ static const StmtCodegenFunc stmt_type_to_codegen[FRX_STMT_TYPE_COUNT] = {
     [FRX_STMT_TYPE_EXPR_STMT] = (StmtCodegenFunc)expr_stmt_codegen,
     [FRX_STMT_TYPE_BREAK_STMT] = (StmtCodegenFunc)break_stmt_codegen,
     [FRX_STMT_TYPE_CONTINUE_STMT] = (StmtCodegenFunc)continue_stmt_codegen,
-    [FRX_STMT_TYPE_RETURN_STMT] = (StmtCodegenFunc)return_stmt_codegen
+    [FRX_STMT_TYPE_RETURN_STMT] = (StmtCodegenFunc)return_stmt_codegen,
+    [FRX_STMT_TYPE_IF_STMT] = (StmtCodegenFunc)if_stmt_codegen
 };
 static Stmt* stmt_create(StmtType type, void* node)
 {
@@ -43,6 +45,7 @@ Stmt* stmt_parse(Parser* parser)
         case FRX_TOKEN_TYPE_KW_BREAK: return stmt_create(FRX_STMT_TYPE_BREAK_STMT, break_stmt_parse(parser));
         case FRX_TOKEN_TYPE_KW_CONTINUE: return stmt_create(FRX_STMT_TYPE_CONTINUE_STMT, continue_stmt_parse(parser));
         case FRX_TOKEN_TYPE_KW_RETURN: return stmt_create(FRX_STMT_TYPE_RETURN_STMT, return_stmt_parse(parser));
+        case FRX_TOKEN_TYPE_KW_IF: return stmt_create(FRX_STMT_TYPE_IF_STMT, if_stmt_parse(parser));
         default:
         {
             FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_STMT,

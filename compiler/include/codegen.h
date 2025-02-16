@@ -31,6 +31,8 @@ void continue_stmt_codegen(ContinueStmt* continue_stmt);
 
 void return_stmt_codegen(ReturnStmt* return_stmt);
 
+void if_stmt_codegen(IfStmt* if_stmt);
+
 void expr_codegen(Expr* expr);
 
 void int_literal_codegen(IntLiteral* literal);
