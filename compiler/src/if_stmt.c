@@ -31,7 +31,14 @@ IfStmt* if_stmt_parse(Parser* parser)
     {
         parser_eat(parser, FRX_TOKEN_TYPE_KW_ELSE);
 
-        else_block = scope_parse(parser);
+        if (parser_match(parser, FRX_TOKEN_TYPE_KW_IF))
+        {
+            else_block = scope_from_stmt(stmt_parse(parser));
+        }
+        else
+        {
+            else_block = scope_parse(parser);
+        }
     }
 
     return if_stmt_create(condition, if_block, else_block);

@@ -157,4 +157,6 @@ typedef struct Stmt
     SourceRange range;
 } Stmt;
 
+Scope* scope_from_stmt(Stmt* stmt);
+
 #endif

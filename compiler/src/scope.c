@@ -22,6 +22,14 @@ static void scope_add_stmt(Scope* scope, Stmt* stmt)
     list_add(&scope->stmts, stmt);
 }
 
+Scope* scope_from_stmt(Stmt* stmt)
+{
+    Scope* scope = scope_create();
+    scope_add_stmt(scope, stmt);
+
+    return scope;
+}
+
 Scope* scope_parse(Parser* parser)
 {
     if (parser_eat(parser, FRX_TOKEN_TYPE_LBRACE))
