@@ -19,6 +19,8 @@ enum
     FRX_ITEM_TYPE_COUNT
 };
 
+typedef u8 ItemType;
+
 enum
 {
     FRX_TYPE_KIND_UNRESOLVED,
@@ -49,8 +51,6 @@ typedef struct TypeSpecifier
         } ptr;
     };
 } TypeSpecifier;
-
-typedef u8 ItemType;
 
 typedef struct Item
 {
