@@ -24,6 +24,8 @@ static Module* submodule_create(Module* parent, const char* filepath)
 
     Module* mod = malloc(sizeof(Module));
 
+    symbol_table_init(&mod->symbol_table);
+
     mod->parent = parent;
     strcpy(mod->filepath, filepath);
     mod->name = strrchr(mod->filepath, '/') + 1;

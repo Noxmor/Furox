@@ -19,6 +19,7 @@ static StructDef* struct_def_create(const char* name)
 {
     StructDef* struct_def = compiler_alloc(sizeof(StructDef));
 
+    struct_def->id = symbol_intern(name);
     struct_def->name = name;
     list_init(&struct_def->fields);
 
@@ -83,6 +84,8 @@ StructDef* struct_def_parse(Parser* parser)
         return NULL;
     }
 
+    parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE, struct_def->id,
+                         FRX_SYMBOL_TYPE_STRUCT, struct_def);
     return struct_def;
 }
 

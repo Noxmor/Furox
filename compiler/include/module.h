@@ -4,6 +4,7 @@
 #include <dirent.h>
 
 #include "list.h"
+#include "symbol_table.h"
 
 typedef struct Module
 {
@@ -13,6 +14,7 @@ typedef struct Module
     b8 failed;
     List submodules;
     List parsers;
+    SymbolTable symbol_table;
 } Module;
 
 Module* module_create(const char* project_path);

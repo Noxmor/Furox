@@ -10,11 +10,15 @@
     list_add(&parser->diagnostics, d);\
 } while (0)
 
+typedef struct Module Module;
+
 typedef struct Parser
 {
+    Module* module;
     Lexer lexer;
     List diagnostics;
     TranslationUnit* translation_unit;
+    SymbolTable symbol_table;
     b8 failed;
     b8 recovery;
 } Parser;
@@ -40,6 +44,9 @@ b8 parser_match(Parser* parser, TokenType type);
 b8 parser_eat(Parser* parser, TokenType type);
 
 void parser_recover(Parser* parser);
+
+void parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
+                          SymbolID id, SymbolType type, void* data);
 
 b8 parser_failed(const Parser* parser);
 

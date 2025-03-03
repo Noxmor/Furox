@@ -6,6 +6,7 @@
 #include "assert.h"
 #include "log.h"
 #include "hash.h"
+#include "compiler.h"
 
 #ifndef FRX_SYMBOL_INTERN_TABLE_CAPACITY
 #define FRX_SYMBOL_INTERN_TABLE_CAPACITY 1024
@@ -15,28 +16,20 @@ static SymbolID next_free_symbol_id;
 
 typedef struct SymbolInternEntry
 {
-    Symbol symbol;
+    SymbolID id;
+    const char* name;
     struct SymbolInternEntry* next;
 } SymbolInternEntry;
 
 static SymbolInternEntry* symbol_intern_entry_create(const char* name, SymbolInternEntry* next)
 {
-    SymbolInternEntry* entry = malloc(sizeof(SymbolInternEntry));
+    SymbolInternEntry* entry = compiler_alloc(sizeof(SymbolInternEntry));
 
-    entry->symbol.name = name;
-    entry->symbol.id = next_free_symbol_id++;
+    entry->id = next_free_symbol_id++;
+    entry->name = name;
     entry->next = next;
 
     return entry;
-}
-
-static void symbol_intern_entry_destroy(SymbolInternEntry* entry)
-{
-    if (entry != NULL)
-    {
-        symbol_intern_entry_destroy(entry->next);
-        free(entry);
-    }
 }
 
 typedef struct SymbolInternTable
@@ -46,7 +39,7 @@ typedef struct SymbolInternTable
 
 static SymbolInternTable intern_table;
 
-Symbol* symbol_intern(const char* name)
+SymbolID symbol_intern(const char* name)
 {
     FRX_ASSERT(name != NULL);
 
@@ -55,9 +48,9 @@ Symbol* symbol_intern(const char* name)
 
     while (entry != NULL)
     {
-        if (strcmp(entry->symbol.name, name) == 0)
+        if (strcmp(entry->name, name) == 0)
         {
-            return &entry->symbol;
+            return entry->id;
         }
 
         entry = entry->next;
@@ -66,16 +59,81 @@ Symbol* symbol_intern(const char* name)
     SymbolInternEntry* new_entry = symbol_intern_entry_create(name, intern_table.entries[index]);
     intern_table.entries[index] = new_entry;
 
-    return &new_entry->symbol;
+    return new_entry->id;
 }
 
-void symbol_table_shutdown(void)
+static Symbol* symbol_create(SymbolType type, void* data)
 {
-    FRX_LOG_INFO("Shutting down symbol table...");
+    FRX_ASSERT(type < FRX_SYMBOL_TYPE_COUNT);
 
-    for (usize i = 0; i < FRX_SYMBOL_INTERN_TABLE_CAPACITY; ++i)
+    FRX_ASSERT(data != NULL);
+
+    Symbol* symbol = compiler_alloc(sizeof(Symbol));
+
+    symbol->type = type;
+    symbol->data = data;
+
+    return symbol;
+}
+
+void symbol_table_init(SymbolTable* table)
+{
+    FRX_ASSERT(table != NULL);
+
+    memset(table, 0, sizeof(SymbolTable));
+}
+
+Symbol* symbol_table_insert(SymbolTable* table, SymbolID id, SymbolType type, void* data)
+{
+    if (symbol_table_lookup(table, id) != NULL)
     {
-        SymbolInternEntry* entry = intern_table.entries[i];
-        symbol_intern_entry_destroy(entry);
+        return NULL;
     }
+
+    Symbol* symbol = symbol_create(type, data);
+    symbol_table_insert_symbol(table, id, symbol);
+
+    return symbol;
+}
+
+void symbol_table_insert_symbol(SymbolTable* table, SymbolID id, Symbol* symbol)
+{
+    FRX_ASSERT(table != NULL);
+
+    FRX_ASSERT(symbol != NULL);
+
+    if (symbol_table_lookup(table, id) != NULL)
+    {
+        return;
+    }
+
+    u64 index = id % FRX_SYMBOL_TABLE_CAPACITY;
+    SymbolTableEntry* entry = table->entries[index];
+
+    SymbolTableEntry* new_entry = compiler_alloc(sizeof(SymbolTableEntry));
+    new_entry->id = id;
+    new_entry->symbol = symbol;
+    new_entry->next = entry;
+
+    table->entries[index] = new_entry;
+}
+
+Symbol* symbol_table_lookup(SymbolTable* table, SymbolID id)
+{
+    FRX_ASSERT(table != NULL);
+
+    u64 index = id % FRX_SYMBOL_TABLE_CAPACITY;
+    SymbolTableEntry* entry = table->entries[index];
+
+    while (entry != NULL)
+    {
+        if (entry->id == id)
+        {
+            return entry->symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    return NULL;
 }

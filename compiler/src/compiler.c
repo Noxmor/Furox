@@ -27,7 +27,6 @@ static void compiler_shutdown(void)
 {
     FRX_LOG_INFO("Shutting down compiler...");
 
-    symbol_table_shutdown();
     string_table_shutdown();
 
     arena_destroy(arena);

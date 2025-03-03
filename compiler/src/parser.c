@@ -5,7 +5,9 @@
 #include "lexer.h"
 #include "assert.h"
 #include "log.h"
+#include "symbol_table.h"
 #include "token.h"
+#include "module.h"
 
 Parser* parser_create(const char* filepath)
 {
@@ -17,6 +19,7 @@ Parser* parser_create(const char* filepath)
 
     lexer_init(&parser->lexer, filepath);
     list_init(&parser->diagnostics);
+    symbol_table_init(&parser->symbol_table);
     parser->failed = FRX_FALSE;
     parser->recovery = FRX_FALSE;
 
@@ -118,6 +121,23 @@ void parser_recover(Parser* parser)
     while (!token_type_is_sync(parser_current_token(parser)->type))
     {
         lexer_next_token(&parser->lexer);
+    }
+}
+
+void parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
+                          SymbolID id, SymbolType type, void* data)
+{
+    FRX_ASSERT(parser != NULL);
+
+    Symbol* symbol = symbol_table_insert(&parser->symbol_table, id, type, data);
+
+    if (visibility == FRX_SYMBOL_VISIBILITY_MODULE)
+    {
+        symbol_table_insert_symbol(&parser->module->symbol_table, id, symbol);
+    }
+    else if (visibility == FRX_SYMBOL_VISIBILITY_PUBLIC)
+    {
+        //TODO: Add symbol to root module's symbol table
     }
 }
 

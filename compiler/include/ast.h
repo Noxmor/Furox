@@ -5,6 +5,7 @@
 #include "token.h"
 #include "list.h"
 #include "source_range.h"
+#include "symbol_table.h"
 
 typedef struct IntLiteral
 {
@@ -68,6 +69,7 @@ typedef struct StructField
 
 typedef struct StructDef
 {
+    SymbolID id;
     const char* name;
     List fields;
 } StructDef;
@@ -98,6 +100,7 @@ typedef struct FuncParams
 
 typedef struct FuncDef
 {
+    SymbolID id;
     const char* name;
     FuncParams* params;
     TypeSpecifier* return_type;
