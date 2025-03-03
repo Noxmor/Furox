@@ -9,13 +9,15 @@
 typedef void (*ExprSemaFunc)(void*);
 
 static const ExprSemaFunc expr_type_to_sema[FRX_EXPR_TYPE_COUNT] = {
-    [FRX_EXPR_TYPE_INT_LIT] = (ExprSemaFunc)int_literal_sema
+    [FRX_EXPR_TYPE_INT_LIT] = (ExprSemaFunc)int_literal_sema,
+    [FRX_EXPR_TYPE_VAR] = (ExprSemaFunc)var_sema,
 };
 
 typedef void (*ExprCodegenFunc)(void*);
 
 static const ExprCodegenFunc expr_type_to_codegen[FRX_EXPR_TYPE_COUNT] = {
     [FRX_EXPR_TYPE_INT_LIT] = (ExprCodegenFunc)int_literal_codegen,
+    [FRX_EXPR_TYPE_VAR] = (ExprCodegenFunc)var_codegen,
 };
 static Expr* expr_create(ExprType type, void* node)
 {
@@ -35,6 +37,7 @@ Expr* expr_parse(Parser* parser)
     switch (parser_current_type(parser))
     {
         case FRX_TOKEN_TYPE_INT_LIT: return expr_create(FRX_EXPR_TYPE_INT_LIT, int_literal_parse(parser));
+        case FRX_TOKEN_TYPE_IDENT: return expr_create(FRX_EXPR_TYPE_VAR, var_parse(parser));
         default:
         {
             FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_EXPR,

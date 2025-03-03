@@ -71,6 +71,8 @@ IfStmt* if_stmt_parse(Parser* parser);
 
 Expr* expr_parse(Parser* parser);
 
+Var* var_parse(Parser* parser);
+
 IntLiteral* int_literal_parse(Parser* parser);
 
 #endif

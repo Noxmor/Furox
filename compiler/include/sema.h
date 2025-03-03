@@ -29,6 +29,8 @@ void if_stmt_sema(IfStmt* if_stmt);
 
 void expr_sema(Expr* expr);
 
+void var_sema(Var* var);
+
 void int_literal_sema(IntLiteral* literal);
 
 #endif
