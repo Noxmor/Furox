@@ -7,6 +7,7 @@
 #include "arena.h"
 #include "lexer.h"
 #include "module.h"
+#include "project.h"
 #include "string_table.h"
 #include "symbol_table.h"
 #include "codegen.h"
@@ -52,15 +53,23 @@ int compiler_run(int argc, char** argv)
             project_path[strlen(project_path) - 1] = '\0';
         }
 
-        Module* mod = module_create(project_path);
-        module_compile(mod);
-        list_add(&projects, mod);
+        ProjectSpecificiation spec;
+        spec.type = i == argc - 1 ? FRX_PROJECT_TYPE_APP : FRX_PROJECT_TYPE_LIB;
+
+        Project* project = project_create(spec, project_path);
+        list_add(&projects, project);
     }
 
     for (usize i = 0; i < list_size(&projects); ++i)
     {
-        Module* mod = list_get(&projects, i);
-        if (module_failed(mod))
+        Project* project = list_get(&projects, i);
+        project_compile(project);
+    }
+
+    for (usize i = 0; i < list_size(&projects); ++i)
+    {
+        Project* project = list_get(&projects, i);
+        if (project_failed(project))
         {
             return EXIT_FAILURE;
         }
@@ -70,7 +79,8 @@ int compiler_run(int argc, char** argv)
 
     for (usize i = 0; i < list_size(&projects); ++i)
     {
-        Module* mod = list_get(&projects, i);
+        Project* project = list_get(&projects, i);
+        Module* mod = project->root_module;
         module_codegen(mod);
     }
 
@@ -80,8 +90,8 @@ int compiler_run(int argc, char** argv)
 
     for (usize i = 0; i < list_size(&projects); ++i)
     {
-        Module* mod = list_get(&projects, i);
-        module_destroy(mod);
+        Project* project = list_get(&projects, i);
+        project_destroy(project);
     }
 
     compiler_shutdown();
