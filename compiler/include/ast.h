@@ -15,6 +15,7 @@ typedef struct IntLiteral
 enum
 {
     FRX_ITEM_TYPE_FUNC_DEF,
+    FRX_ITEM_TYPE_STRUCT_DEF,
 
     FRX_ITEM_TYPE_COUNT
 };
@@ -58,6 +59,18 @@ typedef struct Item
     void* node;
     SourceRange range;
 } Item;
+
+typedef struct StructField
+{
+    const char* name;
+    TypeSpecifier* type;
+} StructField;
+
+typedef struct StructDef
+{
+    const char* name;
+    List fields;
+} StructDef;
 
 typedef struct TranslationUnit
 {

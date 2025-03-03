@@ -15,6 +15,8 @@ void type_specifier_codegen(TypeSpecifier* type);
 
 void item_codegen(Item* item);
 
+void struct_def_codegen(StructDef* struct_def);
+
 void func_params_codegen(FuncParams* params);
 
 void func_def_codegen(FuncDef* func_def);

@@ -10,13 +10,15 @@
 typedef void (*ItemSemaFunc)(void*);
 
 static const ItemSemaFunc item_type_to_sema[FRX_ITEM_TYPE_COUNT] = {
-    [FRX_ITEM_TYPE_FUNC_DEF] = (ItemSemaFunc)func_def_sema
+    [FRX_ITEM_TYPE_FUNC_DEF] = (ItemSemaFunc)func_def_sema,
+    [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemSemaFunc)struct_def_sema,
 };
 
 typedef void (*ItemCodegenFunc)(void*);
 
 static const ItemSemaFunc item_type_to_codegen[FRX_ITEM_TYPE_COUNT] = {
-    [FRX_ITEM_TYPE_FUNC_DEF] = (ItemCodegenFunc)func_def_codegen
+    [FRX_ITEM_TYPE_FUNC_DEF] = (ItemCodegenFunc)func_def_codegen,
+    [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemCodegenFunc)struct_def_codegen,
 };
 
 static Item* item_create(ItemType type, void* node)
@@ -36,6 +38,7 @@ Item* item_parse(Parser* parser)
     switch (parser_current_type(parser))
     {
         case FRX_TOKEN_TYPE_KW_FN: return item_create(FRX_ITEM_TYPE_FUNC_DEF, func_def_parse(parser));
+        case FRX_TOKEN_TYPE_KW_STRUCT: return item_create(FRX_ITEM_TYPE_STRUCT_DEF, struct_def_parse(parser));
         default:
         {
             FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_ITEM,
