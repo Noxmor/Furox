@@ -9,7 +9,7 @@
 #include "token.h"
 #include "module.h"
 
-Parser* parser_create(const char* filepath)
+Parser* parser_create(Module* module, const char* filepath)
 {
     FRX_ASSERT(filepath != NULL);
 
@@ -17,9 +17,9 @@ Parser* parser_create(const char* filepath)
 
     Parser* parser = compiler_alloc(sizeof(Parser));
 
+    parser->module = module;
     lexer_init(&parser->lexer, filepath);
     list_init(&parser->diagnostics);
-    symbol_table_init(&parser->symbol_table);
     parser->failed = FRX_FALSE;
     parser->recovery = FRX_FALSE;
 
@@ -129,16 +129,14 @@ void parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
 {
     FRX_ASSERT(parser != NULL);
 
-    Symbol* symbol = symbol_table_insert(&parser->symbol_table, id, type, data);
+    module_insert_symbol(parser->module, parser, visibility, id, type, data);
+}
 
-    if (visibility == FRX_SYMBOL_VISIBILITY_MODULE)
-    {
-        symbol_table_insert_symbol(&parser->module->symbol_table, id, symbol);
-    }
-    else if (visibility == FRX_SYMBOL_VISIBILITY_PUBLIC)
-    {
-        //TODO: Add symbol to root module's symbol table
-    }
+Symbol* parser_lookup_symbol(Parser* parser, SymbolID id)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return module_lookup_symbol(parser->module, parser, id);
 }
 
 b8 parser_failed(const Parser* parser)

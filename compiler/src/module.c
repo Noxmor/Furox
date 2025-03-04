@@ -63,7 +63,7 @@ static Module* submodule_create(Module* parent, const char* filepath)
         else if (entry->d_type == DT_REG && str_has_suffix(entry->d_name, ".frx"))
         {
 
-            Parser* parser = parser_create(buffer);
+            Parser* parser = parser_create(mod, buffer);
             list_add(&mod->parsers, parser);
         }
     }
@@ -133,6 +133,21 @@ void module_codegen(Module* mod)
         Parser* parser = list_get(&mod->parsers, i);
         translation_unit_codegen(parser->translation_unit);
     }
+}
+
+void module_insert_symbol(Module* mod, Parser* parser, SymbolVisibility visibility,
+                          SymbolID id, SymbolType type, void* data)
+{
+    FRX_ASSERT(mod != NULL);
+
+    symbol_table_insert(&mod->symbol_table, parser, visibility, id, type, data);
+}
+
+Symbol* module_lookup_symbol(Module* mod, Parser* parser, SymbolID id)
+{
+    FRX_ASSERT(mod != NULL);
+
+    return symbol_table_lookup(&mod->symbol_table, parser, id);
 }
 
 b8 module_failed(const Module* mod)

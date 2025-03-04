@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+typedef struct Parser Parser;
+
 typedef u64 SymbolID;
 
 SymbolID symbol_intern(const char* name);
@@ -36,8 +38,10 @@ typedef struct Symbol
 
 typedef struct SymbolTableEntry
 {
+    Parser* origin;
+    SymbolVisibility visibility;
     SymbolID id;
-    Symbol* symbol;
+    Symbol symbol;
     struct SymbolTableEntry* next;
 } SymbolTableEntry;
 
@@ -52,10 +56,10 @@ typedef struct SymbolTable
 
 void symbol_table_init(SymbolTable* table);
 
-Symbol* symbol_table_insert(SymbolTable* table, SymbolID id, SymbolType type, void* data);
+void symbol_table_insert(SymbolTable* table, Parser* origin,
+                         SymbolVisibility visibility, SymbolID id,
+                         SymbolType type, void* data);
 
-void symbol_table_insert_symbol(SymbolTable* table, SymbolID id, Symbol* symbol);
-
-Symbol* symbol_table_lookup(SymbolTable* table, SymbolID id);
+Symbol* symbol_table_lookup(SymbolTable* table, Parser* origin, SymbolID id);
 
 #endif

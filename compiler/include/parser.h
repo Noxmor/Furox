@@ -18,12 +18,11 @@ typedef struct Parser
     Lexer lexer;
     List diagnostics;
     TranslationUnit* translation_unit;
-    SymbolTable symbol_table;
     b8 failed;
     b8 recovery;
 } Parser;
 
-Parser* parser_create(const char* filepath);
+Parser* parser_create(Module* module, const char* filepath);
 
 void parser_parse(Parser* parser);
 
@@ -47,6 +46,8 @@ void parser_recover(Parser* parser);
 
 void parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
                           SymbolID id, SymbolType type, void* data);
+
+Symbol* parser_lookup_symbol(Parser* parser, SymbolID id);
 
 b8 parser_failed(const Parser* parser);
 

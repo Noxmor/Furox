@@ -6,6 +6,8 @@
 #include "list.h"
 #include "symbol_table.h"
 
+typedef struct Parser Parser;
+
 typedef struct Module
 {
     struct Module* parent;
@@ -22,6 +24,11 @@ Module* module_create(const char* project_path);
 void module_compile(Module* mod);
 
 void module_codegen(Module* mod);
+
+void module_insert_symbol(Module* mod, Parser* parser, SymbolVisibility visibility,
+                          SymbolID id, SymbolType type, void* data);
+
+Symbol* module_lookup_symbol(Module* mod, Parser* parser, SymbolID id);
 
 b8 module_failed(const Module* mod);
 

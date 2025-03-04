@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "assert.h"
-#include "log.h"
 #include "hash.h"
 #include "compiler.h"
 
@@ -62,20 +61,6 @@ SymbolID symbol_intern(const char* name)
     return new_entry->id;
 }
 
-static Symbol* symbol_create(SymbolType type, void* data)
-{
-    FRX_ASSERT(type < FRX_SYMBOL_TYPE_COUNT);
-
-    FRX_ASSERT(data != NULL);
-
-    Symbol* symbol = compiler_alloc(sizeof(Symbol));
-
-    symbol->type = type;
-    symbol->data = data;
-
-    return symbol;
-}
-
 void symbol_table_init(SymbolTable* table)
 {
     FRX_ASSERT(table != NULL);
@@ -83,26 +68,21 @@ void symbol_table_init(SymbolTable* table)
     memset(table, 0, sizeof(SymbolTable));
 }
 
-Symbol* symbol_table_insert(SymbolTable* table, SymbolID id, SymbolType type, void* data)
-{
-    if (symbol_table_lookup(table, id) != NULL)
-    {
-        return NULL;
-    }
-
-    Symbol* symbol = symbol_create(type, data);
-    symbol_table_insert_symbol(table, id, symbol);
-
-    return symbol;
-}
-
-void symbol_table_insert_symbol(SymbolTable* table, SymbolID id, Symbol* symbol)
+void symbol_table_insert(SymbolTable* table, Parser* origin,
+                         SymbolVisibility visibility, SymbolID id,
+                         SymbolType type, void* data)
 {
     FRX_ASSERT(table != NULL);
 
-    FRX_ASSERT(symbol != NULL);
+    FRX_ASSERT(origin != NULL);
 
-    if (symbol_table_lookup(table, id) != NULL)
+    FRX_ASSERT(visibility < FRX_SYMBOL_VISIBILITY_COUNT);
+
+    FRX_ASSERT(type < FRX_SYMBOL_TYPE_COUNT);
+
+    FRX_ASSERT(data != NULL);
+
+    if (symbol_table_lookup(table, origin, id) != NULL)
     {
         return;
     }
@@ -111,25 +91,31 @@ void symbol_table_insert_symbol(SymbolTable* table, SymbolID id, Symbol* symbol)
     SymbolTableEntry* entry = table->entries[index];
 
     SymbolTableEntry* new_entry = compiler_alloc(sizeof(SymbolTableEntry));
+    new_entry->origin = origin;
+    new_entry->visibility = visibility;
     new_entry->id = id;
-    new_entry->symbol = symbol;
+    new_entry->symbol.type = type;
+    new_entry->symbol.data = data;
     new_entry->next = entry;
 
     table->entries[index] = new_entry;
 }
 
-Symbol* symbol_table_lookup(SymbolTable* table, SymbolID id)
+Symbol* symbol_table_lookup(SymbolTable* table, Parser* origin, SymbolID id)
 {
     FRX_ASSERT(table != NULL);
+
+    FRX_ASSERT(origin != NULL);
 
     u64 index = id % FRX_SYMBOL_TABLE_CAPACITY;
     SymbolTableEntry* entry = table->entries[index];
 
     while (entry != NULL)
     {
-        if (entry->id == id)
+        //TODO: Check the parser's use statements for a possible match
+        if (entry->id == id && entry->origin == origin)
         {
-            return entry->symbol;
+            return &entry->symbol;
         }
 
         entry = entry->next;
