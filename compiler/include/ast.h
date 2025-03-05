@@ -111,6 +111,7 @@ typedef struct FuncDef
 enum
 {
     FRX_EXPR_TYPE_INT_LIT,
+    FRX_EXPR_TYPE_FUNC_CALL,
     FRX_EXPR_TYPE_VAR,
 
     FRX_EXPR_TYPE_COUNT
@@ -124,6 +125,13 @@ typedef struct Expr
     void* node;
     SourceRange range;
 } Expr;
+
+typedef struct FuncCall
+{
+    const char* name;
+    SymbolID id;
+    List args;
+} FuncCall;
 
 typedef struct Var
 {

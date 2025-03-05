@@ -37,6 +37,8 @@ void if_stmt_codegen(IfStmt* if_stmt);
 
 void expr_codegen(Expr* expr);
 
+void func_call_codegen(FuncCall* func_call);
+
 void var_codegen(Var* var);
 
 void int_literal_codegen(IntLiteral* literal);

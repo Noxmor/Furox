@@ -31,6 +31,8 @@ void if_stmt_sema(IfStmt* if_stmt);
 
 void expr_sema(Expr* expr);
 
+void func_call_sema(FuncCall* func_call);
+
 void var_sema(Var* var);
 
 void int_literal_sema(IntLiteral* literal);
