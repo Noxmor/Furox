@@ -3,8 +3,25 @@
 #include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
+
+typedef void (*ExprResolveFunc)(Parser*, void*);
+
+static void dummy_resolve(Parser* parser, void* node)
+{
+    (void)parser;
+    (void)node;
+}
+
+static const ExprResolveFunc expr_type_to_resolve[FRX_EXPR_TYPE_COUNT] = {
+    [FRX_EXPR_TYPE_INT_LIT] = (ExprResolveFunc)dummy_resolve,
+    [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprResolveFunc)unary_expr_resolve,
+    [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprResolveFunc)binary_expr_resolve,
+    [FRX_EXPR_TYPE_FUNC_CALL] = (ExprResolveFunc)func_call_resolve,
+    [FRX_EXPR_TYPE_VAR] = (ExprResolveFunc)var_resolve,
+};
 
 typedef void (*ExprSemaFunc)(void*);
 
@@ -203,6 +220,13 @@ static Expr* expr_parse_with_precedence(Parser* parser, Precedence min_precedenc
 Expr* expr_parse(Parser* parser)
 {
     return expr_parse_with_precedence(parser, FRX_PRECEDENCE_MIN);
+}
+
+void expr_resolve(Parser* parser, Expr* expr)
+{
+    FRX_ASSERT(expr != NULL);
+
+    expr_type_to_resolve[expr->type](parser, expr->node);
 }
 
 void expr_sema(Expr* expr)

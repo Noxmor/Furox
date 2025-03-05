@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "compiler.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 
@@ -38,6 +39,17 @@ TranslationUnit* translation_unit_parse(Parser* parser)
     }
 
     return unit;
+}
+
+void translation_unit_resolve(Parser* parser, TranslationUnit* unit)
+{
+    FRX_ASSERT(unit != NULL);
+
+    for (usize i = 0; i < list_size(&unit->items); ++i)
+    {
+        Item* item = list_get(&unit->items, i);
+        item_resolve(parser, item);
+    }
 }
 
 void translation_unit_sema(TranslationUnit* unit)

@@ -8,6 +8,7 @@
 #include "assert.h"
 #include "codegen.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 
 static b8 str_has_suffix(const char* str, const char* suffix)
@@ -107,6 +108,7 @@ void module_compile(Module* mod)
 
         if (parser->translation_unit != NULL)
         {
+            translation_unit_resolve(parser, parser->translation_unit);
             translation_unit_sema(parser->translation_unit);
         }
 

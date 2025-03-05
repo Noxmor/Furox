@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "compiler.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 
@@ -49,6 +50,14 @@ StructField* struct_field_parse(Parser* parser)
 
     return struct_field_create(name, type);
 }
+
+void struct_field_resolve(Parser* parser, StructField* field)
+{
+    FRX_ASSERT(field != NULL);
+
+    type_specifier_resolve(parser, field->type);
+}
+
 StructDef* struct_def_parse(Parser* parser)
 {
     if (parser_eat(parser, FRX_TOKEN_TYPE_KW_STRUCT))
@@ -94,6 +103,17 @@ static void struct_field_sema(StructField* field)
     FRX_ASSERT(field != NULL);
 
     type_specifier_sema(field->type);
+}
+
+void struct_def_resolve(Parser* parser, StructDef* struct_def)
+{
+    FRX_ASSERT(struct_def != NULL);
+
+    for (usize i = 0; i < list_size(&struct_def->fields); ++i)
+    {
+        StructField* field = list_get(&struct_def->fields, i);
+        struct_field_resolve(parser, field);
+    }
 }
 
 void struct_def_sema(StructDef* struct_def)

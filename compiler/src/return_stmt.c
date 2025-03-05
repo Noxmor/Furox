@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "compiler.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 
@@ -34,6 +35,16 @@ ReturnStmt* return_stmt_parse(Parser* parser)
     }
 
     return return_stmt_create(value);
+}
+
+void return_stmt_resolve(Parser* parser, ReturnStmt* return_stmt)
+{
+    FRX_ASSERT(return_stmt != NULL);
+
+    if (return_stmt->value != NULL)
+    {
+        expr_resolve(parser, return_stmt->value);
+    }
 }
 
 void return_stmt_sema(ReturnStmt* return_stmt)

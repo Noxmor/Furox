@@ -27,9 +27,13 @@ void continue_stmt_sema(ContinueStmt* continue_stmt);
 
 void return_stmt_sema(ReturnStmt* return_stmt);
 
+void let_stmt_sema(LetStmt* let_stmt);
+
 void if_stmt_sema(IfStmt* if_stmt);
 
 void expr_sema(Expr* expr);
+
+TypeSpecifier* expr_infer_type(Expr* expr);
 
 void unary_expr_sema(UnaryExpr* unary_expr);
 

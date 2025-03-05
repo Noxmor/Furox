@@ -3,8 +3,17 @@
 #include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
+
+void binary_expr_resolve(Parser* parser, BinaryExpr* binary_expr)
+{
+    FRX_ASSERT(binary_expr != NULL);
+
+    expr_resolve(parser, binary_expr->left);
+    expr_resolve(parser, binary_expr->right);
+}
 
 void binary_expr_sema(BinaryExpr* binary_expr)
 {

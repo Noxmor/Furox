@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "compiler.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 
@@ -42,6 +43,26 @@ IfStmt* if_stmt_parse(Parser* parser)
     }
 
     return if_stmt_create(condition, if_block, else_block);
+}
+
+void if_stmt_resolve(Parser* parser, IfStmt* if_stmt)
+{
+    FRX_ASSERT(if_stmt != NULL);
+
+    if (if_stmt->condition != NULL)
+    {
+        expr_resolve(parser, if_stmt->condition);
+    }
+
+    if (if_stmt->if_block != NULL)
+    {
+        scope_resolve(parser, if_stmt->if_block);
+    }
+
+    if (if_stmt->else_block != NULL)
+    {
+        scope_resolve(parser, if_stmt->else_block);
+    }
 }
 
 void if_stmt_sema(IfStmt* if_stmt)

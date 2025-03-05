@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "compiler.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 
@@ -55,6 +56,17 @@ Scope* scope_parse(Parser* parser)
     }
 
     return scope;
+}
+
+void scope_resolve(Parser* parser, Scope* scope)
+{
+    FRX_ASSERT(scope != NULL);
+
+    for (usize i = 0; i < list_size(&scope->stmts); ++i)
+    {
+        Stmt* stmt = list_get(&scope->stmts, i);
+        stmt_resolve(parser, stmt);
+    }
 }
 
 void scope_sema(Scope* scope)

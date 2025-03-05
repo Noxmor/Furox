@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "compiler.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 #include "symbol_table.h"
@@ -57,6 +58,19 @@ FuncCall* func_call_parse(Parser* parser)
     }
 
     return func_call;
+}
+
+void func_call_resolve(Parser* parser, FuncCall* func_call)
+{
+    FRX_ASSERT(func_call != NULL);
+
+    func_call->symbol = parser_lookup_symbol(parser, func_call->id);
+
+    for (usize i = 0; i < list_size(&func_call->args); ++i)
+    {
+        Expr* arg = list_get(&func_call->args, i);
+        expr_resolve(parser, arg);
+    }
 }
 
 void func_call_sema(FuncCall* func_call)

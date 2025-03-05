@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "compiler.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 
@@ -24,6 +25,13 @@ ExprStmt* expr_stmt_parse(Parser* parser)
     }
 
     return expr_stmt_create(expr);
+}
+
+void expr_stmt_resolve(Parser* parser, ExprStmt* expr_stmt)
+{
+    FRX_ASSERT(expr_stmt != NULL);
+
+    expr_resolve(parser, expr_stmt->expr);
 }
 
 void expr_stmt_sema(ExprStmt* expr_stmt)

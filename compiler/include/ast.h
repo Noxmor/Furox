@@ -148,12 +148,15 @@ typedef struct FuncCall
 {
     const char* name;
     SymbolID id;
+    Symbol* symbol;
     List args;
 } FuncCall;
 
 typedef struct Var
 {
     const char* name;
+    SymbolID id;
+    Symbol* symbol;
 } Var;
 
 typedef struct ExprStmt
@@ -191,6 +194,7 @@ enum
     FRX_STMT_TYPE_BREAK_STMT,
     FRX_STMT_TYPE_CONTINUE_STMT,
     FRX_STMT_TYPE_RETURN_STMT,
+    FRX_STMT_TYPE_LET_STMT,
     FRX_STMT_TYPE_IF_STMT,
 
     FRX_STMT_TYPE_COUNT
@@ -204,6 +208,13 @@ typedef struct Stmt
     void* node;
     SourceRange range;
 } Stmt;
+
+typedef struct LetStmt
+{
+    const char* name;
+    TypeSpecifier* type;
+    Expr* value;
+} LetStmt;
 
 Scope* scope_from_stmt(Stmt* stmt);
 

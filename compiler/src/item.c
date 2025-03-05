@@ -3,9 +3,17 @@
 #include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 #include "token.h"
+
+typedef void (*ItemResolveFunc)(Parser*, void*);
+
+static const ItemResolveFunc item_type_to_resolve[FRX_ITEM_TYPE_COUNT] = {
+    [FRX_ITEM_TYPE_FUNC_DEF] = (ItemResolveFunc)func_def_resolve,
+    [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemResolveFunc)struct_def_resolve,
+};
 
 typedef void (*ItemSemaFunc)(void*);
 
@@ -52,6 +60,12 @@ Item* item_parse(Parser* parser)
     }
 }
 
+void item_resolve(Parser* parser, Item* item)
+{
+    FRX_ASSERT(item != NULL);
+
+    item_type_to_resolve[item->type](parser, item->node);
+}
 void item_sema(Item* item)
 {
     FRX_ASSERT(item != NULL);

@@ -3,6 +3,7 @@
 #include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 #include "token.h"
@@ -89,6 +90,15 @@ TypeSpecifier* type_specifier_parse(Parser* parser)
     }
 
     return type;
+}
+
+void type_specifier_resolve(Parser* parser, TypeSpecifier* type)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(type != NULL);
+
+    //TODO: Resolve type specifier
 }
 
 void type_specifier_sema(TypeSpecifier* type)

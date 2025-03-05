@@ -3,6 +3,7 @@
 #include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 
@@ -36,6 +37,16 @@ static FuncParam* func_param_parse(Parser* parser)
     TypeSpecifier* type = type_specifier_parse(parser);
 
     return func_param_create(name, type);
+}
+
+static void func_param_resolve(Parser* parser, FuncParam* param)
+{
+    FRX_ASSERT(param != NULL);
+
+    if (param->type != NULL)
+    {
+        type_specifier_resolve(parser, param->type);
+    }
 }
 
 static void func_param_sema(FuncParam* param)
@@ -110,6 +121,16 @@ FuncParams* func_params_parse(Parser* parser)
     return params;
 }
 
+void func_params_resolve(Parser* parser, FuncParams* params)
+{
+    FRX_ASSERT(params != NULL);
+
+    for (usize i = 0; i < list_size(&params->params); ++i)
+    {
+        FuncParam* param = list_get(&params->params, i);
+        func_param_resolve(parser, param);
+    }
+}
 void func_params_sema(FuncParams* params)
 {
     FRX_ASSERT(params != NULL);
