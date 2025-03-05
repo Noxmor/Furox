@@ -1,0 +1,111 @@
+#ifndef FRX_OPERATOR_H
+#define FRX_OPERATOR_H
+
+#include "token.h"
+
+enum
+{
+    FRX_OPERATOR_INVALID,
+
+    FRX_OPERATOR_POST_INC,
+    FRX_OPERATOR_POST_DEC,
+    FRX_OPERATOR_ARRAY_SUBSCRIPT,
+    FRX_OPERATOR_MEMBER_ACCESS,
+
+    FRX_OPERATOR_PRE_INC,
+    FRX_OPERATOR_PRE_DEC,
+    FRX_OPERATOR_SIGN_PLUS,
+    FRX_OPERATOR_SIGN_MINUS,
+    FRX_OPERATOR_LOG_NOT,
+    FRX_OPERATOR_BIT_NOT,
+    FRX_OPERATOR_DEREF,
+    FRX_OPERATOR_ADDRESS_OF,
+
+    FRX_OPERATOR_MUL,
+    FRX_OPERATOR_DIV,
+    FRX_OPERATOR_MOD,
+
+    FRX_OPERATOR_ADD,
+    FRX_OPERATOR_SUB,
+
+    FRX_OPERATOR_BIT_LSHIFT,
+    FRX_OPERATOR_BIT_RSHIFT,
+
+    FRX_OPERATOR_LT,
+    FRX_OPERATOR_LEQ,
+    FRX_OPERATOR_GT,
+    FRX_OPERATOR_GEQ,
+
+    FRX_OPERATOR_LOG_EQ,
+    FRX_OPERATOR_LOG_NEQ,
+
+    FRX_OPERATOR_BIT_AND,
+
+    FRX_OPERATOR_BIT_XOR,
+
+    FRX_OPERATOR_BIT_OR,
+
+    FRX_OPERATOR_LOG_AND,
+
+    FRX_OPERATOR_LOG_OR,
+
+    FRX_OPERATOR_TERNARY,
+
+    FRX_OPERATOR_ASSIGN,
+    FRX_OPERATOR_ADD_ASSIGN,
+    FRX_OPERATOR_SUB_ASSIGN,
+    FRX_OPERATOR_MUL_ASSIGN,
+    FRX_OPERATOR_DIV_ASSIGN,
+    FRX_OPERATOR_MOD_ASSIGN,
+    FRX_OPERATOR_BIT_LSHIFT_ASSIGN,
+    FRX_OPERATOR_BIT_RSHIFT_ASSIGN,
+    FRX_OPERATOR_BIT_AND_ASSIGN,
+    FRX_OPERATOR_BIT_XOR_ASSIGN,
+    FRX_OPERATOR_BIT_OR_ASSIGN,
+
+    FRX_OPERATOR_COUNT
+};
+
+typedef u8 Operator;
+
+b8 token_type_is_prefix_operator(TokenType type);
+
+Operator token_type_to_prefix_operator(TokenType type);
+
+b8 token_type_is_infix_operator(TokenType type);
+
+Operator token_type_to_infix_operator(TokenType type);
+
+b8 token_type_is_postfix_operator(TokenType type);
+
+Operator token_type_to_postfix_operator(TokenType type);
+
+enum
+{
+    FRX_PRECEDENCE_MAX,
+
+    FRX_PRECEDENCE_1,
+    FRX_PRECEDENCE_2,
+    FRX_PRECEDENCE_3,
+    FRX_PRECEDENCE_4,
+    FRX_PRECEDENCE_5,
+    FRX_PRECEDENCE_6,
+    FRX_PRECEDENCE_7,
+    FRX_PRECEDENCE_8,
+    FRX_PRECEDENCE_9,
+    FRX_PRECEDENCE_10,
+    FRX_PRECEDENCE_11,
+    FRX_PRECEDENCE_12,
+    FRX_PRECEDENCE_13,
+    FRX_PRECEDENCE_14,
+
+    FRX_PRECEDENCE_MIN,
+
+    FRX_PRECEDENCE_COUNT
+};
+
+typedef u8 Precedence;
+
+Precedence operator_to_precedence(Operator operator);
+
+#endif

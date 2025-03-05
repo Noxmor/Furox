@@ -6,6 +6,7 @@
 #include "list.h"
 #include "source_range.h"
 #include "symbol_table.h"
+#include "operator.h"
 
 typedef struct IntLiteral
 {
@@ -111,6 +112,8 @@ typedef struct FuncDef
 enum
 {
     FRX_EXPR_TYPE_INT_LIT,
+    FRX_EXPR_TYPE_UNARY_EXPR,
+    FRX_EXPR_TYPE_BINARY_EXPR,
     FRX_EXPR_TYPE_FUNC_CALL,
     FRX_EXPR_TYPE_VAR,
 
@@ -125,6 +128,21 @@ typedef struct Expr
     void* node;
     SourceRange range;
 } Expr;
+
+typedef struct UnaryExpr
+{
+    TokenType type;
+    Operator operator;
+    Expr* operand;
+} UnaryExpr;
+
+typedef struct BinaryExpr
+{
+    TokenType type;
+    Operator operator;
+    Expr* left;
+    Expr* right;
+} BinaryExpr;
 
 typedef struct FuncCall
 {

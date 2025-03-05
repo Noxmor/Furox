@@ -37,6 +37,10 @@ void if_stmt_codegen(IfStmt* if_stmt);
 
 void expr_codegen(Expr* expr);
 
+void unary_expr_codegen(UnaryExpr* unary_expr);
+
+void binary_expr_codegen(BinaryExpr* binary_expr);
+
 void func_call_codegen(FuncCall* func_call);
 
 void var_codegen(Var* var);
