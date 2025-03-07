@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "ast.h"
 #include "diagnostics.h"
+#include "symbol_table.h"
 
 #define FRX_PARSER_ADD_DIAGNOSTIC(parser, id, lvl, range, ...) do { FRX_ASSERT(parser != NULL);\
     Diagnostic* d = diagnostic_create(id, lvl, parser_source_file(parser), range, ##__VA_ARGS__);\
@@ -19,6 +20,7 @@ typedef struct Parser
     List diagnostics;
     TranslationUnit* translation_unit;
     List use_stmts;
+    SymbolVisibility visibility;
     b8 failed;
     b8 recovery;
 } Parser;

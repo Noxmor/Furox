@@ -78,7 +78,7 @@ StructDef* struct_def_parse(Parser* parser)
 
     struct_def->error |= parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
-    parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE, struct_def->id,
+    parser_insert_symbol(parser, parser->visibility, struct_def->id,
                          FRX_SYMBOL_TYPE_STRUCT, struct_def);
     return struct_def;
 }

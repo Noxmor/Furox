@@ -5,7 +5,6 @@
 #include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
-#include "symbol_table.h"
 
 static FuncDef* func_def_create(b8 error, const char* name, FuncParams* params,
                                 TypeSpecifier* return_type, Scope* body)
@@ -41,7 +40,7 @@ FuncDef* func_def_parse(Parser* parser)
 
     FuncDef* func_def = func_def_create(error, name, params, return_type, scope_parse(parser));
 
-    parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE, func_def->id, FRX_SYMBOL_TYPE_FUNC, func_def);
+    parser_insert_symbol(parser, parser->visibility, func_def->id, FRX_SYMBOL_TYPE_FUNC, func_def);
 
     return func_def;
 }

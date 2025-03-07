@@ -49,6 +49,31 @@ static Item* item_create(ItemType type, void* node)
 
 Item* item_parse(Parser* parser)
 {
+    if (parser_match(parser, FRX_TOKEN_TYPE_KW_PUB))
+    {
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_PUB);
+
+        parser->visibility = FRX_SYMBOL_VISIBILITY_PUBLIC;
+
+        switch (parser_current_type(parser))
+        {
+            case FRX_TOKEN_TYPE_KW_FN: return item_create(FRX_ITEM_TYPE_FUNC_DEF, func_def_parse(parser));
+            case FRX_TOKEN_TYPE_KW_STRUCT: return item_create(FRX_ITEM_TYPE_STRUCT_DEF, struct_def_parse(parser));
+            default:
+            {
+                FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_ITEM,
+                                          FRX_DIAGNOSTIC_LVL_ERROR,
+                                          parser_current_token(parser)->range,
+                                          token_type_to_str(parser_current_type(parser)));
+                parser_recover(parser);
+
+                return item_create(FRX_ITEM_TYPE_ERROR, NULL);
+            }
+        }
+    }
+
+    parser->visibility = FRX_SYMBOL_VISIBILITY_PRIVATE;
+
     switch (parser_current_type(parser))
     {
         case FRX_TOKEN_TYPE_KW_USE: return item_create(FRX_ITEM_TYPE_USE_STMT, use_stmt_parse(parser));
