@@ -9,16 +9,11 @@
 
 typedef void (*StmtResolveFunc)(Parser*, void*);
 
-static void dummy_resolve(Parser* parser, void* node)
-{
-    (void)parser;
-    (void)node;
-}
-
 static const StmtResolveFunc stmt_type_to_resolve[FRX_STMT_TYPE_COUNT] = {
+    [FRX_STMT_TYPE_ERROR] = (StmtResolveFunc)NULL,
     [FRX_STMT_TYPE_EXPR_STMT] = (StmtResolveFunc)expr_stmt_resolve,
-    [FRX_STMT_TYPE_BREAK_STMT] = (StmtResolveFunc)dummy_resolve,
-    [FRX_STMT_TYPE_CONTINUE_STMT] = (StmtResolveFunc)dummy_resolve,
+    [FRX_STMT_TYPE_BREAK_STMT] = (StmtResolveFunc)NULL,
+    [FRX_STMT_TYPE_CONTINUE_STMT] = (StmtResolveFunc)NULL,
     [FRX_STMT_TYPE_RETURN_STMT] = (StmtResolveFunc)return_stmt_resolve,
     [FRX_STMT_TYPE_LET_STMT] = (StmtResolveFunc)let_stmt_resolve,
     [FRX_STMT_TYPE_IF_STMT] = (StmtResolveFunc)if_stmt_resolve
@@ -27,6 +22,7 @@ static const StmtResolveFunc stmt_type_to_resolve[FRX_STMT_TYPE_COUNT] = {
 typedef void (*StmtSemaFunc)(void*);
 
 static const StmtSemaFunc stmt_type_to_sema[FRX_STMT_TYPE_COUNT] = {
+    [FRX_STMT_TYPE_ERROR] = (StmtSemaFunc)NULL,
     [FRX_STMT_TYPE_EXPR_STMT] = (StmtSemaFunc)expr_stmt_sema,
     [FRX_STMT_TYPE_BREAK_STMT] = (StmtSemaFunc)break_stmt_sema,
     [FRX_STMT_TYPE_CONTINUE_STMT] = (StmtSemaFunc)continue_stmt_sema,
@@ -38,6 +34,7 @@ static const StmtSemaFunc stmt_type_to_sema[FRX_STMT_TYPE_COUNT] = {
 typedef void (*StmtCodegenFunc)(void*);
 
 static const StmtCodegenFunc stmt_type_to_codegen[FRX_STMT_TYPE_COUNT] = {
+    [FRX_STMT_TYPE_ERROR] = (StmtCodegenFunc)NULL,
     [FRX_STMT_TYPE_EXPR_STMT] = (StmtCodegenFunc)expr_stmt_codegen,
     [FRX_STMT_TYPE_BREAK_STMT] = (StmtCodegenFunc)break_stmt_codegen,
     [FRX_STMT_TYPE_CONTINUE_STMT] = (StmtCodegenFunc)continue_stmt_codegen,
@@ -77,7 +74,7 @@ Stmt* stmt_parse(Parser* parser)
 
             parser_recover(parser);
 
-            return NULL;
+            return stmt_create(FRX_STMT_TYPE_ERROR, NULL);
         }
     }
 }
@@ -86,19 +83,31 @@ void stmt_resolve(Parser* parser, Stmt* stmt)
 {
     FRX_ASSERT(stmt != NULL);
 
-    stmt_type_to_resolve[stmt->type](parser, stmt->node);
+    StmtResolveFunc func = stmt_type_to_resolve[stmt->type];
+    if (func != NULL)
+    {
+        func(parser, stmt->node);
+    }
 }
 
 void stmt_sema(Stmt* stmt)
 {
     FRX_ASSERT(stmt != NULL);
 
-    stmt_type_to_sema[stmt->type](stmt->node);
+    StmtSemaFunc func = stmt_type_to_sema[stmt->type];
+    if (func != NULL)
+    {
+        func(stmt->node);
+    }
 }
 
 void stmt_codegen(Stmt* stmt)
 {
     FRX_ASSERT(stmt != NULL);
 
-    stmt_type_to_codegen[stmt->type](stmt->node);
+    StmtCodegenFunc func = stmt_type_to_codegen[stmt->type];
+    if (func != NULL)
+    {
+        func(stmt->node);
+    }
 }

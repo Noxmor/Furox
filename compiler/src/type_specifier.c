@@ -8,22 +8,23 @@
 #include "codegen.h"
 #include "token.h"
 
-static TypeSpecifier* type_specifier_create(TypeKind kind)
+static TypeSpecifier* type_specifier_create(b8 error, TypeKind kind)
 {
     FRX_ASSERT(kind < FRX_TYPE_KIND_COUNT);
 
     TypeSpecifier* type = compiler_alloc(sizeof(TypeSpecifier));
 
+    type->error = error;
     type->kind = kind;
 
     return type;
 }
 
-static TypeSpecifier* type_specifier_create_unresolved(const char* name)
+static TypeSpecifier* type_specifier_create_unresolved(b8 error, const char* name)
 {
     FRX_ASSERT(name != NULL);
 
-    TypeSpecifier* type = type_specifier_create(FRX_TYPE_KIND_PRIMITIVE);
+    TypeSpecifier* type = type_specifier_create(error, FRX_TYPE_KIND_PRIMITIVE);
 
     type->name = name;
 
@@ -34,7 +35,7 @@ static TypeSpecifier* type_specifier_create_primitive(TokenType primitive)
 {
     FRX_ASSERT(token_type_is_primitive(primitive));
 
-    TypeSpecifier* type = type_specifier_create(FRX_TYPE_KIND_PRIMITIVE);
+    TypeSpecifier* type = type_specifier_create(FRX_FALSE, FRX_TYPE_KIND_PRIMITIVE);
 
     type->primitive = primitive;
 
@@ -45,7 +46,7 @@ static TypeSpecifier* type_specifier_create_pointer(TypeSpecifier* base, b8 muta
 {
     FRX_ASSERT(base != NULL);
 
-    TypeSpecifier* type = type_specifier_create(FRX_TYPE_KIND_POINTER);
+    TypeSpecifier* type = type_specifier_create(FRX_FALSE, FRX_TYPE_KIND_POINTER);
 
     type->ptr.base = base;
     type->ptr.mutable = mutable;
@@ -69,7 +70,7 @@ TypeSpecifier* type_specifier_parse(Parser* parser)
         const char* name = parser_current_token(parser)->identifier;
         parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-        type = type_specifier_create_unresolved(name);
+        type = type_specifier_create_unresolved(FRX_FALSE, name);
     }
     else
     {
@@ -77,7 +78,7 @@ TypeSpecifier* type_specifier_parse(Parser* parser)
         FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_TYPE_SPECIFIER,
                                   FRX_DIAGNOSTIC_LVL_ERROR, range, token_type_to_str(parser_current_type(parser)));
 
-        return NULL;
+        return type_specifier_create_unresolved(FRX_TRUE, "");
     }
 
     while (parser_match(parser, FRX_TOKEN_TYPE_STAR) ||
@@ -98,17 +99,28 @@ void type_specifier_resolve(Parser* parser, TypeSpecifier* type)
 
     FRX_ASSERT(type != NULL);
 
+    if (type->error)
+    {
+        return;
+    }
+
     //TODO: Resolve type specifier
 }
 
 void type_specifier_sema(TypeSpecifier* type)
 {
     FRX_ASSERT(type != NULL);
+
+    if (type->error)
+    {
+        return;
+    }
 }
 
 void type_specifier_codegen(TypeSpecifier* type)
 {
     FRX_ASSERT(type != NULL);
+    FRX_ASSERT(!type->error);
 
     switch (type->kind)
     {

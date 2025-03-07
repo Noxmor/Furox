@@ -9,14 +9,9 @@
 
 typedef void (*ExprResolveFunc)(Parser*, void*);
 
-static void dummy_resolve(Parser* parser, void* node)
-{
-    (void)parser;
-    (void)node;
-}
-
 static const ExprResolveFunc expr_type_to_resolve[FRX_EXPR_TYPE_COUNT] = {
-    [FRX_EXPR_TYPE_INT_LIT] = (ExprResolveFunc)dummy_resolve,
+    [FRX_EXPR_TYPE_ERROR] = (ExprResolveFunc)NULL,
+    [FRX_EXPR_TYPE_INT_LIT] = (ExprResolveFunc)NULL,
     [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprResolveFunc)unary_expr_resolve,
     [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprResolveFunc)binary_expr_resolve,
     [FRX_EXPR_TYPE_FUNC_CALL] = (ExprResolveFunc)func_call_resolve,
@@ -26,6 +21,7 @@ static const ExprResolveFunc expr_type_to_resolve[FRX_EXPR_TYPE_COUNT] = {
 typedef void (*ExprSemaFunc)(void*);
 
 static const ExprSemaFunc expr_type_to_sema[FRX_EXPR_TYPE_COUNT] = {
+    [FRX_EXPR_TYPE_ERROR] = (ExprSemaFunc)int_literal_sema,
     [FRX_EXPR_TYPE_INT_LIT] = (ExprSemaFunc)int_literal_sema,
     [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprSemaFunc)unary_expr_sema,
     [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprSemaFunc)binary_expr_sema,
@@ -109,7 +105,7 @@ static Expr* expr_parse_primary(Parser* parser)
                                       token_type_to_str(parser_current_type(parser)));
             parser_recover(parser);
 
-            return NULL;
+            return expr_create(FRX_EXPR_TYPE_ERROR, NULL);
         }
     }
 }
@@ -226,19 +222,32 @@ void expr_resolve(Parser* parser, Expr* expr)
 {
     FRX_ASSERT(expr != NULL);
 
-    expr_type_to_resolve[expr->type](parser, expr->node);
+    ExprResolveFunc func = expr_type_to_resolve[expr->type];
+    if (func != NULL)
+    {
+        func(parser, expr->node);
+    }
 }
 
 void expr_sema(Expr* expr)
 {
     FRX_ASSERT(expr != NULL);
 
-    expr_type_to_sema[expr->type](expr->node);
+    ExprSemaFunc func = expr_type_to_sema[expr->type];
+    if (func != NULL)
+    {
+        func(expr->node);
+    }
 }
 
 void expr_codegen(Expr* expr)
 {
     FRX_ASSERT(expr != NULL);
+    FRX_ASSERT(expr->type != FRX_EXPR_TYPE_ERROR);
 
-    expr_type_to_codegen[expr->type](expr->node);
+    ExprCodegenFunc func = expr_type_to_codegen[expr->type];
+    if (func != NULL)
+    {
+        func(expr->node);
+    }
 }

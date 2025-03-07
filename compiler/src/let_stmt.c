@@ -8,12 +8,13 @@
 #include "type_inference.h"
 #include "codegen.h"
 
-static LetStmt* let_stmt_create(const char* name, TypeSpecifier* type, Expr* value)
+static LetStmt* let_stmt_create(b8 error, const char* name, TypeSpecifier* type, Expr* value)
 {
     FRX_ASSERT(name != NULL);
 
     LetStmt* let_stmt = compiler_alloc(sizeof(LetStmt));
 
+    let_stmt->error = error;
     let_stmt->name = name;
     let_stmt->type = type;
     let_stmt->value = value;
@@ -23,25 +24,17 @@ static LetStmt* let_stmt_create(const char* name, TypeSpecifier* type, Expr* val
 
 LetStmt* let_stmt_parse(Parser* parser)
 {
-    if (parser_eat(parser, FRX_TOKEN_TYPE_KW_LET))
-    {
-        return NULL;
-    }
+    b8 error = FRX_FALSE;
+    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_LET);
 
     const char* name = parser_current_token(parser)->identifier;
-    if (parser_eat(parser, FRX_TOKEN_TYPE_IDENT))
-    {
-        return NULL;
-    }
+    error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
     TypeSpecifier* type = NULL;
 
     if (parser_match(parser, FRX_TOKEN_TYPE_COLON))
     {
-        if (parser_eat(parser, FRX_TOKEN_TYPE_COLON))
-        {
-            return NULL;
-        }
+        error |= parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
         type = type_specifier_parse(parser);
     }
@@ -50,11 +43,7 @@ LetStmt* let_stmt_parse(Parser* parser)
 
     if (parser_match(parser, FRX_TOKEN_TYPE_EQ))
     {
-        if (parser_eat(parser, FRX_TOKEN_TYPE_EQ))
-        {
-            return NULL;
-        }
-
+        error |= parser_eat(parser, FRX_TOKEN_TYPE_EQ);
         value = expr_parse(parser);
     }
 
@@ -63,17 +52,19 @@ LetStmt* let_stmt_parse(Parser* parser)
         //TODO: Error: cannot have variable declaration without explicit type
     }
 
-    if (parser_eat(parser, FRX_TOKEN_TYPE_SEMI))
-    {
-        return NULL;
-    }
+    error |= parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    return let_stmt_create(name, type, value);
+    return let_stmt_create(error, name, type, value);
 }
 
 void let_stmt_resolve(Parser* parser, LetStmt* let_stmt)
 {
     FRX_ASSERT(let_stmt != NULL);
+
+    if (let_stmt->error)
+    {
+        return;
+    }
 
     if (let_stmt->type != NULL)
     {
@@ -89,6 +80,11 @@ void let_stmt_resolve(Parser* parser, LetStmt* let_stmt)
 void let_stmt_sema(LetStmt* let_stmt)
 {
     FRX_ASSERT(let_stmt != NULL);
+
+    if (let_stmt->error)
+    {
+        return;
+    }
 
     if (let_stmt->type != NULL)
     {
@@ -109,6 +105,7 @@ void let_stmt_sema(LetStmt* let_stmt)
 void let_stmt_codegen(LetStmt* let_stmt)
 {
     FRX_ASSERT(let_stmt != NULL);
+    FRX_ASSERT(!let_stmt->error);
 
     type_specifier_codegen(let_stmt->type);
     codegen_write(" %s", let_stmt->name);

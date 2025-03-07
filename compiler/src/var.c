@@ -6,10 +6,11 @@
 #include "sema.h"
 #include "codegen.h"
 
-static Var* var_create(const char* name)
+static Var* var_create(b8 error, const char* name)
 {
     Var* var = compiler_alloc(sizeof(Var));
 
+    var->error = error;
     var->id = symbol_intern(name);
     var->name = name;
 
@@ -18,19 +19,23 @@ static Var* var_create(const char* name)
 
 Var* var_parse(Parser* parser)
 {
+    b8 error = FRX_FALSE;
+
     const char* name = parser_current_token(parser)->identifier;
 
-    if (parser_eat(parser, FRX_TOKEN_TYPE_IDENT))
-    {
-        return NULL;
-    }
+    error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    return var_create(name);
+    return var_create(error, name);
 }
 
 void var_resolve(Parser* parser, Var* var)
 {
     FRX_ASSERT(var != NULL);
+
+    if (var->error)
+    {
+        return;
+    }
 
     var->symbol = parser_lookup_symbol(parser, var->id);
 }
@@ -38,11 +43,17 @@ void var_resolve(Parser* parser, Var* var)
 void var_sema(Var* var)
 {
     FRX_ASSERT(var != NULL);
+
+    if (var->error)
+    {
+        return;
+    }
 }
 
 void var_codegen(Var* var)
 {
     FRX_ASSERT(var != NULL);
+    FRX_ASSERT(!var->error);
 
     codegen_write("%s", var->name);
 }

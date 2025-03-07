@@ -10,12 +10,14 @@
 
 typedef struct IntLiteral
 {
+    b8 error;
     u64 value;
     SourceRange range;
 } IntLiteral;
 
 enum
 {
+    FRX_ITEM_TYPE_ERROR,
     FRX_ITEM_TYPE_FUNC_DEF,
     FRX_ITEM_TYPE_STRUCT_DEF,
 
@@ -26,6 +28,7 @@ typedef u8 ItemType;
 
 enum
 {
+    FRX_TYPE_KIND_ERROR,
     FRX_TYPE_KIND_UNRESOLVED,
     FRX_TYPE_KIND_PRIMITIVE,
     FRX_TYPE_KIND_ENUM,
@@ -41,6 +44,7 @@ typedef u8 TypeKind;
 
 typedef struct TypeSpecifier
 {
+    b8 error;
     TypeKind kind;
     union
     {
@@ -57,6 +61,7 @@ typedef struct TypeSpecifier
 
 typedef struct Item
 {
+    b8 error;
     ItemType type;
     void* node;
     SourceRange range;
@@ -64,12 +69,14 @@ typedef struct Item
 
 typedef struct StructField
 {
+    b8 error;
     const char* name;
     TypeSpecifier* type;
 } StructField;
 
 typedef struct StructDef
 {
+    b8 error;
     SymbolID id;
     const char* name;
     List fields;
@@ -77,30 +84,35 @@ typedef struct StructDef
 
 typedef struct TranslationUnit
 {
+    b8 error;
     List items;
     SourceRange range;
 } TranslationUnit;
 
 typedef struct Scope
 {
+    b8 error;
     List stmts;
     SourceRange range;
 } Scope;
 
 typedef struct FuncParam
 {
+    b8 error;
     const char* name;
     TypeSpecifier* type;
 } FuncParam;
 
 typedef struct FuncParams
 {
+    b8 error;
     List params;
     b8 variadic;
 } FuncParams;
 
 typedef struct FuncDef
 {
+    b8 error;
     SymbolID id;
     const char* name;
     FuncParams* params;
@@ -111,6 +123,7 @@ typedef struct FuncDef
 
 enum
 {
+    FRX_EXPR_TYPE_ERROR,
     FRX_EXPR_TYPE_INT_LIT,
     FRX_EXPR_TYPE_UNARY_EXPR,
     FRX_EXPR_TYPE_BINARY_EXPR,
@@ -124,6 +137,7 @@ typedef u8 ExprType;
 
 typedef struct Expr
 {
+    b8 error;
     ExprType type;
     void* node;
     SourceRange range;
@@ -146,6 +160,7 @@ typedef struct BinaryExpr
 
 typedef struct FuncCall
 {
+    b8 error;
     const char* name;
     SymbolID id;
     Symbol* symbol;
@@ -154,6 +169,7 @@ typedef struct FuncCall
 
 typedef struct Var
 {
+    b8 error;
     const char* name;
     SymbolID id;
     Symbol* symbol;
@@ -161,28 +177,33 @@ typedef struct Var
 
 typedef struct ExprStmt
 {
+    b8 error;
     Expr* expr;
     SourceRange range;
 } ExprStmt;
 
 typedef struct BreakStmt
 {
+    b8 error;
     SourceRange range;
 } BreakStmt;
 
 typedef struct ContinueStmt
 {
+    b8 error;
     SourceRange range;
 } ContinueStmt;
 
 typedef struct ReturnStmt
 {
+    b8 error;
     Expr* value;
     SourceRange range;
 } ReturnStmt;
 
 typedef struct IfStmt
 {
+    b8 error;
     Expr* condition;
     Scope* if_block;
     Scope* else_block;
@@ -190,6 +211,7 @@ typedef struct IfStmt
 
 enum
 {
+    FRX_STMT_TYPE_ERROR,
     FRX_STMT_TYPE_EXPR_STMT,
     FRX_STMT_TYPE_BREAK_STMT,
     FRX_STMT_TYPE_CONTINUE_STMT,
@@ -204,6 +226,7 @@ typedef u8 StmtType;
 
 typedef struct Stmt
 {
+    b8 error;
     StmtType type;
     void* node;
     SourceRange range;
@@ -211,6 +234,7 @@ typedef struct Stmt
 
 typedef struct LetStmt
 {
+    b8 error;
     const char* name;
     TypeSpecifier* type;
     Expr* value;

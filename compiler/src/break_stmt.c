@@ -7,10 +7,11 @@
 #include "source_location.h"
 #include "source_range.h"
 
-static BreakStmt* break_stmt_create(SourceRange range)
+static BreakStmt* break_stmt_create(b8 error, SourceRange range)
 {
     BreakStmt* break_stmt = compiler_alloc(sizeof(BreakStmt));
 
+    break_stmt->error = error;
     break_stmt->range = range;
 
     return break_stmt;
@@ -18,26 +19,21 @@ static BreakStmt* break_stmt_create(SourceRange range)
 
 BreakStmt* break_stmt_parse(Parser* parser)
 {
+    b8 error = FRX_FALSE;
     SourceLocation start = parser_current_location(parser);
 
-    if (parser_eat(parser, FRX_TOKEN_TYPE_KW_BREAK))
-    {
-        return NULL;
-    }
+    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_BREAK);
 
     SourceLocation end = parser_current_location(parser);
 
-    if (parser_eat(parser, FRX_TOKEN_TYPE_SEMI))
-    {
-        return NULL;
-    }
+    error |= parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
     SourceRange range = {
         .start = start,
         .end = end
     };
 
-    return break_stmt_create(range);
+    return break_stmt_create(error, range);
 }
 
 void break_stmt_sema(BreakStmt* break_stmt)
@@ -48,6 +44,7 @@ void break_stmt_sema(BreakStmt* break_stmt)
 void break_stmt_codegen(BreakStmt* break_stmt)
 {
     FRX_ASSERT(break_stmt != NULL);
+    FRX_ASSERT(!break_stmt->error);
 
     codegen_write("break;\n");
 }

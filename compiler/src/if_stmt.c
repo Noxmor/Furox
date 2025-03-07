@@ -6,10 +6,11 @@
 #include "sema.h"
 #include "codegen.h"
 
-static IfStmt* if_stmt_create(Expr* condition, Scope* if_block, Scope* else_block)
+static IfStmt* if_stmt_create(b8 error, Expr* condition, Scope* if_block, Scope* else_block)
 {
     IfStmt* if_stmt = compiler_alloc(sizeof(IfStmt));
 
+    if_stmt->error = error;
     if_stmt->condition = condition;
     if_stmt->if_block = if_block;
     if_stmt->else_block = else_block;
@@ -19,10 +20,9 @@ static IfStmt* if_stmt_create(Expr* condition, Scope* if_block, Scope* else_bloc
 
 IfStmt* if_stmt_parse(Parser* parser)
 {
-    if (parser_eat(parser, FRX_TOKEN_TYPE_KW_IF))
-    {
-        return NULL;
-    }
+    b8 error = FRX_FALSE;
+
+    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_IF);
 
     Expr* condition = expr_parse(parser);
     Scope* if_block = scope_parse(parser);
@@ -30,7 +30,7 @@ IfStmt* if_stmt_parse(Parser* parser)
 
     if (parser_match(parser, FRX_TOKEN_TYPE_KW_ELSE))
     {
-        parser_eat(parser, FRX_TOKEN_TYPE_KW_ELSE);
+        error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_ELSE);
 
         if (parser_match(parser, FRX_TOKEN_TYPE_KW_IF))
         {
@@ -42,12 +42,17 @@ IfStmt* if_stmt_parse(Parser* parser)
         }
     }
 
-    return if_stmt_create(condition, if_block, else_block);
+    return if_stmt_create(error, condition, if_block, else_block);
 }
 
 void if_stmt_resolve(Parser* parser, IfStmt* if_stmt)
 {
     FRX_ASSERT(if_stmt != NULL);
+
+    if (if_stmt->error)
+    {
+        return;
+    }
 
     if (if_stmt->condition != NULL)
     {
@@ -69,6 +74,11 @@ void if_stmt_sema(IfStmt* if_stmt)
 {
     FRX_ASSERT(if_stmt != NULL);
 
+    if (if_stmt->error)
+    {
+        return;
+    }
+
     if (if_stmt->condition != NULL)
     {
         expr_sema(if_stmt->condition);
@@ -88,6 +98,7 @@ void if_stmt_sema(IfStmt* if_stmt)
 void if_stmt_codegen(IfStmt* if_stmt)
 {
     FRX_ASSERT(if_stmt != NULL);
+    FRX_ASSERT(!if_stmt->error);
 
     codegen_write("if (");
     expr_codegen(if_stmt->condition);

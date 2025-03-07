@@ -6,10 +6,11 @@
 #include "sema.h"
 #include "codegen.h"
 
-static ReturnStmt* return_stmt_create(Expr* value)
+static ReturnStmt* return_stmt_create(b8 error, Expr* value)
 {
     ReturnStmt* return_stmt = compiler_alloc(sizeof(ReturnStmt));
 
+    return_stmt->error = error;
     return_stmt->value = value;
 
     return return_stmt;
@@ -17,10 +18,9 @@ static ReturnStmt* return_stmt_create(Expr* value)
 
 ReturnStmt* return_stmt_parse(Parser* parser)
 {
-    if (parser_eat(parser, FRX_TOKEN_TYPE_KW_RETURN))
-    {
-        return NULL;
-    }
+    b8 error = FRX_FALSE;
+
+    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_RETURN);
 
     Expr* value = NULL;
 
@@ -29,17 +29,19 @@ ReturnStmt* return_stmt_parse(Parser* parser)
         value = expr_parse(parser);
     }
 
-    if (parser_eat(parser, FRX_TOKEN_TYPE_SEMI))
-    {
-        return NULL;
-    }
+    error |= parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    return return_stmt_create(value);
+    return return_stmt_create(error, value);
 }
 
 void return_stmt_resolve(Parser* parser, ReturnStmt* return_stmt)
 {
     FRX_ASSERT(return_stmt != NULL);
+
+    if (return_stmt->error)
+    {
+        return;
+    }
 
     if (return_stmt->value != NULL)
     {
@@ -51,6 +53,11 @@ void return_stmt_sema(ReturnStmt* return_stmt)
 {
     FRX_ASSERT(return_stmt != NULL);
 
+    if (return_stmt->error)
+    {
+        return;
+    }
+
     if (return_stmt->value != NULL)
     {
         expr_sema(return_stmt->value);
@@ -60,6 +67,7 @@ void return_stmt_sema(ReturnStmt* return_stmt)
 void return_stmt_codegen(ReturnStmt* return_stmt)
 {
     FRX_ASSERT(return_stmt != NULL);
+    FRX_ASSERT(!return_stmt->error);
 
     codegen_write("return");
 

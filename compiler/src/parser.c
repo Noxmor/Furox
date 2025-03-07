@@ -79,7 +79,9 @@ b8 parser_match(Parser* parser, TokenType type)
 {
     FRX_ASSERT(parser != NULL);
 
-    return parser_current_token(parser)->type == type;
+    TokenType current_type = parser_current_type(parser);
+
+    return current_type == type || current_type == FRX_TOKEN_TYPE_EOF;
 }
 
 b8 parser_eat(Parser* parser, TokenType type)

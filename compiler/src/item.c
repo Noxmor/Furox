@@ -11,6 +11,7 @@
 typedef void (*ItemResolveFunc)(Parser*, void*);
 
 static const ItemResolveFunc item_type_to_resolve[FRX_ITEM_TYPE_COUNT] = {
+    [FRX_ITEM_TYPE_ERROR] = (ItemResolveFunc)NULL,
     [FRX_ITEM_TYPE_FUNC_DEF] = (ItemResolveFunc)func_def_resolve,
     [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemResolveFunc)struct_def_resolve,
 };
@@ -18,6 +19,7 @@ static const ItemResolveFunc item_type_to_resolve[FRX_ITEM_TYPE_COUNT] = {
 typedef void (*ItemSemaFunc)(void*);
 
 static const ItemSemaFunc item_type_to_sema[FRX_ITEM_TYPE_COUNT] = {
+    [FRX_ITEM_TYPE_ERROR] = (ItemSemaFunc)NULL,
     [FRX_ITEM_TYPE_FUNC_DEF] = (ItemSemaFunc)func_def_sema,
     [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemSemaFunc)struct_def_sema,
 };
@@ -25,6 +27,7 @@ static const ItemSemaFunc item_type_to_sema[FRX_ITEM_TYPE_COUNT] = {
 typedef void (*ItemCodegenFunc)(void*);
 
 static const ItemSemaFunc item_type_to_codegen[FRX_ITEM_TYPE_COUNT] = {
+    [FRX_ITEM_TYPE_ERROR] = (ItemCodegenFunc)NULL,
     [FRX_ITEM_TYPE_FUNC_DEF] = (ItemCodegenFunc)func_def_codegen,
     [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemCodegenFunc)struct_def_codegen,
 };
@@ -55,7 +58,7 @@ Item* item_parse(Parser* parser)
                                       token_type_to_str(parser_current_type(parser)));
             parser_recover(parser);
 
-            return NULL;
+            return item_create(FRX_ITEM_TYPE_ERROR, NULL);
         }
     }
 }
@@ -64,18 +67,32 @@ void item_resolve(Parser* parser, Item* item)
 {
     FRX_ASSERT(item != NULL);
 
-    item_type_to_resolve[item->type](parser, item->node);
+    ItemResolveFunc func = item_type_to_resolve[item->type];
+    if (func != NULL)
+    {
+        func(parser, item->node);
+    }
 }
+
 void item_sema(Item* item)
 {
     FRX_ASSERT(item != NULL);
 
-    item_type_to_sema[item->type](item->node);
+    ItemSemaFunc func = item_type_to_sema[item->type];
+    if (func != NULL)
+    {
+        func(item->node);
+    }
 }
 
 void item_codegen(Item* item)
 {
     FRX_ASSERT(item != NULL);
+    FRX_ASSERT(item->type != FRX_ITEM_TYPE_ERROR);
 
-    item_type_to_codegen[item->type](item->node);
+    ItemCodegenFunc func = item_type_to_codegen[item->type];
+    if (func != NULL)
+    {
+        func(item->node);
+    }
 }
