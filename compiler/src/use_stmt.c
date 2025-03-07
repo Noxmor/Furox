@@ -67,6 +67,11 @@ void use_stmt_resolve(Parser* parser, UseStmt* use_stmt)
     Module* mod = parser_find_module_by_path_segments(parser, &use_stmt->path_segments);
     if (mod == NULL)
     {
+        mod = compiler_find_module_by_path_segments(&use_stmt->path_segments);
+    }
+
+    if (mod == NULL)
+    {
         usize path_segments_count = list_size(&use_stmt->path_segments);
         usize path_len = path_segments_count == 0 ? 0 : path_segments_count * 2;
         for (usize i = 0; i < path_segments_count; ++i)

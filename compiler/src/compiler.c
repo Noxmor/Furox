@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "assert.h"
 #include "log.h"
 #include "arena.h"
 #include "lexer.h"
@@ -13,6 +14,7 @@
 #include "codegen.h"
 
 static Arena* arena;
+static List projects;
 
 static void compiler_init(void)
 {
@@ -21,6 +23,7 @@ static void compiler_init(void)
     lexer_init_keyword_table();
 
     arena = arena_create();
+    list_init(&projects);
 }
 
 static void compiler_shutdown(void)
@@ -40,9 +43,6 @@ void* compiler_alloc(usize size)
 int compiler_run(int argc, char** argv)
 {
     compiler_init();
-
-    List projects;
-    list_init(&projects);
 
     for (int i = 1; i < argc; ++i)
     {
@@ -96,4 +96,21 @@ int compiler_run(int argc, char** argv)
     compiler_shutdown();
 
     return EXIT_SUCCESS;
+}
+
+Module* compiler_find_module_by_path_segments(const List* path_segments)
+{
+    FRX_ASSERT(path_segments != NULL);
+
+    for (usize i = 0; i < list_size(&projects); ++i)
+    {
+        Project* project = list_get(&projects, i);
+        Module* mod = project_find_module_by_path_segments(project, path_segments);
+        if (mod != NULL)
+        {
+            return mod;
+        }
+    }
+
+    return NULL;
 }

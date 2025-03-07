@@ -2,9 +2,13 @@
 #define FRX_COMPILER_H
 
 #include "types.h"
+#include "list.h"
+#include "module.h"
 
 int compiler_run(int argc, char** argv);
 
 void* compiler_alloc(usize size);
+
+Module* compiler_find_module_by_path_segments(const List* path_segments);
 
 #endif
