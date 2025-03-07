@@ -76,7 +76,16 @@ static Module* submodule_create(Module* parent, const char* filepath)
 
 Module* module_create(const char* project_path)
 {
-    const char* name = strrchr(project_path, '/') + 1;
+    const char* name = strrchr(project_path, '/');
+    if (name == NULL)
+    {
+        name = project_path;
+    }
+    else
+    {
+        ++name;
+    }
+
     char src_path[PATH_MAX];
     sprintf(src_path, "%s/src", project_path);
 
@@ -150,6 +159,24 @@ Symbol* module_lookup_symbol(Module* mod, Parser* parser, SymbolID id)
     FRX_ASSERT(mod != NULL);
 
     return symbol_table_lookup(&mod->symbol_table, parser, id);
+}
+
+Module* module_find_submodule_by_name(Module* mod, const char* name)
+{
+    FRX_ASSERT(mod != NULL);
+
+    FRX_ASSERT(name != NULL);
+
+    for (usize i = 0; i < list_size(&mod->submodules); ++i)
+    {
+        Module* submodule = list_get(&mod->submodules, i);
+        if (strcmp(submodule->name, name) == 0)
+        {
+            return submodule;
+        }
+    }
+
+    return NULL;
 }
 
 b8 module_failed(const Module* mod)

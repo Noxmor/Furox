@@ -112,8 +112,7 @@ Symbol* symbol_table_lookup(SymbolTable* table, Parser* origin, SymbolID id)
 
     while (entry != NULL)
     {
-        //TODO: Check the parser's use statements for a possible match
-        if (entry->id == id && entry->origin == origin)
+        if (entry->id == id && (entry->origin == origin || entry->visibility == FRX_SYMBOL_VISIBILITY_PUBLIC))
         {
             return &entry->symbol;
         }

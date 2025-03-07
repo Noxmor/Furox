@@ -18,6 +18,7 @@ typedef struct IntLiteral
 enum
 {
     FRX_ITEM_TYPE_ERROR,
+    FRX_ITEM_TYPE_USE_STMT,
     FRX_ITEM_TYPE_FUNC_DEF,
     FRX_ITEM_TYPE_STRUCT_DEF,
 
@@ -66,6 +67,14 @@ typedef struct Item
     void* node;
     SourceRange range;
 } Item;
+
+typedef struct UseStmt
+{
+    b8 error;
+    List path_segments;
+    const char* symbol_name;
+    Symbol* symbol;
+} UseStmt;
 
 typedef struct StructField
 {

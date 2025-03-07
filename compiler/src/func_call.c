@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "ast.h"
 #include "compiler.h"
+#include "diagnostics.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -58,6 +59,16 @@ void func_call_resolve(Parser* parser, FuncCall* func_call)
     }
 
     func_call->symbol = parser_lookup_symbol(parser, func_call->id);
+    if (func_call->symbol == NULL)
+    {
+        //TODO: Error: Symbol not found
+        func_call->error = FRX_TRUE;
+        SourceRange range; //TODO: Replace with correct range
+        range.start.line = 0;
+        range.start.column = 0;
+        FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_UNRESOLVED_SYMBOL, FRX_DIAGNOSTIC_LVL_ERROR, range, func_call->name);
+        parser_fail(parser);
+    }
 
     for (usize i = 0; i < list_size(&func_call->args); ++i)
     {

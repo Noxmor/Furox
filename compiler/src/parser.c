@@ -1,5 +1,7 @@
 #include "parser.h"
 
+#include <string.h>
+
 #include "compiler.h"
 #include "diagnostics.h"
 #include "lexer.h"
@@ -20,6 +22,7 @@ Parser* parser_create(Module* module, const char* filepath)
     parser->module = module;
     lexer_init(&parser->lexer, filepath);
     list_init(&parser->diagnostics);
+    list_init(&parser->use_stmts);
     parser->failed = FRX_FALSE;
     parser->recovery = FRX_FALSE;
 
@@ -115,7 +118,7 @@ void parser_recover(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    parser->failed = FRX_TRUE;
+    parser_fail(parser);
     parser->recovery = FRX_TRUE;
 
     lexer_next_token(&parser->lexer);
@@ -138,7 +141,88 @@ Symbol* parser_lookup_symbol(Parser* parser, SymbolID id)
 {
     FRX_ASSERT(parser != NULL);
 
-    return module_lookup_symbol(parser->module, parser, id);
+    Symbol* symbol = module_lookup_symbol(parser->module, parser, id);
+    if (symbol != NULL)
+    {
+        return symbol;
+    }
+
+    for (usize i = 0; i < list_size(&parser->use_stmts); ++i)
+    {
+        UseStmt* use_stmt = list_get(&parser->use_stmts, i);
+        if (symbol_intern(use_stmt->symbol_name) == id)
+        {
+            return use_stmt->symbol;
+        }
+    }
+
+    return NULL;
+}
+
+Module* parser_find_module_by_path_segments(Parser* parser, const List* path_segments)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(path_segments != NULL);
+
+    if (list_empty(path_segments))
+    {
+        return parser->module;
+    }
+
+    Module* initial_mod = parser->module;
+    Module* mod = initial_mod;
+
+    for (usize i = 0; i < list_size(path_segments); ++i)
+    {
+        Module* submodule = module_find_submodule_by_name(mod, list_get(path_segments, i));
+        if (submodule != NULL)
+        {
+            mod = submodule;
+            if (i == list_size(path_segments) - 1)
+            {
+                return mod;
+            }
+        }
+    }
+
+    mod = initial_mod;
+
+    while (mod != NULL)
+    {
+        if (strcmp(mod->name, list_get(path_segments, 0)) == 0)
+        {
+            for (usize i = 1; i < list_size(path_segments); ++i)
+            {
+                Module* submodule = module_find_submodule_by_name(mod, list_get(path_segments, i));
+                if (submodule != NULL)
+                {
+                    mod = submodule;
+                    if (i == list_size(path_segments) - 1)
+                    {
+                        return mod;
+                    }
+                }
+            }
+
+            initial_mod = initial_mod->parent;
+            mod = initial_mod;
+        }
+        else
+        {
+            initial_mod = initial_mod->parent;
+            mod = initial_mod;
+        }
+    }
+
+    return NULL;
+}
+
+void parser_fail(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    parser->failed = FRX_TRUE;
 }
 
 b8 parser_failed(const Parser* parser)

@@ -30,6 +30,8 @@ void module_insert_symbol(Module* mod, Parser* parser, SymbolVisibility visibili
 
 Symbol* module_lookup_symbol(Module* mod, Parser* parser, SymbolID id);
 
+Module* module_find_submodule_by_name(Module* mod, const char* name);
+
 b8 module_failed(const Module* mod);
 
 void module_destroy(Module* mod);

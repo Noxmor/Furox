@@ -17,7 +17,9 @@ static const DiagnosticInfo diagnostic_id_to_info[FRX_DIAGNOSTIC_ID_COUNT] = {
     [FRX_DIAGNOSTIC_ID_EXPECTED_TYPE_SPECIFIER] = { "Expected type specifier, but found '%s'", 1 },
     [FRX_DIAGNOSTIC_ID_EXPECTED_ITEM] = { "Expected item, but found '%s'", 1 },
     [FRX_DIAGNOSTIC_ID_EXPECTED_STMT] = { "Expected statement, but found '%s'", 1 },
-    [FRX_DIAGNOSTIC_ID_EXPECTED_EXPR] = { "Expected expression, but found '%s'", 1 }
+    [FRX_DIAGNOSTIC_ID_EXPECTED_EXPR] = { "Expected expression, but found '%s'", 1 },
+    [FRX_DIAGNOSTIC_ID_UNRESOLVED_SYMBOL] = { "Failed to resolve symbol '%s'", 1 },
+    [FRX_DIAGNOSTIC_ID_INVALID_MODULE_PATH] = { "Invalid module path '%s'", 1 }
 };
 
 Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl, const char* filepath,

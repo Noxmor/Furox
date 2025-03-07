@@ -5,6 +5,8 @@
 
 void translation_unit_resolve(Parser* parser, TranslationUnit* unit);
 
+void use_stmt_resolve(Parser* parser, UseStmt* use_stmt);
+
 void type_specifier_resolve(Parser* parser, TypeSpecifier* type);
 
 void item_resolve(Parser* parser, Item* item);
