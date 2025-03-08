@@ -10,7 +10,6 @@
 #include "module.h"
 #include "project.h"
 #include "string_table.h"
-#include "symbol_table.h"
 #include "codegen.h"
 
 static Arena* arena;
@@ -24,6 +23,12 @@ static void compiler_init(void)
 
     arena = arena_create();
     list_init(&projects);
+
+    ProjectSpecificiation spec;
+    spec.type = FRX_PROJECT_TYPE_LIB;
+
+    Project* stdlib = project_create(spec, "/usr/local/lib/furox/std");
+    list_add(&projects, stdlib);
 }
 
 static void compiler_shutdown(void)
