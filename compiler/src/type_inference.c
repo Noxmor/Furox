@@ -28,7 +28,7 @@ static TypeSpecifier* func_call_infer_type(FuncCall* func_call)
 {
     if (func_call->symbol != NULL)
     {
-        return ((FuncDef*)func_call->symbol->data)->return_type;
+        return ((FuncDef*)func_call->symbol)->return_type;
     }
 
     return NULL;

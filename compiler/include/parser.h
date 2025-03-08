@@ -19,6 +19,7 @@ typedef struct Parser
     Lexer lexer;
     List diagnostics;
     TranslationUnit* translation_unit;
+    SymbolTable symbol_table;
     List use_stmts;
     SymbolVisibility visibility;
     b8 failed;
@@ -50,7 +51,7 @@ void parser_recover(Parser* parser);
 void parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
                           SymbolType type, const char* name, void* data);
 
-Symbol* parser_lookup_symbol(Parser* parser, const char* name);
+void* parser_lookup_symbol(Parser* parser, SymbolType type, const char* name);
 
 Module* parser_find_module_by_path_segments(Parser* parser, const List* path_segments);
 

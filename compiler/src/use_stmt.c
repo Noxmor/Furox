@@ -19,7 +19,7 @@ static UseStmt* use_stmt_create(b8 error, const char* name)
     use_stmt->error = error;
     list_init(&use_stmt->path_segments);
     use_stmt->symbol_name = name;
-    use_stmt->symbol = NULL;
+    use_stmt->module = NULL;
 
     return use_stmt;
 }
@@ -100,7 +100,6 @@ void use_stmt_resolve(Parser* parser, UseStmt* use_stmt)
     }
     else
     {
-        use_stmt->symbol = symbol_table_lookup(&mod->symbol_table, parser,
-                                               use_stmt->symbol_name);
+        use_stmt->module = mod;
     }
 }

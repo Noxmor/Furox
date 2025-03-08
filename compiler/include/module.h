@@ -17,6 +17,7 @@ typedef struct Module
     List submodules;
     List parsers;
     SymbolTable symbol_table;
+    SymbolRegistry symbol_registry;
 } Module;
 
 Module* module_create(const char* project_path);
@@ -25,10 +26,12 @@ void module_compile(Module* mod);
 
 void module_codegen(Module* mod);
 
-void module_insert_symbol(Module* mod, Parser* parser, SymbolVisibility visibility,
+SymbolID module_insert_symbol(Module* mod, SymbolVisibility visibility,
                           SymbolType type, const char* name, void* data);
 
-Symbol* module_lookup_symbol(Module* mod, Parser* parser, const char* name);
+SymbolID module_lookup_symbol(Module* mod, SymbolType type, const char* name);
+
+void* module_get_def(Module* mod, SymbolID id);
 
 Module* module_find_submodule_by_name(Module* mod, const char* name);
 

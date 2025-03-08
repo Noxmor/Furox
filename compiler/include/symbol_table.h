@@ -2,6 +2,7 @@
 #define FRX_SYMBOL_TABLE_H
 
 #include "types.h"
+#include "symbol_registry.h"
 
 typedef struct Parser Parser;
 
@@ -26,18 +27,11 @@ enum
 
 typedef u8 SymbolType;
 
-typedef struct Symbol
-{
-    SymbolType type;
-    void* data;
-} Symbol;
-
 typedef struct SymbolTableEntry
 {
-    Parser* origin;
-    SymbolVisibility visibility;
+    SymbolType type;
     const char* name;
-    Symbol symbol;
+    SymbolID id;
     struct SymbolTableEntry* next;
 } SymbolTableEntry;
 
@@ -52,10 +46,8 @@ typedef struct SymbolTable
 
 void symbol_table_init(SymbolTable* table);
 
-void symbol_table_insert(SymbolTable* table, Parser* origin,
-                         SymbolVisibility visibility, SymbolType type,
-                         const char* name, void* data);
+void symbol_table_insert(SymbolTable* table, SymbolType type, const char* name, SymbolID id);
 
-Symbol* symbol_table_lookup(SymbolTable* table, Parser* origin, const char* name);
+SymbolID symbol_table_lookup(SymbolTable* table, SymbolType type, const char* name);
 
 #endif

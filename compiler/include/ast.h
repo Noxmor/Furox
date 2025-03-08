@@ -5,8 +5,9 @@
 #include "token.h"
 #include "list.h"
 #include "source_range.h"
-#include "symbol_table.h"
 #include "operator.h"
+
+typedef struct Module Module;
 
 typedef struct IntLiteral
 {
@@ -73,7 +74,7 @@ typedef struct UseStmt
     b8 error;
     List path_segments;
     const char* symbol_name;
-    Symbol* symbol;
+    Module* module;
 } UseStmt;
 
 typedef struct StructField
@@ -169,7 +170,7 @@ typedef struct FuncCall
 {
     b8 error;
     const char* name;
-    Symbol* symbol;
+    void* symbol;
     List args;
 } FuncCall;
 
@@ -177,7 +178,6 @@ typedef struct Var
 {
     b8 error;
     const char* name;
-    Symbol* symbol;
 } Var;
 
 typedef struct ExprStmt

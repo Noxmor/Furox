@@ -10,6 +10,7 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "symbol_table.h"
 
 static b8 str_has_suffix(const char* str, const char* suffix)
 {
@@ -26,6 +27,8 @@ static Module* submodule_create(Module* parent, const char* filepath)
     Module* mod = malloc(sizeof(Module));
 
     symbol_table_init(&mod->symbol_table);
+
+    symbol_registry_init(&mod->symbol_registry);
 
     mod->parent = parent;
     strcpy(mod->filepath, filepath);
@@ -146,19 +149,33 @@ void module_codegen(Module* mod)
     }
 }
 
-void module_insert_symbol(Module* mod, Parser* parser, SymbolVisibility visibility,
-                          SymbolType type, const char* name, void* data)
+SymbolID module_insert_symbol(Module* mod, SymbolVisibility visibility,
+                           SymbolType type, const char* name, void* data)
 {
     FRX_ASSERT(mod != NULL);
 
-    symbol_table_insert(&mod->symbol_table, parser, visibility, type, name, data);
+    SymbolID id = symbol_registry_add(&mod->symbol_registry, data);
+
+    if (visibility > FRX_SYMBOL_VISIBILITY_PRIVATE)
+    {
+        symbol_table_insert(&mod->symbol_table, type, name, id);
+    }
+
+    return id;
 }
 
-Symbol* module_lookup_symbol(Module* mod, Parser* parser, const char* name)
+SymbolID module_lookup_symbol(Module* mod, SymbolType type, const char* name)
 {
     FRX_ASSERT(mod != NULL);
 
-    return symbol_table_lookup(&mod->symbol_table, parser, name);
+    return symbol_table_lookup(&mod->symbol_table, type, name);
+}
+
+void* module_get_def(Module* mod, SymbolID id)
+{
+    FRX_ASSERT(mod != NULL);
+
+    return symbol_registry_get(&mod->symbol_registry, id);
 }
 
 Module* module_find_submodule_by_name(Module* mod, const char* name)

@@ -57,10 +57,10 @@ void func_call_resolve(Parser* parser, FuncCall* func_call)
         return;
     }
 
-    func_call->symbol = parser_lookup_symbol(parser, func_call->name);
+    func_call->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_FUNC, func_call->name);
+
     if (func_call->symbol == NULL)
     {
-        //TODO: Error: Symbol not found
         func_call->error = FRX_TRUE;
         SourceRange range; //TODO: Replace with correct range
         range.start.line = 0;

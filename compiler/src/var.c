@@ -35,8 +35,6 @@ void var_resolve(Parser* parser, Var* var)
     {
         return;
     }
-
-    var->symbol = parser_lookup_symbol(parser, var->name);
 }
 
 void var_sema(Var* var)
