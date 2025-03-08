@@ -62,8 +62,6 @@ void use_stmt_resolve(Parser* parser, UseStmt* use_stmt)
         return;
     }
 
-    SymbolID id = symbol_intern(use_stmt->symbol_name);
-
     Module* mod = parser_find_module_by_path_segments(parser, &use_stmt->path_segments);
     if (mod == NULL)
     {
@@ -102,6 +100,7 @@ void use_stmt_resolve(Parser* parser, UseStmt* use_stmt)
     }
     else
     {
-        use_stmt->symbol = symbol_table_lookup(&mod->symbol_table, parser, id);
+        use_stmt->symbol = symbol_table_lookup(&mod->symbol_table, parser,
+                                               use_stmt->symbol_name);
     }
 }

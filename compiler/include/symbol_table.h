@@ -5,10 +5,6 @@
 
 typedef struct Parser Parser;
 
-typedef u64 SymbolID;
-
-SymbolID symbol_intern(const char* name);
-
 enum
 {
     FRX_SYMBOL_VISIBILITY_PRIVATE,
@@ -40,7 +36,7 @@ typedef struct SymbolTableEntry
 {
     Parser* origin;
     SymbolVisibility visibility;
-    SymbolID id;
+    const char* name;
     Symbol symbol;
     struct SymbolTableEntry* next;
 } SymbolTableEntry;
@@ -57,9 +53,9 @@ typedef struct SymbolTable
 void symbol_table_init(SymbolTable* table);
 
 void symbol_table_insert(SymbolTable* table, Parser* origin,
-                         SymbolVisibility visibility, SymbolID id,
-                         SymbolType type, void* data);
+                         SymbolVisibility visibility, SymbolType type,
+                         const char* name, void* data);
 
-Symbol* symbol_table_lookup(SymbolTable* table, Parser* origin, SymbolID id);
+Symbol* symbol_table_lookup(SymbolTable* table, Parser* origin, const char* name);
 
 #endif

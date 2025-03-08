@@ -15,7 +15,6 @@ static FuncCall* func_call_create(b8 error, const char* name)
     FuncCall* func_call = compiler_alloc(sizeof(FuncCall));
 
     func_call->error = error;
-    func_call->id = symbol_intern(name);
     func_call->name = name;
     list_init(&func_call->args);
 
@@ -58,7 +57,7 @@ void func_call_resolve(Parser* parser, FuncCall* func_call)
         return;
     }
 
-    func_call->symbol = parser_lookup_symbol(parser, func_call->id);
+    func_call->symbol = parser_lookup_symbol(parser, func_call->name);
     if (func_call->symbol == NULL)
     {
         //TODO: Error: Symbol not found

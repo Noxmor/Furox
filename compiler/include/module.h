@@ -26,9 +26,9 @@ void module_compile(Module* mod);
 void module_codegen(Module* mod);
 
 void module_insert_symbol(Module* mod, Parser* parser, SymbolVisibility visibility,
-                          SymbolID id, SymbolType type, void* data);
+                          SymbolType type, const char* name, void* data);
 
-Symbol* module_lookup_symbol(Module* mod, Parser* parser, SymbolID id);
+Symbol* module_lookup_symbol(Module* mod, Parser* parser, const char* name);
 
 Module* module_find_submodule_by_name(Module* mod, const char* name);
 

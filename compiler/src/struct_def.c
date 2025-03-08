@@ -22,7 +22,6 @@ static StructDef* struct_def_create(b8 error, const char* name)
     StructDef* struct_def = compiler_alloc(sizeof(StructDef));
 
     struct_def->error = error;
-    struct_def->id = symbol_intern(name);
     struct_def->name = name;
     list_init(&struct_def->fields);
 
@@ -78,8 +77,8 @@ StructDef* struct_def_parse(Parser* parser)
 
     struct_def->error |= parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
-    parser_insert_symbol(parser, parser->visibility, struct_def->id,
-                         FRX_SYMBOL_TYPE_STRUCT, struct_def);
+    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_STRUCT,
+                         struct_def->name, struct_def);
     return struct_def;
 }
 

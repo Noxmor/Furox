@@ -130,18 +130,18 @@ void parser_recover(Parser* parser)
 }
 
 void parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
-                          SymbolID id, SymbolType type, void* data)
+                          SymbolType type, const char* name, void* data)
 {
     FRX_ASSERT(parser != NULL);
 
-    module_insert_symbol(parser->module, parser, visibility, id, type, data);
+    module_insert_symbol(parser->module, parser, visibility, type, name, data);
 }
 
-Symbol* parser_lookup_symbol(Parser* parser, SymbolID id)
+Symbol* parser_lookup_symbol(Parser* parser, const char* name)
 {
     FRX_ASSERT(parser != NULL);
 
-    Symbol* symbol = module_lookup_symbol(parser->module, parser, id);
+    Symbol* symbol = module_lookup_symbol(parser->module, parser, name);
     if (symbol != NULL)
     {
         return symbol;
@@ -150,7 +150,7 @@ Symbol* parser_lookup_symbol(Parser* parser, SymbolID id)
     for (usize i = 0; i < list_size(&parser->use_stmts); ++i)
     {
         UseStmt* use_stmt = list_get(&parser->use_stmts, i);
-        if (symbol_intern(use_stmt->symbol_name) == id)
+        if (use_stmt->symbol_name == name)
         {
             return use_stmt->symbol;
         }

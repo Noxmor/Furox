@@ -14,7 +14,6 @@ static FuncDef* func_def_create(b8 error, const char* name, FuncParams* params,
     FuncDef* func_def = compiler_alloc(sizeof(FuncDef));
 
     func_def->error = error;
-    func_def->id = symbol_intern(name);
     func_def->name = name;
     func_def->params = params;
     func_def->return_type = return_type;
@@ -40,7 +39,7 @@ FuncDef* func_def_parse(Parser* parser)
 
     FuncDef* func_def = func_def_create(error, name, params, return_type, scope_parse(parser));
 
-    parser_insert_symbol(parser, parser->visibility, func_def->id, FRX_SYMBOL_TYPE_FUNC, func_def);
+    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_FUNC, func_def->name, func_def);
 
     return func_def;
 }

@@ -11,7 +11,6 @@ static Var* var_create(b8 error, const char* name)
     Var* var = compiler_alloc(sizeof(Var));
 
     var->error = error;
-    var->id = symbol_intern(name);
     var->name = name;
 
     return var;
@@ -37,7 +36,7 @@ void var_resolve(Parser* parser, Var* var)
         return;
     }
 
-    var->symbol = parser_lookup_symbol(parser, var->id);
+    var->symbol = parser_lookup_symbol(parser, var->name);
 }
 
 void var_sema(Var* var)

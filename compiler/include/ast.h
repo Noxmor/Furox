@@ -86,7 +86,6 @@ typedef struct StructField
 typedef struct StructDef
 {
     b8 error;
-    SymbolID id;
     const char* name;
     List fields;
 } StructDef;
@@ -122,7 +121,6 @@ typedef struct FuncParams
 typedef struct FuncDef
 {
     b8 error;
-    SymbolID id;
     const char* name;
     FuncParams* params;
     TypeSpecifier* return_type;
@@ -171,7 +169,6 @@ typedef struct FuncCall
 {
     b8 error;
     const char* name;
-    SymbolID id;
     Symbol* symbol;
     List args;
 } FuncCall;
@@ -180,7 +177,6 @@ typedef struct Var
 {
     b8 error;
     const char* name;
-    SymbolID id;
     Symbol* symbol;
 } Var;
 

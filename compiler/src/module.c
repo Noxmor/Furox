@@ -147,18 +147,18 @@ void module_codegen(Module* mod)
 }
 
 void module_insert_symbol(Module* mod, Parser* parser, SymbolVisibility visibility,
-                          SymbolID id, SymbolType type, void* data)
+                          SymbolType type, const char* name, void* data)
 {
     FRX_ASSERT(mod != NULL);
 
-    symbol_table_insert(&mod->symbol_table, parser, visibility, id, type, data);
+    symbol_table_insert(&mod->symbol_table, parser, visibility, type, name, data);
 }
 
-Symbol* module_lookup_symbol(Module* mod, Parser* parser, SymbolID id)
+Symbol* module_lookup_symbol(Module* mod, Parser* parser, const char* name)
 {
     FRX_ASSERT(mod != NULL);
 
-    return symbol_table_lookup(&mod->symbol_table, parser, id);
+    return symbol_table_lookup(&mod->symbol_table, parser, name);
 }
 
 Module* module_find_submodule_by_name(Module* mod, const char* name)

@@ -48,9 +48,9 @@ b8 parser_eat(Parser* parser, TokenType type);
 void parser_recover(Parser* parser);
 
 void parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
-                          SymbolID id, SymbolType type, void* data);
+                          SymbolType type, const char* name, void* data);
 
-Symbol* parser_lookup_symbol(Parser* parser, SymbolID id);
+Symbol* parser_lookup_symbol(Parser* parser, const char* name);
 
 Module* parser_find_module_by_path_segments(Parser* parser, const List* path_segments);
 
