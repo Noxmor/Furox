@@ -1,0 +1,10 @@
+extern fn malloc(size: usize) -> void*;
+extern fn free(ptr: void*) -> void;
+
+pub fn malloc(size: usize) -> void* {
+    return extern::malloc(size);
+}
+
+pub fn free(ptr: void*) -> void {
+    extern::free(ptr);
+}
