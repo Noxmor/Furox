@@ -42,7 +42,8 @@ static const ExprCodegenFunc expr_type_to_codegen[FRX_EXPR_TYPE_COUNT] = {
 static Expr* expr_create(ExprType type, void* node)
 {
     FRX_ASSERT(type < FRX_EXPR_TYPE_COUNT);
-    FRX_ASSERT(node != NULL);
+    FRX_ASSERT((type == FRX_EXPR_TYPE_ERROR && node == NULL)
+               || (type != FRX_EXPR_TYPE_ERROR && node != NULL));
 
     Expr* expr = compiler_alloc(sizeof(Expr));
 

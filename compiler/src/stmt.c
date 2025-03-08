@@ -47,6 +47,9 @@ static Stmt* stmt_create(StmtType type, void* node)
 {
     FRX_ASSERT(type < FRX_STMT_TYPE_COUNT);
 
+    FRX_ASSERT((type == FRX_STMT_TYPE_ERROR && node == NULL)
+               || (type != FRX_STMT_TYPE_ERROR && node != NULL));
+
     Stmt* stmt = compiler_alloc(sizeof(Stmt));
 
     stmt->type = type;
