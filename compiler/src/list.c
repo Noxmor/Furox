@@ -45,3 +45,11 @@ void* list_get(const List* list, usize index)
 
     return list->items[index];
 }
+
+void list_destroy(List* list)
+{
+    FRX_ASSERT(list != NULL);
+
+    free(list->items);
+    list_init(list);
+}

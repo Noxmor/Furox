@@ -20,4 +20,6 @@ b8 list_empty(const List* list);
 
 void* list_get(const List* list, usize index);
 
+void list_destroy(List* list);
+
 #endif
