@@ -13,6 +13,8 @@ void struct_def_sema(StructDef* struct_def);
 
 void func_params_sema(FuncParams* params);
 
+void func_decl_sema(FuncDecl* func_decl);
+
 void func_def_sema(FuncDef* func_def);
 
 void scope_sema(Scope* scope);

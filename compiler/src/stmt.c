@@ -62,6 +62,9 @@ Stmt* stmt_parse(Parser* parser)
 {
     switch (parser_current_type(parser))
     {
+        case FRX_TOKEN_TYPE_IDENT:
+        case FRX_TOKEN_TYPE_LPAREN:
+        case FRX_TOKEN_TYPE_KW_EXTERN:
         case FRX_TOKEN_TYPE_INT_LIT: return stmt_create(FRX_STMT_TYPE_EXPR_STMT, expr_stmt_parse(parser));
         case FRX_TOKEN_TYPE_KW_BREAK: return stmt_create(FRX_STMT_TYPE_BREAK_STMT, break_stmt_parse(parser));
         case FRX_TOKEN_TYPE_KW_CONTINUE: return stmt_create(FRX_STMT_TYPE_CONTINUE_STMT, continue_stmt_parse(parser));

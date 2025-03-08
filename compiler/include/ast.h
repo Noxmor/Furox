@@ -20,6 +20,7 @@ enum
 {
     FRX_ITEM_TYPE_ERROR,
     FRX_ITEM_TYPE_USE_STMT,
+    FRX_ITEM_TYPE_FUNC_DECL,
     FRX_ITEM_TYPE_FUNC_DEF,
     FRX_ITEM_TYPE_STRUCT_DEF,
 
@@ -119,6 +120,15 @@ typedef struct FuncParams
     b8 variadic;
 } FuncParams;
 
+typedef struct FuncDecl
+{
+    b8 error;
+    const char* name;
+    FuncParams* params;
+    TypeSpecifier* return_type;
+    SourceRange range;
+} FuncDecl;
+
 typedef struct FuncDef
 {
     b8 error;
@@ -170,6 +180,7 @@ typedef struct FuncCall
 {
     b8 error;
     const char* name;
+    b8 external;
     void* symbol;
     List args;
 } FuncCall;

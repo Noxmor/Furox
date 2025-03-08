@@ -98,6 +98,20 @@ static Expr* expr_parse_primary(Parser* parser)
 
             return expr_create(FRX_EXPR_TYPE_VAR, var_parse(parser));
         }
+        case FRX_TOKEN_TYPE_KW_EXTERN:
+        {
+            parser_eat(parser, FRX_TOKEN_TYPE_KW_EXTERN);
+            if (parser_eat(parser, FRX_TOKEN_TYPE_RESOLUTION))
+            {
+                return expr_create(FRX_EXPR_TYPE_ERROR, NULL);
+            }
+
+            parser->external = FRX_TRUE;
+            FuncCall* func_call = func_call_parse(parser);
+            parser->external = FRX_FALSE;
+
+            return expr_create(FRX_EXPR_TYPE_FUNC_CALL, func_call);
+        }
         default:
         {
             FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_EXPR,

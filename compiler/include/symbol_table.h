@@ -20,6 +20,7 @@ typedef u8 SymbolVisibility;
 enum
 {
     FRX_SYMBOL_TYPE_FUNC,
+    FRX_SYMBOL_TYPE_EXTERN_FUNC,
     FRX_SYMBOL_TYPE_STRUCT,
 
     FRX_SYMBOL_TYPE_COUNT

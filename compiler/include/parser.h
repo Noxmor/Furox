@@ -22,6 +22,7 @@ typedef struct Parser
     SymbolTable symbol_table;
     List use_stmts;
     SymbolVisibility visibility;
+    b8 external;
     b8 failed;
     b8 recovery;
 } Parser;
@@ -72,6 +73,8 @@ Item* item_parse(Parser* parser);
 StructDef* struct_def_parse(Parser* parser);
 
 FuncParams* func_params_parse(Parser* parser);
+
+FuncDecl* func_decl_parse(Parser* parser);
 
 FuncDef* func_def_parse(Parser* parser);
 

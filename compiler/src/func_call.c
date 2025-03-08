@@ -8,7 +8,7 @@
 #include "codegen.h"
 #include "symbol_table.h"
 
-static FuncCall* func_call_create(b8 error, const char* name)
+static FuncCall* func_call_create(b8 error, const char* name, b8 external)
 {
     FRX_ASSERT(name != NULL);
 
@@ -16,6 +16,7 @@ static FuncCall* func_call_create(b8 error, const char* name)
 
     func_call->error = error;
     func_call->name = name;
+    func_call->external = external;
     list_init(&func_call->args);
 
     return func_call;
@@ -28,7 +29,7 @@ FuncCall* func_call_parse(Parser* parser)
     const char* name = parser_current_token(parser)->identifier;
     error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    FuncCall* func_call = func_call_create(error, name);
+    FuncCall* func_call = func_call_create(error, name, parser->external);
 
     func_call->error |= parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
 
@@ -57,7 +58,14 @@ void func_call_resolve(Parser* parser, FuncCall* func_call)
         return;
     }
 
-    func_call->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_FUNC, func_call->name);
+    if (func_call->external)
+    {
+        func_call->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_EXTERN_FUNC, func_call->name);
+    }
+    else
+    {
+        func_call->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_FUNC, func_call->name);
+    }
 
     if (func_call->symbol == NULL)
     {
@@ -97,7 +105,14 @@ void func_call_codegen(FuncCall* func_call)
     FRX_ASSERT(func_call != NULL);
     FRX_ASSERT(!func_call->error);
 
-    codegen_write("%s(", func_call->name);
+    if (func_call->external)
+    {
+        codegen_write("%s(", func_call->name);
+    }
+    else
+    {
+        codegen_write("frx_%s(", func_call->name);
+    }
 
     for (usize i = 0; i < list_size(&func_call->args); ++i)
     {

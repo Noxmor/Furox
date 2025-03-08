@@ -6,6 +6,8 @@
 #include "sema.h"
 #include "codegen.h"
 
+#include <string.h>
+
 static FuncDef* func_def_create(b8 error, const char* name, FuncParams* params,
                                 TypeSpecifier* return_type, Scope* body)
 {
@@ -100,7 +102,16 @@ void func_def_codegen(FuncDef* func_def)
     FRX_ASSERT(!func_def->error);
 
     type_specifier_codegen(func_def->return_type);
-    codegen_write(" %s", func_def->name);
+
+    if (strcmp(func_def->name, "main") == 0)
+    {
+        codegen_write(" %s", func_def->name);
+    }
+    else
+    {
+        codegen_write(" frx_%s", func_def->name);
+    }
+
     func_params_codegen(func_def->params);
     codegen_write("\n");
 
