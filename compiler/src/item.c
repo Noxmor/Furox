@@ -41,7 +41,7 @@ static const ItemSemaFunc item_type_to_codegen[FRX_ITEM_TYPE_COUNT] = {
     [FRX_ITEM_TYPE_FUNC_DEF] = (ItemCodegenFunc)func_def_codegen,
     [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemCodegenFunc)struct_def_codegen,
     [FRX_ITEM_TYPE_TRAIT] = (ItemCodegenFunc)NULL,
-    [FRX_ITEM_TYPE_IMPL_BLOCK] = (ItemCodegenFunc)NULL,
+    [FRX_ITEM_TYPE_IMPL_BLOCK] = (ItemCodegenFunc)impl_block_codegen,
 };
 
 static Item* item_create(ItemType type, void* node)

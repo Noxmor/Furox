@@ -73,3 +73,16 @@ void impl_block_sema(ImplBlock* impl_block)
         func_def_sema(func_def);
     }
 }
+
+void impl_block_codegen(ImplBlock* impl_block)
+{
+    FRX_ASSERT(impl_block != NULL);
+
+    FRX_ASSERT(!impl_block->error);
+
+    for (usize i = 0; i < list_size(&impl_block->methods); ++i)
+    {
+        FuncDef* func_def = list_get(&impl_block->methods, i);
+        func_def_codegen(func_def);
+    }
+}

@@ -17,6 +17,8 @@ void item_codegen(Item* item);
 
 void struct_def_codegen(StructDef* struct_def);
 
+void impl_block_codegen(ImplBlock* impl_block);
+
 void func_params_codegen(FuncParams* params);
 
 void func_def_codegen(FuncDef* func_def);
