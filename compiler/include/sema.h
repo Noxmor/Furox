@@ -13,6 +13,8 @@ void struct_def_sema(StructDef* struct_def);
 
 void trait_sema(Trait* trait);
 
+void impl_block_sema(ImplBlock* impl_block);
+
 void func_params_sema(FuncParams* params);
 
 void func_decl_sema(FuncDecl* func_decl);

@@ -15,6 +15,8 @@ void struct_def_resolve(Parser* parser, StructDef* struct_def);
 
 void trait_resolve(Parser* parser, Trait* trait);
 
+void impl_block_resolve(Parser* parser, ImplBlock* impl_block);
+
 void func_params_resolve(Parser* parser, FuncParams* params);
 
 void func_decl_resolve(Parser* parser, FuncDecl* func_decl);

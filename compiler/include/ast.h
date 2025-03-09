@@ -24,6 +24,7 @@ enum
     FRX_ITEM_TYPE_FUNC_DEF,
     FRX_ITEM_TYPE_STRUCT_DEF,
     FRX_ITEM_TYPE_TRAIT,
+    FRX_ITEM_TYPE_IMPL_BLOCK,
 
     FRX_ITEM_TYPE_COUNT
 };
@@ -99,6 +100,13 @@ typedef struct Trait
     const char* name;
     List methods;
 } Trait;
+
+typedef struct ImplBlock
+{
+    b8 error;
+    const char* type_name;
+    List methods;
+} ImplBlock;
 
 typedef struct TranslationUnit
 {
