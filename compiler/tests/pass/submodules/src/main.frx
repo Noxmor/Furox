@@ -1,0 +1,7 @@
+use foo::foo;
+use bar::bar;
+
+fn main() -> i32
+{
+    return foo() - bar();
+}

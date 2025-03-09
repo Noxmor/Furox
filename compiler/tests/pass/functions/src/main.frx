@@ -1,0 +1,14 @@
+fn foo() -> i32
+{
+    return 1;
+}
+
+fn bar(param: i32) -> i32
+{
+    return param;
+}
+
+fn main() -> i32
+{
+    return foo() - bar(1);
+}

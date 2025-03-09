@@ -1,0 +1,12 @@
+use foo;
+use bar;
+
+fn private_func() -> i32
+{
+    return 0;
+}
+
+fn main() -> i32
+{
+    return foo() - bar() - private_func();
+}
