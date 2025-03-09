@@ -6,6 +6,8 @@
 #include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
+#include "symbol_registry.h"
+#include "symbol_table.h"
 #include "token.h"
 
 static TypeSpecifier* type_specifier_create(b8 error, TypeKind kind)
@@ -24,7 +26,7 @@ static TypeSpecifier* type_specifier_create_unresolved(b8 error, const char* nam
 {
     FRX_ASSERT(name != NULL);
 
-    TypeSpecifier* type = type_specifier_create(error, FRX_TYPE_KIND_PRIMITIVE);
+    TypeSpecifier* type = type_specifier_create(error, FRX_TYPE_KIND_UNRESOLVED);
 
     type->name = name;
 
@@ -104,7 +106,26 @@ void type_specifier_resolve(Parser* parser, TypeSpecifier* type)
         return;
     }
 
-    //TODO: Resolve type specifier
+    switch (type->kind)
+    {
+        case FRX_TYPE_KIND_UNRESOLVED:
+        {
+            void* symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_STRUCT, type->name);
+            if (symbol != NULL)
+            {
+                type->kind = FRX_TYPE_KIND_STRUCT;
+            }
+
+            break;
+        }
+        case FRX_TYPE_KIND_PRIMITIVE: break;
+        case FRX_TYPE_KIND_ENUM: break;
+        case FRX_TYPE_KIND_STRUCT: break;
+        case FRX_TYPE_KIND_UNION: break;
+        case FRX_TYPE_KIND_POINTER:
+        case FRX_TYPE_KIND_ARRAY: type_specifier_resolve(parser, type->ptr.base); break;
+        default: FRX_ASSERT(FRX_FALSE); break;
+    }
 }
 
 void type_specifier_sema(TypeSpecifier* type)
@@ -124,6 +145,7 @@ void type_specifier_codegen(TypeSpecifier* type)
 
     switch (type->kind)
     {
+        case FRX_TYPE_KIND_STRUCT: codegen_write("%s", type->name); break;
         case FRX_TYPE_KIND_PRIMITIVE:
         {
             switch (type->primitive)
