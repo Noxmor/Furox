@@ -109,7 +109,7 @@ void func_def_codegen(FuncDef* func_def)
     }
     else
     {
-        codegen_write(" frx_%s", func_def->name);
+        codegen_write(" _FRX%s%p", func_def->name, func_def);
     }
 
     func_params_codegen(func_def->params);

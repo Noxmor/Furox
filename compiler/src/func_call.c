@@ -8,6 +8,8 @@
 #include "codegen.h"
 #include "symbol_table.h"
 
+#include <string.h>
+
 static FuncCall* func_call_create(b8 error, const char* name, b8 external)
 {
     FRX_ASSERT(name != NULL);
@@ -105,13 +107,13 @@ void func_call_codegen(FuncCall* func_call)
     FRX_ASSERT(func_call != NULL);
     FRX_ASSERT(!func_call->error);
 
-    if (func_call->external)
+    if (func_call->external || strcmp(func_call->name, "main") == 0)
     {
         codegen_write("%s(", func_call->name);
     }
     else
     {
-        codegen_write("frx_%s(", func_call->name);
+        codegen_write("_FRX%s%p(", func_call->name, func_call->symbol);
     }
 
     for (usize i = 0; i < list_size(&func_call->args); ++i)
