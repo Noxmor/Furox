@@ -1,0 +1,27 @@
+use std::libc::malloc;
+use std::libc::free;
+
+struct Foo
+{
+    x: i32;
+}
+
+impl Foo
+{
+    fn new(x: i32) -> Foo*
+    {
+        let foo: Foo* = malloc(4);
+
+        return foo;
+    }
+
+    fn get_value(foo: Foo*) -> i32
+    {
+        return 0;
+    }
+}
+
+fn main() -> i32
+{
+    return 0;
+}
