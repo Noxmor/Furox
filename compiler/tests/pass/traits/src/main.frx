@@ -1,6 +1,6 @@
-trait Default
+trait Sizeable
 {
-    fn default() -> void*;
+    fn size(ptr: void*) -> usize;
 }
 
 fn main() -> i32
