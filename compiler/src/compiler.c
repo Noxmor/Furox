@@ -90,7 +90,7 @@ int compiler_run(int argc, char** argv)
 
     codegen_end();
 
-    system("gcc frx.c");
+    b8 success = system("gcc frx.c") != 0;
 
     for (usize i = 0; i < list_size(&projects); ++i)
     {
@@ -100,7 +100,7 @@ int compiler_run(int argc, char** argv)
 
     compiler_shutdown();
 
-    return EXIT_SUCCESS;
+    return success;
 }
 
 Module* compiler_find_module_by_path_segments(const List* path_segments)
