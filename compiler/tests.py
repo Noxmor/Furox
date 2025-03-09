@@ -81,9 +81,6 @@ def main():
 
     total_tests = len(valid_tests) + len(invalid_tests)
 
-    subprocess.run(["make", "clean"])
-    subprocess.run(["make"])
-
     for test in valid_tests:
         run_test(test, 0)
 
