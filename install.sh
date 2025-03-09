@@ -4,6 +4,13 @@ echo "Compiling furoxc..."
 cd compiler
 make clean
 make
+
+echo "Running tests..."
+python3 tests.py
+if [ $? -ne 0 ]; then
+    echo "Failed to install furoxc and stdlib"
+    exit 1
+fi
 cd ..
 
 echo "Installing furoxc..."
