@@ -72,6 +72,8 @@ Item* item_parse(Parser* parser);
 
 StructDef* struct_def_parse(Parser* parser);
 
+Trait* trait_parse(Parser* parser);
+
 FuncParams* func_params_parse(Parser* parser);
 
 FuncDecl* func_decl_parse(Parser* parser);

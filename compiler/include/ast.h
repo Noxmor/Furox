@@ -23,6 +23,7 @@ enum
     FRX_ITEM_TYPE_FUNC_DECL,
     FRX_ITEM_TYPE_FUNC_DEF,
     FRX_ITEM_TYPE_STRUCT_DEF,
+    FRX_ITEM_TYPE_TRAIT,
 
     FRX_ITEM_TYPE_COUNT
 };
@@ -91,6 +92,13 @@ typedef struct StructDef
     const char* name;
     List fields;
 } StructDef;
+
+typedef struct Trait
+{
+    b8 error;
+    const char* name;
+    List methods;
+} Trait;
 
 typedef struct TranslationUnit
 {

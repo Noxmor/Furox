@@ -24,7 +24,6 @@ FuncDecl* func_decl_parse(Parser* parser)
 {
     b8 error = FRX_FALSE;
 
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_EXTERN);
     error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_FN);
 
     const char* name = parser_current_token(parser)->identifier;
