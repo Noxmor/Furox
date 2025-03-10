@@ -136,10 +136,22 @@ typedef struct FuncParams
     b8 variadic;
 } FuncParams;
 
+typedef struct GenericArg
+{
+    const char* name;
+} GenericArg;
+
+typedef struct GenericArgs
+{
+    b8 error;
+    List args;
+} GenericArgs;
+
 typedef struct FuncDecl
 {
     b8 error;
     const char* name;
+    GenericArgs* generic_args;
     FuncParams* params;
     TypeSpecifier* return_type;
     SourceRange range;
@@ -149,6 +161,7 @@ typedef struct FuncDef
 {
     b8 error;
     const char* name;
+    GenericArgs* generic_args;
     FuncParams* params;
     TypeSpecifier* return_type;
     Scope* body;

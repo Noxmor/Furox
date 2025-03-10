@@ -78,6 +78,8 @@ ImplBlock* impl_block_parse(Parser* parser);
 
 FuncParams* func_params_parse(Parser* parser);
 
+GenericArgs* generic_args_parse(Parser* parser);
+
 FuncDecl* func_decl_parse(Parser* parser);
 
 FuncDef* func_def_parse(Parser* parser);
