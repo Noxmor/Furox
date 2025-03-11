@@ -80,6 +80,17 @@ typedef struct UseStmt
     Module* module;
 } UseStmt;
 
+typedef struct GenericArg
+{
+    const char* name;
+} GenericArg;
+
+typedef struct GenericArgs
+{
+    b8 error;
+    List args;
+} GenericArgs;
+
 typedef struct StructField
 {
     b8 error;
@@ -91,6 +102,7 @@ typedef struct StructDef
 {
     b8 error;
     const char* name;
+    GenericArgs* generic_args;
     List fields;
 } StructDef;
 
@@ -135,17 +147,6 @@ typedef struct FuncParams
     List params;
     b8 variadic;
 } FuncParams;
-
-typedef struct GenericArg
-{
-    const char* name;
-} GenericArg;
-
-typedef struct GenericArgs
-{
-    b8 error;
-    List args;
-} GenericArgs;
 
 typedef struct GenericInstantiation
 {
