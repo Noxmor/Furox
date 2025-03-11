@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-static FuncDef* func_def_create(b8 error, const char* name, GenericArgs* generic_args,
+static FuncDef* func_def_create(b8 error, const char* name, GenericParams* generic_params,
                                 FuncParams* params, TypeSpecifier* return_type,
                                 Scope* body)
 {
@@ -19,7 +19,7 @@ static FuncDef* func_def_create(b8 error, const char* name, GenericArgs* generic
 
     func_def->error = error;
     func_def->name = name;
-    func_def->generic_args = generic_args;
+    func_def->generic_params = generic_params;
     list_init(&func_def->generic_instantiations);
     func_def->params = params;
     func_def->return_type = return_type;
@@ -37,10 +37,10 @@ FuncDef* func_def_parse(Parser* parser)
     const char* name = parser_current_token(parser)->identifier;
     error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    GenericArgs* generic_args = NULL;
+    GenericParams* generic_params = NULL;
     if (parser_match(parser, FRX_TOKEN_TYPE_LT))
     {
-        generic_args = generic_args_parse(parser);
+        generic_params = generic_params_parse(parser);
     }
 
     FuncParams* params = func_params_parse(parser);
@@ -49,7 +49,7 @@ FuncDef* func_def_parse(Parser* parser)
 
     TypeSpecifier* return_type = type_specifier_parse(parser);
 
-    FuncDef* func_def = func_def_create(error, name, generic_args, params,
+    FuncDef* func_def = func_def_create(error, name, generic_params, params,
                                         return_type, scope_parse(parser));
 
     parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_FUNC, func_def->name, func_def);
@@ -146,7 +146,7 @@ void func_def_codegen(FuncDef* func_def)
             scope_codegen(func_def->body);
         }
     }
-    else if (func_def->generic_args == NULL)
+    else if (func_def->generic_params == NULL)
     {
         type_specifier_codegen(func_def->return_type);
 

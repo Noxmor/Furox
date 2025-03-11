@@ -26,10 +26,10 @@ static FuncCall* func_call_create(b8 error, const char* name, b8 external)
     return func_call;
 }
 
-static GenericInstantiation* generic_args_instantiate(GenericArgs* generic_args,
+static GenericInstantiation* generic_params_instantiate(GenericParams* generic_params,
                                                       FuncParams* params, List* args)
 {
-    FRX_ASSERT(generic_args != NULL);
+    FRX_ASSERT(generic_params != NULL);
 
     FRX_ASSERT(params != NULL);
 
@@ -46,18 +46,18 @@ static GenericInstantiation* generic_args_instantiate(GenericArgs* generic_args,
             continue;
         }
 
-        b8 is_generic_arg = FRX_FALSE;
-        for (usize j = 0; j < list_size(&generic_args->args); ++j)
+        b8 is_generic_param = FRX_FALSE;
+        for (usize j = 0; j < list_size(&generic_params->params); ++j)
         {
-            GenericArg* generic_arg = list_get(&generic_args->args, j);
-            if (generic_arg->name == param->type->name)
+            GenericParam* generic_param = list_get(&generic_params->params, j);
+            if (generic_param->name == param->type->name)
             {
-                is_generic_arg = FRX_TRUE;
+                is_generic_param = FRX_TRUE;
                 break;
             }
         }
 
-        if (!is_generic_arg)
+        if (!is_generic_param)
         {
             continue;
         }
@@ -133,9 +133,9 @@ void func_call_resolve(Parser* parser, FuncCall* func_call)
     else
     {
         FuncDef* func_def = func_call->symbol;
-        if (func_def->generic_args != NULL)
+        if (func_def->generic_params != NULL)
         {
-            GenericInstantiation* instantiation = generic_args_instantiate(func_def->generic_args, func_def->params, &func_call->args);
+            GenericInstantiation* instantiation = generic_params_instantiate(func_def->generic_params, func_def->params, &func_call->args);
             list_add(&func_def->generic_instantiations, instantiation);
             func_call->instantiation = instantiation;
         }

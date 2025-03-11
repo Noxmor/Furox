@@ -5,7 +5,7 @@
 #include "resolution.h"
 #include "sema.h"
 
-static FuncDecl* func_decl_create(b8 error, const char* name, GenericArgs* generic_args,
+static FuncDecl* func_decl_create(b8 error, const char* name, GenericParams* generic_params,
                                   FuncParams* params, TypeSpecifier* return_type)
 {
     FRX_ASSERT(name != NULL);
@@ -14,7 +14,7 @@ static FuncDecl* func_decl_create(b8 error, const char* name, GenericArgs* gener
 
     func_decl->error = error;
     func_decl->name = name;
-    func_decl->generic_args = generic_args;
+    func_decl->generic_params = generic_params;
     func_decl->params = params;
     func_decl->return_type = return_type;
 
@@ -30,10 +30,10 @@ FuncDecl* func_decl_parse(Parser* parser)
     const char* name = parser_current_token(parser)->identifier;
     error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    GenericArgs* generic_args = NULL;
+    GenericParams* generic_params = NULL;
     if (parser_match(parser, FRX_TOKEN_TYPE_LT))
     {
-        generic_args = generic_args_parse(parser);
+        generic_params = generic_params_parse(parser);
     }
 
     FuncParams* params = func_params_parse(parser);
@@ -44,7 +44,7 @@ FuncDecl* func_decl_parse(Parser* parser)
 
     error |= parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    FuncDecl* func_decl = func_decl_create(error, name, generic_args, params, return_type);
+    FuncDecl* func_decl = func_decl_create(error, name, generic_params, params, return_type);
 
     parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_EXTERN_FUNC, func_decl->name, func_decl);
 

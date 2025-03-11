@@ -17,13 +17,13 @@ static StructField* struct_field_create(b8 error, const char* name, TypeSpecifie
     return field;
 }
 
-static StructDef* struct_def_create(b8 error, const char* name, GenericArgs* generic_args)
+static StructDef* struct_def_create(b8 error, const char* name, GenericParams* generic_params)
 {
     StructDef* struct_def = compiler_alloc(sizeof(StructDef));
 
     struct_def->error = error;
     struct_def->name = name;
-    struct_def->generic_args = generic_args;
+    struct_def->generic_params = generic_params;
     list_init(&struct_def->fields);
 
     return struct_def;
@@ -67,15 +67,15 @@ StructDef* struct_def_parse(Parser* parser)
 
     error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    GenericArgs* generic_args = NULL;
+    GenericParams* generic_params = NULL;
     if (parser_match(parser, FRX_TOKEN_TYPE_LT))
     {
-        generic_args = generic_args_parse(parser);
+        generic_params = generic_params_parse(parser);
     }
 
     error |= parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
-    StructDef* struct_def = struct_def_create(error, name, generic_args);
+    StructDef* struct_def = struct_def_create(error, name, generic_params);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
