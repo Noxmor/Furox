@@ -147,6 +147,11 @@ typedef struct GenericArgs
     List args;
 } GenericArgs;
 
+typedef struct GenericInstantiation
+{
+    List concrete_types;
+} GenericInstantiation;
+
 typedef struct FuncDecl
 {
     b8 error;
@@ -162,6 +167,7 @@ typedef struct FuncDef
     b8 error;
     const char* name;
     GenericArgs* generic_args;
+    List generic_instantiations;
     FuncParams* params;
     TypeSpecifier* return_type;
     Scope* body;
@@ -210,6 +216,7 @@ typedef struct FuncCall
     b8 error;
     const char* name;
     b8 external;
+    GenericInstantiation* instantiation;
     void* symbol;
     List args;
 } FuncCall;

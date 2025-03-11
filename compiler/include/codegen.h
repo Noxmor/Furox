@@ -21,6 +21,8 @@ void impl_block_codegen(ImplBlock* impl_block);
 
 void func_params_codegen(FuncParams* params);
 
+void func_params_instantiation_codegen(FuncParams* params, GenericInstantiation* instantiation);
+
 void func_def_codegen(FuncDef* func_def);
 
 void scope_codegen(Scope* scope);

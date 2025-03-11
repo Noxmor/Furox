@@ -175,3 +175,43 @@ void func_params_codegen(FuncParams* params)
 
     codegen_write(")");
 }
+
+void func_params_instantiation_codegen(FuncParams* params, GenericInstantiation* instantiation)
+{
+    FRX_ASSERT(params != NULL);
+    FRX_ASSERT(!params->error);
+
+    FRX_ASSERT(instantiation != NULL);
+
+    codegen_write("(");
+
+    if (!list_empty(&params->params))
+    {
+        FuncParam* param = list_get(&params->params, 0);
+        TypeSpecifier* param_type = param->type;
+        TypeSpecifier* concrete_type = list_get(&instantiation->concrete_types, 0);
+        param->type = concrete_type;
+        func_param_codegen(param);
+        param->type = param_type;
+    }
+
+    usize generic_arg_index = 1;
+
+    for (usize i = 1; i < list_size(&params->params); ++i)
+    {
+        codegen_write(", ");
+        FuncParam* param = list_get(&params->params, i);
+        TypeSpecifier* param_type = param->type;
+        TypeSpecifier* concrete_type = list_get(&instantiation->concrete_types, generic_arg_index++);
+        param->type = concrete_type;
+        func_param_codegen(param);
+        param->type = param_type;
+    }
+
+    if (params->variadic)
+    {
+        codegen_write(", ...");
+    }
+
+    codegen_write(")");
+}

@@ -7,6 +7,7 @@
 #include "sema.h"
 #include "codegen.h"
 #include "symbol_table.h"
+#include "token.h"
 
 #include <string.h>
 
@@ -19,9 +20,54 @@ static FuncCall* func_call_create(b8 error, const char* name, b8 external)
     func_call->error = error;
     func_call->name = name;
     func_call->external = external;
+    func_call->instantiation = NULL;
     list_init(&func_call->args);
 
     return func_call;
+}
+
+static GenericInstantiation* generic_args_instantiate(GenericArgs* generic_args,
+                                                      FuncParams* params, List* args)
+{
+    FRX_ASSERT(generic_args != NULL);
+
+    FRX_ASSERT(params != NULL);
+
+    FRX_ASSERT(args != NULL);
+
+    GenericInstantiation* instantiation = compiler_alloc(sizeof(GenericInstantiation));
+    list_init(&instantiation->concrete_types);
+
+    for (usize i = 0; i < list_size(&params->params); ++i)
+    {
+        FuncParam* param = list_get(&params->params, i);
+        if (param->type->kind != FRX_TYPE_KIND_UNRESOLVED)
+        {
+            continue;
+        }
+
+        b8 is_generic_arg = FRX_FALSE;
+        for (usize j = 0; j < list_size(&generic_args->args); ++j)
+        {
+            GenericArg* generic_arg = list_get(&generic_args->args, j);
+            if (generic_arg->name == param->type->name)
+            {
+                is_generic_arg = FRX_TRUE;
+                break;
+            }
+        }
+
+        if (!is_generic_arg)
+        {
+            continue;
+        }
+
+        Expr* arg = list_get(args, i);
+        TypeSpecifier* type = expr_infer_type(arg);
+        list_add(&instantiation->concrete_types, type);
+    }
+
+    return instantiation;
 }
 
 FuncCall* func_call_parse(Parser* parser)
@@ -69,6 +115,12 @@ void func_call_resolve(Parser* parser, FuncCall* func_call)
         func_call->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_FUNC, func_call->name);
     }
 
+    for (usize i = 0; i < list_size(&func_call->args); ++i)
+    {
+        Expr* arg = list_get(&func_call->args, i);
+        expr_resolve(parser, arg);
+    }
+
     if (func_call->symbol == NULL)
     {
         func_call->error = FRX_TRUE;
@@ -78,11 +130,15 @@ void func_call_resolve(Parser* parser, FuncCall* func_call)
         FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_UNRESOLVED_SYMBOL, FRX_DIAGNOSTIC_LVL_ERROR, range, func_call->name);
         parser_fail(parser);
     }
-
-    for (usize i = 0; i < list_size(&func_call->args); ++i)
+    else
     {
-        Expr* arg = list_get(&func_call->args, i);
-        expr_resolve(parser, arg);
+        FuncDef* func_def = func_call->symbol;
+        if (func_def->generic_args != NULL)
+        {
+            GenericInstantiation* instantiation = generic_args_instantiate(func_def->generic_args, func_def->params, &func_call->args);
+            list_add(&func_def->generic_instantiations, instantiation);
+            func_call->instantiation = instantiation;
+        }
     }
 }
 
@@ -113,7 +169,29 @@ void func_call_codegen(FuncCall* func_call)
     }
     else
     {
-        codegen_write("_FRX%s%p(", func_call->name, func_call->symbol);
+        codegen_write("_FRX%s", func_call->name);
+        if (func_call->instantiation != NULL)
+        {
+            GenericInstantiation* instantiation = func_call->instantiation;
+            for (usize i = 0; i < list_size(&instantiation->concrete_types); ++i)
+            {
+                TypeSpecifier* type = list_get(&instantiation->concrete_types, i);
+                if (type->kind == FRX_TYPE_KIND_PRIMITIVE)
+                {
+                    codegen_write("%s", token_type_to_str(type->primitive));
+                }
+                else if (type->kind == FRX_TYPE_KIND_STRUCT)
+                {
+                    codegen_write("%s", type->name);
+                }
+                else
+                {
+                    FRX_ASSERT(FRX_FALSE);
+                }
+            }
+        }
+
+        codegen_write("%p(", func_call->symbol);
     }
 
     for (usize i = 0; i < list_size(&func_call->args); ++i)

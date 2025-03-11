@@ -5,6 +5,7 @@
 #include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
+#include "token.h"
 
 #include <string.h>
 
@@ -19,6 +20,7 @@ static FuncDef* func_def_create(b8 error, const char* name, GenericArgs* generic
     func_def->error = error;
     func_def->name = name;
     func_def->generic_args = generic_args;
+    list_init(&func_def->generic_instantiations);
     func_def->params = params;
     func_def->return_type = return_type;
     func_def->body = body;
@@ -110,19 +112,56 @@ void func_def_codegen(FuncDef* func_def)
     FRX_ASSERT(func_def != NULL);
     FRX_ASSERT(!func_def->error);
 
-    type_specifier_codegen(func_def->return_type);
-
-    if (strcmp(func_def->name, "main") == 0)
+    if (!list_empty(&func_def->generic_instantiations))
     {
-        codegen_write(" %s", func_def->name);
+        for (usize i = 0; i < list_size(&func_def->generic_instantiations); ++i)
+        {
+            GenericInstantiation* instantiation = list_get(&func_def->generic_instantiations, i);
+
+            type_specifier_codegen(func_def->return_type);
+
+            codegen_write(" _FRX%s", func_def->name);
+            for (usize j = 0; j < list_size(&instantiation->concrete_types); ++j)
+            {
+                TypeSpecifier* type = list_get(&instantiation->concrete_types, j);
+                if (type->kind == FRX_TYPE_KIND_PRIMITIVE)
+                {
+                    codegen_write("%s", token_type_to_str(type->primitive));
+                }
+                else if (type->kind == FRX_TYPE_KIND_STRUCT)
+                {
+                    codegen_write("%s", type->name);
+                }
+                else
+                {
+                    FRX_ASSERT(FRX_FALSE);
+                }
+            }
+
+            codegen_write("%p", func_def);
+
+            func_params_instantiation_codegen(func_def->params, instantiation);
+            codegen_write("\n");
+
+            scope_codegen(func_def->body);
+        }
     }
-    else
+    else if (func_def->generic_args == NULL)
     {
-        codegen_write(" _FRX%s%p", func_def->name, func_def);
+        type_specifier_codegen(func_def->return_type);
+
+        if (strcmp(func_def->name, "main") == 0)
+        {
+            codegen_write(" %s", func_def->name);
+        }
+        else
+        {
+            codegen_write(" _FRX%s%p", func_def->name, func_def);
+        }
+
+        func_params_codegen(func_def->params);
+        codegen_write("\n");
+
+        scope_codegen(func_def->body);
     }
-
-    func_params_codegen(func_def->params);
-    codegen_write("\n");
-
-    scope_codegen(func_def->body);
 }
