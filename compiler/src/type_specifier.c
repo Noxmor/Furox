@@ -10,6 +10,39 @@
 #include "symbol_table.h"
 #include "token.h"
 
+static GenericArgs* generic_args_create(void)
+{
+    GenericArgs* generic_args = compiler_alloc(sizeof(GenericArgs));
+
+    generic_args->error = FRX_FALSE;
+    list_init(&generic_args->args);
+
+    return generic_args;
+}
+
+static GenericArgs* generic_args_parse(Parser* parser)
+{
+    GenericArgs* generic_args = generic_args_create();
+
+    generic_args->error |= parser_eat(parser, FRX_TOKEN_TYPE_LT);
+
+    while (!parser_match(parser, FRX_TOKEN_TYPE_GT))
+    {
+        if (!list_empty(&generic_args->args))
+        {
+            generic_args->error |= parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
+        }
+
+        GenericArg* arg = compiler_alloc(sizeof(GenericArg));
+        arg->type = type_specifier_parse(parser);
+        list_add(&generic_args->args, arg);
+    }
+
+    generic_args->error |= parser_eat(parser, FRX_TOKEN_TYPE_GT);
+
+    return generic_args;
+}
+
 static TypeSpecifier* type_specifier_create(b8 error, TypeKind kind)
 {
     FRX_ASSERT(kind < FRX_TYPE_KIND_COUNT);
@@ -18,6 +51,7 @@ static TypeSpecifier* type_specifier_create(b8 error, TypeKind kind)
 
     type->error = error;
     type->kind = kind;
+    type->generic_args = NULL;
 
     return type;
 }
@@ -81,6 +115,11 @@ TypeSpecifier* type_specifier_parse(Parser* parser)
                                   FRX_DIAGNOSTIC_LVL_ERROR, range, token_type_to_str(parser_current_type(parser)));
 
         return type_specifier_create_unresolved(FRX_TRUE, "");
+    }
+
+    if (parser_match(parser, FRX_TOKEN_TYPE_LT))
+    {
+        type->generic_args = generic_args_parse(parser);
     }
 
     while (parser_match(parser, FRX_TOKEN_TYPE_STAR) ||

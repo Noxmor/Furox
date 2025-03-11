@@ -47,10 +47,24 @@ enum
 
 typedef u8 TypeKind;
 
+typedef struct TypeSpecifier TypeSpecifier;
+
+typedef struct GenericArg
+{
+    TypeSpecifier* type;
+} GenericArg;
+
+typedef struct GenericArgs
+{
+    b8 error;
+    List args;
+} GenericArgs;
+
 typedef struct TypeSpecifier
 {
     b8 error;
     TypeKind kind;
+    GenericArgs* generic_args;
     union
     {
         const char* name;
