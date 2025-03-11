@@ -1,9 +1,11 @@
-fn generic_func<T>() -> i32
+fn generic_func<T>(x: T) -> i32
 {
     return 0;
 }
 
 fn main() -> i32
 {
-    return 0;
+    let x: i32 = 1;
+
+    return generic_func(x);
 }
