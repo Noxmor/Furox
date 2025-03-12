@@ -51,7 +51,7 @@ static Item* item_create(ItemType type, void* node)
     FRX_ASSERT((type == FRX_ITEM_TYPE_ERROR && node == NULL)
                || (type != FRX_ITEM_TYPE_ERROR && node != NULL));
 
-    Item* item = compiler_alloc(sizeof(Item));
+    Item* item = compiler_alloc_ast(sizeof(Item));
 
     item->type = type;
     item->node = node;

@@ -45,7 +45,7 @@ static Expr* expr_create(ExprType type, void* node)
     FRX_ASSERT((type == FRX_EXPR_TYPE_ERROR && node == NULL)
                || (type != FRX_EXPR_TYPE_ERROR && node != NULL));
 
-    Expr* expr = compiler_alloc(sizeof(Expr));
+    Expr* expr = compiler_alloc_ast(sizeof(Expr));
 
     expr->type = type;
     expr->node = node;
@@ -59,7 +59,7 @@ static UnaryExpr* unary_expr_create(TokenType type, Operator operator, Expr* ope
 
     FRX_ASSERT(operator < FRX_OPERATOR_COUNT);
 
-    UnaryExpr* unary_expr = compiler_alloc(sizeof(UnaryExpr));
+    UnaryExpr* unary_expr = compiler_alloc_ast(sizeof(UnaryExpr));
 
     unary_expr->type = type;
     unary_expr->operator = operator;
@@ -74,7 +74,7 @@ static BinaryExpr* binary_expr_create(TokenType type, Operator operator, Expr* l
 
     FRX_ASSERT(operator < FRX_OPERATOR_COUNT);
 
-    BinaryExpr* binary_expr = compiler_alloc(sizeof(BinaryExpr));
+    BinaryExpr* binary_expr = compiler_alloc_ast(sizeof(BinaryExpr));
 
     binary_expr->type = type;
     binary_expr->operator = operator;

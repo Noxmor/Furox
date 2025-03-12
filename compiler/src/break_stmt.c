@@ -9,7 +9,7 @@
 
 static BreakStmt* break_stmt_create(b8 error, SourceRange range)
 {
-    BreakStmt* break_stmt = compiler_alloc(sizeof(BreakStmt));
+    BreakStmt* break_stmt = compiler_alloc_ast(sizeof(BreakStmt));
 
     break_stmt->error = error;
     break_stmt->range = range;

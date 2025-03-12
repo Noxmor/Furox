@@ -10,7 +10,7 @@ static ImplBlock* impl_block_create(b8 error, const char* type_name)
 {
     FRX_ASSERT(type_name != NULL);
 
-    ImplBlock* impl_block = compiler_alloc(sizeof(Trait));
+    ImplBlock* impl_block = compiler_alloc_ast(sizeof(Trait));
 
     impl_block->error = error;
     impl_block->type_name = type_name;

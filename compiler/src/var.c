@@ -8,7 +8,7 @@
 
 static Var* var_create(b8 error, const char* name)
 {
-    Var* var = compiler_alloc(sizeof(Var));
+    Var* var = compiler_alloc_ast(sizeof(Var));
 
     var->error = error;
     var->name = name;

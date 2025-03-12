@@ -8,7 +8,7 @@
 
 static ExprStmt* expr_stmt_create(b8 error, Expr* expr)
 {
-    ExprStmt* expr_stmt = compiler_alloc(sizeof(ExprStmt));
+    ExprStmt* expr_stmt = compiler_alloc_ast(sizeof(ExprStmt));
 
     expr_stmt->error = error;
     expr_stmt->expr = expr;

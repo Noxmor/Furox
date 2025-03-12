@@ -12,7 +12,7 @@
 
 static GenericArgs* generic_args_create(void)
 {
-    GenericArgs* generic_args = compiler_alloc(sizeof(GenericArgs));
+    GenericArgs* generic_args = compiler_alloc_ast(sizeof(GenericArgs));
 
     generic_args->error = FRX_FALSE;
     list_init(&generic_args->args);
@@ -33,7 +33,7 @@ static GenericArgs* generic_args_parse(Parser* parser)
             generic_args->error |= parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
         }
 
-        GenericArg* arg = compiler_alloc(sizeof(GenericArg));
+        GenericArg* arg = compiler_alloc_ast(sizeof(GenericArg));
         arg->type = type_specifier_parse(parser);
         list_add(&generic_args->args, arg);
     }
@@ -47,7 +47,7 @@ static TypeSpecifier* type_specifier_create(b8 error, TypeKind kind)
 {
     FRX_ASSERT(kind < FRX_TYPE_KIND_COUNT);
 
-    TypeSpecifier* type = compiler_alloc(sizeof(TypeSpecifier));
+    TypeSpecifier* type = compiler_alloc_ast(sizeof(TypeSpecifier));
 
     type->error = error;
     type->kind = kind;

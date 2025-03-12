@@ -8,7 +8,7 @@
 
 static TranslationUnit* translation_unit_create(void)
 {
-    TranslationUnit* unit = compiler_alloc(sizeof(TranslationUnit));
+    TranslationUnit* unit = compiler_alloc_ast(sizeof(TranslationUnit));
 
     list_init(&unit->items);
 

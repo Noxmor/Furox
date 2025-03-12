@@ -6,7 +6,7 @@
 
 static IntLiteral* int_literal_create(b8 error, u64 value)
 {
-    IntLiteral* literal = compiler_alloc(sizeof(IntLiteral));
+    IntLiteral* literal = compiler_alloc_ast(sizeof(IntLiteral));
 
     literal->error = error;
     literal->value = value;

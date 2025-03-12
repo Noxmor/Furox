@@ -8,7 +8,7 @@
 
 static StructField* struct_field_create(b8 error, const char* name, TypeSpecifier* type)
 {
-    StructField* field = compiler_alloc(sizeof(StructField));
+    StructField* field = compiler_alloc_ast(sizeof(StructField));
 
     field->error = error;
     field->name = name;
@@ -19,7 +19,7 @@ static StructField* struct_field_create(b8 error, const char* name, TypeSpecifie
 
 static StructDef* struct_def_create(b8 error, const char* name, GenericParams* generic_params)
 {
-    StructDef* struct_def = compiler_alloc(sizeof(StructDef));
+    StructDef* struct_def = compiler_alloc_ast(sizeof(StructDef));
 
     struct_def->error = error;
     struct_def->name = name;

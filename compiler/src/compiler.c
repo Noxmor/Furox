@@ -13,6 +13,8 @@
 #include "codegen.h"
 
 static Arena* arena;
+static Arena* ast_arena;
+
 static List projects;
 
 static void compiler_init(void)
@@ -22,6 +24,7 @@ static void compiler_init(void)
     lexer_init_keyword_table();
 
     arena = arena_create();
+    ast_arena = arena_create();
     list_init(&projects);
 
     ProjectSpecificiation spec;
@@ -38,11 +41,17 @@ static void compiler_shutdown(void)
     string_table_shutdown();
 
     arena_destroy(arena);
+    arena_destroy(ast_arena);
 }
 
 void* compiler_alloc(usize size)
 {
     return arena_alloc(arena, size);
+}
+
+void* compiler_alloc_ast(usize size)
+{
+    return arena_alloc(ast_arena, size);
 }
 
 int compiler_run(int argc, char** argv)

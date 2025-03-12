@@ -8,7 +8,7 @@
 
 static ReturnStmt* return_stmt_create(b8 error, Expr* value)
 {
-    ReturnStmt* return_stmt = compiler_alloc(sizeof(ReturnStmt));
+    ReturnStmt* return_stmt = compiler_alloc_ast(sizeof(ReturnStmt));
 
     return_stmt->error = error;
     return_stmt->value = value;

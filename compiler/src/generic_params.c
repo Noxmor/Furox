@@ -8,7 +8,7 @@
 
 static GenericParams* generic_params_create(void)
 {
-    GenericParams* params = compiler_alloc(sizeof(GenericParams));
+    GenericParams* params = compiler_alloc_ast(sizeof(GenericParams));
 
     params->error = FRX_FALSE;
     list_init(&params->params);
@@ -32,7 +32,7 @@ GenericParams* generic_params_parse(Parser* parser)
         const char* name = parser_current_token(parser)->identifier;
         generic_params->error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-        GenericParam* param = compiler_alloc(sizeof(GenericParam));
+        GenericParam* param = compiler_alloc_ast(sizeof(GenericParam));
         param->name = name;
 
         list_add(&generic_params->params, param);

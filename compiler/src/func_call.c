@@ -15,7 +15,7 @@ static FuncCall* func_call_create(b8 error, const char* name, b8 external)
 {
     FRX_ASSERT(name != NULL);
 
-    FuncCall* func_call = compiler_alloc(sizeof(FuncCall));
+    FuncCall* func_call = compiler_alloc_ast(sizeof(FuncCall));
 
     func_call->error = error;
     func_call->name = name;

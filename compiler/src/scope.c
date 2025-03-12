@@ -8,7 +8,7 @@
 
 static Scope* scope_create(b8 error)
 {
-    Scope* scope = compiler_alloc(sizeof(Scope));
+    Scope* scope = compiler_alloc_ast(sizeof(Scope));
 
     scope->error = error;
     list_init(&scope->stmts);

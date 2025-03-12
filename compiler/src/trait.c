@@ -10,7 +10,7 @@ static Trait* trait_create(b8 error, const char* name)
 {
     FRX_ASSERT(name != NULL);
 
-    Trait* trait = compiler_alloc(sizeof(Trait));
+    Trait* trait = compiler_alloc_ast(sizeof(Trait));
 
     trait->error = error;
     trait->name = name;

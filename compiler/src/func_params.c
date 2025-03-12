@@ -12,7 +12,7 @@ static FuncParam* func_param_create(b8 error, const char* name, TypeSpecifier* t
     FRX_ASSERT(name != NULL);
     FRX_ASSERT(type != NULL);
 
-    FuncParam* param = compiler_alloc(sizeof(FuncParam));
+    FuncParam* param = compiler_alloc_ast(sizeof(FuncParam));
 
     param->error = error;
     param->name = name;
@@ -76,7 +76,7 @@ static void func_param_codegen(FuncParam* param)
 
 static FuncParams* func_params_create(b8 error)
 {
-    FuncParams* params = compiler_alloc(sizeof(FuncParams));
+    FuncParams* params = compiler_alloc_ast(sizeof(FuncParams));
 
     params->error = error;
     list_init(&params->params);

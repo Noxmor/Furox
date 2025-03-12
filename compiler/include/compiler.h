@@ -9,6 +9,8 @@ int compiler_run(int argc, char** argv);
 
 void* compiler_alloc(usize size);
 
+void* compiler_alloc_ast(usize size);
+
 Module* compiler_find_module_by_path_segments(const List* path_segments);
 
 #endif

@@ -15,7 +15,7 @@ static FuncDef* func_def_create(b8 error, const char* name, GenericParams* gener
 {
     FRX_ASSERT(name != NULL);
 
-    FuncDef* func_def = compiler_alloc(sizeof(FuncDef));
+    FuncDef* func_def = compiler_alloc_ast(sizeof(FuncDef));
 
     func_def->error = error;
     func_def->name = name;

@@ -14,7 +14,7 @@
 
 static UseStmt* use_stmt_create(b8 error, const char* name)
 {
-    UseStmt* use_stmt = compiler_alloc(sizeof(UseStmt));
+    UseStmt* use_stmt = compiler_alloc_ast(sizeof(UseStmt));
 
     use_stmt->error = error;
     list_init(&use_stmt->path_segments);

@@ -12,7 +12,7 @@ static LetStmt* let_stmt_create(b8 error, const char* name, TypeSpecifier* type,
 {
     FRX_ASSERT(name != NULL);
 
-    LetStmt* let_stmt = compiler_alloc(sizeof(LetStmt));
+    LetStmt* let_stmt = compiler_alloc_ast(sizeof(LetStmt));
 
     let_stmt->error = error;
     let_stmt->name = name;

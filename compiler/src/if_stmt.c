@@ -8,7 +8,7 @@
 
 static IfStmt* if_stmt_create(b8 error, Expr* condition, Scope* if_block, Scope* else_block)
 {
-    IfStmt* if_stmt = compiler_alloc(sizeof(IfStmt));
+    IfStmt* if_stmt = compiler_alloc_ast(sizeof(IfStmt));
 
     if_stmt->error = error;
     if_stmt->condition = condition;

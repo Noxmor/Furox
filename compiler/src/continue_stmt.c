@@ -7,7 +7,7 @@
 
 static ContinueStmt* continue_stmt_create(b8 error)
 {
-    ContinueStmt* continue_stmt = compiler_alloc(sizeof(ContinueStmt));
+    ContinueStmt* continue_stmt = compiler_alloc_ast(sizeof(ContinueStmt));
 
     continue_stmt->error = error;
 
