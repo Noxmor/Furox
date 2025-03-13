@@ -14,6 +14,7 @@
 
 static Arena* arena;
 static Arena* ast_arena;
+static Arena* mir_arena;
 
 static List projects;
 
@@ -25,6 +26,7 @@ static void compiler_init(void)
 
     arena = arena_create();
     ast_arena = arena_create();
+    mir_arena = arena_create();
     list_init(&projects);
 
     ProjectSpecificiation spec;
@@ -42,6 +44,7 @@ static void compiler_shutdown(void)
 
     arena_destroy(arena);
     arena_destroy(ast_arena);
+    arena_destroy(mir_arena);
 }
 
 void* compiler_alloc(usize size)
@@ -54,9 +57,63 @@ void* compiler_alloc_ast(usize size)
     return arena_alloc(ast_arena, size);
 }
 
+void* compiler_alloc_mir(usize size)
+{
+    return arena_alloc(mir_arena, size);
+}
+
+#include "mir.h"
+
+static b8 compiler_mir_test(void)
+{
+    MIRContext* ctx = mir_context_create();
+
+    MIRFuncContext* func = mir_func_context_create("main", mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32));
+
+    MIRVariable* argc = mir_variable_create_func_param(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), "argc");
+    mir_func_context_add_param(func, argc);
+    mir_func_context_add_param(func, mir_variable_create_func_param(mir_type_create_ptr(mir_type_create_ptr(mir_type_create_primitive(FRX_MIR_TYPE_KIND_U8))), "argv"));
+
+    func->block = mir_block_create();
+    MIRVariable* call_result = mir_variable_create_temp(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), 1);
+    MIRInstruction* call_instruction = mir_instruction_create_call(call_result, "add");
+    MIRVariable* call_arg_a = argc;
+    MIRVariable* call_arg_b = argc;
+    mir_instruction_add_func_arg(call_instruction, call_arg_a);
+    mir_instruction_add_func_arg(call_instruction, call_arg_b);
+    mir_block_add_instruction(func->block, call_instruction);
+    mir_block_add_instruction(func->block, mir_instruction_create(FRX_MIR_INSTRUCTION_TYPE_RET, call_result, NULL, NULL));
+
+    MIRFuncContext* add = mir_func_context_create("add", mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32));
+
+    MIRVariable* param_a = mir_variable_create_func_param(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), "a");
+    MIRVariable* param_b = mir_variable_create_func_param(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), "b");
+    mir_func_context_add_param(add, param_a);
+    mir_func_context_add_param(add, param_b);
+
+    add->block = mir_block_create();
+    MIRVariable* result = mir_variable_create_temp(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), 1);
+    mir_block_add_instruction(add->block, mir_instruction_create(FRX_MIR_INSTRUCTION_TYPE_ADD, result, param_a, param_b));
+    mir_block_add_instruction(add->block, mir_instruction_create(FRX_MIR_INSTRUCTION_TYPE_RET, result, NULL, NULL));
+
+
+    mir_context_add_func(ctx, add);
+    mir_context_add_func(ctx, func);
+
+    mir_context_emit_c(ctx);
+
+    return system("gcc frx.c") != 0;
+}
+
 int compiler_run(int argc, char** argv)
 {
     compiler_init();
+
+    //TODO: Remove (only for testing)
+    if (argc == 2 && strcmp(argv[1], "mir") == 0)
+    {
+        return compiler_mir_test();
+    }
 
     for (int i = 1; i < argc; ++i)
     {
