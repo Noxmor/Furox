@@ -41,8 +41,4 @@ void unary_expr_resolve(Parser* parser, UnaryExpr* unary_expr);
 
 void binary_expr_resolve(Parser* parser, BinaryExpr* binary_expr);
 
-void func_call_resolve(Parser* parser, FuncCall* func_call);
-
-void var_resolve(Parser* parser, Var* var);
-
 #endif

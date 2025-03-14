@@ -14,8 +14,6 @@ static const ExprResolveFunc expr_type_to_resolve[FRX_EXPR_TYPE_COUNT] = {
     [FRX_EXPR_TYPE_INT_LIT] = (ExprResolveFunc)NULL,
     [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprResolveFunc)unary_expr_resolve,
     [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprResolveFunc)binary_expr_resolve,
-    [FRX_EXPR_TYPE_FUNC_CALL] = (ExprResolveFunc)func_call_resolve,
-    [FRX_EXPR_TYPE_VAR] = (ExprResolveFunc)var_resolve,
 };
 
 typedef void (*ExprSemaFunc)(void*);
@@ -25,8 +23,6 @@ static const ExprSemaFunc expr_type_to_sema[FRX_EXPR_TYPE_COUNT] = {
     [FRX_EXPR_TYPE_INT_LIT] = (ExprSemaFunc)int_literal_sema,
     [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprSemaFunc)unary_expr_sema,
     [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprSemaFunc)binary_expr_sema,
-    [FRX_EXPR_TYPE_FUNC_CALL] = (ExprSemaFunc)func_call_sema,
-    [FRX_EXPR_TYPE_VAR] = (ExprSemaFunc)var_sema,
 };
 
 typedef void (*ExprCodegenFunc)(void*);
@@ -35,8 +31,6 @@ static const ExprCodegenFunc expr_type_to_codegen[FRX_EXPR_TYPE_COUNT] = {
     [FRX_EXPR_TYPE_INT_LIT] = (ExprCodegenFunc)int_literal_codegen,
     [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprCodegenFunc)unary_expr_codegen,
     [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprCodegenFunc)binary_expr_codegen,
-    [FRX_EXPR_TYPE_FUNC_CALL] = (ExprCodegenFunc)func_call_codegen,
-    [FRX_EXPR_TYPE_VAR] = (ExprCodegenFunc)var_codegen,
 };
 
 static Expr* expr_create(ExprType type, void* node)
@@ -89,21 +83,8 @@ static Expr* expr_parse_primary(Parser* parser)
     switch (parser_current_type(parser))
     {
         case FRX_TOKEN_TYPE_INT_LIT: return expr_create(FRX_EXPR_TYPE_INT_LIT, int_literal_parse(parser));
-        case FRX_TOKEN_TYPE_IDENT: return expr_create(FRX_EXPR_TYPE_PATH_EXPR, path_expr_parse(parser));
         case FRX_TOKEN_TYPE_KW_EXTERN:
-        {
-            parser_eat(parser, FRX_TOKEN_TYPE_KW_EXTERN);
-            if (parser_eat(parser, FRX_TOKEN_TYPE_RESOLUTION))
-            {
-                return expr_create(FRX_EXPR_TYPE_ERROR, NULL);
-            }
-
-            parser->external = FRX_TRUE;
-            FuncCall* func_call = func_call_parse(parser);
-            parser->external = FRX_FALSE;
-
-            return expr_create(FRX_EXPR_TYPE_FUNC_CALL, func_call);
-        }
+        case FRX_TOKEN_TYPE_IDENT: return expr_create(FRX_EXPR_TYPE_PATH_EXPR, path_expr_parse(parser));
         default:
         {
             FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_EXPR,

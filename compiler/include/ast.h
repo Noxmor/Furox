@@ -195,8 +195,6 @@ enum
     FRX_EXPR_TYPE_INT_LIT,
     FRX_EXPR_TYPE_UNARY_EXPR,
     FRX_EXPR_TYPE_BINARY_EXPR,
-    FRX_EXPR_TYPE_FUNC_CALL,
-    FRX_EXPR_TYPE_VAR,
     FRX_EXPR_TYPE_PATH_EXPR,
     FRX_EXPR_TYPE_CALL_EXPR,
 
@@ -228,25 +226,10 @@ typedef struct BinaryExpr
     Expr* right;
 } BinaryExpr;
 
-typedef struct FuncCall
-{
-    b8 error;
-    const char* name;
-    b8 external;
-    GenericInstantiation* instantiation;
-    void* symbol;
-    List args;
-} FuncCall;
-
-typedef struct Var
-{
-    b8 error;
-    const char* name;
-} Var;
-
 typedef struct PathSegment
 {
     const char* name;
+    b8 external;
 } PathSegment;
 
 typedef struct PathExpr

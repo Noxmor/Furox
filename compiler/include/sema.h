@@ -45,10 +45,6 @@ void unary_expr_sema(UnaryExpr* unary_expr);
 
 void binary_expr_sema(BinaryExpr* binary_expr);
 
-void func_call_sema(FuncCall* func_call);
-
-void var_sema(Var* var);
-
 void int_literal_sema(IntLiteral* literal);
 
 #endif

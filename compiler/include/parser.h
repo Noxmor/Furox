@@ -102,10 +102,6 @@ IfStmt* if_stmt_parse(Parser* parser);
 
 Expr* expr_parse(Parser* parser);
 
-FuncCall* func_call_parse(Parser* parser);
-
-Var* var_parse(Parser* parser);
-
 PathExpr* path_expr_parse(Parser* parser);
 
 CallExpr* call_expr_parse(Parser* parser);
