@@ -94,9 +94,15 @@ typedef struct UseStmt
     Module* module;
 } UseStmt;
 
+typedef struct TraitBound
+{
+    TypeSpecifier* type;
+} TraitBound;
+
 typedef struct GenericParam
 {
     const char* name;
+    List trait_bounds;
 } GenericParam;
 
 typedef struct GenericParams
