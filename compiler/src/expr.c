@@ -91,7 +91,11 @@ static Expr* expr_parse_primary(Parser* parser)
         case FRX_TOKEN_TYPE_INT_LIT: return expr_create(FRX_EXPR_TYPE_INT_LIT, int_literal_parse(parser));
         case FRX_TOKEN_TYPE_IDENT:
         {
-            if (parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LPAREN)
+            if (parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_RESOLUTION)
+            {
+                    return expr_create(FRX_EXPR_TYPE_PATH_EXPR, path_expr_parse(parser));
+            }
+            else if (parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LPAREN)
             {
                 return expr_create(FRX_EXPR_TYPE_FUNC_CALL, func_call_parse(parser));
             }

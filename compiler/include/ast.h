@@ -197,6 +197,7 @@ enum
     FRX_EXPR_TYPE_BINARY_EXPR,
     FRX_EXPR_TYPE_FUNC_CALL,
     FRX_EXPR_TYPE_VAR,
+    FRX_EXPR_TYPE_PATH_EXPR,
 
     FRX_EXPR_TYPE_COUNT
 };
@@ -241,6 +242,16 @@ typedef struct Var
     b8 error;
     const char* name;
 } Var;
+
+typedef struct PathSegment
+{
+    const char* name;
+} PathSegment;
+
+typedef struct PathExpr
+{
+    List path_segments;
+} PathExpr;
 
 typedef struct ExprStmt
 {

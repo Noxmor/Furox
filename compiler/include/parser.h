@@ -106,6 +106,8 @@ FuncCall* func_call_parse(Parser* parser);
 
 Var* var_parse(Parser* parser);
 
+PathExpr* path_expr_parse(Parser* parser);
+
 IntLiteral* int_literal_parse(Parser* parser);
 
 #endif
