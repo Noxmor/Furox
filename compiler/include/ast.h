@@ -198,6 +198,7 @@ enum
     FRX_EXPR_TYPE_FUNC_CALL,
     FRX_EXPR_TYPE_VAR,
     FRX_EXPR_TYPE_PATH_EXPR,
+    FRX_EXPR_TYPE_CALL_EXPR,
 
     FRX_EXPR_TYPE_COUNT
 };
@@ -252,6 +253,11 @@ typedef struct PathExpr
 {
     List path_segments;
 } PathExpr;
+
+typedef struct CallExpr
+{
+    List args;
+} CallExpr;
 
 typedef struct ExprStmt
 {

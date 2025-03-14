@@ -108,6 +108,8 @@ Var* var_parse(Parser* parser);
 
 PathExpr* path_expr_parse(Parser* parser);
 
+CallExpr* call_expr_parse(Parser* parser);
+
 IntLiteral* int_literal_parse(Parser* parser);
 
 #endif

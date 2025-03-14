@@ -89,19 +89,7 @@ static Expr* expr_parse_primary(Parser* parser)
     switch (parser_current_type(parser))
     {
         case FRX_TOKEN_TYPE_INT_LIT: return expr_create(FRX_EXPR_TYPE_INT_LIT, int_literal_parse(parser));
-        case FRX_TOKEN_TYPE_IDENT:
-        {
-            if (parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_RESOLUTION)
-            {
-                    return expr_create(FRX_EXPR_TYPE_PATH_EXPR, path_expr_parse(parser));
-            }
-            else if (parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LPAREN)
-            {
-                return expr_create(FRX_EXPR_TYPE_FUNC_CALL, func_call_parse(parser));
-            }
-
-            return expr_create(FRX_EXPR_TYPE_VAR, var_parse(parser));
-        }
+        case FRX_TOKEN_TYPE_IDENT: return expr_create(FRX_EXPR_TYPE_PATH_EXPR, path_expr_parse(parser));
         case FRX_TOKEN_TYPE_KW_EXTERN:
         {
             parser_eat(parser, FRX_TOKEN_TYPE_KW_EXTERN);
@@ -198,6 +186,13 @@ static Expr* expr_parse_with_precedence(Parser* parser, Precedence min_precedenc
                 }
 
                 BinaryExpr* binary_expr = binary_expr_create(type, operator, expr, index);
+                expr = expr_create(FRX_EXPR_TYPE_BINARY_EXPR, binary_expr);
+            }
+            else if (operator == FRX_OPERATOR_CALL)
+            {
+                Expr* call_expr = expr_create(FRX_EXPR_TYPE_CALL_EXPR, call_expr_parse(parser));
+
+                BinaryExpr* binary_expr = binary_expr_create(type, operator, expr, call_expr);
                 expr = expr_create(FRX_EXPR_TYPE_BINARY_EXPR, binary_expr);
             }
             else

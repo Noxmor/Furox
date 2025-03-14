@@ -85,6 +85,7 @@ Operator token_type_to_postfix_operator(TokenType type)
         case FRX_TOKEN_TYPE_PLUS_PLUS: return FRX_OPERATOR_POST_INC;
         case FRX_TOKEN_TYPE_MINUS_MINUS: return FRX_OPERATOR_POST_DEC;
         case FRX_TOKEN_TYPE_LBRACKET: return FRX_OPERATOR_ARRAY_SUBSCRIPT;
+        case FRX_TOKEN_TYPE_LPAREN: return FRX_OPERATOR_CALL;
     }
 
     return FRX_OPERATOR_INVALID;
