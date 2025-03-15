@@ -115,10 +115,13 @@ void mir_instruction_add_func_arg(MIRInstruction* instruction, MIRVariable* arg)
     list_add(&instruction->func_args, arg);
 }
 
-MIRBlock* mir_block_create(void)
+MIRBlock* mir_block_create(const char* label)
 {
+    FRX_ASSERT(label != NULL);
+
     MIRBlock* block = compiler_alloc_mir(sizeof(MIRBlock));
 
+    block->label = label;
     list_init(&block->instructions);
     block->next = NULL;
 

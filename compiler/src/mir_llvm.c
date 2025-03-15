@@ -36,6 +36,8 @@ static void mir_emit_block(const MIRBlock* block)
 {
     FRX_ASSERT(block != NULL);
 
+    MIR_EMIT("%s:\n", block->label);
+
     //TODO: Implement
 }
 

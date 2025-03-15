@@ -79,6 +79,7 @@ typedef struct MIRInstruction
 
 typedef struct MIRBlock
 {
+    const char* label;
     List instructions;
     struct MIRBlock* next;
 } MIRBlock;
@@ -116,7 +117,7 @@ MIRInstruction* mir_instruction_create_call(MIRVariable* dest, const char* func_
 
 void mir_instruction_add_func_arg(MIRInstruction* instruction, MIRVariable* arg);
 
-MIRBlock* mir_block_create(void);
+MIRBlock* mir_block_create(const char* label);
 
 void mir_block_add_instruction(MIRBlock* block, MIRInstruction* instruction);
 

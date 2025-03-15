@@ -73,7 +73,7 @@ static b8 compiler_mir_test(void)
     mir_func_context_add_param(func, argc);
     mir_func_context_add_param(func, mir_variable_create_func_param(mir_type_create_ptr(mir_type_create_ptr(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I8))), "argv"));
 
-    func->block = mir_block_create();
+    func->block = mir_block_create("entry");
     MIRVariable* call_result = mir_variable_create_temp(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), 1);
     MIRInstruction* call_instruction = mir_instruction_create_call(call_result, "add");
     MIRVariable* call_arg_a = argc;
@@ -90,7 +90,7 @@ static b8 compiler_mir_test(void)
     mir_func_context_add_param(add, param_a);
     mir_func_context_add_param(add, param_b);
 
-    add->block = mir_block_create();
+    add->block = mir_block_create("entry");
     MIRVariable* result = mir_variable_create_temp(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), 1);
     mir_block_add_instruction(add->block, mir_instruction_create(FRX_MIR_INSTRUCTION_TYPE_ADD, result, param_a, param_b));
     mir_block_add_instruction(add->block, mir_instruction_create(FRX_MIR_INSTRUCTION_TYPE_RET, result, NULL, NULL));
