@@ -110,7 +110,11 @@ MIRInstruction* mir_instruction_create_call(MIRVariable* dest, const char* func_
 
 void mir_instruction_add_func_arg(MIRInstruction* instruction, MIRVariable* arg)
 {
+    FRX_ASSERT(instruction != NULL);
+
     FRX_ASSERT(instruction->type == FRX_MIR_INSTRUCTION_TYPE_CALL);
+
+    FRX_ASSERT(arg != NULL);
 
     list_add(&instruction->func_args, arg);
 }

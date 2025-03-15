@@ -32,11 +32,119 @@ static void mir_emit_type(const MIRType* type)
     }
 }
 
+static void mir_emit_variable(const MIRVariable* variable)
+{
+    FRX_ASSERT(variable != NULL);
+
+    MIR_EMIT("%%");
+    if (variable->id != FRX_MIR_VAR_ID_NONE)
+    {
+        MIR_EMIT("t%zu", variable->id);
+    }
+    else
+    {
+        MIR_EMIT("%s", variable->name);
+    }
+}
+
 static void mir_emit_instruction(const MIRInstruction* instruction)
 {
     FRX_ASSERT(instruction != NULL);
 
-    //TODO: Implement
+    switch (instruction->type)
+    {
+        case FRX_MIR_INSTRUCTION_TYPE_ADD:
+        {
+            mir_emit_variable(instruction->dest);
+            MIR_EMIT(" = add i32 ");
+            mir_emit_variable(instruction->left);
+            MIR_EMIT(", ");
+            mir_emit_variable(instruction->right);
+
+            break;
+        }
+        case FRX_MIR_INSTRUCTION_TYPE_SUB:
+        {
+            mir_emit_variable(instruction->dest);
+            MIR_EMIT(" = sub i32 ");
+            mir_emit_variable(instruction->left);
+            MIR_EMIT(", ");
+            mir_emit_variable(instruction->right);
+
+            break;
+        }
+        case FRX_MIR_INSTRUCTION_TYPE_MUL:
+        {
+            mir_emit_variable(instruction->dest);
+            MIR_EMIT(" = mul i32 ");
+            mir_emit_variable(instruction->left);
+            MIR_EMIT(", ");
+            mir_emit_variable(instruction->right);
+
+            break;
+        }
+        case FRX_MIR_INSTRUCTION_TYPE_DIV:
+        {
+            mir_emit_variable(instruction->dest);
+            MIR_EMIT(" = sdiv i32 ");
+            mir_emit_variable(instruction->left);
+            MIR_EMIT(", ");
+            mir_emit_variable(instruction->right);
+
+            break;
+        }
+        case FRX_MIR_INSTRUCTION_TYPE_MOD:
+        {
+            mir_emit_variable(instruction->dest);
+            MIR_EMIT(" = srem i32 ");
+            mir_emit_variable(instruction->left);
+            MIR_EMIT(", ");
+            mir_emit_variable(instruction->right);
+
+            break;
+        }
+        case FRX_MIR_INSTRUCTION_TYPE_RET:
+        {
+            MIR_EMIT("ret ");
+            if (instruction->dest != NULL)
+            {
+                mir_emit_type(instruction->dest->type);
+                MIR_EMIT(" ");
+                mir_emit_variable(instruction->dest);
+            }
+            else
+            {
+                MIR_EMIT(" void");
+            }
+
+            break;
+        }
+        case FRX_MIR_INSTRUCTION_TYPE_CALL:
+        {
+            mir_emit_variable(instruction->dest);
+            MIR_EMIT(" = call i32 @%s(", instruction->func_name);
+
+            for (usize i = 0; i < list_size(&instruction->func_args); ++i)
+            {
+                MIRVariable* arg = list_get(&instruction->func_args, i);
+                mir_emit_type(arg->type);
+                MIR_EMIT(" ");
+                mir_emit_variable(arg);
+
+                if (i + 1 < list_size(&instruction->func_args))
+                {
+                    MIR_EMIT(", ");
+                }
+            }
+
+            MIR_EMIT(")");
+
+            break;
+        }
+        default: FRX_ASSERT(FRX_FALSE);
+    }
+
+    MIR_EMIT("\n");
 }
 
 static void mir_emit_block(const MIRBlock* block)
