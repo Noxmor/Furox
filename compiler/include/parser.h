@@ -72,6 +72,8 @@ Item* item_parse(Parser* parser);
 
 StructDef* struct_def_parse(Parser* parser);
 
+EnumDef* enum_def_parse(Parser* parser);
+
 Trait* trait_parse(Parser* parser);
 
 ImplBlock* impl_block_parse(Parser* parser);

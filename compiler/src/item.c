@@ -58,6 +58,7 @@ Item* item_parse(Parser* parser)
         {
             case FRX_TOKEN_TYPE_KW_FN: return item_create(FRX_ITEM_TYPE_FUNC_DEF, func_def_parse(parser));
             case FRX_TOKEN_TYPE_KW_STRUCT: return item_create(FRX_ITEM_TYPE_STRUCT_DEF, struct_def_parse(parser));
+            case FRX_TOKEN_TYPE_KW_ENUM: return item_create(FRX_ITEM_TYPE_ENUM_DEF, enum_def_parse(parser));
             case FRX_TOKEN_TYPE_KW_TRAIT: return item_create(FRX_ITEM_TYPE_TRAIT, trait_parse(parser));
             default:
             {
@@ -80,6 +81,7 @@ Item* item_parse(Parser* parser)
         case FRX_TOKEN_TYPE_KW_EXTERN: parser_eat(parser, FRX_TOKEN_TYPE_KW_EXTERN); return item_create(FRX_ITEM_TYPE_FUNC_DECL, func_decl_parse(parser));
         case FRX_TOKEN_TYPE_KW_FN: return item_create(FRX_ITEM_TYPE_FUNC_DEF, func_def_parse(parser));
         case FRX_TOKEN_TYPE_KW_STRUCT: return item_create(FRX_ITEM_TYPE_STRUCT_DEF, struct_def_parse(parser));
+        case FRX_TOKEN_TYPE_KW_ENUM: return item_create(FRX_ITEM_TYPE_ENUM_DEF, enum_def_parse(parser));
         case FRX_TOKEN_TYPE_KW_TRAIT: return item_create(FRX_ITEM_TYPE_TRAIT, trait_parse(parser));
         case FRX_TOKEN_TYPE_KW_IMPL: return item_create(FRX_ITEM_TYPE_IMPL_BLOCK, impl_block_parse(parser));
         default:

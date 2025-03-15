@@ -23,6 +23,7 @@ enum
     FRX_ITEM_TYPE_FUNC_DECL,
     FRX_ITEM_TYPE_FUNC_DEF,
     FRX_ITEM_TYPE_STRUCT_DEF,
+    FRX_ITEM_TYPE_ENUM_DEF,
     FRX_ITEM_TYPE_TRAIT,
     FRX_ITEM_TYPE_IMPL_BLOCK,
 
@@ -125,6 +126,18 @@ typedef struct StructDef
     GenericParams* generic_params;
     List fields;
 } StructDef;
+
+typedef struct EnumConstant
+{
+    const char* name;
+} EnumConstant;
+
+typedef struct EnumDef
+{
+    const char* name;
+    TypeSpecifier* type;
+    List constants;
+} EnumDef;
 
 typedef struct Trait
 {
