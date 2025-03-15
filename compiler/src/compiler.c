@@ -71,7 +71,7 @@ static b8 compiler_mir_test(void)
 
     MIRVariable* argc = mir_variable_create_func_param(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), "argc");
     mir_func_context_add_param(func, argc);
-    mir_func_context_add_param(func, mir_variable_create_func_param(mir_type_create_ptr(mir_type_create_ptr(mir_type_create_primitive(FRX_MIR_TYPE_KIND_U8))), "argv"));
+    mir_func_context_add_param(func, mir_variable_create_func_param(mir_type_create_ptr(mir_type_create_ptr(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I8))), "argv"));
 
     func->block = mir_block_create();
     MIRVariable* call_result = mir_variable_create_temp(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), 1);
@@ -99,9 +99,9 @@ static b8 compiler_mir_test(void)
     mir_context_add_func(ctx, add);
     mir_context_add_func(ctx, func);
 
-    mir_context_emit_c(ctx);
+    mir_context_emit_llvm(ctx);
 
-    return system("gcc frx.c") != 0;
+    return system("clang frx.ll") != 0;
 }
 
 int compiler_run(int argc, char** argv)

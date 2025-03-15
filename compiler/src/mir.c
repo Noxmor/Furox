@@ -210,10 +210,10 @@ static void mir_type_emit_c(const MIRType* type)
         case FRX_MIR_TYPE_KIND_I16: FRX_MIR_EMIT("i16"); break;
         case FRX_MIR_TYPE_KIND_I32: FRX_MIR_EMIT("i32"); break;
         case FRX_MIR_TYPE_KIND_I64: FRX_MIR_EMIT("i64"); break;
-        case FRX_MIR_TYPE_KIND_U8: FRX_MIR_EMIT("u8"); break;
-        case FRX_MIR_TYPE_KIND_U16: FRX_MIR_EMIT("u16"); break;
-        case FRX_MIR_TYPE_KIND_U32: FRX_MIR_EMIT("u32"); break;
-        case FRX_MIR_TYPE_KIND_U64: FRX_MIR_EMIT("u64"); break;
+        case FRX_MIR_TYPE_KIND_U8: FRX_MIR_EMIT("i8"); break;
+        case FRX_MIR_TYPE_KIND_U16: FRX_MIR_EMIT("i16"); break;
+        case FRX_MIR_TYPE_KIND_U32: FRX_MIR_EMIT("i32"); break;
+        case FRX_MIR_TYPE_KIND_U64: FRX_MIR_EMIT("i64"); break;
         case FRX_MIR_TYPE_KIND_F32: FRX_MIR_EMIT("f32"); break;
         case FRX_MIR_TYPE_KIND_F64: FRX_MIR_EMIT("f64"); break;
         case FRX_MIR_TYPE_KIND_PTR: mir_type_emit_c(type->ptr.base); FRX_MIR_EMIT("*"); break;

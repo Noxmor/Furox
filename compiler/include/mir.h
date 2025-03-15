@@ -130,4 +130,6 @@ void mir_context_add_func(MIRContext* ctx, MIRFuncContext* func);
 
 void mir_context_emit_c(const MIRContext* ctx);
 
+void mir_context_emit_llvm(const MIRContext* ctx);
+
 #endif
