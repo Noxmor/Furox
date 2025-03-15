@@ -156,6 +156,7 @@ static void mir_emit_block(const MIRBlock* block)
     for (usize i = 0; i < list_size(&block->instructions); ++i)
     {
         MIRInstruction* instruction = list_get(&block->instructions, i);
+        MIR_EMIT("    ");
         mir_emit_instruction(instruction);
     }
 }
