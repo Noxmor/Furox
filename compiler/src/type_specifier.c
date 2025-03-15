@@ -5,7 +5,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 #include "symbol_registry.h"
 #include "symbol_table.h"
 #include "token.h"
@@ -174,49 +173,5 @@ void type_specifier_sema(TypeSpecifier* type)
     if (type->error)
     {
         return;
-    }
-}
-
-void type_specifier_codegen(TypeSpecifier* type)
-{
-    FRX_ASSERT(type != NULL);
-    FRX_ASSERT(!type->error);
-
-    switch (type->kind)
-    {
-        case FRX_TYPE_KIND_STRUCT: codegen_write("%s", type->name); break;
-        case FRX_TYPE_KIND_PRIMITIVE:
-        {
-            switch (type->primitive)
-            {
-                case FRX_TOKEN_TYPE_KW_VOID:
-                case FRX_TOKEN_TYPE_KW_CHAR:
-                {
-                    codegen_write("%s", token_type_to_str(type->primitive));
-                    break;
-                }
-                case FRX_TOKEN_TYPE_KW_B8: codegen_write("uint8_t"); break;
-                case FRX_TOKEN_TYPE_KW_B16: codegen_write("uint16_t"); break;
-                case FRX_TOKEN_TYPE_KW_B32: codegen_write("uint32_t"); break;
-                case FRX_TOKEN_TYPE_KW_B64: codegen_write("uint64_t"); break;
-                case FRX_TOKEN_TYPE_KW_U8: codegen_write("uint8_t"); break;
-                case FRX_TOKEN_TYPE_KW_U16: codegen_write("uint16_t"); break;
-                case FRX_TOKEN_TYPE_KW_U32: codegen_write("uint32_t"); break;
-                case FRX_TOKEN_TYPE_KW_U64: codegen_write("uint64_t"); break;
-                case FRX_TOKEN_TYPE_KW_USIZE: codegen_write("size_t"); break;
-                case FRX_TOKEN_TYPE_KW_I8: codegen_write("int8_t"); break;
-                case FRX_TOKEN_TYPE_KW_I16: codegen_write("int16_t"); break;
-                case FRX_TOKEN_TYPE_KW_I32: codegen_write("int32_t"); break;
-                case FRX_TOKEN_TYPE_KW_I64: codegen_write("int_64_t"); break;
-                case FRX_TOKEN_TYPE_KW_ISIZE: codegen_write("isize_t"); break;
-                case FRX_TOKEN_TYPE_KW_F32: codegen_write("float"); break;
-                case FRX_TOKEN_TYPE_KW_F64: codegen_write("double"); break;
-                default: FRX_ASSERT(FRX_FALSE);
-            }
-
-            break;
-        }
-        case FRX_TYPE_KIND_POINTER: type_specifier_codegen(type->ptr.base); codegen_write("*"); break;
-        default: FRX_ASSERT(FRX_FALSE); break;
     }
 }

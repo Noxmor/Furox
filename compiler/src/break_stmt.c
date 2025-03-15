@@ -3,7 +3,6 @@
 #include "compiler.h"
 #include "parser.h"
 #include "sema.h"
-#include "codegen.h"
 #include "source_location.h"
 #include "source_range.h"
 
@@ -39,12 +38,4 @@ BreakStmt* break_stmt_parse(Parser* parser)
 void break_stmt_sema(BreakStmt* break_stmt)
 {
     FRX_ASSERT(break_stmt != NULL);
-}
-
-void break_stmt_codegen(BreakStmt* break_stmt)
-{
-    FRX_ASSERT(break_stmt != NULL);
-    FRX_ASSERT(!break_stmt->error);
-
-    codegen_write("break;\n");
 }

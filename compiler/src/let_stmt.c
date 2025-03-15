@@ -6,7 +6,6 @@
 #include "resolution.h"
 #include "sema.h"
 #include "type_inference.h"
-#include "codegen.h"
 
 static LetStmt* let_stmt_create(b8 error, const char* name, TypeSpecifier* type, Expr* value)
 {
@@ -100,21 +99,4 @@ void let_stmt_sema(LetStmt* let_stmt)
             let_stmt->type = expr_infer_type(let_stmt->value);
         }
     }
-}
-
-void let_stmt_codegen(LetStmt* let_stmt)
-{
-    FRX_ASSERT(let_stmt != NULL);
-    FRX_ASSERT(!let_stmt->error);
-
-    type_specifier_codegen(let_stmt->type);
-    codegen_write(" %s", let_stmt->name);
-
-    if (let_stmt->value != NULL)
-    {
-        codegen_write(" = ");
-        expr_codegen(let_stmt->value);
-    }
-
-    codegen_write(";\n");
 }

@@ -4,7 +4,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 static IfStmt* if_stmt_create(b8 error, Expr* condition, Scope* if_block, Scope* else_block)
 {
@@ -92,22 +91,5 @@ void if_stmt_sema(IfStmt* if_stmt)
     if (if_stmt->else_block != NULL)
     {
         scope_sema(if_stmt->else_block);
-    }
-}
-
-void if_stmt_codegen(IfStmt* if_stmt)
-{
-    FRX_ASSERT(if_stmt != NULL);
-    FRX_ASSERT(!if_stmt->error);
-
-    codegen_write("if (");
-    expr_codegen(if_stmt->condition);
-    codegen_write(")\n");
-    scope_codegen(if_stmt->if_block);
-
-    if (if_stmt->else_block != NULL)
-    {
-        codegen_write("else\n");
-        scope_codegen(if_stmt->else_block);
     }
 }

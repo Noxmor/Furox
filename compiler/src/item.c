@@ -5,7 +5,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 #include "token.h"
 
 typedef void (*ItemResolveFunc)(Parser*, void*);
@@ -30,18 +29,6 @@ static const ItemSemaFunc item_type_to_sema[FRX_ITEM_TYPE_COUNT] = {
     [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemSemaFunc)struct_def_sema,
     [FRX_ITEM_TYPE_TRAIT] = (ItemSemaFunc)trait_sema,
     [FRX_ITEM_TYPE_IMPL_BLOCK] = (ItemSemaFunc)impl_block_sema,
-};
-
-typedef void (*ItemCodegenFunc)(void*);
-
-static const ItemSemaFunc item_type_to_codegen[FRX_ITEM_TYPE_COUNT] = {
-    [FRX_ITEM_TYPE_ERROR] = (ItemCodegenFunc)NULL,
-    [FRX_ITEM_TYPE_USE_STMT] = (ItemCodegenFunc)NULL,
-    [FRX_ITEM_TYPE_FUNC_DECL] = (ItemCodegenFunc)NULL,
-    [FRX_ITEM_TYPE_FUNC_DEF] = (ItemCodegenFunc)func_def_codegen,
-    [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemCodegenFunc)struct_def_codegen,
-    [FRX_ITEM_TYPE_TRAIT] = (ItemCodegenFunc)NULL,
-    [FRX_ITEM_TYPE_IMPL_BLOCK] = (ItemCodegenFunc)impl_block_codegen,
 };
 
 static Item* item_create(ItemType type, void* node)
@@ -124,18 +111,6 @@ void item_sema(Item* item)
     FRX_ASSERT(item != NULL);
 
     ItemSemaFunc func = item_type_to_sema[item->type];
-    if (func != NULL)
-    {
-        func(item->node);
-    }
-}
-
-void item_codegen(Item* item)
-{
-    FRX_ASSERT(item != NULL);
-    FRX_ASSERT(item->type != FRX_ITEM_TYPE_ERROR);
-
-    ItemCodegenFunc func = item_type_to_codegen[item->type];
     if (func != NULL)
     {
         func(item->node);

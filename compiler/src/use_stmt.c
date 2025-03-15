@@ -6,7 +6,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 #include "string_table.h"
 #include "symbol_table.h"
 

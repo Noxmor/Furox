@@ -5,7 +5,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 static FuncParam* func_param_create(b8 error, const char* name, TypeSpecifier* type)
 {
@@ -63,15 +62,6 @@ static void func_param_sema(FuncParam* param)
     {
         type_specifier_sema(param->type);
     }
-}
-
-static void func_param_codegen(FuncParam* param)
-{
-    FRX_ASSERT(param != NULL);
-    FRX_ASSERT(!param->error);
-
-    type_specifier_codegen(param->type);
-    codegen_write(" %s", param->name);
 }
 
 static FuncParams* func_params_create(b8 error)
@@ -146,72 +136,4 @@ void func_params_sema(FuncParams* params)
         FuncParam* param = list_get(&params->params, i);
         func_param_sema(param);
     }
-}
-
-void func_params_codegen(FuncParams* params)
-{
-    FRX_ASSERT(params != NULL);
-    FRX_ASSERT(!params->error);
-
-    codegen_write("(");
-
-    if (!list_empty(&params->params))
-    {
-        FuncParam* param = list_get(&params->params, 0);
-        func_param_codegen(param);
-    }
-
-    for (usize i = 1; i < list_size(&params->params); ++i)
-    {
-        codegen_write(", ");
-        FuncParam* param = list_get(&params->params, i);
-        func_param_codegen(param);
-    }
-
-    if (params->variadic)
-    {
-        codegen_write(", ...");
-    }
-
-    codegen_write(")");
-}
-
-void func_params_instantiation_codegen(FuncParams* params, GenericInstantiation* instantiation)
-{
-    FRX_ASSERT(params != NULL);
-    FRX_ASSERT(!params->error);
-
-    FRX_ASSERT(instantiation != NULL);
-
-    codegen_write("(");
-
-    if (!list_empty(&params->params))
-    {
-        FuncParam* param = list_get(&params->params, 0);
-        TypeSpecifier* param_type = param->type;
-        TypeSpecifier* concrete_type = list_get(&instantiation->concrete_types, 0);
-        param->type = concrete_type;
-        func_param_codegen(param);
-        param->type = param_type;
-    }
-
-    usize generic_arg_index = 1;
-
-    for (usize i = 1; i < list_size(&params->params); ++i)
-    {
-        codegen_write(", ");
-        FuncParam* param = list_get(&params->params, i);
-        TypeSpecifier* param_type = param->type;
-        TypeSpecifier* concrete_type = list_get(&instantiation->concrete_types, generic_arg_index++);
-        param->type = concrete_type;
-        func_param_codegen(param);
-        param->type = param_type;
-    }
-
-    if (params->variadic)
-    {
-        codegen_write(", ...");
-    }
-
-    codegen_write(")");
 }

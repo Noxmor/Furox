@@ -3,7 +3,6 @@
 #include "compiler.h"
 #include "parser.h"
 #include "sema.h"
-#include "codegen.h"
 
 static ContinueStmt* continue_stmt_create(b8 error)
 {
@@ -27,12 +26,4 @@ ContinueStmt* continue_stmt_parse(Parser* parser)
 void continue_stmt_sema(ContinueStmt* continue_stmt)
 {
     FRX_ASSERT(continue_stmt != NULL);
-}
-
-void continue_stmt_codegen(ContinueStmt* continue_stmt)
-{
-    FRX_ASSERT(continue_stmt != NULL);
-    FRX_ASSERT(!continue_stmt->error);
-
-    codegen_write("continue;\n");
 }

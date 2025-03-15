@@ -10,7 +10,6 @@
 #include "module.h"
 #include "project.h"
 #include "string_table.h"
-#include "codegen.h"
 
 static Arena* arena;
 static Arena* ast_arena;
@@ -145,19 +144,6 @@ int compiler_run(int argc, char** argv)
         }
     }
 
-    codegen_begin("frx.c");
-
-    for (usize i = 0; i < list_size(&projects); ++i)
-    {
-        Project* project = list_get(&projects, i);
-        Module* mod = project->root_module;
-        module_codegen(mod);
-    }
-
-    codegen_end();
-
-    b8 success = system("gcc frx.c") != 0;
-
     for (usize i = 0; i < list_size(&projects); ++i)
     {
         Project* project = list_get(&projects, i);
@@ -166,7 +152,7 @@ int compiler_run(int argc, char** argv)
 
     compiler_shutdown();
 
-    return success;
+    return EXIT_SUCCESS;
 }
 
 Module* compiler_find_module_by_path_segments(const List* path_segments)

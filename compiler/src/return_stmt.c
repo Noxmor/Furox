@@ -4,7 +4,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 static ReturnStmt* return_stmt_create(b8 error, Expr* value)
 {
@@ -63,20 +62,3 @@ void return_stmt_sema(ReturnStmt* return_stmt)
         expr_sema(return_stmt->value);
     }
 }
-
-void return_stmt_codegen(ReturnStmt* return_stmt)
-{
-    FRX_ASSERT(return_stmt != NULL);
-    FRX_ASSERT(!return_stmt->error);
-
-    codegen_write("return");
-
-    if (return_stmt->value != NULL)
-    {
-        codegen_write(" ");
-        expr_codegen(return_stmt->value);
-    }
-
-    codegen_write(";\n");
-}
-

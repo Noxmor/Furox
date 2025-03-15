@@ -5,7 +5,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 typedef void (*StmtResolveFunc)(Parser*, void*);
 
@@ -29,18 +28,6 @@ static const StmtSemaFunc stmt_type_to_sema[FRX_STMT_TYPE_COUNT] = {
     [FRX_STMT_TYPE_RETURN_STMT] = (StmtSemaFunc)return_stmt_sema,
     [FRX_STMT_TYPE_LET_STMT] = (StmtSemaFunc)let_stmt_sema,
     [FRX_STMT_TYPE_IF_STMT] = (StmtSemaFunc)if_stmt_sema
-};
-
-typedef void (*StmtCodegenFunc)(void*);
-
-static const StmtCodegenFunc stmt_type_to_codegen[FRX_STMT_TYPE_COUNT] = {
-    [FRX_STMT_TYPE_ERROR] = (StmtCodegenFunc)NULL,
-    [FRX_STMT_TYPE_EXPR_STMT] = (StmtCodegenFunc)expr_stmt_codegen,
-    [FRX_STMT_TYPE_BREAK_STMT] = (StmtCodegenFunc)break_stmt_codegen,
-    [FRX_STMT_TYPE_CONTINUE_STMT] = (StmtCodegenFunc)continue_stmt_codegen,
-    [FRX_STMT_TYPE_RETURN_STMT] = (StmtCodegenFunc)return_stmt_codegen,
-    [FRX_STMT_TYPE_LET_STMT] = (StmtCodegenFunc)let_stmt_codegen,
-    [FRX_STMT_TYPE_IF_STMT] = (StmtCodegenFunc)if_stmt_codegen
 };
 
 static Stmt* stmt_create(StmtType type, void* node)
@@ -101,17 +88,6 @@ void stmt_sema(Stmt* stmt)
     FRX_ASSERT(stmt != NULL);
 
     StmtSemaFunc func = stmt_type_to_sema[stmt->type];
-    if (func != NULL)
-    {
-        func(stmt->node);
-    }
-}
-
-void stmt_codegen(Stmt* stmt)
-{
-    FRX_ASSERT(stmt != NULL);
-
-    StmtCodegenFunc func = stmt_type_to_codegen[stmt->type];
     if (func != NULL)
     {
         func(stmt->node);

@@ -4,7 +4,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 static StructField* struct_field_create(b8 error, const char* name, TypeSpecifier* type)
 {
@@ -132,22 +131,4 @@ void struct_def_sema(StructDef* struct_def)
         StructField* field = list_get(&struct_def->fields, i);
         struct_field_sema(field);
     }
-}
-
-void struct_def_codegen(StructDef* struct_def)
-{
-    FRX_ASSERT(struct_def != NULL);
-    FRX_ASSERT(!struct_def->error);
-
-    codegen_write("typedef struct %s {\n", struct_def->name);
-
-    for (usize i = 0; i < list_size(&struct_def->fields); ++i)
-    {
-        StructField* field = list_get(&struct_def->fields, i);
-
-        type_specifier_codegen(field->type);
-        codegen_write(" %s;\n", field->name);
-    }
-
-    codegen_write("} %s;\n", struct_def->name);
 }

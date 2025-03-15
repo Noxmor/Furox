@@ -4,7 +4,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 static TraitBound* trait_bound_create(TypeSpecifier* type)
 {

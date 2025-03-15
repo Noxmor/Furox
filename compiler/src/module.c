@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "assert.h"
-#include "codegen.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -130,22 +129,6 @@ void module_compile(Module* mod)
         {
             mod->failed = FRX_TRUE;
         }
-    }
-}
-
-void module_codegen(Module* mod)
-{
-    for (usize i = 0; i < list_size(&mod->submodules); ++i)
-    {
-        Module* submodule = list_get(&mod->submodules, i);
-
-        module_codegen(submodule);
-    }
-
-    for (usize i = 0; i < list_size(&mod->parsers); ++i)
-    {
-        Parser* parser = list_get(&mod->parsers, i);
-        translation_unit_codegen(parser->translation_unit);
     }
 }
 

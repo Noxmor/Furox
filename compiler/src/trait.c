@@ -4,7 +4,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 static Trait* trait_create(b8 error, const char* name)
 {

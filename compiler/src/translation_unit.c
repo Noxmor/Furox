@@ -4,7 +4,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 static TranslationUnit* translation_unit_create(void)
 {
@@ -60,16 +59,5 @@ void translation_unit_sema(TranslationUnit* unit)
     {
         Item* item = list_get(&unit->items, i);
         item_sema(item);
-    }
-}
-
-void translation_unit_codegen(TranslationUnit* unit)
-{
-    FRX_ASSERT(unit != NULL);
-
-    for (usize i = 0; i < list_size(&unit->items); ++i)
-    {
-        Item* item = list_get(&unit->items, i);
-        item_codegen(item);
     }
 }

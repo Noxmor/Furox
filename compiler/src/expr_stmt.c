@@ -4,7 +4,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 static ExprStmt* expr_stmt_create(b8 error, Expr* expr)
 {
@@ -48,13 +47,4 @@ void expr_stmt_sema(ExprStmt* expr_stmt)
     }
 
     expr_sema(expr_stmt->expr);
-}
-
-void expr_stmt_codegen(ExprStmt* expr_stmt)
-{
-    FRX_ASSERT(expr_stmt != NULL);
-    FRX_ASSERT(!expr_stmt->error);
-
-    expr_codegen(expr_stmt->expr);
-    codegen_write(";\n");
 }

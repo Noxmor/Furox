@@ -4,7 +4,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
 static Scope* scope_create(b8 error)
 {
@@ -80,20 +79,4 @@ void scope_sema(Scope* scope)
         Stmt* stmt = list_get(&scope->stmts, i);
         stmt_sema(stmt);
     }
-}
-
-void scope_codegen(Scope* scope)
-{
-    FRX_ASSERT(scope != NULL);
-    FRX_ASSERT(!scope->error);
-
-    codegen_write("{\n");
-
-    for (usize i = 0; i < list_size(&scope->stmts); ++i)
-    {
-        Stmt* stmt = list_get(&scope->stmts, i);
-        stmt_codegen(stmt);
-    }
-
-    codegen_write("}\n");
 }

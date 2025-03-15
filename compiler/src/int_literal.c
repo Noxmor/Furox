@@ -2,7 +2,6 @@
 #include "ast.h"
 #include "compiler.h"
 #include "parser.h"
-#include "codegen.h"
 
 static IntLiteral* int_literal_create(b8 error, u64 value)
 {
@@ -28,12 +27,4 @@ IntLiteral* int_literal_parse(Parser* parser)
 void int_literal_sema(IntLiteral* literal)
 {
     FRX_ASSERT(literal != NULL);
-}
-
-void int_literal_codegen(IntLiteral* literal)
-{
-    FRX_ASSERT(literal != NULL);
-    FRX_ASSERT(!literal->error);
-
-    codegen_write("%zu", literal->value);
 }
