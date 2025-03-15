@@ -7,13 +7,15 @@
 #include "sema.h"
 #include "type_inference.h"
 
-static LetStmt* let_stmt_create(b8 error, const char* name, TypeSpecifier* type, Expr* value)
+static LetStmt* let_stmt_create(b8 error, b8 mutable, const char* name,
+                                TypeSpecifier* type, Expr* value)
 {
     FRX_ASSERT(name != NULL);
 
     LetStmt* let_stmt = compiler_alloc_ast(sizeof(LetStmt));
 
     let_stmt->error = error;
+    let_stmt->mutable = mutable;
     let_stmt->name = name;
     let_stmt->type = type;
     let_stmt->value = value;
@@ -25,6 +27,13 @@ LetStmt* let_stmt_parse(Parser* parser)
 {
     b8 error = FRX_FALSE;
     error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_LET);
+
+    b8 mutable = FRX_FALSE;
+    if (parser_match(parser, FRX_TOKEN_TYPE_KW_MUT))
+    {
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_MUT);
+        mutable = FRX_TRUE;
+    }
 
     const char* name = parser_current_token(parser)->identifier;
     error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
@@ -53,7 +62,7 @@ LetStmt* let_stmt_parse(Parser* parser)
 
     error |= parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    return let_stmt_create(error, name, type, value);
+    return let_stmt_create(error, mutable, name, type, value);
 }
 
 void let_stmt_resolve(Parser* parser, LetStmt* let_stmt)

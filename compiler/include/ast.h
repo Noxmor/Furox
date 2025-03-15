@@ -308,6 +308,7 @@ typedef struct Stmt
 typedef struct LetStmt
 {
     b8 error;
+    b8 mutable;
     const char* name;
     TypeSpecifier* type;
     Expr* value;
