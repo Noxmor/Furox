@@ -32,13 +32,24 @@ static void mir_emit_type(const MIRType* type)
     }
 }
 
+static void mir_emit_instruction(const MIRInstruction* instruction)
+{
+    FRX_ASSERT(instruction != NULL);
+
+    //TODO: Implement
+}
+
 static void mir_emit_block(const MIRBlock* block)
 {
     FRX_ASSERT(block != NULL);
 
     MIR_EMIT("%s:\n", block->label);
 
-    //TODO: Implement
+    for (usize i = 0; i < list_size(&block->instructions); ++i)
+    {
+        MIRInstruction* instruction = list_get(&block->instructions, i);
+        mir_emit_instruction(instruction);
+    }
 }
 
 static void mir_emit_func_decl(const MIRFuncContext* ctx)
