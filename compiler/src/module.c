@@ -132,6 +132,25 @@ void module_compile(Module* mod)
     }
 }
 
+void module_codegen(Module* mod, MIRContext* ctx)
+{
+    FRX_ASSERT(mod != NULL);
+
+    for (usize i = 0; i < list_size(&mod->submodules); ++i)
+    {
+        Module* submodule = list_get(&mod->submodules, i);
+        module_codegen(submodule, ctx);
+    }
+
+    for (usize i = 0; i < list_size(&mod->parsers); ++i)
+    {
+        Parser* parser = list_get(&mod->parsers, i);
+        TranslationUnit* unit = parser->translation_unit;
+
+        translation_unit_lower_to_mir(unit, ctx);
+    }
+}
+
 SymbolID module_insert_symbol(Module* mod, SymbolVisibility visibility,
                            SymbolType type, const char* name, void* data)
 {

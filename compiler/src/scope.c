@@ -1,9 +1,11 @@
 #include "assert.h"
 #include "ast.h"
 #include "compiler.h"
+#include "mir.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "codegen.h"
 
 static Scope* scope_create(void)
 {
@@ -66,4 +68,19 @@ void scope_sema(Scope* scope)
         Stmt* stmt = list_get(&scope->stmts, i);
         stmt_sema(stmt);
     }
+}
+
+MIRBlock* scope_lower_to_mir(Scope* scope)
+{
+    FRX_ASSERT(scope != NULL);
+
+    MIRBlock* block = mir_block_create("entry");
+
+    for (usize i = 0; i < list_size(&scope->stmts); ++i)
+    {
+        Stmt* stmt = list_get(&scope->stmts, i);
+        stmt_lower_to_mir(stmt, block);
+    }
+
+    return block;
 }

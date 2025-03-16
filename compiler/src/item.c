@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "codegen.h"
 #include "token.h"
 
 typedef void (*ItemResolveFunc)(Parser*, void*);
@@ -29,6 +30,18 @@ static const ItemSemaFunc item_type_to_sema[FRX_ITEM_TYPE_COUNT] = {
     [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemSemaFunc)struct_def_sema,
     [FRX_ITEM_TYPE_TRAIT] = (ItemSemaFunc)trait_sema,
     [FRX_ITEM_TYPE_IMPL_BLOCK] = (ItemSemaFunc)impl_block_sema,
+};
+
+typedef void (*ItemCodegenFunc)(void*, MIRContext*);
+
+static const ItemCodegenFunc item_type_to_codegen[FRX_ITEM_TYPE_COUNT] = {
+    [FRX_ITEM_TYPE_ERROR] = (ItemCodegenFunc)NULL,
+    [FRX_ITEM_TYPE_USE_STMT] = (ItemCodegenFunc)NULL,
+    [FRX_ITEM_TYPE_FUNC_DECL] = (ItemCodegenFunc)NULL,
+    [FRX_ITEM_TYPE_FUNC_DEF] = (ItemCodegenFunc)func_def_lower_to_mir,
+    [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemCodegenFunc)NULL,
+    [FRX_ITEM_TYPE_TRAIT] = (ItemCodegenFunc)NULL,
+    [FRX_ITEM_TYPE_IMPL_BLOCK] = (ItemCodegenFunc)NULL,
 };
 
 static Item* item_create(ItemType type, void* node)
@@ -116,5 +129,16 @@ void item_sema(Item* item)
     if (func != NULL)
     {
         func(item->node);
+    }
+}
+
+void item_lower_to_mir(Item* item, MIRContext* ctx)
+{
+    FRX_ASSERT(item != NULL);
+
+    ItemCodegenFunc func = item_type_to_codegen[item->type];
+    if (func != NULL)
+    {
+        func(item->node, ctx);
     }
 }

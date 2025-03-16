@@ -144,6 +144,15 @@ int compiler_run(int argc, char** argv)
         }
     }
 
+    MIRContext* ctx = mir_context_create();
+    for (usize i = 0; i < list_size(&projects); ++i)
+    {
+        Project* project = list_get(&projects, i);
+        project_codegen(project, ctx);
+    }
+
+    mir_context_emit_llvm(ctx);
+
     for (usize i = 0; i < list_size(&projects); ++i)
     {
         Project* project = list_get(&projects, i);
