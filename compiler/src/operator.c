@@ -100,6 +100,7 @@ Precedence operator_to_precedence(Operator operator)
         case FRX_OPERATOR_POST_INC:
         case FRX_OPERATOR_POST_DEC:
         case FRX_OPERATOR_ARRAY_SUBSCRIPT:
+        case FRX_OPERATOR_CALL:
         case FRX_OPERATOR_MEMBER_ACCESS: return FRX_PRECEDENCE_1;
         case FRX_OPERATOR_PRE_INC:
         case FRX_OPERATOR_PRE_DEC:
