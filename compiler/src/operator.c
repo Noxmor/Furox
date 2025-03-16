@@ -65,6 +65,7 @@ Operator token_type_to_infix_operator(TokenType type)
         case FRX_TOKEN_TYPE_LT: return FRX_OPERATOR_LT;
         case FRX_TOKEN_TYPE_LEQ: return FRX_OPERATOR_LEQ;
         case FRX_TOKEN_TYPE_LBRACKET: return FRX_OPERATOR_ARRAY_SUBSCRIPT;
+        case FRX_TOKEN_TYPE_LPAREN: return FRX_OPERATOR_CALL;
         case FRX_TOKEN_TYPE_DOT: return FRX_OPERATOR_MEMBER_ACCESS;
     }
 
