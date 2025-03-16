@@ -11,11 +11,10 @@
 
 #include <string.h>
 
-static UseStmt* use_stmt_create(b8 error, const char* name)
+static UseStmt* use_stmt_create(const char* name)
 {
     UseStmt* use_stmt = compiler_alloc_ast(sizeof(UseStmt));
 
-    use_stmt->error = error;
     list_init(&use_stmt->path_segments);
     use_stmt->symbol_name = name;
     use_stmt->module = NULL;
@@ -25,27 +24,25 @@ static UseStmt* use_stmt_create(b8 error, const char* name)
 
 UseStmt* use_stmt_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
-
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_USE);
+    parser_eat(parser, FRX_TOKEN_TYPE_KW_USE);
 
     const char* symbol_name = parser_current_token(parser)->identifier;
 
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    UseStmt* use_stmt = use_stmt_create(error, symbol_name);
+    UseStmt* use_stmt = use_stmt_create(symbol_name);
 
     while (parser_match(parser, FRX_TOKEN_TYPE_RESOLUTION))
     {
-        error |= parser_eat(parser, FRX_TOKEN_TYPE_RESOLUTION);
+        parser_eat(parser, FRX_TOKEN_TYPE_RESOLUTION);
 
         list_add(&use_stmt->path_segments, (void*)use_stmt->symbol_name);
         use_stmt->symbol_name = parser_current_token(parser)->identifier;
 
-        error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+        parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
     }
 
-    use_stmt->error |= parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
+    parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
     list_add(&parser->use_stmts, use_stmt);
 
@@ -55,11 +52,6 @@ UseStmt* use_stmt_parse(Parser* parser)
 void use_stmt_resolve(Parser* parser, UseStmt* use_stmt)
 {
     FRX_ASSERT(use_stmt != NULL);
-
-    if (use_stmt->error)
-    {
-        return;
-    }
 
     Module* mod = parser_find_module_by_path_segments(parser, &use_stmt->path_segments);
     if (mod == NULL)

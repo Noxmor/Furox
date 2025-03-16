@@ -3,7 +3,6 @@
 #include "ast.h"
 
 TypeSpecifier default_type = {
-    .error = FRX_FALSE,
     .kind = FRX_TYPE_KIND_PRIMITIVE,
     .primitive = FRX_TOKEN_TYPE_KW_I32
 };

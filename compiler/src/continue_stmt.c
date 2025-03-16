@@ -4,23 +4,19 @@
 #include "parser.h"
 #include "sema.h"
 
-static ContinueStmt* continue_stmt_create(b8 error)
+static ContinueStmt* continue_stmt_create(void)
 {
     ContinueStmt* continue_stmt = compiler_alloc_ast(sizeof(ContinueStmt));
-
-    continue_stmt->error = error;
 
     return continue_stmt;
 }
 
 ContinueStmt* continue_stmt_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
+    parser_eat(parser, FRX_TOKEN_TYPE_KW_CONTINUE);
+    parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_CONTINUE);
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
-
-    return continue_stmt_create(error);
+    return continue_stmt_create();
 }
 
 void continue_stmt_sema(ContinueStmt* continue_stmt)

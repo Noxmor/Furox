@@ -70,7 +70,6 @@ static GenericParams* generic_params_create(void)
 {
     GenericParams* params = compiler_alloc_ast(sizeof(GenericParams));
 
-    params->error = FRX_FALSE;
     list_init(&params->params);
 
     return params;
@@ -90,20 +89,20 @@ GenericParams* generic_params_parse(Parser* parser)
 {
     GenericParams* generic_params = generic_params_create();
 
-    generic_params->error |= parser_eat(parser, FRX_TOKEN_TYPE_LT);
+    parser_eat(parser, FRX_TOKEN_TYPE_LT);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_GT))
     {
         if (!list_empty(&generic_params->params))
         {
-            generic_params->error |= parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
+            parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
         }
 
         GenericParam* param = generic_param_parse(parser);
         generic_params_add_param(generic_params, param);
     }
 
-    generic_params->error |= parser_eat(parser, FRX_TOKEN_TYPE_GT);
+    parser_eat(parser, FRX_TOKEN_TYPE_GT);
 
     return generic_params;
 }

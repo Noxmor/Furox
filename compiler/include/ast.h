@@ -11,7 +11,6 @@ typedef struct Module Module;
 
 typedef struct IntLiteral
 {
-    b8 error;
     u64 value;
     SourceRange range;
 } IntLiteral;
@@ -57,13 +56,11 @@ typedef struct GenericArg
 
 typedef struct GenericArgs
 {
-    b8 error;
     List args;
 } GenericArgs;
 
 typedef struct TypeSpecifier
 {
-    b8 error;
     TypeKind kind;
     GenericArgs* generic_args;
     union
@@ -81,7 +78,6 @@ typedef struct TypeSpecifier
 
 typedef struct Item
 {
-    b8 error;
     ItemType type;
     void* node;
     SourceRange range;
@@ -89,7 +85,6 @@ typedef struct Item
 
 typedef struct UseStmt
 {
-    b8 error;
     List path_segments;
     const char* symbol_name;
     Module* module;
@@ -108,20 +103,17 @@ typedef struct GenericParam
 
 typedef struct GenericParams
 {
-    b8 error;
     List params;
 } GenericParams;
 
 typedef struct StructField
 {
-    b8 error;
     const char* name;
     TypeSpecifier* type;
 } StructField;
 
 typedef struct StructDef
 {
-    b8 error;
     const char* name;
     GenericParams* generic_params;
     List fields;
@@ -141,42 +133,36 @@ typedef struct EnumDef
 
 typedef struct Trait
 {
-    b8 error;
     const char* name;
     List methods;
 } Trait;
 
 typedef struct ImplBlock
 {
-    b8 error;
     const char* type_name;
     List methods;
 } ImplBlock;
 
 typedef struct TranslationUnit
 {
-    b8 error;
     List items;
     SourceRange range;
 } TranslationUnit;
 
 typedef struct Scope
 {
-    b8 error;
     List stmts;
     SourceRange range;
 } Scope;
 
 typedef struct FuncParam
 {
-    b8 error;
     const char* name;
     TypeSpecifier* type;
 } FuncParam;
 
 typedef struct FuncParams
 {
-    b8 error;
     List params;
     b8 variadic;
 } FuncParams;
@@ -188,7 +174,6 @@ typedef struct GenericInstantiation
 
 typedef struct FuncDecl
 {
-    b8 error;
     const char* name;
     GenericParams* generic_params;
     FuncParams* params;
@@ -198,7 +183,6 @@ typedef struct FuncDecl
 
 typedef struct FuncDef
 {
-    b8 error;
     const char* name;
     GenericParams* generic_params;
     List generic_instantiations;
@@ -224,7 +208,6 @@ typedef u8 ExprType;
 
 typedef struct Expr
 {
-    b8 error;
     ExprType type;
     void* node;
     SourceRange range;
@@ -263,33 +246,28 @@ typedef struct CallExpr
 
 typedef struct ExprStmt
 {
-    b8 error;
     Expr* expr;
     SourceRange range;
 } ExprStmt;
 
 typedef struct BreakStmt
 {
-    b8 error;
     SourceRange range;
 } BreakStmt;
 
 typedef struct ContinueStmt
 {
-    b8 error;
     SourceRange range;
 } ContinueStmt;
 
 typedef struct ReturnStmt
 {
-    b8 error;
     Expr* value;
     SourceRange range;
 } ReturnStmt;
 
 typedef struct IfStmt
 {
-    b8 error;
     Expr* condition;
     Scope* if_block;
     Scope* else_block;
@@ -312,7 +290,6 @@ typedef u8 StmtType;
 
 typedef struct Stmt
 {
-    b8 error;
     StmtType type;
     void* node;
     SourceRange range;
@@ -320,7 +297,6 @@ typedef struct Stmt
 
 typedef struct LetStmt
 {
-    b8 error;
     b8 mutable;
     const char* name;
     TypeSpecifier* type;

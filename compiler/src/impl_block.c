@@ -5,13 +5,12 @@
 #include "resolution.h"
 #include "sema.h"
 
-static ImplBlock* impl_block_create(b8 error, const char* type_name)
+static ImplBlock* impl_block_create(const char* type_name)
 {
     FRX_ASSERT(type_name != NULL);
 
     ImplBlock* impl_block = compiler_alloc_ast(sizeof(Trait));
 
-    impl_block->error = error;
     impl_block->type_name = type_name;
     list_init(&impl_block->methods);
 
@@ -20,15 +19,13 @@ static ImplBlock* impl_block_create(b8 error, const char* type_name)
 
 ImplBlock* impl_block_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
-
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_IMPL);
+    parser_eat(parser, FRX_TOKEN_TYPE_KW_IMPL);
 
     const char* type_name = parser_current_token(parser)->identifier;
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    ImplBlock* impl_block = impl_block_create(error, type_name);
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
+    ImplBlock* impl_block = impl_block_create(type_name);
+    parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
@@ -36,7 +33,7 @@ ImplBlock* impl_block_parse(Parser* parser)
         list_add(&impl_block->methods, func_def);
     }
 
-    impl_block->error |= parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
+    parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
     return impl_block;
 }
@@ -44,11 +41,6 @@ ImplBlock* impl_block_parse(Parser* parser)
 void impl_block_resolve(Parser* parser, ImplBlock* impl_block)
 {
     FRX_ASSERT(impl_block != NULL);
-
-    if (impl_block->error)
-    {
-        return;
-    }
 
     for (usize i = 0; i < list_size(&impl_block->methods); ++i)
     {
@@ -60,11 +52,6 @@ void impl_block_resolve(Parser* parser, ImplBlock* impl_block)
 void impl_block_sema(ImplBlock* impl_block)
 {
     FRX_ASSERT(impl_block != NULL);
-
-    if (impl_block->error)
-    {
-        return;
-    }
 
     for (usize i = 0; i < list_size(&impl_block->methods); ++i)
     {

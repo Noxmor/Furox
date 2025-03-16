@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-static FuncDef* func_def_create(b8 error, const char* name, GenericParams* generic_params,
+static FuncDef* func_def_create(const char* name, GenericParams* generic_params,
                                 FuncParams* params, TypeSpecifier* return_type,
                                 Scope* body)
 {
@@ -16,7 +16,6 @@ static FuncDef* func_def_create(b8 error, const char* name, GenericParams* gener
 
     FuncDef* func_def = compiler_alloc_ast(sizeof(FuncDef));
 
-    func_def->error = error;
     func_def->name = name;
     func_def->generic_params = generic_params;
     list_init(&func_def->generic_instantiations);
@@ -29,12 +28,10 @@ static FuncDef* func_def_create(b8 error, const char* name, GenericParams* gener
 
 FuncDef* func_def_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
-
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_FN);
+    parser_eat(parser, FRX_TOKEN_TYPE_KW_FN);
 
     const char* name = parser_current_token(parser)->identifier;
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
     GenericParams* generic_params = NULL;
     if (parser_match(parser, FRX_TOKEN_TYPE_LT))
@@ -44,11 +41,11 @@ FuncDef* func_def_parse(Parser* parser)
 
     FuncParams* params = func_params_parse(parser);
 
-    error = parser_eat(parser, FRX_TOKEN_TYPE_ARROW);
+    parser_eat(parser, FRX_TOKEN_TYPE_ARROW);
 
     TypeSpecifier* return_type = type_specifier_parse(parser);
 
-    FuncDef* func_def = func_def_create(error, name, generic_params, params,
+    FuncDef* func_def = func_def_create(name, generic_params, params,
                                         return_type, scope_parse(parser));
 
     parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_FUNC, func_def->name, func_def);
@@ -59,11 +56,6 @@ FuncDef* func_def_parse(Parser* parser)
 void func_def_resolve(Parser* parser, FuncDef* func_def)
 {
     FRX_ASSERT(func_def != NULL);
-
-    if (func_def->error)
-    {
-        return;
-    }
 
     if (func_def->params != NULL)
     {
@@ -84,11 +76,6 @@ void func_def_resolve(Parser* parser, FuncDef* func_def)
 void func_def_sema(FuncDef* func_def)
 {
     FRX_ASSERT(func_def != NULL);
-
-    if (func_def->error)
-    {
-        return;
-    }
 
     if (func_def->params != NULL)
     {

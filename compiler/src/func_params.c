@@ -6,14 +6,13 @@
 #include "resolution.h"
 #include "sema.h"
 
-static FuncParam* func_param_create(b8 error, const char* name, TypeSpecifier* type)
+static FuncParam* func_param_create(const char* name, TypeSpecifier* type)
 {
     FRX_ASSERT(name != NULL);
     FRX_ASSERT(type != NULL);
 
     FuncParam* param = compiler_alloc_ast(sizeof(FuncParam));
 
-    param->error = error;
     param->name = name;
     param->type = type;
 
@@ -31,17 +30,12 @@ static FuncParam* func_param_parse(Parser* parser)
 
     TypeSpecifier* type = type_specifier_parse(parser);
 
-    return func_param_create(error, name, type);
+    return func_param_create(name, type);
 }
 
 static void func_param_resolve(Parser* parser, FuncParam* param)
 {
     FRX_ASSERT(param != NULL);
-
-    if (param->error)
-    {
-        return;
-    }
 
     if (param->type != NULL)
     {
@@ -53,22 +47,16 @@ static void func_param_sema(FuncParam* param)
 {
     FRX_ASSERT(param != NULL);
 
-    if (param->error)
-    {
-        return;
-    }
-
     if (param->type != NULL)
     {
         type_specifier_sema(param->type);
     }
 }
 
-static FuncParams* func_params_create(b8 error)
+static FuncParams* func_params_create(void)
 {
     FuncParams* params = compiler_alloc_ast(sizeof(FuncParams));
 
-    params->error = error;
     list_init(&params->params);
     params->variadic = FRX_FALSE;
 
@@ -77,17 +65,15 @@ static FuncParams* func_params_create(b8 error)
 
 FuncParams* func_params_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
+    parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
 
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
-
-    FuncParams* params = func_params_create(error);
+    FuncParams* params = func_params_create();
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
     {
         if (!list_empty(&params->params))
         {
-            error |= parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
+            parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
         }
 
         if (parser_match(parser, FRX_TOKEN_TYPE_ELLIPSIS))
@@ -102,7 +88,7 @@ FuncParams* func_params_parse(Parser* parser)
         list_add(&params->params, param);
     }
 
-    params->error |= parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
+    parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
     return params;
 }
@@ -110,11 +96,6 @@ FuncParams* func_params_parse(Parser* parser)
 void func_params_resolve(Parser* parser, FuncParams* params)
 {
     FRX_ASSERT(params != NULL);
-
-    if (params->error)
-    {
-        return;
-    }
 
     for (usize i = 0; i < list_size(&params->params); ++i)
     {
@@ -125,11 +106,6 @@ void func_params_resolve(Parser* parser, FuncParams* params)
 void func_params_sema(FuncParams* params)
 {
     FRX_ASSERT(params != NULL);
-
-    if (params->error)
-    {
-        return;
-    }
 
     for (usize i = 0; i < list_size(&params->params); ++i)
     {

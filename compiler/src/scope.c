@@ -5,11 +5,10 @@
 #include "resolution.h"
 #include "sema.h"
 
-static Scope* scope_create(b8 error)
+static Scope* scope_create(void)
 {
     Scope* scope = compiler_alloc_ast(sizeof(Scope));
 
-    scope->error = error;
     list_init(&scope->stmts);
 
     return scope;
@@ -25,7 +24,7 @@ static void scope_add_stmt(Scope* scope, Stmt* stmt)
 
 Scope* scope_from_stmt(Stmt* stmt)
 {
-    Scope* scope = scope_create(FRX_FALSE);
+    Scope* scope = scope_create();
     scope_add_stmt(scope, stmt);
 
     return scope;
@@ -33,18 +32,16 @@ Scope* scope_from_stmt(Stmt* stmt)
 
 Scope* scope_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
+    parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
-
-    Scope* scope = scope_create(error);
+    Scope* scope = scope_create();
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
         Stmt* stmt = stmt_parse(parser);
         scope_add_stmt(scope, stmt);
     }
 
-    scope->error |= parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
+    parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
     return scope;
 }
@@ -52,11 +49,6 @@ Scope* scope_parse(Parser* parser)
 void scope_resolve(Parser* parser, Scope* scope)
 {
     FRX_ASSERT(scope != NULL);
-
-    if (scope->error)
-    {
-        return;
-    }
 
     for (usize i = 0; i < list_size(&scope->stmts); ++i)
     {
@@ -68,11 +60,6 @@ void scope_resolve(Parser* parser, Scope* scope)
 void scope_sema(Scope* scope)
 {
     FRX_ASSERT(scope != NULL);
-
-    if (scope->error)
-    {
-        return;
-    }
 
     for (usize i = 0; i < list_size(&scope->stmts); ++i)
     {

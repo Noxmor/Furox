@@ -7,14 +7,13 @@
 #include "sema.h"
 #include "type_inference.h"
 
-static LetStmt* let_stmt_create(b8 error, b8 mutable, const char* name,
+static LetStmt* let_stmt_create(b8 mutable, const char* name,
                                 TypeSpecifier* type, Expr* value)
 {
     FRX_ASSERT(name != NULL);
 
     LetStmt* let_stmt = compiler_alloc_ast(sizeof(LetStmt));
 
-    let_stmt->error = error;
     let_stmt->mutable = mutable;
     let_stmt->name = name;
     let_stmt->type = type;
@@ -25,8 +24,7 @@ static LetStmt* let_stmt_create(b8 error, b8 mutable, const char* name,
 
 LetStmt* let_stmt_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_LET);
+    parser_eat(parser, FRX_TOKEN_TYPE_KW_LET);
 
     b8 mutable = FRX_FALSE;
     if (parser_match(parser, FRX_TOKEN_TYPE_KW_MUT))
@@ -36,13 +34,13 @@ LetStmt* let_stmt_parse(Parser* parser)
     }
 
     const char* name = parser_current_token(parser)->identifier;
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
     TypeSpecifier* type = NULL;
 
     if (parser_match(parser, FRX_TOKEN_TYPE_COLON))
     {
-        error |= parser_eat(parser, FRX_TOKEN_TYPE_COLON);
+        parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
         type = type_specifier_parse(parser);
     }
@@ -51,7 +49,7 @@ LetStmt* let_stmt_parse(Parser* parser)
 
     if (parser_match(parser, FRX_TOKEN_TYPE_EQ))
     {
-        error |= parser_eat(parser, FRX_TOKEN_TYPE_EQ);
+        parser_eat(parser, FRX_TOKEN_TYPE_EQ);
         value = expr_parse(parser);
     }
 
@@ -60,19 +58,14 @@ LetStmt* let_stmt_parse(Parser* parser)
         //TODO: Error: cannot have variable declaration without explicit type
     }
 
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
+    parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    return let_stmt_create(error, mutable, name, type, value);
+    return let_stmt_create(mutable, name, type, value);
 }
 
 void let_stmt_resolve(Parser* parser, LetStmt* let_stmt)
 {
     FRX_ASSERT(let_stmt != NULL);
-
-    if (let_stmt->error)
-    {
-        return;
-    }
 
     if (let_stmt->type != NULL)
     {
@@ -88,11 +81,6 @@ void let_stmt_resolve(Parser* parser, LetStmt* let_stmt)
 void let_stmt_sema(LetStmt* let_stmt)
 {
     FRX_ASSERT(let_stmt != NULL);
-
-    if (let_stmt->error)
-    {
-        return;
-    }
 
     if (let_stmt->type != NULL)
     {

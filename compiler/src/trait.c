@@ -5,13 +5,12 @@
 #include "resolution.h"
 #include "sema.h"
 
-static Trait* trait_create(b8 error, const char* name)
+static Trait* trait_create(const char* name)
 {
     FRX_ASSERT(name != NULL);
 
     Trait* trait = compiler_alloc_ast(sizeof(Trait));
 
-    trait->error = error;
     trait->name = name;
     list_init(&trait->methods);
 
@@ -20,15 +19,13 @@ static Trait* trait_create(b8 error, const char* name)
 
 Trait* trait_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
-
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_TRAIT);
+    parser_eat(parser, FRX_TOKEN_TYPE_KW_TRAIT);
 
     const char* name = parser_current_token(parser)->identifier;
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    Trait* trait = trait_create(error, name);
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
+    Trait* trait = trait_create(name);
+    parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
@@ -36,7 +33,7 @@ Trait* trait_parse(Parser* parser)
         list_add(&trait->methods, func_decl);
     }
 
-    trait->error |= parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
+    parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
     return trait;
 }
@@ -44,11 +41,6 @@ Trait* trait_parse(Parser* parser)
 void trait_resolve(Parser* parser, Trait* trait)
 {
     FRX_ASSERT(trait != NULL);
-
-    if (trait->error)
-    {
-        return;
-    }
 
     for (usize i = 0; i < list_size(&trait->methods); ++i)
     {
@@ -60,11 +52,6 @@ void trait_resolve(Parser* parser, Trait* trait)
 void trait_sema(Trait* trait)
 {
     FRX_ASSERT(trait != NULL);
-
-    if (trait->error)
-    {
-        return;
-    }
 
     for (usize i = 0; i < list_size(&trait->methods); ++i)
     {

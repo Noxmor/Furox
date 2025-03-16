@@ -5,11 +5,10 @@
 #include "resolution.h"
 #include "sema.h"
 
-static IfStmt* if_stmt_create(b8 error, Expr* condition, Scope* if_block, Scope* else_block)
+static IfStmt* if_stmt_create(Expr* condition, Scope* if_block, Scope* else_block)
 {
     IfStmt* if_stmt = compiler_alloc_ast(sizeof(IfStmt));
 
-    if_stmt->error = error;
     if_stmt->condition = condition;
     if_stmt->if_block = if_block;
     if_stmt->else_block = else_block;
@@ -41,17 +40,12 @@ IfStmt* if_stmt_parse(Parser* parser)
         }
     }
 
-    return if_stmt_create(error, condition, if_block, else_block);
+    return if_stmt_create(condition, if_block, else_block);
 }
 
 void if_stmt_resolve(Parser* parser, IfStmt* if_stmt)
 {
     FRX_ASSERT(if_stmt != NULL);
-
-    if (if_stmt->error)
-    {
-        return;
-    }
 
     if (if_stmt->condition != NULL)
     {
@@ -72,11 +66,6 @@ void if_stmt_resolve(Parser* parser, IfStmt* if_stmt)
 void if_stmt_sema(IfStmt* if_stmt)
 {
     FRX_ASSERT(if_stmt != NULL);
-
-    if (if_stmt->error)
-    {
-        return;
-    }
 
     if (if_stmt->condition != NULL)
     {
