@@ -24,8 +24,6 @@ static void call_expr_add_arg(CallExpr* call_expr, Expr* arg)
 
 CallExpr* call_expr_parse(Parser* parser)
 {
-    parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
-
     CallExpr* call_expr = call_expr_create();
     while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
     {
