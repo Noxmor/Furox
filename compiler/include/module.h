@@ -5,7 +5,6 @@
 
 #include "list.h"
 #include "symbol_table.h"
-#include "mir.h"
 
 typedef struct Parser Parser;
 
@@ -25,7 +24,7 @@ Module* module_create(const char* project_path);
 
 void module_compile(Module* mod);
 
-void module_codegen(Module* mod, MIRContext* ctx);
+void module_codegen(Module* mod);
 
 SymbolID module_insert_symbol(Module* mod, SymbolVisibility visibility,
                           SymbolType type, const char* name, void* data);

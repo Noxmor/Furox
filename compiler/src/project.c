@@ -23,11 +23,11 @@ void project_compile(Project* project)
     module_compile(project->root_module);
 }
 
-void project_codegen(Project* project, MIRContext* ctx)
+void project_codegen(Project* project)
 {
     FRX_ASSERT(project != NULL);
 
-    module_codegen(project->root_module, ctx);
+    module_codegen(project->root_module);
 }
 
 Module* project_find_module_by_path_segments(Project* project, const List* path_segments)

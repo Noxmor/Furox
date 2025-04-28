@@ -2,7 +2,6 @@
 #include "ast.h"
 #include "compiler.h"
 #include "diagnostics.h"
-#include "mir.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -32,14 +31,14 @@ static const StmtSemaFunc stmt_type_to_sema[FRX_STMT_TYPE_COUNT] = {
     [FRX_STMT_TYPE_IF_STMT] = (StmtSemaFunc)if_stmt_sema
 };
 
-typedef void (*StmtCodegenFunc)(void*, MIRBlock*);
+typedef void (*StmtCodegenFunc)(void*);
 
 static const StmtCodegenFunc stmt_type_to_codegen[FRX_STMT_TYPE_COUNT] = {
     [FRX_STMT_TYPE_ERROR] = (StmtCodegenFunc)NULL,
     [FRX_STMT_TYPE_EXPR_STMT] = (StmtCodegenFunc)NULL,
     [FRX_STMT_TYPE_BREAK_STMT] = (StmtCodegenFunc)NULL,
     [FRX_STMT_TYPE_CONTINUE_STMT] = (StmtCodegenFunc)NULL,
-    [FRX_STMT_TYPE_RETURN_STMT] = (StmtCodegenFunc)return_stmt_lower_to_mir,
+    [FRX_STMT_TYPE_RETURN_STMT] = (StmtCodegenFunc)NULL,
     [FRX_STMT_TYPE_LET_STMT] = (StmtCodegenFunc)NULL,
     [FRX_STMT_TYPE_IF_STMT] = (StmtCodegenFunc)NULL,
 };
@@ -105,16 +104,5 @@ void stmt_sema(Stmt* stmt)
     if (func != NULL)
     {
         func(stmt->node);
-    }
-}
-
-void stmt_lower_to_mir(Stmt* stmt, MIRBlock* block)
-{
-    FRX_ASSERT(stmt != NULL);
-
-    StmtCodegenFunc func = stmt_type_to_codegen[stmt->type];
-    if (func != NULL)
-    {
-        func(stmt->node, block);
     }
 }

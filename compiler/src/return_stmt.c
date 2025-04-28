@@ -1,7 +1,6 @@
 #include "assert.h"
 #include "ast.h"
 #include "compiler.h"
-#include "mir.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -50,13 +49,4 @@ void return_stmt_sema(ReturnStmt* return_stmt)
     {
         expr_sema(return_stmt->value);
     }
-}
-
-void return_stmt_lower_to_mir(ReturnStmt* return_stmt, MIRBlock* block)
-{
-    FRX_ASSERT(return_stmt != NULL);
-
-    MIRVariable* dest = mir_variable_create_func_param(mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32), "argc");
-    MIRInstruction* instruction = mir_instruction_create(FRX_MIR_INSTRUCTION_TYPE_RET, dest, NULL, NULL);
-    mir_block_add_instruction(block, instruction);
 }

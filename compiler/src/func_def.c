@@ -2,7 +2,6 @@
 #include "ast.h"
 #include "codegen.h"
 #include "compiler.h"
-#include "mir.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -94,24 +93,4 @@ void func_def_sema(FuncDef* func_def)
     {
         scope_sema(func_def->body);
     }
-}
-
-void func_def_lower_to_mir(FuncDef* func_def, MIRContext* ctx)
-{
-    FRX_ASSERT(func_def != NULL);
-
-    //TODO: Convert return type to MIR type
-    MIRFuncContext* func = mir_func_context_create(func_def->name, mir_type_create_primitive(FRX_MIR_TYPE_KIND_I32));
-    func->block = scope_lower_to_mir(func_def->body);
-
-    if (func_def->return_type->kind == FRX_TYPE_KIND_PRIMITIVE
-        && func_def->return_type->primitive == FRX_TOKEN_TYPE_KW_VOID)
-    {
-        //TODO: Return void
-        MIRVariable* var = mir_variable_create_temp(mir_type_create_primitive(FRX_MIR_TYPE_KIND_VOID), 1);
-        MIRInstruction* ret = mir_instruction_create(FRX_MIR_INSTRUCTION_TYPE_RET, var, NULL, NULL);
-        mir_block_add_instruction(func->block, ret);
-    }
-
-    mir_context_add_func(ctx, func);
 }

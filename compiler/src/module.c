@@ -9,6 +9,7 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "codegen.h"
 #include "symbol_table.h"
 
 static b8 str_has_suffix(const char* str, const char* suffix)
@@ -132,14 +133,14 @@ void module_compile(Module* mod)
     }
 }
 
-void module_codegen(Module* mod, MIRContext* ctx)
+void module_codegen(Module* mod)
 {
     FRX_ASSERT(mod != NULL);
 
     for (usize i = 0; i < list_size(&mod->submodules); ++i)
     {
         Module* submodule = list_get(&mod->submodules, i);
-        module_codegen(submodule, ctx);
+        module_codegen(submodule);
     }
 
     for (usize i = 0; i < list_size(&mod->parsers); ++i)
@@ -147,7 +148,7 @@ void module_codegen(Module* mod, MIRContext* ctx)
         Parser* parser = list_get(&mod->parsers, i);
         TranslationUnit* unit = parser->translation_unit;
 
-        translation_unit_lower_to_mir(unit, ctx);
+        translation_unit_codegen(unit);
     }
 }
 

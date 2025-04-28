@@ -1,7 +1,6 @@
 #include "assert.h"
 #include "ast.h"
 #include "compiler.h"
-#include "mir.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -64,14 +63,7 @@ void translation_unit_sema(TranslationUnit* unit)
     }
 }
 
-void translation_unit_lower_to_mir(TranslationUnit* unit, MIRContext* ctx)
+void translation_unit_codegen(TranslationUnit* unit)
 {
-    FRX_ASSERT(unit != NULL);
-
-    for (usize i = 0; i < list_size(&unit->items); ++i)
-    {
-        Item* item = list_get(&unit->items, i);
-        item_lower_to_mir(item, ctx);
-    }
-
+    // TODO: Implement
 }
