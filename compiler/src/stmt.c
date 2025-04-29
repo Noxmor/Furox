@@ -31,15 +31,15 @@ static const StmtSemaFunc stmt_type_to_sema[FRX_STMT_TYPE_COUNT] = {
     [FRX_STMT_TYPE_IF_STMT] = (StmtSemaFunc)if_stmt_sema
 };
 
-typedef void (*StmtCodegenFunc)(void*);
+typedef void (*StmtCodegenFunc)(void*, CodegenContext* ctx);
 
 static const StmtCodegenFunc stmt_type_to_codegen[FRX_STMT_TYPE_COUNT] = {
     [FRX_STMT_TYPE_ERROR] = (StmtCodegenFunc)NULL,
     [FRX_STMT_TYPE_EXPR_STMT] = (StmtCodegenFunc)NULL,
     [FRX_STMT_TYPE_BREAK_STMT] = (StmtCodegenFunc)NULL,
     [FRX_STMT_TYPE_CONTINUE_STMT] = (StmtCodegenFunc)NULL,
-    [FRX_STMT_TYPE_RETURN_STMT] = (StmtCodegenFunc)NULL,
-    [FRX_STMT_TYPE_LET_STMT] = (StmtCodegenFunc)NULL,
+    [FRX_STMT_TYPE_RETURN_STMT] = (StmtCodegenFunc)return_stmt_codegen,
+    [FRX_STMT_TYPE_LET_STMT] = (StmtCodegenFunc)let_stmt_codegen,
     [FRX_STMT_TYPE_IF_STMT] = (StmtCodegenFunc)NULL,
 };
 
@@ -104,5 +104,18 @@ void stmt_sema(Stmt* stmt)
     if (func != NULL)
     {
         func(stmt->node);
+    }
+}
+
+void stmt_codegen(Stmt* stmt, CodegenContext* ctx)
+{
+    FRX_ASSERT(stmt != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    StmtCodegenFunc func = stmt_type_to_codegen[stmt->type];
+    if (func != NULL)
+    {
+        func(stmt->node, ctx);
     }
 }

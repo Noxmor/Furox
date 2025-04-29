@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "codegen.h"
 #include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
@@ -76,4 +77,13 @@ void func_decl_sema(FuncDecl* func_decl)
     {
         type_specifier_sema(func_decl->return_type);
     }
+}
+
+void func_decl_codegen(FuncDecl* func_decl, CodegenContext* ctx)
+{
+    FRX_ASSERT(func_decl != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    // TODO: Implement
 }

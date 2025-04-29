@@ -98,7 +98,10 @@ int compiler_run(int argc, char** argv)
     for (usize i = 0; i < list_size(&projects); ++i)
     {
         Project* project = list_get(&projects, i);
-        project_codegen(project);
+        if (project_codegen(project))
+        {
+            return EXIT_FAILURE;
+        }
     }
 
     for (usize i = 0; i < list_size(&projects); ++i)

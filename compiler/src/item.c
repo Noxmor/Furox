@@ -32,14 +32,14 @@ static const ItemSemaFunc item_type_to_sema[FRX_ITEM_TYPE_COUNT] = {
     [FRX_ITEM_TYPE_IMPL_BLOCK] = (ItemSemaFunc)impl_block_sema,
 };
 
-typedef void (*ItemCodegenFunc)(void*);
+typedef void (*ItemCodegenFunc)(void*, CodegenContext* ctx);
 
 static const ItemCodegenFunc item_type_to_codegen[FRX_ITEM_TYPE_COUNT] = {
     [FRX_ITEM_TYPE_ERROR] = (ItemCodegenFunc)NULL,
     [FRX_ITEM_TYPE_USE_STMT] = (ItemCodegenFunc)NULL,
-    [FRX_ITEM_TYPE_FUNC_DECL] = (ItemCodegenFunc)NULL,
-    [FRX_ITEM_TYPE_FUNC_DEF] = (ItemCodegenFunc)NULL,
-    [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemCodegenFunc)NULL,
+    [FRX_ITEM_TYPE_FUNC_DECL] = (ItemCodegenFunc)func_decl_codegen,
+    [FRX_ITEM_TYPE_FUNC_DEF] = (ItemCodegenFunc)func_def_codegen,
+    [FRX_ITEM_TYPE_STRUCT_DEF] = (ItemCodegenFunc)struct_def_codegen,
     [FRX_ITEM_TYPE_TRAIT] = (ItemCodegenFunc)NULL,
     [FRX_ITEM_TYPE_IMPL_BLOCK] = (ItemCodegenFunc)NULL,
 };
@@ -131,3 +131,15 @@ void item_sema(Item* item)
         func(item->node);
     }
 }
+
+void item_codegen(Item* item, CodegenContext* ctx)
+{
+    FRX_ASSERT(item != NULL);
+
+    ItemCodegenFunc func = item_type_to_codegen[item->type];
+    if (func != NULL)
+    {
+        func(item->node, ctx);
+    }
+}
+

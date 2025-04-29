@@ -103,6 +103,7 @@ void func_params_resolve(Parser* parser, FuncParams* params)
         func_param_resolve(parser, param);
     }
 }
+
 void func_params_sema(FuncParams* params)
 {
     FRX_ASSERT(params != NULL);
@@ -112,4 +113,46 @@ void func_params_sema(FuncParams* params)
         FuncParam* param = list_get(&params->params, i);
         func_param_sema(param);
     }
+}
+
+static void func_param_codegen(FuncParam* param, FILE* f)
+{
+    FRX_ASSERT(param != NULL);
+
+    FRX_ASSERT(f != NULL);
+
+    type_specifier_codegen(param->type, f);
+    fprintf(f, " %s", param->name);
+}
+
+void func_params_codegen(FuncParams* params, FILE* f)
+{
+    FRX_ASSERT(params != NULL);
+
+    FRX_ASSERT(f != NULL);
+
+    fprintf(f, "(");
+
+    if (list_empty(&params->params))
+    {
+        fprintf(f, "void");
+    }
+
+    for (usize i = 0; i < list_size(&params->params); ++i)
+    {
+        if (i > 0)
+        {
+            fprintf(f, ", ");
+        }
+
+        FuncParam* param = list_get(&params->params, i);
+        func_param_codegen(param, f);
+    }
+
+    if (params->variadic)
+    {
+        fprintf(f, ", ...");
+    }
+
+    fprintf(f, ")");
 }

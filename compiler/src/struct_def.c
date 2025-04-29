@@ -106,3 +106,23 @@ void struct_def_sema(StructDef* struct_def)
         struct_field_sema(field);
     }
 }
+
+void struct_def_codegen(StructDef* struct_def, CodegenContext* ctx)
+{
+    FRX_ASSERT(struct_def != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    fprintf(ctx->header, "typedef struct %s %s;\n", struct_def->name, struct_def->name);
+
+    fprintf(ctx->source, "struct %s {\n", struct_def->name);
+
+    for (usize i = 0; i < list_size(&struct_def->fields); ++i)
+    {
+        StructField* field = list_get(&struct_def->fields, i);
+        type_specifier_codegen(field->type, ctx->source);
+        fprintf(ctx->source, " %s;\n", field->name);
+    }
+
+    fprintf(ctx->source, "};\n");
+}

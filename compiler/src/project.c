@@ -3,8 +3,10 @@
 #include <string.h>
 
 #include "assert.h"
+#include "codegen.h"
 #include "compiler.h"
 #include "module.h"
+#include "project_specification.h"
 
 Project* project_create(ProjectSpecificiation spec, const char* project_path)
 {
@@ -23,11 +25,29 @@ void project_compile(Project* project)
     module_compile(project->root_module);
 }
 
-void project_codegen(Project* project)
+u8 project_codegen(Project* project)
 {
     FRX_ASSERT(project != NULL);
 
-    module_codegen(project->root_module);
+    CodegenContext ctx;
+    codegen_context_begin(&ctx, project->root_module->name);
+
+    module_codegen(project->root_module, &ctx);
+
+    codegen_context_end(&ctx);
+
+    if (project->specification.type == FRX_PROJECT_TYPE_APP)
+    {
+        char buffer[strlen("gcc /tmp/") + strlen(project->root_module->name) + strlen(".c") + 1];
+        sprintf(buffer, "gcc /tmp/%s.c", project->root_module->name);
+
+        if (system(buffer) != 0)
+        {
+            return FRX_TRUE;
+        }
+    }
+
+    return FRX_FALSE;
 }
 
 Module* project_find_module_by_path_segments(Project* project, const List* path_segments)

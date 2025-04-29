@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "codegen.h"
 #include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
@@ -18,10 +19,21 @@ static const ExprResolveFunc expr_type_to_resolve[FRX_EXPR_TYPE_COUNT] = {
 typedef void (*ExprSemaFunc)(void*);
 
 static const ExprSemaFunc expr_type_to_sema[FRX_EXPR_TYPE_COUNT] = {
-    [FRX_EXPR_TYPE_ERROR] = (ExprSemaFunc)int_literal_sema,
+    [FRX_EXPR_TYPE_ERROR] = (ExprSemaFunc)NULL,
     [FRX_EXPR_TYPE_INT_LIT] = (ExprSemaFunc)int_literal_sema,
     [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprSemaFunc)unary_expr_sema,
     [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprSemaFunc)binary_expr_sema,
+};
+
+typedef void (*ExprCodegenFunc)(void*, CodegenContext*);
+
+static const ExprCodegenFunc expr_type_to_codegen[FRX_EXPR_TYPE_COUNT] = {
+    [FRX_EXPR_TYPE_ERROR] = (ExprCodegenFunc)NULL,
+    [FRX_EXPR_TYPE_INT_LIT] = (ExprCodegenFunc)int_literal_codegen,
+    [FRX_EXPR_TYPE_PATH_EXPR] = (ExprCodegenFunc)path_expr_codegen,
+    [FRX_EXPR_TYPE_CALL_EXPR] = (ExprCodegenFunc)call_expr_codegen,
+    [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprCodegenFunc)unary_expr_codegen,
+    [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprCodegenFunc)binary_expr_codegen,
 };
 
 static Expr* expr_create(ExprType type, void* node)
@@ -223,5 +235,16 @@ void expr_sema(Expr* expr)
     if (func != NULL)
     {
         func(expr->node);
+    }
+}
+
+void expr_codegen(Expr* expr, CodegenContext* ctx)
+{
+    FRX_ASSERT(expr != NULL);
+
+    ExprCodegenFunc func = expr_type_to_codegen[expr->type];
+    if (func != NULL)
+    {
+        func(expr->node, ctx);
     }
 }

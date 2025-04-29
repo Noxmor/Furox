@@ -63,7 +63,11 @@ void translation_unit_sema(TranslationUnit* unit)
     }
 }
 
-void translation_unit_codegen(TranslationUnit* unit)
+void translation_unit_codegen(TranslationUnit* unit, CodegenContext* ctx)
 {
-    // TODO: Implement
+    for (usize i = 0; i < list_size(&unit->items); ++i)
+    {
+        Item* item = list_get(&unit->items, i);
+        item_codegen(item, ctx);
+    }
 }

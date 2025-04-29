@@ -50,3 +50,20 @@ void return_stmt_sema(ReturnStmt* return_stmt)
         expr_sema(return_stmt->value);
     }
 }
+
+void return_stmt_codegen(ReturnStmt* return_stmt, CodegenContext* ctx)
+{
+    FRX_ASSERT(return_stmt != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    fprintf(ctx->source, "return");
+
+    if (return_stmt->value != NULL)
+    {
+        fprintf(ctx->source, " ");
+        expr_codegen(return_stmt->value, ctx);
+    }
+
+    fprintf(ctx->source, ";\n");
+}

@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "codegen.h"
 #include "compiler.h"
 #include "parser.h"
 
@@ -24,4 +25,13 @@ IntLiteral* int_literal_parse(Parser* parser)
 void int_literal_sema(IntLiteral* literal)
 {
     FRX_ASSERT(literal != NULL);
+}
+
+void int_literal_codegen(IntLiteral* literal, CodegenContext* ctx)
+{
+    FRX_ASSERT(literal != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    fprintf(ctx->source, "%zu", literal->value);
 }

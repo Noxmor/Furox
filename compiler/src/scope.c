@@ -68,3 +68,20 @@ void scope_sema(Scope* scope)
         stmt_sema(stmt);
     }
 }
+
+void scope_codegen(Scope* scope, CodegenContext* ctx)
+{
+    FRX_ASSERT(scope != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    fprintf(ctx->source, "{\n");
+
+    for (usize i = 0; i < list_size(&scope->stmts); ++i)
+    {
+        Stmt* stmt = list_get(&scope->stmts, i);
+        stmt_codegen(stmt, ctx);
+    }
+
+    fprintf(ctx->source, "}\n");
+}

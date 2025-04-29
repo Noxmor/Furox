@@ -94,3 +94,34 @@ void func_def_sema(FuncDef* func_def)
         scope_sema(func_def->body);
     }
 }
+
+void func_def_codegen(FuncDef* func_def, CodegenContext* ctx)
+{
+    FRX_ASSERT(func_def != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    type_specifier_codegen(func_def->return_type, ctx->header);
+    fprintf(ctx->header, " %s", func_def->name);
+
+    if (strcmp(func_def->name, "main") != 0)
+    {
+        fprintf(ctx->header, "%p", func_def);
+    }
+
+    func_params_codegen(func_def->params, ctx->header);
+    fprintf(ctx->header, ";\n");
+
+    type_specifier_codegen(func_def->return_type, ctx->source);
+    fprintf(ctx->source, " %s", func_def->name);
+
+    if (strcmp(func_def->name, "main") != 0)
+    {
+        fprintf(ctx->source, "%p", func_def);
+    }
+
+    func_params_codegen(func_def->params, ctx->source);
+    fprintf(ctx->source, "\n");
+
+    scope_codegen(func_def->body, ctx);
+}

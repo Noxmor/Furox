@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "codegen.h"
 #include "compiler.h"
 #include "parser.h"
 #include "token.h"
@@ -65,4 +66,24 @@ PathExpr* path_expr_parse(Parser* parser)
     }
 
     return path_expr;
+}
+
+void path_expr_codegen(PathExpr* path_expr, CodegenContext* ctx)
+{
+    FRX_ASSERT(path_expr != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    for (usize i = 0; i < list_size(&path_expr->path_segments); ++i)
+    {
+        if (i > 0)
+        {
+            fprintf(ctx->source, "_");
+        }
+
+        PathSegment* segment = list_get(&path_expr->path_segments, i);
+        fprintf(ctx->source, segment->name);
+    }
+
+    fprintf(ctx->source, "%p", path_expr);
 }

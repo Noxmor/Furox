@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "codegen.h"
 #include "compiler.h"
 #include "parser.h"
 #include "token.h"
@@ -39,4 +40,21 @@ CallExpr* call_expr_parse(Parser* parser)
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
     return call_expr;
+}
+
+void call_expr_codegen(CallExpr* call_expr, CodegenContext* ctx)
+{
+    for (usize i = 0; i < list_size(&call_expr->args); ++i)
+    {
+        if (i > 0)
+        {
+            fprintf(ctx->source, ", ");
+        }
+
+        Expr* arg = list_get(&call_expr->args, i);
+        expr_codegen(arg, ctx);
+
+    }
+
+    fprintf(ctx->source, ")");
 }

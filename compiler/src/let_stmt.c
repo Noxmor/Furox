@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "codegen.h"
 #include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
@@ -96,4 +97,22 @@ void let_stmt_sema(LetStmt* let_stmt)
             let_stmt->type = expr_infer_type(let_stmt->value);
         }
     }
+}
+
+void let_stmt_codegen(LetStmt* let_stmt, CodegenContext* ctx)
+{
+    FRX_ASSERT(let_stmt != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    type_specifier_codegen(let_stmt->type, ctx->source);
+    fprintf(ctx->source, " %s", let_stmt->name);
+
+    if (let_stmt->value != NULL)
+    {
+        fprintf(ctx->source, " = ");
+        expr_codegen(let_stmt->value, ctx);
+    }
+
+    fprintf(ctx->source, ";\n");
 }

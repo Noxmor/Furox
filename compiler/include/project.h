@@ -14,7 +14,7 @@ Project* project_create(ProjectSpecificiation spec, const char* project_path);
 
 void project_compile(Project* project);
 
-void project_codegen(Project* project);
+u8 project_codegen(Project* project);
 
 Module* project_find_module_by_path_segments(Project* project, const List* path_segments);
 

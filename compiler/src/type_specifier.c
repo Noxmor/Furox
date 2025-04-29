@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "codegen.h"
 #include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
@@ -162,4 +163,22 @@ void type_specifier_resolve(Parser* parser, TypeSpecifier* type)
 void type_specifier_sema(TypeSpecifier* type)
 {
     FRX_ASSERT(type != NULL);
+}
+
+void type_specifier_codegen(TypeSpecifier* type, FILE* f)
+{
+    FRX_ASSERT(type != NULL);
+
+    FRX_ASSERT(f != NULL);
+
+    switch (type->kind)
+    {
+        case FRX_TYPE_KIND_PRIMITIVE: fprintf(f, "%s", token_type_to_str(type->primitive)); break;
+        case FRX_TYPE_KIND_ENUM: break;
+        case FRX_TYPE_KIND_STRUCT: break;
+        case FRX_TYPE_KIND_UNION: break;
+        case FRX_TYPE_KIND_POINTER: type_specifier_codegen(type->ptr.base, f); fprintf(f, "*"); break;
+        case FRX_TYPE_KIND_ARRAY: break;
+        default: FRX_ASSERT(FRX_FALSE); break;
+    }
 }
