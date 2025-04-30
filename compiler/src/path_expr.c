@@ -116,6 +116,4 @@ void path_expr_codegen(AST* ast, CodegenContext* ctx)
             fprintf(ctx->source, "%s", path_segment->name);
         }
     }
-
-    fprintf(ctx->source, "%p", path_expr);
 }

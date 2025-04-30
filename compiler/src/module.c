@@ -25,9 +25,7 @@ static Module* submodule_create(Module* parent, const char* filepath)
 
     Module* mod = malloc(sizeof(Module));
 
-    symbol_table_init(&mod->symbol_table);
-
-    symbol_registry_init(&mod->symbol_registry);
+    symbol_table_init(&mod->symbol_table, NULL);
 
     mod->parent = parent;
     strcpy(mod->filepath, filepath);
@@ -151,33 +149,19 @@ void module_codegen(Module* mod, CodegenContext* ctx)
     }
 }
 
-SymbolID module_insert_symbol(Module* mod, SymbolVisibility visibility,
-                           SymbolType type, const char* name, void* data)
+void module_insert_symbol(Module* mod, SymbolVisibility visibility,
+                          SymbolType type, const char* name, void* data)
 {
     FRX_ASSERT(mod != NULL);
 
-    SymbolID id = symbol_registry_add(&mod->symbol_registry, data);
-
-    if (visibility > FRX_SYMBOL_VISIBILITY_PRIVATE)
-    {
-        symbol_table_insert(&mod->symbol_table, type, name, id);
-    }
-
-    return id;
+    symbol_table_insert(&mod->symbol_table, visibility, type, name, data);
 }
 
-SymbolID module_lookup_symbol(Module* mod, SymbolType type, const char* name)
+Symbol* module_lookup_symbol(Module* mod, SymbolType type, const char* name)
 {
     FRX_ASSERT(mod != NULL);
 
     return symbol_table_lookup(&mod->symbol_table, type, name);
-}
-
-void* module_get_def(Module* mod, SymbolID id)
-{
-    FRX_ASSERT(mod != NULL);
-
-    return symbol_registry_get(&mod->symbol_registry, id);
 }
 
 Module* module_find_submodule_by_name(Module* mod, const char* name)

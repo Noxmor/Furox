@@ -6,14 +6,27 @@
 #include "assert.h"
 #include "compiler.h"
 
-void symbol_table_init(SymbolTable* table)
+static void symbol_init(Symbol* symbol, SymbolVisibility visibility,
+                        SymbolType type, void* data)
+{
+    FRX_ASSERT(symbol != NULL);
+
+    symbol->visibility = visibility;
+    symbol->type = type;
+    symbol->data = data;
+}
+
+void symbol_table_init(SymbolTable* table, SymbolTable* parent)
 {
     FRX_ASSERT(table != NULL);
 
     memset(table, 0, sizeof(SymbolTable));
+
+    table->parent = parent;
 }
 
-void symbol_table_insert(SymbolTable* table, SymbolType type, const char* name, SymbolID id)
+void symbol_table_insert(SymbolTable* table, SymbolVisibility visibility,
+                         SymbolType type, const char* name, void* data)
 {
     FRX_ASSERT(table != NULL);
 
@@ -21,21 +34,18 @@ void symbol_table_insert(SymbolTable* table, SymbolType type, const char* name, 
 
     FRX_ASSERT(name != NULL);
 
-    FRX_ASSERT(id != FRX_SYMBOL_ID_INVALID);
-
     u64 index = (usize)name % FRX_SYMBOL_TABLE_CAPACITY;
     SymbolTableEntry* entry = table->entries[index];
 
     SymbolTableEntry* new_entry = compiler_alloc(sizeof(SymbolTableEntry));
-    new_entry->id = id;
-    new_entry->type = type;
+    symbol_init(&new_entry->symbol, visibility, type, data);
     new_entry->name = name;
     new_entry->next = entry;
 
     table->entries[index] = new_entry;
 }
 
-SymbolID symbol_table_lookup(SymbolTable* table, SymbolType type, const char* name)
+Symbol* symbol_table_lookup(SymbolTable* table, SymbolType type, const char* name)
 {
     FRX_ASSERT(table != NULL);
 
@@ -48,13 +58,13 @@ SymbolID symbol_table_lookup(SymbolTable* table, SymbolType type, const char* na
 
     while (entry != NULL)
     {
-        if (entry->type == type && entry->name == name)
+        if (entry->symbol.type == type && entry->name == name)
         {
-            return entry->id;
+            return &entry->symbol;
         }
 
         entry = entry->next;
     }
 
-    return FRX_SYMBOL_ID_INVALID;
+    return NULL;
 }

@@ -22,7 +22,7 @@ Parser* parser_create(Module* module, const char* filepath)
     parser->module = module;
     lexer_init(&parser->lexer, filepath);
     list_init(&parser->diagnostics);
-    symbol_table_init(&parser->symbol_table);
+    symbol_table_init(&parser->symbol_table, &parser->module->symbol_table);
     list_init(&parser->use_stmts);
     parser->failed = FRX_FALSE;
     parser->recovery = FRX_FALSE;
@@ -135,39 +135,27 @@ void parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
 {
     FRX_ASSERT(parser != NULL);
 
-    SymbolID id = module_insert_symbol(parser->module, visibility, type, name, data);
-    symbol_table_insert(&parser->symbol_table, type, name, id);
+    if (visibility == FRX_SYMBOL_VISIBILITY_PRIVATE)
+    {
+        symbol_table_insert(&parser->symbol_table, visibility, type, name, data);
+    }
+    else
+    {
+        module_insert_symbol(parser->module, visibility, type, name, data);
+    }
 }
 
-void* parser_lookup_symbol(Parser* parser, SymbolType type, const char* name)
+Symbol* parser_lookup_symbol(Parser* parser, SymbolType type, const char* name)
 {
     FRX_ASSERT(parser != NULL);
 
-    SymbolID id = symbol_table_lookup(&parser->symbol_table, type, name);
-    if (id == FRX_SYMBOL_ID_INVALID)
+    Symbol* symbol = symbol_table_lookup(&parser->symbol_table, type, name);
+    if (symbol == NULL)
     {
-        id = module_lookup_symbol(parser->module, type, name);
+        symbol = module_lookup_symbol(parser->module, type, name);
     }
 
-    if (id != FRX_SYMBOL_ID_INVALID)
-    {
-        return module_get_def(parser->module, id);
-    }
-
-    for (usize i = 0; i < list_size(&parser->use_stmts); ++i)
-    {
-        UseStmt* use_stmt = list_get(&parser->use_stmts, i);
-        if (use_stmt->symbol_name == name && use_stmt->module != NULL)
-        {
-            SymbolID id = module_lookup_symbol(use_stmt->module, type, use_stmt->symbol_name);
-            if (id != FRX_SYMBOL_ID_INVALID)
-            {
-                return module_get_def(use_stmt->module, id);
-            }
-        }
-    }
-
-    return NULL;
+    return symbol;
 }
 
 Module* parser_find_module_by_path_segments(Parser* parser, const List* path_segments)

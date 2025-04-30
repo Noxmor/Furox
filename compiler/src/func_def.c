@@ -133,11 +133,6 @@ void func_def_codegen(AST* ast, CodegenContext* ctx)
     type_specifier_codegen(func_def->return_type, ctx->source);
     fprintf(ctx->source, " %s", func_def->name);
 
-    if (strcmp(func_def->name, "main") != 0)
-    {
-        fprintf(ctx->source, "%p", func_def);
-    }
-
     func_params_codegen(func_def->params, ctx->source);
     fprintf(ctx->source, "\n");
 

@@ -5,7 +5,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "symbol_registry.h"
 #include "symbol_table.h"
 #include "token.h"
 
