@@ -1,38 +1,32 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "parser.h"
-#include "resolution.h"
-#include "sema.h"
 
-static TraitBound* trait_bound_create(TypeSpecifier* type)
+static AST* trait_bound_create(AST* type)
 {
     FRX_ASSERT(type != NULL);
 
-    TraitBound* trait_bound = compiler_alloc_ast(sizeof(TraitBound));
+    AST* ast = ast_create(FRX_AST_TYPE_TRAIT_BOUND);
+    TraitBound* trait_bound = &ast->trait_bound;
 
     trait_bound->type = type;
 
-    return trait_bound;
+    return ast;
 }
 
-static TraitBound* trait_bound_parse(Parser* parser)
+static AST* trait_bound_parse(Parser* parser)
 {
     return trait_bound_create(type_specifier_parse(parser));
 }
 
-static GenericParam* generic_param_create(const char* name)
+static void generic_param_init(GenericParam* generic_param, const char* name)
 {
-    GenericParam* generic_param = compiler_alloc_ast(sizeof(GenericParam));
-
     generic_param->name = name;
     list_init(&generic_param->trait_bounds);
-
-    return generic_param;
 }
 
 static void generic_param_add_trait_bound(GenericParam* generic_param,
-                                          TraitBound* trait_bound)
+                                          AST* trait_bound)
 {
     FRX_ASSERT(generic_param != NULL);
 
@@ -41,18 +35,23 @@ static void generic_param_add_trait_bound(GenericParam* generic_param,
     list_add(&generic_param->trait_bounds, trait_bound);
 }
 
-static GenericParam* generic_param_parse(Parser* parser)
+static AST* generic_param_parse(Parser* parser)
 {
+    AST* ast = ast_create(FRX_AST_TYPE_GENERIC_PARAM);
+    GenericParam* generic_param = &ast->generic_param;
+
+    ast->range.start = parser_current_location(parser);
+
     const char* name = parser_current_token(parser)->identifier;
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    GenericParam* generic_param = generic_param_create(name);
+    generic_param_init(generic_param, name);
 
     if (parser_match(parser, FRX_TOKEN_TYPE_COLON))
     {
         parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
-        TraitBound* trait_bound = trait_bound_parse(parser);
+        AST* trait_bound = trait_bound_parse(parser);
         generic_param_add_trait_bound(generic_param, trait_bound);
 
         while (parser_match(parser, FRX_TOKEN_TYPE_PLUS))
@@ -63,20 +62,18 @@ static GenericParam* generic_param_parse(Parser* parser)
         }
     }
 
-    return generic_param;
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-static GenericParams* generic_params_create(void)
+static void generic_params_init(GenericParams* params)
 {
-    GenericParams* params = compiler_alloc_ast(sizeof(GenericParams));
-
     list_init(&params->params);
-
-    return params;
 }
 
 static void generic_params_add_param(GenericParams* generic_params,
-                                     GenericParam* generic_param)
+                                     AST* generic_param)
 {
     FRX_ASSERT(generic_params != NULL);
 
@@ -85,9 +82,14 @@ static void generic_params_add_param(GenericParams* generic_params,
     list_add(&generic_params->params, generic_param);
 }
 
-GenericParams* generic_params_parse(Parser* parser)
+AST* generic_params_parse(Parser* parser)
 {
-    GenericParams* generic_params = generic_params_create();
+    AST* ast = ast_create(FRX_AST_TYPE_GENERIC_PARAMS);
+    GenericParams* generic_params = &ast->generic_params;
+
+    ast->range.start = parser_current_location(parser);
+
+    generic_params_init(generic_params);
 
     parser_eat(parser, FRX_TOKEN_TYPE_LT);
 
@@ -98,11 +100,13 @@ GenericParams* generic_params_parse(Parser* parser)
             parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
         }
 
-        GenericParam* param = generic_param_parse(parser);
+        AST* param = generic_param_parse(parser);
         generic_params_add_param(generic_params, param);
     }
 
     parser_eat(parser, FRX_TOKEN_TYPE_GT);
 
-    return generic_params;
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }

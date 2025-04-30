@@ -3,42 +3,44 @@
 
 #include "parser.h"
 
-void translation_unit_resolve(Parser* parser, TranslationUnit* unit);
+void ast_resolve(AST* ast, Parser* parser);
 
-void use_stmt_resolve(Parser* parser, UseStmt* use_stmt);
+void translation_unit_resolve(AST* ast, Parser* parser);
 
-void type_specifier_resolve(Parser* parser, TypeSpecifier* type);
+void use_stmt_resolve(AST* ast, Parser* parser);
 
-void item_resolve(Parser* parser, Item* item);
+void type_specifier_resolve(AST* ast, Parser* parser);
 
-void struct_def_resolve(Parser* parser, StructDef* struct_def);
+void struct_def_resolve(AST* ast, Parser* parser);
 
-void trait_resolve(Parser* parser, Trait* trait);
+void enum_def_resolve(AST* ast, Parser* parser);
 
-void impl_block_resolve(Parser* parser, ImplBlock* impl_block);
+void trait_resolve(AST* ast, Parser* parser);
 
-void func_params_resolve(Parser* parser, FuncParams* params);
+void impl_block_resolve(AST* ast, Parser* parser);
 
-void func_decl_resolve(Parser* parser, FuncDecl* func_decl);
+void func_params_resolve(AST* ast, Parser* parser);
 
-void func_def_resolve(Parser* parser, FuncDef* func_def);
+void func_decl_resolve(AST* ast, Parser* parser);
 
-void scope_resolve(Parser* parser, Scope* scope);
+void func_def_resolve(AST* ast, Parser* parser);
 
-void stmt_resolve(Parser* parser, Stmt* stmt);
+void scope_resolve(AST* ast, Parser* parser);
 
-void expr_stmt_resolve(Parser* parser, ExprStmt* expr_stmt);
+void expr_stmt_resolve(AST* ast, Parser* parser);
 
-void return_stmt_resolve(Parser* parser, ReturnStmt* return_stmt);
+void return_stmt_resolve(AST* ast, Parser* parser);
 
-void let_stmt_resolve(Parser* parser, LetStmt* let_stmt);
+void let_stmt_resolve(AST* ast, Parser* parser);
 
-void if_stmt_resolve(Parser* parser, IfStmt* if_stmt);
+void if_stmt_resolve(AST* ast, Parser* parser);
 
-void expr_resolve(Parser* parser, Expr* expr);
+void unary_expr_resolve(AST* ast, Parser* parser);
 
-void unary_expr_resolve(Parser* parser, UnaryExpr* unary_expr);
+void binary_expr_resolve(AST* ast, Parser* parser);
 
-void binary_expr_resolve(Parser* parser, BinaryExpr* binary_expr);
+void path_expr_resolve(AST* ast, Parser* parser);
+
+void call_expr_resolve(AST* ast, Parser* parser);
 
 #endif

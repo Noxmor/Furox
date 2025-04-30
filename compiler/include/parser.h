@@ -18,7 +18,7 @@ typedef struct Parser
     Module* module;
     Lexer lexer;
     List diagnostics;
-    TranslationUnit* translation_unit;
+    AST* translation_unit;
     SymbolTable symbol_table;
     List use_stmts;
     SymbolVisibility visibility;
@@ -62,52 +62,52 @@ b8 parser_failed(const Parser* parser);
 
 void parser_destroy(Parser* parser);
 
-TranslationUnit* translation_unit_parse(Parser* parser);
+AST* translation_unit_parse(Parser* parser);
 
-UseStmt* use_stmt_parse(Parser* parser);
+AST* item_parse(Parser* parser);
 
-TypeSpecifier* type_specifier_parse(Parser* parser);
+AST* use_stmt_parse(Parser* parser);
 
-Item* item_parse(Parser* parser);
+AST* type_specifier_parse(Parser* parser);
 
-StructDef* struct_def_parse(Parser* parser);
+AST* struct_def_parse(Parser* parser);
 
-EnumDef* enum_def_parse(Parser* parser);
+AST* enum_def_parse(Parser* parser);
 
-Trait* trait_parse(Parser* parser);
+AST* trait_parse(Parser* parser);
 
-ImplBlock* impl_block_parse(Parser* parser);
+AST* impl_block_parse(Parser* parser);
 
-FuncParams* func_params_parse(Parser* parser);
+AST* func_params_parse(Parser* parser);
 
-GenericParams* generic_params_parse(Parser* parser);
+AST* generic_params_parse(Parser* parser);
 
-FuncDecl* func_decl_parse(Parser* parser);
+AST* func_decl_parse(Parser* parser);
 
-FuncDef* func_def_parse(Parser* parser);
+AST* func_def_parse(Parser* parser);
 
-Scope* scope_parse(Parser* parser);
+AST* scope_parse(Parser* parser);
 
-Stmt* stmt_parse(Parser* parser);
+AST* stmt_parse(Parser* parser);
 
-ExprStmt* expr_stmt_parse(Parser* parser);
+AST* expr_stmt_parse(Parser* parser);
 
-BreakStmt* break_stmt_parse(Parser* parser);
+AST* break_stmt_parse(Parser* parser);
 
-ContinueStmt* continue_stmt_parse(Parser* parser);
+AST* continue_stmt_parse(Parser* parser);
 
-ReturnStmt* return_stmt_parse(Parser* parser);
+AST* return_stmt_parse(Parser* parser);
 
-LetStmt* let_stmt_parse(Parser* parser);
+AST* let_stmt_parse(Parser* parser);
 
-IfStmt* if_stmt_parse(Parser* parser);
+AST* if_stmt_parse(Parser* parser);
 
-Expr* expr_parse(Parser* parser);
+AST* expr_parse(Parser* parser);
 
-PathExpr* path_expr_parse(Parser* parser);
+AST* path_expr_parse(Parser* parser);
 
-CallExpr* call_expr_parse(Parser* parser);
+AST* call_expr_parse(Parser* parser);
 
-IntLiteral* int_literal_parse(Parser* parser);
+AST* int_literal_parse(Parser* parser);
 
 #endif

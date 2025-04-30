@@ -1,87 +1,113 @@
 #include "assert.h"
 #include "ast.h"
 #include "codegen.h"
-#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
 
-static FuncDecl* func_decl_create(const char* name, GenericParams* generic_params,
-                                  FuncParams* params, TypeSpecifier* return_type)
+static void func_decl_init(FuncDecl* func_decl, const char* name,
+                           AST* generic_params, AST* params, AST* return_type)
 {
     FRX_ASSERT(name != NULL);
-
-    FuncDecl* func_decl = compiler_alloc_ast(sizeof(FuncDef));
 
     func_decl->name = name;
     func_decl->generic_params = generic_params;
     func_decl->params = params;
     func_decl->return_type = return_type;
-
-    return func_decl;
 }
 
-FuncDecl* func_decl_parse(Parser* parser)
+AST* func_decl_parse(Parser* parser)
 {
-    parser_eat(parser, FRX_TOKEN_TYPE_KW_FN);
+    AST* ast = ast_create(FRX_AST_TYPE_FUNC_DECL);
+    FuncDecl* func_decl = &ast->func_decl;
+
+    ast->range.start = parser_current_location(parser);
+
+    if (parser_eat(parser, FRX_TOKEN_TYPE_KW_FN))
+    {
+        ast->type = FRX_AST_TYPE_ERROR;
+    }
 
     const char* name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    if (parser_eat(parser, FRX_TOKEN_TYPE_IDENT))
+    {
+        ast->type = FRX_AST_TYPE_ERROR;
+    }
 
-    GenericParams* generic_params = NULL;
+    AST* generic_params = NULL;
     if (parser_match(parser, FRX_TOKEN_TYPE_LT))
     {
         generic_params = generic_params_parse(parser);
     }
 
-    FuncParams* params = func_params_parse(parser);
+    AST* params = func_params_parse(parser);
 
-    parser_eat(parser, FRX_TOKEN_TYPE_ARROW);
+    if (parser_eat(parser, FRX_TOKEN_TYPE_ARROW))
+    {
+        ast->type = FRX_AST_TYPE_ERROR;
+    }
 
-    TypeSpecifier* return_type = type_specifier_parse(parser);
+    AST* return_type = type_specifier_parse(parser);
 
-    parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
+    if (parser_eat(parser, FRX_TOKEN_TYPE_SEMI))
+    {
+        ast->type = FRX_AST_TYPE_ERROR;
+    }
 
-    FuncDecl* func_decl = func_decl_create(name, generic_params, params, return_type);
+    func_decl_init(func_decl, name, generic_params, params, return_type);
 
     parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_EXTERN_FUNC, func_decl->name, func_decl);
 
-    return func_decl;
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-void func_decl_resolve(Parser* parser, FuncDecl* func_decl)
+void func_decl_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(func_decl != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_DECL);
+
+    FuncDecl* func_decl = &ast->func_decl;
 
     if (func_decl->params != NULL)
     {
-        func_params_resolve(parser, func_decl->params);
+        func_params_resolve(func_decl->params, parser);
     }
 
     if (func_decl->return_type != NULL)
     {
-        type_specifier_resolve(parser, func_decl->return_type);
+        type_specifier_resolve(func_decl->return_type, parser);
     }
 }
 
-void func_decl_sema(FuncDecl* func_decl)
+void func_decl_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(func_decl != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_DECL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    FuncDecl* func_decl = &ast->func_decl;
 
     if (func_decl->params != NULL)
     {
-        func_params_sema(func_decl->params);
+        func_params_sema(func_decl->params, ctx);
     }
 
     if (func_decl->return_type != NULL)
     {
-        type_specifier_sema(func_decl->return_type);
+        type_specifier_sema(func_decl->return_type, ctx);
     }
 }
 
-void func_decl_codegen(FuncDecl* func_decl, CodegenContext* ctx)
+void func_decl_codegen(AST* ast, CodegenContext* ctx)
 {
-    FRX_ASSERT(func_decl != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_DECL);
 
     FRX_ASSERT(ctx != NULL);
 

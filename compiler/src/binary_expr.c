@@ -7,31 +7,43 @@
 #include "resolution.h"
 #include "sema.h"
 
-void binary_expr_resolve(Parser* parser, BinaryExpr* binary_expr)
+void binary_expr_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(binary_expr != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    expr_resolve(parser, binary_expr->left);
-    expr_resolve(parser, binary_expr->right);
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_BINARY_EXPR);
+
+    BinaryExpr* binary_expr = &ast->binary_expr;
+
+    ast_resolve(binary_expr->left, parser);
+    ast_resolve(binary_expr->right, parser);
 }
 
-void binary_expr_sema(BinaryExpr* binary_expr)
+void binary_expr_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(binary_expr != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    expr_sema(binary_expr->left);
-    expr_sema(binary_expr->right);
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_BINARY_EXPR);
+
+    BinaryExpr* binary_expr = &ast->binary_expr;
+
+    ast_sema(binary_expr->left, ctx);
+    ast_sema(binary_expr->right, ctx);
 }
 
-void binary_expr_codegen(BinaryExpr* binary_expr, CodegenContext* ctx)
+void binary_expr_codegen(AST* ast, CodegenContext* ctx)
 {
-    FRX_ASSERT(binary_expr != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_BINARY_EXPR);
 
     FRX_ASSERT(ctx != NULL);
 
+    BinaryExpr* binary_expr = &ast->binary_expr;
+
     fprintf(ctx->source, "(");
-    expr_codegen(binary_expr->left, ctx);
+    ast_codegen(binary_expr->left, ctx);
     fprintf(ctx->source, " %s ", token_type_to_str(binary_expr->type));
-    expr_codegen(binary_expr->right, ctx);
+    ast_codegen(binary_expr->right, ctx);
     fprintf(ctx->source, ")");
 }

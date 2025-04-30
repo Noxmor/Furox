@@ -1,7 +1,6 @@
 #include "assert.h"
 #include "ast.h"
 #include "codegen.h"
-#include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
 #include "resolution.h"
@@ -10,18 +9,21 @@
 #include "symbol_table.h"
 #include "token.h"
 
-static GenericArgs* generic_args_create(void)
+static void generic_args_init(GenericArgs* generic_args)
 {
-    GenericArgs* generic_args = compiler_alloc_ast(sizeof(GenericArgs));
+    FRX_ASSERT(generic_args != NULL);
 
     list_init(&generic_args->args);
-
-    return generic_args;
 }
 
-static GenericArgs* generic_args_parse(Parser* parser)
+static AST* generic_args_parse(Parser* parser)
 {
-    GenericArgs* generic_args = generic_args_create();
+    AST* ast = ast_create(FRX_AST_TYPE_GENERIC_ARGS);
+    GenericArgs* generic_args = &ast->generic_args;
+
+    ast->range.start = parser_current_location(parser);
+
+    generic_args_init(generic_args);
 
     parser_eat(parser, FRX_TOKEN_TYPE_LT);
 
@@ -32,79 +34,82 @@ static GenericArgs* generic_args_parse(Parser* parser)
             parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
         }
 
-        GenericArg* arg = compiler_alloc_ast(sizeof(GenericArg));
-        arg->type = type_specifier_parse(parser);
+        AST* arg = ast_create(FRX_AST_TYPE_GENERIC_ARG);
+        arg->generic_arg.type = type_specifier_parse(parser);
         list_add(&generic_args->args, arg);
     }
 
     parser_eat(parser, FRX_TOKEN_TYPE_GT);
 
-    return generic_args;
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-static TypeSpecifier* type_specifier_create(TypeKind kind)
+static void type_specifier_init(TypeSpecifier* type, TypeKind kind)
 {
-    FRX_ASSERT(kind < FRX_TYPE_KIND_COUNT);
+    FRX_ASSERT(type != NULL);
 
-    TypeSpecifier* type = compiler_alloc_ast(sizeof(TypeSpecifier));
+    FRX_ASSERT(kind < FRX_TYPE_KIND_COUNT);
 
     type->kind = kind;
     type->generic_args = NULL;
-
-    return type;
 }
 
-static TypeSpecifier* type_specifier_create_unresolved(const char* name)
+static void type_specifier_init_unresolved(TypeSpecifier* type, const char* name)
 {
+    FRX_ASSERT(type != NULL);
+
     FRX_ASSERT(name != NULL);
 
-    TypeSpecifier* type = type_specifier_create(FRX_TYPE_KIND_UNRESOLVED);
+    type_specifier_init(type, FRX_TYPE_KIND_UNRESOLVED);
 
     type->name = name;
-
-    return type;
 }
 
-static TypeSpecifier* type_specifier_create_primitive(TokenType primitive)
+static void type_specifier_init_primitive(TypeSpecifier* type, TokenType primitive)
 {
+    FRX_ASSERT(type != NULL);
+
     FRX_ASSERT(token_type_is_primitive(primitive));
 
-    TypeSpecifier* type = type_specifier_create(FRX_TYPE_KIND_PRIMITIVE);
+    type_specifier_init(type, FRX_TYPE_KIND_PRIMITIVE);
 
     type->primitive = primitive;
-
-    return type;
 }
 
-static TypeSpecifier* type_specifier_create_pointer(TypeSpecifier* base, b8 mutable)
+static void type_specifier_init_pointer(TypeSpecifier* type, AST* base, b8 mutable)
 {
+    FRX_ASSERT(type != NULL);
+
     FRX_ASSERT(base != NULL);
 
-    TypeSpecifier* type = type_specifier_create(FRX_TYPE_KIND_POINTER);
+    FRX_ASSERT(base->type == FRX_AST_TYPE_TYPE_SPECIFIER);
+
+    type_specifier_init(type, FRX_TYPE_KIND_POINTER);
 
     type->ptr.base = base;
     type->ptr.mutable = mutable;
-
-    return type;
 }
 
-TypeSpecifier* type_specifier_parse(Parser* parser)
+AST* type_specifier_parse(Parser* parser)
 {
-    TypeSpecifier* type = NULL;
+    AST* ast = ast_create(FRX_AST_TYPE_TYPE_SPECIFIER);
+    TypeSpecifier* type = &ast->type_specifier;
 
     if (token_type_is_primitive(parser_current_type(parser)))
     {
         TokenType primitive = parser_current_type(parser);
         parser_eat(parser, primitive);
 
-        type = type_specifier_create_primitive(primitive);
+        type_specifier_init_primitive(type, primitive);
     }
     else if (parser_current_type(parser) == FRX_TOKEN_TYPE_IDENT)
     {
         const char* name = parser_current_token(parser)->identifier;
         parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-        type = type_specifier_create_unresolved(name);
+        type_specifier_init_unresolved(type, name);
     }
     else
     {
@@ -112,7 +117,7 @@ TypeSpecifier* type_specifier_parse(Parser* parser)
         FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_TYPE_SPECIFIER,
                                   FRX_DIAGNOSTIC_LVL_ERROR, range, token_type_to_str(parser_current_type(parser)));
 
-        return type_specifier_create_unresolved("");
+        return ast_create(FRX_AST_TYPE_ERROR);
     }
 
     if (parser_match(parser, FRX_TOKEN_TYPE_LT))
@@ -124,19 +129,26 @@ TypeSpecifier* type_specifier_parse(Parser* parser)
         parser_match(parser, FRX_TOKEN_TYPE_BIT_AND))
     {
         b8 mutable = parser_match(parser, FRX_TOKEN_TYPE_STAR);
-        type = type_specifier_create_pointer(type, mutable);
+        AST* pointer_type = ast_create(FRX_AST_TYPE_TYPE_SPECIFIER);
+        type_specifier_init_pointer(&pointer_type->type_specifier, ast, mutable);
+        ast = pointer_type;
+        type = &pointer_type->type_specifier;
 
         parser_eat(parser, parser_current_type(parser));
     }
 
-    return type;
+    return ast;
 }
 
-void type_specifier_resolve(Parser* parser, TypeSpecifier* type)
+void type_specifier_resolve(AST* ast, Parser* parser)
 {
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TYPE_SPECIFIER);
+
     FRX_ASSERT(parser != NULL);
 
-    FRX_ASSERT(type != NULL);
+    TypeSpecifier* type = &ast->type_specifier;
 
     switch (type->kind)
     {
@@ -155,21 +167,34 @@ void type_specifier_resolve(Parser* parser, TypeSpecifier* type)
         case FRX_TYPE_KIND_STRUCT: break;
         case FRX_TYPE_KIND_UNION: break;
         case FRX_TYPE_KIND_POINTER:
-        case FRX_TYPE_KIND_ARRAY: type_specifier_resolve(parser, type->ptr.base); break;
+        case FRX_TYPE_KIND_ARRAY: type_specifier_resolve(type->ptr.base, parser); break;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 }
 
-void type_specifier_sema(TypeSpecifier* type)
+void type_specifier_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(type != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TYPE_SPECIFIER);
+
+    FRX_ASSERT(ctx != NULL);
+
+    TypeSpecifier* type = &ast->type_specifier;
+    (void)type;
+
+    // TODO: Implement
 }
 
-void type_specifier_codegen(TypeSpecifier* type, FILE* f)
+void type_specifier_codegen(AST* ast, FILE* f)
 {
-    FRX_ASSERT(type != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TYPE_SPECIFIER);
 
     FRX_ASSERT(f != NULL);
+
+    TypeSpecifier* type = &ast->type_specifier;
 
     switch (type->kind)
     {

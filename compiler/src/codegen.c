@@ -1,6 +1,7 @@
 #include "codegen.h"
 
 #include <string.h>
+#include <ctype.h>
 
 u8 codegen_context_begin(CodegenContext* ctx, const char* name)
 {
@@ -23,8 +24,23 @@ u8 codegen_context_begin(CodegenContext* ctx, const char* name)
         return FRX_TRUE;
     }
 
-    fprintf(ctx->header, "#ifndef FRX_%s_H\n", name);
-    fprintf(ctx->header, "#define FRX_%s_H\n", name);
+    char name_buffer[strlen(name) + 1];
+    name_buffer[strlen(name)] = '\0';
+
+    for (usize i = 0; i < strlen(name); ++i)
+    {
+        if (name[i] == '-')
+        {
+            name_buffer[i] = '_';
+        }
+        else
+        {
+            name_buffer[i] = toupper(name[i]);
+        }
+    }
+
+    fprintf(ctx->header, "#ifndef FRX_%s_H\n", name_buffer);
+    fprintf(ctx->header, "#define FRX_%s_H\n", name_buffer);
 
     fprintf(ctx->header, "#include <stddef.h>\n");
     fprintf(ctx->header, "#include <stdint.h>\n");

@@ -1,34 +1,34 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "codegen.h"
 
-static IfStmt* if_stmt_create(Expr* condition, Scope* if_block, Scope* else_block)
+static void if_stmt_init(IfStmt* if_stmt, AST* condition, AST* if_block,
+                         AST* else_block)
 {
-    IfStmt* if_stmt = compiler_alloc_ast(sizeof(IfStmt));
-
     if_stmt->condition = condition;
     if_stmt->if_block = if_block;
     if_stmt->else_block = else_block;
-
-    return if_stmt;
 }
 
-IfStmt* if_stmt_parse(Parser* parser)
+AST* if_stmt_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
+    AST* ast = ast_create(FRX_AST_TYPE_IF_STMT);
+    IfStmt* if_stmt = &ast->if_stmt;
 
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_IF);
+    ast->range.start = parser_current_location(parser);
 
-    Expr* condition = expr_parse(parser);
-    Scope* if_block = scope_parse(parser);
-    Scope* else_block = NULL;
+    parser_eat(parser, FRX_TOKEN_TYPE_KW_IF);
+
+    AST* condition = expr_parse(parser);
+    AST* if_block = scope_parse(parser);
+    AST* else_block = NULL;
 
     if (parser_match(parser, FRX_TOKEN_TYPE_KW_ELSE))
     {
-        error |= parser_eat(parser, FRX_TOKEN_TYPE_KW_ELSE);
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_ELSE);
 
         if (parser_match(parser, FRX_TOKEN_TYPE_KW_IF))
         {
@@ -40,45 +40,73 @@ IfStmt* if_stmt_parse(Parser* parser)
         }
     }
 
-    return if_stmt_create(condition, if_block, else_block);
+    if_stmt_init(if_stmt, condition, if_block, else_block);
+
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-void if_stmt_resolve(Parser* parser, IfStmt* if_stmt)
+void if_stmt_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(if_stmt != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_IF_STMT);
+
+    IfStmt* if_stmt = &ast->if_stmt;
 
     if (if_stmt->condition != NULL)
     {
-        expr_resolve(parser, if_stmt->condition);
+        ast_resolve(if_stmt->condition, parser);
     }
 
     if (if_stmt->if_block != NULL)
     {
-        scope_resolve(parser, if_stmt->if_block);
+        scope_resolve(if_stmt->if_block, parser);
     }
 
     if (if_stmt->else_block != NULL)
     {
-        scope_resolve(parser, if_stmt->else_block);
+        scope_resolve(if_stmt->else_block, parser);
     }
 }
 
-void if_stmt_sema(IfStmt* if_stmt)
+void if_stmt_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(if_stmt != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_IF_STMT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    IfStmt* if_stmt = &ast->if_stmt;
 
     if (if_stmt->condition != NULL)
     {
-        expr_sema(if_stmt->condition);
+        ast_sema(if_stmt->condition, ctx);
     }
 
     if (if_stmt->if_block != NULL)
     {
-        scope_sema(if_stmt->if_block);
+        scope_sema(if_stmt->if_block, ctx);
     }
 
     if (if_stmt->else_block != NULL)
     {
-        scope_sema(if_stmt->else_block);
+        scope_sema(if_stmt->else_block, ctx);
     }
+}
+
+void if_stmt_codegen(AST* ast, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_IF_STMT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    IfStmt* if_stmt = &ast->if_stmt;
+
+    // TODO: Implement
+    (void)if_stmt;
 }

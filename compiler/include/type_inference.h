@@ -3,6 +3,6 @@
 
 #include "ast.h"
 
-TypeSpecifier* expr_infer_type(Expr* expr);
+TypeSpecifier* expr_infer_type(AST* expr);
 
 #endif

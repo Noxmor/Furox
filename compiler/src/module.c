@@ -119,8 +119,10 @@ void module_compile(Module* mod)
 
         if (parser->translation_unit != NULL)
         {
-            translation_unit_resolve(parser, parser->translation_unit);
-            translation_unit_sema(parser->translation_unit);
+            translation_unit_resolve(parser->translation_unit, parser);
+
+            SemaContext ctx;
+            translation_unit_sema(parser->translation_unit, &ctx);
         }
 
         parser_emit_diagnostics(parser);
@@ -145,9 +147,7 @@ void module_codegen(Module* mod, CodegenContext* ctx)
     for (usize i = 0; i < list_size(&mod->parsers); ++i)
     {
         Parser* parser = list_get(&mod->parsers, i);
-        TranslationUnit* unit = parser->translation_unit;
-
-        translation_unit_codegen(unit, ctx);
+        translation_unit_codegen(parser->translation_unit, ctx);
     }
 }
 

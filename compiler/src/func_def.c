@@ -10,13 +10,11 @@
 
 #include <string.h>
 
-static FuncDef* func_def_create(const char* name, GenericParams* generic_params,
-                                FuncParams* params, TypeSpecifier* return_type,
-                                Scope* body)
+static void func_def_init(FuncDef* func_def, const char* name,
+                          AST* generic_params, AST* params, AST* return_type,
+                          AST* body)
 {
     FRX_ASSERT(name != NULL);
-
-    FuncDef* func_def = compiler_alloc_ast(sizeof(FuncDef));
 
     func_def->name = name;
     func_def->generic_params = generic_params;
@@ -24,82 +22,102 @@ static FuncDef* func_def_create(const char* name, GenericParams* generic_params,
     func_def->params = params;
     func_def->return_type = return_type;
     func_def->body = body;
-
-    return func_def;
 }
 
-FuncDef* func_def_parse(Parser* parser)
+AST* func_def_parse(Parser* parser)
 {
+    AST* ast = ast_create(FRX_AST_TYPE_FUNC_DEF);
+    FuncDef* func_def = &ast->func_def;
+
+    ast->range.start = parser_current_location(parser);
+
     parser_eat(parser, FRX_TOKEN_TYPE_KW_FN);
 
     const char* name = parser_current_token(parser)->identifier;
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    GenericParams* generic_params = NULL;
+    AST* generic_params = NULL;
     if (parser_match(parser, FRX_TOKEN_TYPE_LT))
     {
         generic_params = generic_params_parse(parser);
     }
 
-    FuncParams* params = func_params_parse(parser);
+    AST* params = func_params_parse(parser);
 
     parser_eat(parser, FRX_TOKEN_TYPE_ARROW);
 
-    TypeSpecifier* return_type = type_specifier_parse(parser);
+    AST* return_type = type_specifier_parse(parser);
 
-    FuncDef* func_def = func_def_create(name, generic_params, params,
-                                        return_type, scope_parse(parser));
+    func_def_init(func_def, name, generic_params, params, return_type,
+                  scope_parse(parser));
 
-    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_FUNC, func_def->name, func_def);
+    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_FUNC,
+                         func_def->name, func_def);
 
-    return func_def;
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-void func_def_resolve(Parser* parser, FuncDef* func_def)
+void func_def_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(func_def != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_DEF);
+
+    FuncDef* func_def = &ast->func_def;
 
     if (func_def->params != NULL)
     {
-        func_params_resolve(parser, func_def->params);
+        func_params_resolve(func_def->params, parser);
     }
 
     if (func_def->return_type != NULL)
     {
-        type_specifier_resolve(parser, func_def->return_type);
+        type_specifier_resolve(func_def->return_type, parser);
     }
 
     if (func_def->body != NULL)
     {
-        scope_resolve(parser, func_def->body);
+        scope_resolve(func_def->body, parser);
     }
 }
 
-void func_def_sema(FuncDef* func_def)
+void func_def_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(func_def != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    if (func_def->params != NULL)
-    {
-        func_params_sema(func_def->params);
-    }
-
-    if (func_def->return_type != NULL)
-    {
-        type_specifier_sema(func_def->return_type);
-    }
-
-    if (func_def->body != NULL)
-    {
-        scope_sema(func_def->body);
-    }
-}
-
-void func_def_codegen(FuncDef* func_def, CodegenContext* ctx)
-{
-    FRX_ASSERT(func_def != NULL);
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_DEF);
 
     FRX_ASSERT(ctx != NULL);
+
+    FuncDef* func_def = &ast->func_def;
+
+    if (func_def->params != NULL)
+    {
+        func_params_sema(func_def->params, ctx);
+    }
+
+    if (func_def->return_type != NULL)
+    {
+        type_specifier_sema(func_def->return_type, ctx);
+    }
+
+    if (func_def->body != NULL)
+    {
+        scope_sema(func_def->body, ctx);
+    }
+}
+
+void func_def_codegen(AST* ast, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_DEF);
+
+    FRX_ASSERT(ctx != NULL);
+
+    FuncDef* func_def = &ast->func_def;
 
     type_specifier_codegen(func_def->return_type, ctx->header);
     fprintf(ctx->header, " %s", func_def->name);

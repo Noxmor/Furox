@@ -1,21 +1,16 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 
-static TranslationUnit* translation_unit_create(void)
+static void translation_unit_init(TranslationUnit* unit)
 {
-    TranslationUnit* unit = compiler_alloc_ast(sizeof(TranslationUnit));
-
     list_init(&unit->items);
-
-    return unit;
 }
 
-static void translation_unit_add_item(TranslationUnit* unit, Item* item)
+static void translation_unit_add_item(TranslationUnit* unit, AST* item)
 {
     FRX_ASSERT(unit != NULL);
     FRX_ASSERT(item != NULL);
@@ -23,13 +18,18 @@ static void translation_unit_add_item(TranslationUnit* unit, Item* item)
     list_add(&unit->items, item);
 }
 
-TranslationUnit* translation_unit_parse(Parser* parser)
+AST* translation_unit_parse(Parser* parser)
 {
-    TranslationUnit* unit = translation_unit_create();
+    AST* ast = ast_create(FRX_AST_TYPE_TRANSLATION_UNIT);
+    TranslationUnit* unit = &ast->translation_unit;
+
+    ast->range.start = parser_current_location(parser);
+
+    translation_unit_init(unit);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_EOF))
     {
-        Item* item = item_parse(parser);
+        AST* item = item_parse(parser);
         if (item == NULL)
         {
             continue;
@@ -38,36 +38,56 @@ TranslationUnit* translation_unit_parse(Parser* parser)
         translation_unit_add_item(unit, item);
     }
 
-    return unit;
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-void translation_unit_resolve(Parser* parser, TranslationUnit* unit)
+void translation_unit_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(unit != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TRANSLATION_UNIT);
+
+    TranslationUnit* unit = &ast->translation_unit;
 
     for (usize i = 0; i < list_size(&unit->items); ++i)
     {
-        Item* item = list_get(&unit->items, i);
-        item_resolve(parser, item);
+        AST* item = list_get(&unit->items, i);
+        ast_resolve(item, parser);
     }
 }
 
-void translation_unit_sema(TranslationUnit* unit)
+void translation_unit_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(unit != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TRANSLATION_UNIT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    TranslationUnit* unit = &ast->translation_unit;
 
     for (usize i = 0; i < list_size(&unit->items); ++i)
     {
-        Item* item = list_get(&unit->items, i);
-        item_sema(item);
+        AST* item = list_get(&unit->items, i);
+        ast_sema(item, ctx);
     }
 }
 
-void translation_unit_codegen(TranslationUnit* unit, CodegenContext* ctx)
+void translation_unit_codegen(AST* ast, CodegenContext* ctx)
 {
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TRANSLATION_UNIT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    TranslationUnit* unit = &ast->translation_unit;
+
     for (usize i = 0; i < list_size(&unit->items); ++i)
     {
-        Item* item = list_get(&unit->items, i);
-        item_codegen(item, ctx);
+        AST* item = list_get(&unit->items, i);
+        ast_codegen(item, ctx);
     }
 }

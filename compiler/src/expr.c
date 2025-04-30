@@ -1,93 +1,49 @@
 #include "assert.h"
 #include "ast.h"
-#include "codegen.h"
-#include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
-#include "resolution.h"
-#include "sema.h"
 
-typedef void (*ExprResolveFunc)(Parser*, void*);
-
-static const ExprResolveFunc expr_type_to_resolve[FRX_EXPR_TYPE_COUNT] = {
-    [FRX_EXPR_TYPE_ERROR] = (ExprResolveFunc)NULL,
-    [FRX_EXPR_TYPE_INT_LIT] = (ExprResolveFunc)NULL,
-    [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprResolveFunc)unary_expr_resolve,
-    [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprResolveFunc)binary_expr_resolve,
-};
-
-typedef void (*ExprSemaFunc)(void*);
-
-static const ExprSemaFunc expr_type_to_sema[FRX_EXPR_TYPE_COUNT] = {
-    [FRX_EXPR_TYPE_ERROR] = (ExprSemaFunc)NULL,
-    [FRX_EXPR_TYPE_INT_LIT] = (ExprSemaFunc)int_literal_sema,
-    [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprSemaFunc)unary_expr_sema,
-    [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprSemaFunc)binary_expr_sema,
-};
-
-typedef void (*ExprCodegenFunc)(void*, CodegenContext*);
-
-static const ExprCodegenFunc expr_type_to_codegen[FRX_EXPR_TYPE_COUNT] = {
-    [FRX_EXPR_TYPE_ERROR] = (ExprCodegenFunc)NULL,
-    [FRX_EXPR_TYPE_INT_LIT] = (ExprCodegenFunc)int_literal_codegen,
-    [FRX_EXPR_TYPE_PATH_EXPR] = (ExprCodegenFunc)path_expr_codegen,
-    [FRX_EXPR_TYPE_CALL_EXPR] = (ExprCodegenFunc)call_expr_codegen,
-    [FRX_EXPR_TYPE_UNARY_EXPR] = (ExprCodegenFunc)unary_expr_codegen,
-    [FRX_EXPR_TYPE_BINARY_EXPR] = (ExprCodegenFunc)binary_expr_codegen,
-};
-
-static Expr* expr_create(ExprType type, void* node)
-{
-    FRX_ASSERT(type < FRX_EXPR_TYPE_COUNT);
-    FRX_ASSERT((type == FRX_EXPR_TYPE_ERROR && node == NULL)
-               || (type != FRX_EXPR_TYPE_ERROR && node != NULL));
-
-    Expr* expr = compiler_alloc_ast(sizeof(Expr));
-
-    expr->type = type;
-    expr->node = node;
-
-    return expr;
-}
-
-static UnaryExpr* unary_expr_create(TokenType type, Operator operator, Expr* operand)
+static AST* unary_expr_create(TokenType type, Operator operator, AST* operand)
 {
     FRX_ASSERT(token_type_is_prefix_operator(type) || token_type_is_postfix_operator(type));
 
     FRX_ASSERT(operator < FRX_OPERATOR_COUNT);
 
-    UnaryExpr* unary_expr = compiler_alloc_ast(sizeof(UnaryExpr));
+    AST* ast = ast_create(FRX_AST_TYPE_UNARY_EXPR);
+    UnaryExpr* unary_expr = &ast->unary_expr;
 
     unary_expr->type = type;
     unary_expr->operator = operator;
     unary_expr->operand = operand;
 
-    return unary_expr;
+    return ast;
 }
 
-static BinaryExpr* binary_expr_create(TokenType type, Operator operator, Expr* left, Expr* right)
+static AST* binary_expr_create(TokenType type, Operator operator,
+                               AST* left, AST* right)
 {
     FRX_ASSERT(token_type_is_infix_operator(type));
 
     FRX_ASSERT(operator < FRX_OPERATOR_COUNT);
 
-    BinaryExpr* binary_expr = compiler_alloc_ast(sizeof(BinaryExpr));
+    AST* ast = ast_create(FRX_AST_TYPE_BINARY_EXPR);
+    BinaryExpr* binary_expr = &ast->binary_expr;
 
     binary_expr->type = type;
     binary_expr->operator = operator;
     binary_expr->left = left;
     binary_expr->right = right;
 
-    return binary_expr;
+    return ast;
 }
 
-static Expr* expr_parse_primary(Parser* parser)
+static AST* expr_parse_primary(Parser* parser)
 {
     switch (parser_current_type(parser))
     {
-        case FRX_TOKEN_TYPE_INT_LIT: return expr_create(FRX_EXPR_TYPE_INT_LIT, int_literal_parse(parser));
+        case FRX_TOKEN_TYPE_INT_LIT: return int_literal_parse(parser);
         case FRX_TOKEN_TYPE_KW_EXTERN:
-        case FRX_TOKEN_TYPE_IDENT: return expr_create(FRX_EXPR_TYPE_PATH_EXPR, path_expr_parse(parser));
+        case FRX_TOKEN_TYPE_IDENT: return path_expr_parse(parser);
         default:
         {
             FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_EXPR,
@@ -96,16 +52,16 @@ static Expr* expr_parse_primary(Parser* parser)
                                       token_type_to_str(parser_current_type(parser)));
             parser_recover(parser);
 
-            return expr_create(FRX_EXPR_TYPE_ERROR, NULL);
+            return ast_create(FRX_AST_TYPE_ERROR);
         }
     }
 }
 
-static Expr* expr_parse_with_precedence(Parser* parser, Precedence min_precedence)
+static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence)
 {
     FRX_ASSERT(parser != NULL);
 
-    Expr* expr = NULL;
+    AST* expr = NULL;
 
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_LPAREN)
     {
@@ -132,9 +88,7 @@ static Expr* expr_parse_with_precedence(Parser* parser, Precedence min_precedenc
 
         Operator operator = token_type_to_prefix_operator(type);
         Precedence precedence = operator_to_precedence(operator);
-        UnaryExpr* unary_expr = unary_expr_create(type, operator,
-                                                  expr_parse_with_precedence(parser, precedence));
-        expr = expr_create(FRX_EXPR_TYPE_UNARY_EXPR, unary_expr);
+        expr = unary_expr_create(type, operator, expr_parse_with_precedence(parser, precedence));
     }
     else
     {
@@ -163,26 +117,22 @@ static Expr* expr_parse_with_precedence(Parser* parser, Precedence min_precedenc
 
             if (operator == FRX_OPERATOR_ARRAY_SUBSCRIPT)
             {
-                Expr* index = expr_parse(parser);
+                AST* index = expr_parse(parser);
                 if (parser_eat(parser, FRX_TOKEN_TYPE_RBRACKET))
                 {
                     return NULL;
                 }
 
-                BinaryExpr* binary_expr = binary_expr_create(type, operator, expr, index);
-                expr = expr_create(FRX_EXPR_TYPE_BINARY_EXPR, binary_expr);
+                expr = binary_expr_create(type, operator, expr, index);
             }
             else if (operator == FRX_OPERATOR_CALL)
             {
-                Expr* call_expr = expr_create(FRX_EXPR_TYPE_CALL_EXPR, call_expr_parse(parser));
-
-                BinaryExpr* binary_expr = binary_expr_create(type, operator, expr, call_expr);
-                expr = expr_create(FRX_EXPR_TYPE_BINARY_EXPR, binary_expr);
+                AST* call_expr = call_expr_parse(parser);
+                expr = binary_expr_create(type, operator, expr, call_expr);
             }
             else
             {
-                UnaryExpr* unary_expr = unary_expr_create(type, operator, expr);
-                expr = expr_create(FRX_EXPR_TYPE_UNARY_EXPR, unary_expr);
+                expr = unary_expr_create(type, operator, expr);
             }
 
             continue;
@@ -198,9 +148,8 @@ static Expr* expr_parse_with_precedence(Parser* parser, Precedence min_precedenc
 
             parser_eat(parser, type);
 
-            BinaryExpr* binary_expr = binary_expr_create(type, operator, expr,
-                                                         expr_parse_with_precedence(parser, precedence));
-            expr = expr_create(FRX_EXPR_TYPE_BINARY_EXPR, binary_expr);
+            expr = binary_expr_create(type, operator, expr,
+                                      expr_parse_with_precedence(parser, precedence));
 
             continue;
         }
@@ -211,40 +160,7 @@ static Expr* expr_parse_with_precedence(Parser* parser, Precedence min_precedenc
     return expr;
 }
 
-Expr* expr_parse(Parser* parser)
+AST* expr_parse(Parser* parser)
 {
     return expr_parse_with_precedence(parser, FRX_PRECEDENCE_MIN);
-}
-
-void expr_resolve(Parser* parser, Expr* expr)
-{
-    FRX_ASSERT(expr != NULL);
-
-    ExprResolveFunc func = expr_type_to_resolve[expr->type];
-    if (func != NULL)
-    {
-        func(parser, expr->node);
-    }
-}
-
-void expr_sema(Expr* expr)
-{
-    FRX_ASSERT(expr != NULL);
-
-    ExprSemaFunc func = expr_type_to_sema[expr->type];
-    if (func != NULL)
-    {
-        func(expr->node);
-    }
-}
-
-void expr_codegen(Expr* expr, CodegenContext* ctx)
-{
-    FRX_ASSERT(expr != NULL);
-
-    ExprCodegenFunc func = expr_type_to_codegen[expr->type];
-    if (func != NULL)
-    {
-        func(expr->node, ctx);
-    }
 }

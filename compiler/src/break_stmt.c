@@ -1,39 +1,31 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "parser.h"
-#include "sema.h"
-#include "source_location.h"
-#include "source_range.h"
+#include "codegen.h"
 
-static BreakStmt* break_stmt_create(SourceRange range)
+AST* break_stmt_parse(Parser* parser)
 {
-    BreakStmt* break_stmt = compiler_alloc_ast(sizeof(BreakStmt));
+    AST* ast = ast_create(FRX_AST_TYPE_BREAK_STMT);
+    ast->range.start = parser_current_location(parser);
 
-    break_stmt->range = range;
+    if (parser_eat(parser, FRX_TOKEN_TYPE_KW_BREAK))
+    {
+        ast->type = FRX_AST_TYPE_ERROR;
+    }
 
-    return break_stmt;
-}
-
-BreakStmt* break_stmt_parse(Parser* parser)
-{
-    SourceLocation start = parser_current_location(parser);
-
-    parser_eat(parser, FRX_TOKEN_TYPE_KW_BREAK);
-
-    SourceLocation end = parser_current_location(parser);
+    ast->range.end = parser_current_location(parser);
 
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    SourceRange range = {
-        .start = start,
-        .end = end
-    };
 
-    return break_stmt_create(range);
+    return ast;
 }
 
-void break_stmt_sema(BreakStmt* break_stmt)
+void break_stmt_codegen(AST* ast, CodegenContext* ctx)
 {
-    FRX_ASSERT(break_stmt != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_BREAK_STMT);
+
+    fprintf(ctx->source, "break;\n");
 }

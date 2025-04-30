@@ -6,68 +6,78 @@
 #include "resolution.h"
 #include "sema.h"
 
-static FuncParam* func_param_create(const char* name, TypeSpecifier* type)
+static AST* func_param_create(const char* name, AST* type)
 {
     FRX_ASSERT(name != NULL);
     FRX_ASSERT(type != NULL);
 
-    FuncParam* param = compiler_alloc_ast(sizeof(FuncParam));
+    AST* ast = ast_create(FRX_AST_TYPE_FUNC_PARAM);
+    FuncParam* param = &ast->func_param;
 
     param->name = name;
     param->type = type;
 
-    return param;
+    return ast;
 }
 
-static FuncParam* func_param_parse(Parser* parser)
+static AST* func_param_parse(Parser* parser)
 {
-    b8 error = FRX_FALSE;
-
     const char* name = parser_current_token(parser)->identifier;
 
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
-    error |= parser_eat(parser, FRX_TOKEN_TYPE_COLON);
+    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
-    TypeSpecifier* type = type_specifier_parse(parser);
+    AST* type = type_specifier_parse(parser);
 
     return func_param_create(name, type);
 }
 
-static void func_param_resolve(Parser* parser, FuncParam* param)
+static void func_param_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(param != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_PARAM);
+
+    FuncParam* param = &ast->func_param;
 
     if (param->type != NULL)
     {
-        type_specifier_resolve(parser, param->type);
+        type_specifier_resolve(param->type, parser);
     }
 }
 
-static void func_param_sema(FuncParam* param)
+static void func_param_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(param != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_PARAM);
+
+    FRX_ASSERT(ctx != NULL);
+
+    FuncParam* param = &ast->func_param;
 
     if (param->type != NULL)
     {
-        type_specifier_sema(param->type);
+        type_specifier_sema(param->type, ctx);
     }
 }
 
-static FuncParams* func_params_create(void)
+static void func_params_init(FuncParams* params)
 {
-    FuncParams* params = compiler_alloc_ast(sizeof(FuncParams));
-
     list_init(&params->params);
     params->variadic = FRX_FALSE;
-
-    return params;
 }
 
-FuncParams* func_params_parse(Parser* parser)
+AST* func_params_parse(Parser* parser)
 {
+    AST* ast = ast_create(FRX_AST_TYPE_FUNC_PARAMS);
+    FuncParams* params = &ast->func_params;
+
+    ast->range.start = parser_current_location(parser);
+
     parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
 
-    FuncParams* params = func_params_create();
+    func_params_init(params);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
     {
@@ -84,52 +94,70 @@ FuncParams* func_params_parse(Parser* parser)
             break;
         }
 
-        FuncParam* param = func_param_parse(parser);
+        AST* param = func_param_parse(parser);
         list_add(&params->params, param);
     }
 
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
-    return params;
+    return ast;
 }
 
-void func_params_resolve(Parser* parser, FuncParams* params)
+void func_params_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(params != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_PARAMS);
+
+    FuncParams* params = &ast->func_params;
 
     for (usize i = 0; i < list_size(&params->params); ++i)
     {
-        FuncParam* param = list_get(&params->params, i);
-        func_param_resolve(parser, param);
+        AST* param = list_get(&params->params, i);
+        func_param_resolve(param, parser);
     }
 }
 
-void func_params_sema(FuncParams* params)
+void func_params_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(params != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_PARAMS);
+
+    FRX_ASSERT(ctx != NULL);
+
+    FuncParams* params = &ast->func_params;
 
     for (usize i = 0; i < list_size(&params->params); ++i)
     {
-        FuncParam* param = list_get(&params->params, i);
-        func_param_sema(param);
+        AST* param = list_get(&params->params, i);
+        func_param_sema(param, ctx);
     }
 }
 
-static void func_param_codegen(FuncParam* param, FILE* f)
+static void func_param_codegen(AST* ast, FILE* f)
 {
-    FRX_ASSERT(param != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_PARAM);
 
     FRX_ASSERT(f != NULL);
+
+    FuncParam* param  = &ast->func_param;
 
     type_specifier_codegen(param->type, f);
     fprintf(f, " %s", param->name);
 }
 
-void func_params_codegen(FuncParams* params, FILE* f)
+void func_params_codegen(AST* ast, FILE* f)
 {
-    FRX_ASSERT(params != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_PARAMS);
 
     FRX_ASSERT(f != NULL);
+
+    FuncParams* params = &ast->func_params;
 
     fprintf(f, "(");
 
@@ -145,7 +173,7 @@ void func_params_codegen(FuncParams* params, FILE* f)
             fprintf(f, ", ");
         }
 
-        FuncParam* param = list_get(&params->params, i);
+        AST* param = list_get(&params->params, i);
         func_param_codegen(param, f);
     }
 

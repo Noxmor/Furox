@@ -1,20 +1,11 @@
 #include "assert.h"
 #include "ast.h"
-#include "codegen.h"
-#include "compiler.h"
 #include "parser.h"
+#include "sema.h"
+#include "codegen.h"
 #include "token.h"
 
-static CallExpr* call_expr_create(void)
-{
-    CallExpr* call_expr = compiler_alloc_ast(sizeof(CallExpr));
-
-    list_init(&call_expr->args);
-
-    return call_expr;
-}
-
-static void call_expr_add_arg(CallExpr* call_expr, Expr* arg)
+static void call_expr_add_arg(CallExpr* call_expr, AST* arg)
 {
     FRX_ASSERT(call_expr != NULL);
 
@@ -23,9 +14,12 @@ static void call_expr_add_arg(CallExpr* call_expr, Expr* arg)
     list_add(&call_expr->args, arg);
 }
 
-CallExpr* call_expr_parse(Parser* parser)
+AST* call_expr_parse(Parser* parser)
 {
-    CallExpr* call_expr = call_expr_create();
+    AST* ast = ast_create(FRX_AST_TYPE_CALL_EXPR);
+    CallExpr* call_expr = &ast->call_expr;
+    ast->range.start = parser_current_location(parser);
+
     while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
     {
         if (!list_empty(&call_expr->args))
@@ -33,17 +27,47 @@ CallExpr* call_expr_parse(Parser* parser)
             parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
         }
 
-        Expr* arg = expr_parse(parser);
+        AST* arg = expr_parse(parser);
         call_expr_add_arg(call_expr, arg);
     }
 
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
-    return call_expr;
+    return ast;
 }
 
-void call_expr_codegen(CallExpr* call_expr, CodegenContext* ctx)
+void call_expr_resolve(AST* ast, Parser* parser)
 {
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_CALL_EXPR);
+
+    // TODO: Implement
+    (void)parser;
+}
+
+void call_expr_sema(AST* ast, SemaContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_CALL_EXPR);
+
+    FRX_ASSERT(ctx != NULL);
+
+    // TODO: Implement
+    (void)ctx;
+}
+
+void call_expr_codegen(AST* ast, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_CALL_EXPR);
+
+    FRX_ASSERT(ctx != NULL);
+
+    CallExpr* call_expr = &ast->call_expr;
+
     for (usize i = 0; i < list_size(&call_expr->args); ++i)
     {
         if (i > 0)
@@ -51,8 +75,8 @@ void call_expr_codegen(CallExpr* call_expr, CodegenContext* ctx)
             fprintf(ctx->source, ", ");
         }
 
-        Expr* arg = list_get(&call_expr->args, i);
-        expr_codegen(arg, ctx);
+        AST* arg = list_get(&call_expr->args, i);
+        ast_codegen(arg, ctx);
 
     }
 

@@ -1,25 +1,25 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 
-static ReturnStmt* return_stmt_create(Expr* value)
+static void return_stmt_init(ReturnStmt* return_stmt, AST* value)
 {
-    ReturnStmt* return_stmt = compiler_alloc_ast(sizeof(ReturnStmt));
-
     return_stmt->value = value;
-
-    return return_stmt;
 }
 
-ReturnStmt* return_stmt_parse(Parser* parser)
+AST* return_stmt_parse(Parser* parser)
 {
+    AST* ast = ast_create(FRX_AST_TYPE_RETURN_STMT);
+    ReturnStmt* return_stmt = &ast->return_stmt;
+
+    ast->range.start = parser_current_location(parser);
+
     parser_eat(parser, FRX_TOKEN_TYPE_KW_RETURN);
 
-    Expr* value = NULL;
+    AST* value = NULL;
 
     if (!parser_match(parser, FRX_TOKEN_TYPE_SEMI))
     {
@@ -28,41 +28,59 @@ ReturnStmt* return_stmt_parse(Parser* parser)
 
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    return return_stmt_create(value);
+    return_stmt_init(return_stmt, value);
+
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-void return_stmt_resolve(Parser* parser, ReturnStmt* return_stmt)
+void return_stmt_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(return_stmt != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_RETURN_STMT);
+
+    ReturnStmt* return_stmt = &ast->return_stmt;
 
     if (return_stmt->value != NULL)
     {
-        expr_resolve(parser, return_stmt->value);
+        ast_resolve(return_stmt->value, parser);
     }
 }
 
-void return_stmt_sema(ReturnStmt* return_stmt)
+void return_stmt_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(return_stmt != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    if (return_stmt->value != NULL)
-    {
-        expr_sema(return_stmt->value);
-    }
-}
-
-void return_stmt_codegen(ReturnStmt* return_stmt, CodegenContext* ctx)
-{
-    FRX_ASSERT(return_stmt != NULL);
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_RETURN_STMT);
 
     FRX_ASSERT(ctx != NULL);
+
+    ReturnStmt* return_stmt = &ast->return_stmt;
+
+    if (return_stmt->value != NULL)
+    {
+        ast_sema(return_stmt->value, ctx);
+    }
+}
+
+void return_stmt_codegen(AST* ast, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_RETURN_STMT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    ReturnStmt* return_stmt = &ast->return_stmt;
 
     fprintf(ctx->source, "return");
 
     if (return_stmt->value != NULL)
     {
         fprintf(ctx->source, " ");
-        expr_codegen(return_stmt->value, ctx);
+        ast_codegen(return_stmt->value, ctx);
     }
 
     fprintf(ctx->source, ";\n");

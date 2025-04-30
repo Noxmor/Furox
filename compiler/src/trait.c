@@ -1,61 +1,73 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
 
-static Trait* trait_create(const char* name)
+static void trait_init(Trait* trait, const char* name)
 {
     FRX_ASSERT(name != NULL);
 
-    Trait* trait = compiler_alloc_ast(sizeof(Trait));
-
     trait->name = name;
     list_init(&trait->methods);
-
-    return trait;
 }
 
-Trait* trait_parse(Parser* parser)
+AST* trait_parse(Parser* parser)
 {
+    AST* ast = ast_create(FRX_AST_TYPE_TRAIT);
+    Trait* trait = &ast->trait;
+
+    ast->range.start = parser_current_location(parser);
+
     parser_eat(parser, FRX_TOKEN_TYPE_KW_TRAIT);
 
     const char* name = parser_current_token(parser)->identifier;
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    Trait* trait = trait_create(name);
+    trait_init(trait, name);
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
-        FuncDecl* func_decl = func_decl_parse(parser);
+        AST* func_decl = func_decl_parse(parser);
         list_add(&trait->methods, func_decl);
     }
 
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
-    return trait;
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-void trait_resolve(Parser* parser, Trait* trait)
+void trait_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(trait != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TRAIT);
+
+    Trait* trait = &ast->trait;
 
     for (usize i = 0; i < list_size(&trait->methods); ++i)
     {
-        FuncDecl* func_decl = list_get(&trait->methods, i);
-        func_decl_resolve(parser, func_decl);
+        AST* func_decl = list_get(&trait->methods, i);
+        func_decl_resolve(func_decl, parser);
     }
 }
 
-void trait_sema(Trait* trait)
+void trait_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(trait != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TRAIT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    Trait* trait = &ast->trait;
 
     for (usize i = 0; i < list_size(&trait->methods); ++i)
     {
-        FuncDecl* func_decl = list_get(&trait->methods, i);
-        func_decl_sema(func_decl);
+        AST* func_decl = list_get(&trait->methods, i);
+        func_decl_sema(func_decl, ctx);
     }
 }

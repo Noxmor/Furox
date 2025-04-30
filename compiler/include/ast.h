@@ -9,27 +9,12 @@
 
 typedef struct Module Module;
 
+typedef struct AST AST;
+
 typedef struct IntLiteral
 {
     u64 value;
-    SourceRange range;
 } IntLiteral;
-
-enum
-{
-    FRX_ITEM_TYPE_ERROR,
-    FRX_ITEM_TYPE_USE_STMT,
-    FRX_ITEM_TYPE_FUNC_DECL,
-    FRX_ITEM_TYPE_FUNC_DEF,
-    FRX_ITEM_TYPE_STRUCT_DEF,
-    FRX_ITEM_TYPE_ENUM_DEF,
-    FRX_ITEM_TYPE_TRAIT,
-    FRX_ITEM_TYPE_IMPL_BLOCK,
-
-    FRX_ITEM_TYPE_COUNT
-};
-
-typedef u8 ItemType;
 
 enum
 {
@@ -51,7 +36,7 @@ typedef struct TypeSpecifier TypeSpecifier;
 
 typedef struct GenericArg
 {
-    TypeSpecifier* type;
+    AST* type;
 } GenericArg;
 
 typedef struct GenericArgs
@@ -62,7 +47,7 @@ typedef struct GenericArgs
 typedef struct TypeSpecifier
 {
     TypeKind kind;
-    GenericArgs* generic_args;
+    AST* generic_args;
     union
     {
         const char* name;
@@ -70,18 +55,11 @@ typedef struct TypeSpecifier
         usize size;
         struct
         {
-            struct TypeSpecifier* base;
+            AST* base;
             b8 mutable;
         } ptr;
     };
 } TypeSpecifier;
-
-typedef struct Item
-{
-    ItemType type;
-    void* node;
-    SourceRange range;
-} Item;
 
 typedef struct UseStmt
 {
@@ -92,7 +70,7 @@ typedef struct UseStmt
 
 typedef struct TraitBound
 {
-    TypeSpecifier* type;
+    AST* type;
 } TraitBound;
 
 typedef struct GenericParam
@@ -109,13 +87,13 @@ typedef struct GenericParams
 typedef struct StructField
 {
     const char* name;
-    TypeSpecifier* type;
+    AST* type;
 } StructField;
 
 typedef struct StructDef
 {
     const char* name;
-    GenericParams* generic_params;
+    AST* generic_params;
     List fields;
 } StructDef;
 
@@ -127,7 +105,7 @@ typedef struct EnumConstant
 typedef struct EnumDef
 {
     const char* name;
-    TypeSpecifier* type;
+    AST* type;
     List constants;
 } EnumDef;
 
@@ -146,19 +124,17 @@ typedef struct ImplBlock
 typedef struct TranslationUnit
 {
     List items;
-    SourceRange range;
 } TranslationUnit;
 
 typedef struct Scope
 {
     List stmts;
-    SourceRange range;
 } Scope;
 
 typedef struct FuncParam
 {
     const char* name;
-    TypeSpecifier* type;
+    AST* type;
 } FuncParam;
 
 typedef struct FuncParams
@@ -175,57 +151,36 @@ typedef struct GenericInstantiation
 typedef struct FuncDecl
 {
     const char* name;
-    GenericParams* generic_params;
-    FuncParams* params;
-    TypeSpecifier* return_type;
-    SourceRange range;
+    AST* generic_params;
+    AST* params;
+    AST* return_type;
 } FuncDecl;
 
 typedef struct FuncDef
 {
     const char* name;
-    GenericParams* generic_params;
+    AST* generic_params;
     List generic_instantiations;
-    FuncParams* params;
-    TypeSpecifier* return_type;
-    Scope* body;
-    SourceRange range;
+    AST* params;
+    AST* return_type;
+    AST* body;
 } FuncDef;
 
-enum
-{
-    FRX_EXPR_TYPE_ERROR,
-    FRX_EXPR_TYPE_INT_LIT,
-    FRX_EXPR_TYPE_UNARY_EXPR,
-    FRX_EXPR_TYPE_BINARY_EXPR,
-    FRX_EXPR_TYPE_PATH_EXPR,
-    FRX_EXPR_TYPE_CALL_EXPR,
-
-    FRX_EXPR_TYPE_COUNT
-};
-
 typedef u8 ExprType;
-
-typedef struct Expr
-{
-    ExprType type;
-    void* node;
-    SourceRange range;
-} Expr;
 
 typedef struct UnaryExpr
 {
     TokenType type;
     Operator operator;
-    Expr* operand;
+    AST* operand;
 } UnaryExpr;
 
 typedef struct BinaryExpr
 {
     TokenType type;
     Operator operator;
-    Expr* left;
-    Expr* right;
+    AST* left;
+    AST* right;
 } BinaryExpr;
 
 typedef struct PathSegment
@@ -246,63 +201,121 @@ typedef struct CallExpr
 
 typedef struct ExprStmt
 {
-    Expr* expr;
-    SourceRange range;
+    AST* expr;
 } ExprStmt;
 
 typedef struct BreakStmt
 {
-    SourceRange range;
+    const char* label;
 } BreakStmt;
 
 typedef struct ContinueStmt
 {
-    SourceRange range;
+    const char* label;
 } ContinueStmt;
 
 typedef struct ReturnStmt
 {
-    Expr* value;
-    SourceRange range;
+    AST* value;
 } ReturnStmt;
 
 typedef struct IfStmt
 {
-    Expr* condition;
-    Scope* if_block;
-    Scope* else_block;
+    AST* condition;
+    AST* if_block;
+    AST* else_block;
 } IfStmt;
-
-enum
-{
-    FRX_STMT_TYPE_ERROR,
-    FRX_STMT_TYPE_EXPR_STMT,
-    FRX_STMT_TYPE_BREAK_STMT,
-    FRX_STMT_TYPE_CONTINUE_STMT,
-    FRX_STMT_TYPE_RETURN_STMT,
-    FRX_STMT_TYPE_LET_STMT,
-    FRX_STMT_TYPE_IF_STMT,
-
-    FRX_STMT_TYPE_COUNT
-};
-
-typedef u8 StmtType;
-
-typedef struct Stmt
-{
-    StmtType type;
-    void* node;
-    SourceRange range;
-} Stmt;
 
 typedef struct LetStmt
 {
     b8 mutable;
     const char* name;
-    TypeSpecifier* type;
-    Expr* value;
+    AST* type;
+    AST* value;
 } LetStmt;
 
-Scope* scope_from_stmt(Stmt* stmt);
+enum
+{
+    FRX_AST_TYPE_ERROR,
+    FRX_AST_TYPE_TRANSLATION_UNIT,
+    FRX_AST_TYPE_USE_STMT,
+    FRX_AST_TYPE_TYPE_SPECIFIER,
+    FRX_AST_TYPE_STRUCT_FIELD,
+    FRX_AST_TYPE_STRUCT_DEF,
+    FRX_AST_TYPE_ENUM_CONSTANT,
+    FRX_AST_TYPE_ENUM_DEF,
+    FRX_AST_TYPE_TRAIT,
+    FRX_AST_TYPE_TRAIT_BOUND,
+    FRX_AST_TYPE_IMPL_BLOCK,
+    FRX_AST_TYPE_FUNC_PARAM,
+    FRX_AST_TYPE_FUNC_PARAMS,
+    FRX_AST_TYPE_GENERIC_PARAM,
+    FRX_AST_TYPE_GENERIC_PARAMS,
+    FRX_AST_TYPE_GENERIC_ARG,
+    FRX_AST_TYPE_GENERIC_ARGS,
+    FRX_AST_TYPE_FUNC_DECL,
+    FRX_AST_TYPE_FUNC_DEF,
+    FRX_AST_TYPE_SCOPE,
+    FRX_AST_TYPE_EXPR_STMT,
+    FRX_AST_TYPE_BREAK_STMT,
+    FRX_AST_TYPE_CONTINUE_STMT,
+    FRX_AST_TYPE_RETURN_STMT,
+    FRX_AST_TYPE_LET_STMT,
+    FRX_AST_TYPE_IF_STMT,
+    FRX_AST_TYPE_UNARY_EXPR,
+    FRX_AST_TYPE_BINARY_EXPR,
+    FRX_AST_TYPE_PATH_SEGMENT,
+    FRX_AST_TYPE_PATH_EXPR,
+    FRX_AST_TYPE_CALL_EXPR,
+    FRX_AST_TYPE_INT_LIT,
+
+    FRX_AST_TYPE_COUNT
+};
+
+typedef u8 ASTType;
+
+typedef struct AST
+{
+    SourceRange range;
+    ASTType type;
+    union
+    {
+        TranslationUnit translation_unit;
+        UseStmt use_stmt;
+        TypeSpecifier type_specifier;
+        StructField struct_field;
+        StructDef struct_def;
+        EnumConstant enum_constant;
+        EnumDef enum_def;
+        Trait trait;
+        TraitBound trait_bound;
+        ImplBlock impl_block;
+        FuncParam func_param;
+        FuncParams func_params;
+        GenericParam generic_param;
+        GenericParams generic_params;
+        GenericArg generic_arg;
+        GenericArgs generic_args;
+        FuncDecl func_decl;
+        FuncDef func_def;
+        Scope scope;
+        ExprStmt expr_stmt;
+        BreakStmt break_stmt;
+        ContinueStmt continue_stmt;
+        ReturnStmt return_stmt;
+        LetStmt let_stmt;
+        IfStmt if_stmt;
+        UnaryExpr unary_expr;
+        BinaryExpr binary_expr;
+        PathSegment path_segment;
+        PathExpr path_expr;
+        CallExpr call_expr;
+        IntLiteral int_literal;
+    };
+} AST;
+
+AST* ast_create(ASTType type);
+
+AST* scope_from_stmt(AST* stmt);
 
 #endif

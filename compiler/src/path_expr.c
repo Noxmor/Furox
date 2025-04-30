@@ -1,24 +1,25 @@
 #include "assert.h"
 #include "ast.h"
 #include "codegen.h"
-#include "compiler.h"
 #include "parser.h"
 #include "token.h"
 
-static PathSegment* path_segment_create(const char* name, b8 external)
+static void path_segment_init(PathSegment* path_segment, const char* name,
+                              b8 external)
 {
     FRX_ASSERT(name != NULL || external == FRX_TRUE);
 
-    PathSegment* path_segment = compiler_alloc_ast(sizeof(PathSegment));
-
     path_segment->name = name;
     path_segment->external = external;
-
-    return path_segment;
 }
 
-static PathSegment* path_segment_parse(Parser* parser)
+static AST* path_segment_parse(Parser* parser)
 {
+    AST* ast = ast_create(FRX_AST_TYPE_PATH_SEGMENT);
+    PathSegment* path_segment = &ast->path_segment;
+
+    ast->range.start = parser_current_location(parser);
+
     b8 external = FRX_FALSE;
     const char* name = NULL;
 
@@ -33,29 +34,39 @@ static PathSegment* path_segment_parse(Parser* parser)
         parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
     }
 
-    return path_segment_create(name, external);
+    path_segment_init(path_segment, name, external);
+
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-static PathExpr* path_expr_create(void)
-{
-    PathExpr* path_expr = compiler_alloc_ast(sizeof(ExprStmt));
-
-    list_init(&path_expr->path_segments);
-
-    return path_expr;
-}
-
-static void path_expr_add_segment(PathExpr* path_expr, PathSegment* path_segment)
+static void path_expr_init(PathExpr* path_expr)
 {
     FRX_ASSERT(path_expr != NULL);
+
+    list_init(&path_expr->path_segments);
+}
+
+static void path_expr_add_segment(PathExpr* path_expr, AST* path_segment)
+{
+    FRX_ASSERT(path_expr != NULL);
+
+    FRX_ASSERT(path_segment->type == FRX_AST_TYPE_PATH_SEGMENT);
 
     list_add(&path_expr->path_segments, path_segment);
 }
 
-PathExpr* path_expr_parse(Parser* parser)
+AST* path_expr_parse(Parser* parser)
 {
-    PathExpr* path_expr = path_expr_create();
-    PathSegment* path_segment = path_segment_parse(parser);
+    AST* ast = ast_create(FRX_AST_TYPE_PATH_EXPR);
+    PathExpr* path_expr = &ast->path_expr;
+
+    ast->range.start = parser_current_location(parser);
+
+    path_expr_init(path_expr);
+
+    AST* path_segment = path_segment_parse(parser);
     path_expr_add_segment(path_expr, path_segment);
 
     while (parser_match(parser, FRX_TOKEN_TYPE_RESOLUTION))
@@ -65,14 +76,30 @@ PathExpr* path_expr_parse(Parser* parser)
         path_expr_add_segment(path_expr, path_segment);
     }
 
-    return path_expr;
+    ast->range.end = parser_current_location(parser);
+
+    return ast;
 }
 
-void path_expr_codegen(PathExpr* path_expr, CodegenContext* ctx)
+void path_expr_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(path_expr != NULL);
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_PATH_EXPR);
+
+    // TODO: Implement
+    (void)parser;
+}
+
+void path_expr_codegen(AST* ast, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_PATH_EXPR);
 
     FRX_ASSERT(ctx != NULL);
+
+    PathExpr* path_expr = &ast->path_expr;
 
     for (usize i = 0; i < list_size(&path_expr->path_segments); ++i)
     {
@@ -81,8 +108,13 @@ void path_expr_codegen(PathExpr* path_expr, CodegenContext* ctx)
             fprintf(ctx->source, "_");
         }
 
-        PathSegment* segment = list_get(&path_expr->path_segments, i);
-        fprintf(ctx->source, segment->name);
+        AST* segment = list_get(&path_expr->path_segments, i);
+        PathSegment* path_segment = &segment->path_segment;
+
+        if (!path_segment->external)
+        {
+            fprintf(ctx->source, "%s", path_segment->name);
+        }
     }
 
     fprintf(ctx->source, "%p", path_expr);

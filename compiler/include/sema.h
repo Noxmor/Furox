@@ -3,48 +3,47 @@
 
 #include "ast.h"
 
-void translation_unit_sema(TranslationUnit* unit);
+typedef struct SemaContext
+{
 
-void type_specifier_sema(TypeSpecifier* type);
+} SemaContext;
 
-void item_sema(Item* item);
+void ast_sema(AST* ast, SemaContext* ctx);
 
-void struct_def_sema(StructDef* struct_def);
+void translation_unit_sema(AST* ast, SemaContext* ctx);
 
-void trait_sema(Trait* trait);
+void type_specifier_sema(AST* ast, SemaContext* ctx);
 
-void impl_block_sema(ImplBlock* impl_block);
+void struct_def_sema(AST* ast, SemaContext* ctx);
 
-void func_params_sema(FuncParams* params);
+void enum_def_sema(AST* ast, SemaContext* ctx);
 
-void func_decl_sema(FuncDecl* func_decl);
+void trait_sema(AST* ast, SemaContext* ctx);
 
-void func_def_sema(FuncDef* func_def);
+void impl_block_sema(AST* ast, SemaContext* ctx);
 
-void scope_sema(Scope* scope);
+void func_params_sema(AST* ast, SemaContext* ctx);
 
-void stmt_sema(Stmt* stmt);
+void func_decl_sema(AST* ast, SemaContext* ctx);
 
-void expr_stmt_sema(ExprStmt* expr_stmt);
+void func_def_sema(AST* ast, SemaContext* ctx);
 
-void break_stmt_sema(BreakStmt* break_stmt);
+void scope_sema(AST* ast, SemaContext* ctx);
 
-void continue_stmt_sema(ContinueStmt* continue_stmt);
+void expr_stmt_sema(AST* ast, SemaContext* ctx);
 
-void return_stmt_sema(ReturnStmt* return_stmt);
+void return_stmt_sema(AST* ast, SemaContext* ctx);
 
-void let_stmt_sema(LetStmt* let_stmt);
+void let_stmt_sema(AST* ast, SemaContext* ctx);
 
-void if_stmt_sema(IfStmt* if_stmt);
+void if_stmt_sema(AST* ast, SemaContext* ctx);
 
-void expr_sema(Expr* expr);
+void unary_expr_sema(AST* ast, SemaContext* ctx);
 
-TypeSpecifier* expr_infer_type(Expr* expr);
+void binary_expr_sema(AST* ast, SemaContext* ctx);
 
-void unary_expr_sema(UnaryExpr* unary_expr);
+void call_expr_sema(AST* ast, SemaContext* ctx);
 
-void binary_expr_sema(BinaryExpr* binary_expr);
-
-void int_literal_sema(IntLiteral* literal);
+TypeSpecifier* expr_infer_type(AST* expr);
 
 #endif

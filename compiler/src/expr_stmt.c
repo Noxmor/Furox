@@ -1,38 +1,60 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "codegen.h"
 
-static ExprStmt* expr_stmt_create(Expr* expr)
+AST* expr_stmt_parse(Parser* parser)
 {
-    ExprStmt* expr_stmt = compiler_alloc_ast(sizeof(ExprStmt));
+    AST* ast = ast_create(FRX_AST_TYPE_EXPR_STMT);
+    ast->range.start = parser_current_location(parser);
+    ExprStmt* expr_stmt = &ast->expr_stmt;
 
-    expr_stmt->expr = expr;
+    expr_stmt->expr = expr_parse(parser);
 
-    return expr_stmt;
-}
-
-ExprStmt* expr_stmt_parse(Parser* parser)
-{
-    Expr* expr = expr_parse(parser);
+    ast->range.end = parser_current_location(parser);
 
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    return expr_stmt_create(expr);
+    return ast;
 }
 
-void expr_stmt_resolve(Parser* parser, ExprStmt* expr_stmt)
+void expr_stmt_resolve(AST* ast, Parser* parser)
 {
-    FRX_ASSERT(expr_stmt != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    expr_resolve(parser, expr_stmt->expr);
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_EXPR_STMT);
+
+    ExprStmt* expr_stmt = &ast->expr_stmt;
+
+    ast_resolve(expr_stmt->expr, parser);
 }
 
-void expr_stmt_sema(ExprStmt* expr_stmt)
+void expr_stmt_sema(AST* ast, SemaContext* ctx)
 {
-    FRX_ASSERT(expr_stmt != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    expr_sema(expr_stmt->expr);
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_EXPR_STMT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    ExprStmt* expr_stmt = &ast->expr_stmt;
+
+    ast_sema(expr_stmt->expr, ctx);
+}
+
+void expr_stmt_codegen(AST* ast, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_EXPR_STMT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    ExprStmt* expr_stmt = &ast->expr_stmt;
+
+    ast_codegen(expr_stmt->expr, ctx);
+
+    fprintf(ctx->source, ";\n");
 }
