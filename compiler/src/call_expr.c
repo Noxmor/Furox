@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
+#include "resolution.h"
 #include "sema.h"
 #include "codegen.h"
 #include "token.h"
@@ -42,8 +43,13 @@ void call_expr_resolve(AST* ast, Parser* parser)
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_CALL_EXPR);
 
-    // TODO: Implement
-    (void)parser;
+    CallExpr* call_expr = &ast->call_expr;
+
+    for (usize i = 0; i < list_size(&call_expr->args); ++i)
+    {
+        AST* arg = list_get(&call_expr->args, i);
+        ast_resolve(arg, parser);
+    }
 }
 
 void call_expr_sema(AST* ast, SemaContext* ctx)

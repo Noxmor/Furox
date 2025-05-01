@@ -1,10 +1,14 @@
 #include "codegen.h"
+#include "assert.h"
+#include "module.h"
 
 #include <string.h>
 #include <ctype.h>
 
 u8 codegen_context_begin(CodegenContext* ctx, const char* name)
 {
+    ctx->mod = NULL;
+
     char buffer[strlen("/tmp/") + strlen(name) + strlen(".c") + 1];
 
     sprintf(buffer, "/tmp/%s.c", name);
@@ -79,4 +83,18 @@ void codegen_context_end(CodegenContext* ctx)
 
     fclose(ctx->source);
     fclose(ctx->header);
+}
+
+void codegen_mangle_module(FILE* f, Module* mod)
+{
+    FRX_ASSERT(f != NULL);
+
+    FRX_ASSERT(mod != NULL);
+
+    if (mod->parent != NULL)
+    {
+        codegen_mangle_module(f, mod->parent);
+    }
+
+    fprintf(f, "%s_", mod->name);
 }

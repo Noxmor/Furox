@@ -9,11 +9,14 @@ typedef struct CodegenContext
 {
     FILE* source;
     FILE* header;
+    Module* mod;
 } CodegenContext;
 
 u8 codegen_context_begin(CodegenContext* ctx, const char* name);
 
 void codegen_context_end(CodegenContext* ctx);
+
+void codegen_mangle_module(FILE* f, Module* mod);
 
 void ast_codegen(AST* ast, CodegenContext* ctx);
 

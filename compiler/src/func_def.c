@@ -1,7 +1,6 @@
 #include "assert.h"
 #include "ast.h"
 #include "codegen.h"
-#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -120,18 +119,28 @@ void func_def_codegen(AST* ast, CodegenContext* ctx)
     FuncDef* func_def = &ast->func_def;
 
     type_specifier_codegen(func_def->return_type, ctx->header);
-    fprintf(ctx->header, " %s", func_def->name);
+    fprintf(ctx->header, " ");
 
     if (strcmp(func_def->name, "main") != 0)
     {
-        fprintf(ctx->header, "%p", func_def);
+        codegen_mangle_module(ctx->header, ctx->mod);
+        fprintf(ctx->header, "%p_", func_def);
     }
 
+    fprintf(ctx->header, "%s", func_def->name);
     func_params_codegen(func_def->params, ctx->header);
     fprintf(ctx->header, ";\n");
 
     type_specifier_codegen(func_def->return_type, ctx->source);
-    fprintf(ctx->source, " %s", func_def->name);
+    fprintf(ctx->source, " ");
+
+    if (strcmp(func_def->name, "main") != 0)
+    {
+        codegen_mangle_module(ctx->source, ctx->mod);
+        fprintf(ctx->source, "%p_", func_def);
+    }
+
+    fprintf(ctx->source, "%s", func_def->name);
 
     func_params_codegen(func_def->params, ctx->source);
     fprintf(ctx->source, "\n");

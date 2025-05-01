@@ -6,6 +6,7 @@
 #include "list.h"
 #include "source_range.h"
 #include "operator.h"
+#include "symbol_table.h"
 
 typedef struct Module Module;
 
@@ -192,6 +193,7 @@ typedef struct PathSegment
 typedef struct PathExpr
 {
     List path_segments;
+    Symbol* symbol;
 } PathExpr;
 
 typedef struct CallExpr

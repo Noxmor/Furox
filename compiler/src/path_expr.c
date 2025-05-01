@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "codegen.h"
 #include "parser.h"
+#include "symbol_table.h"
 #include "token.h"
 
 static void path_segment_init(PathSegment* path_segment, const char* name,
@@ -87,8 +88,25 @@ void path_expr_resolve(AST* ast, Parser* parser)
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_PATH_EXPR);
 
-    // TODO: Implement
-    (void)parser;
+    PathExpr* path_expr = &ast->path_expr;
+    AST* path_segment = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
+    const char* name = path_segment->path_segment.name;
+
+    path_expr->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_FUNC, name);
+    if (path_expr->symbol == NULL)
+    {
+        path_expr->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_EXTERN_FUNC, name);
+    }
+
+    if (path_expr->symbol == NULL)
+    {
+        path_expr->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_PARAM, name);
+    }
+
+    if (path_expr->symbol == NULL)
+    {
+        parser_fail(parser);
+    }
 }
 
 void path_expr_codegen(AST* ast, CodegenContext* ctx)
@@ -100,6 +118,14 @@ void path_expr_codegen(AST* ast, CodegenContext* ctx)
     FRX_ASSERT(ctx != NULL);
 
     PathExpr* path_expr = &ast->path_expr;
+
+    Symbol* symbol = path_expr->symbol;
+
+    if (symbol->type != FRX_SYMBOL_TYPE_PARAM && symbol->type != FRX_SYMBOL_TYPE_VAR)
+    {
+        codegen_mangle_module(ctx->source, ctx->mod);
+        fprintf(ctx->source, "%p_", symbol->data);
+    }
 
     for (usize i = 0; i < list_size(&path_expr->path_segments); ++i)
     {

@@ -142,11 +142,15 @@ void module_codegen(Module* mod, CodegenContext* ctx)
         module_codegen(submodule, ctx);
     }
 
+    ctx->mod = mod;
+
     for (usize i = 0; i < list_size(&mod->parsers); ++i)
     {
         Parser* parser = list_get(&mod->parsers, i);
         translation_unit_codegen(parser->translation_unit, ctx);
     }
+
+    ctx->mod = NULL;
 }
 
 void module_insert_symbol(Module* mod, SymbolVisibility visibility,

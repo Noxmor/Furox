@@ -1,10 +1,10 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "diagnostics.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "codegen.h"
 
 static AST* func_param_create(const char* name, AST* type)
 {
@@ -28,8 +28,12 @@ static AST* func_param_parse(Parser* parser)
     parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
     AST* type = type_specifier_parse(parser);
+    AST* ast = func_param_create(name, type);
 
-    return func_param_create(name, type);
+    // FIXME: Add to correct symbol table
+    parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_PARAM, name, ast);
+
+    return ast;
 }
 
 static void func_param_resolve(AST* ast, Parser* parser)
