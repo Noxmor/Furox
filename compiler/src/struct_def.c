@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "compiler.h"
 #include "parser.h"
+#include "type_context.h"
 #include "resolution.h"
 #include "sema.h"
 
@@ -84,8 +85,13 @@ AST* struct_def_parse(Parser* parser)
 
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
-    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_STRUCT,
-                         struct_def->name, struct_def);
+    Type* type = compiler_alloc(sizeof(Type));
+    type->kind = FRX_TYPE_KIND_STRUCT;
+    type->name = struct_def->name;
+    // TODO: Add fields and generics, if this is a generic struct
+
+    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_TYPE,
+                         type->name, type);
 
     ast->range.end = parser_current_location(parser);
 
