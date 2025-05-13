@@ -17,22 +17,6 @@ typedef struct IntLiteral
     u64 value;
 } IntLiteral;
 
-enum
-{
-    FRX_TYPE_KIND_ERROR,
-    FRX_TYPE_KIND_UNRESOLVED,
-    FRX_TYPE_KIND_PRIMITIVE,
-    FRX_TYPE_KIND_ENUM,
-    FRX_TYPE_KIND_STRUCT,
-    FRX_TYPE_KIND_UNION,
-    FRX_TYPE_KIND_POINTER,
-    FRX_TYPE_KIND_ARRAY,
-
-    FRX_TYPE_KIND_COUNT
-};
-
-typedef u8 TypeKind;
-
 typedef struct TypeSpecifier TypeSpecifier;
 
 typedef struct GenericArg
@@ -47,7 +31,6 @@ typedef struct GenericArgs
 
 typedef struct TypeSpecifier
 {
-    TypeKind kind;
     AST* generic_args;
     union
     {
