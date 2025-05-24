@@ -21,4 +21,9 @@ typedef struct Type
     const char* name;
 } Type;
 
+typedef struct TypeContext
+{
+
+} TypeContext;
+
 #endif
