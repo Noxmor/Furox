@@ -15,4 +15,8 @@ typedef struct SourceFile
 
 b8 source_file_load_from_disk(SourceFile* source_file, const char* filepath);
 
+const char* source_file_data(const SourceFile* source_file);
+
+usize source_file_data_len(const SourceFile* source_file);
+
 #endif

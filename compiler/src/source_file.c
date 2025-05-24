@@ -33,3 +33,17 @@ b8 source_file_load_from_disk(SourceFile* source_file, const char* filepath)
 
     return FRX_FALSE;
 }
+
+const char* source_file_data(const SourceFile* source_file)
+{
+    FRX_ASSERT(source_file != NULL);
+
+    return source_file->data;
+}
+
+usize source_file_data_len(const SourceFile* source_file)
+{
+    FRX_ASSERT(source_file != NULL);
+
+    return source_file->data_len;
+}
