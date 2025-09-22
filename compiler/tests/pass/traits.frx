@@ -1,9 +1,7 @@
-trait Sizeable
-{
+trait Sizeable {
     fn size(ptr: void*) -> usize;
 }
 
-fn main() -> i32
-{
+fn main() -> i32 {
     return 0;
 }

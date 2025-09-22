@@ -1,9 +1,0 @@
-pub fn foo() -> i32
-{
-    return 1;
-}
-
-fn private_func() -> i32
-{
-    return -1;
-}
