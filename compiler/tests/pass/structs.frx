@@ -1,0 +1,10 @@
+struct Foo {
+    bar: i32;
+}
+
+fn main() -> i32 {
+    let foo: Foo;
+    foo.bar = 0;
+
+    return foo.bar;
+}
