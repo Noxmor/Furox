@@ -31,7 +31,15 @@ def run_test(filepath, expected_result):
 
     print(f"{filepath}: ", end=" ")
 
-    if not os.path.isdir(filepath):
+    src_files = []
+
+    if os.path.isfile(filepath):
+        src_files.append(filepath)
+    elif os.path.isdir(filepath):
+        for root, _, filenames in os.walk(filepath):
+            for name in filenames:
+                src_files.append(os.path.join(root, name))
+    else:
         print(Fore.YELLOW + "INVALID" + Style.RESET_ALL)
         FAIL_COUNT += 1
         return
@@ -41,7 +49,7 @@ def run_test(filepath, expected_result):
 
     # TODO: Use the below line as soon as the compiler supports the -o flag
     # compile_result = subprocess.run([COMPILER, "-o", temp_executable.name, filepath], capture_output=True, text=True)
-    compile_result = subprocess.run([COMPILER, filepath], capture_output=True, text=True)
+    compile_result = subprocess.run([COMPILER] + src_files, capture_output=True, text=True)
     actual_result = compile_result.returncode
     compile_output = compile_result.stdout + compile_result.stderr
 
