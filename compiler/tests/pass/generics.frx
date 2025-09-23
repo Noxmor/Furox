@@ -1,3 +1,5 @@
+mod test;
+
 fn generic_func<T>(x: T) -> i32
 {
     return 0;

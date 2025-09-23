@@ -1,3 +1,5 @@
+mod test;
+
 struct Foo {
     bar: i32;
 }

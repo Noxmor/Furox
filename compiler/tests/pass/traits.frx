@@ -1,3 +1,5 @@
+mod test;
+
 trait Sizeable {
     fn size(ptr: void*) -> usize;
 }
