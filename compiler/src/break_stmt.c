@@ -1,7 +1,5 @@
-#include "assert.h"
 #include "ast.h"
 #include "parser.h"
-#include "codegen.h"
 
 AST* break_stmt_parse(Parser* parser)
 {
@@ -19,13 +17,4 @@ AST* break_stmt_parse(Parser* parser)
 
 
     return ast;
-}
-
-void break_stmt_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_BREAK_STMT);
-
-    fprintf(ctx->source, "break;\n");
 }

@@ -3,10 +3,9 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 #include "token.h"
 
-static void call_expr_add_arg(CallExpr* call_expr, AST* arg)
+static void call_expr_add_arg(ASTCallExpr* call_expr, AST* arg)
 {
     FRX_ASSERT(call_expr != NULL);
 
@@ -18,7 +17,7 @@ static void call_expr_add_arg(CallExpr* call_expr, AST* arg)
 AST* call_expr_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_CALL_EXPR);
-    CallExpr* call_expr = &ast->call_expr;
+    ASTCallExpr* call_expr = &ast->call_expr;
     ast->range.start = parser_current_location(parser);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
@@ -37,18 +36,18 @@ AST* call_expr_parse(Parser* parser)
     return ast;
 }
 
-void call_expr_resolve(AST* ast, Parser* parser)
+void call_expr_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_CALL_EXPR);
 
-    CallExpr* call_expr = &ast->call_expr;
+    ASTCallExpr* call_expr = &ast->call_expr;
 
     for (usize i = 0; i < list_size(&call_expr->args); ++i)
     {
         AST* arg = list_get(&call_expr->args, i);
-        ast_resolve(arg, parser);
+        ast_resolve(arg, ctx);
     }
 }
 
@@ -61,30 +60,6 @@ void call_expr_sema(AST* ast, SemaContext* ctx)
     FRX_ASSERT(ctx != NULL);
 
     // TODO: Implement
+    (void)ast;
     (void)ctx;
-}
-
-void call_expr_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_CALL_EXPR);
-
-    FRX_ASSERT(ctx != NULL);
-
-    CallExpr* call_expr = &ast->call_expr;
-
-    for (usize i = 0; i < list_size(&call_expr->args); ++i)
-    {
-        if (i > 0)
-        {
-            fprintf(ctx->source, ", ");
-        }
-
-        AST* arg = list_get(&call_expr->args, i);
-        ast_codegen(arg, ctx);
-
-    }
-
-    fprintf(ctx->source, ")");
 }

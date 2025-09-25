@@ -2,50 +2,45 @@
 
 #include <string.h>
 
-#include "compiler.h"
 #include "diagnostics.h"
 #include "lexer.h"
 #include "assert.h"
 #include "log.h"
+#include "source_file.h"
 #include "symbol_table.h"
 #include "token.h"
 #include "module.h"
 
-Parser* parser_create(Module* module, const char* filepath)
+void parser_init(Parser* parser, SourceFile* src_file)
 {
-    FRX_ASSERT(filepath != NULL);
+    FRX_ASSERT(parser != NULL);
 
-    FRX_LOG_INFO("Creating parser for file: %s...", filepath);
+    FRX_ASSERT(src_file != NULL);
 
-    Parser* parser = compiler_alloc(sizeof(Parser));
+    FRX_LOG_INFO("Initializing parser for file: %s...", src_file->path);
 
-    parser->module = module;
-    lexer_init(&parser->lexer, filepath);
-    list_init(&parser->diagnostics);
-    symbol_table_init(&parser->symbol_table, &parser->module->symbol_table);
+    parser->src_file = src_file;
+    lexer_init(&parser->lexer, source_file_data(src_file));
+    symbol_table_init(&parser->symbol_table, NULL);
     list_init(&parser->use_stmts);
     parser->failed = FRX_FALSE;
     parser->recovery = FRX_FALSE;
-
-    return parser;
 }
 
-void parser_parse(Parser* parser)
+AST* parser_parse(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
     parser->translation_unit = translation_unit_parse(parser);
+
+    return parser->translation_unit;
 }
 
-void parser_emit_diagnostics(const Parser* parser)
+void parser_add_diagnostic(Parser* parser, Diagnostic* d)
 {
     FRX_ASSERT(parser != NULL);
 
-    for (usize i = 0; i < list_size(&parser->diagnostics); ++i)
-    {
-        Diagnostic* d = list_get(&parser->diagnostics, i);
-        diagnostic_emit(d);
-    }
+    source_file_add_diagnostic(parser->src_file, d);
 }
 
 SourceLocation parser_current_location(const Parser* parser)
@@ -53,11 +48,11 @@ SourceLocation parser_current_location(const Parser* parser)
     return parser->lexer.location;
 }
 
-const char* parser_source_file(const Parser* parser)
+const SourceFile* parser_source_file(const Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    return lexer_source_file(&parser->lexer);
+    return parser->src_file;
 }
 
 TokenType parser_current_type(Parser* parser)
@@ -103,11 +98,12 @@ b8 parser_eat(Parser* parser, TokenType type)
 
     if (!parser->recovery)
     {
-        FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_UNEXPECTED_TOKEN,
-                                  FRX_DIAGNOSTIC_LVL_ERROR,
-                                  parser_current_token(parser)->range,
-                                  token_type_to_str(type),
-                                  token_type_to_str(parser_current_type(parser)));
+        Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_UNEXPECTED_TOKEN,
+                                          FRX_DIAGNOSTIC_LVL_ERROR,
+                                          parser_current_token(parser)->range,
+                                          token_type_to_str(type),
+                                          token_type_to_str(parser_current_type(parser)));
+        parser_add_diagnostic(parser, d);
     }
 
     parser_recover(parser);
@@ -130,19 +126,18 @@ void parser_recover(Parser* parser)
     }
 }
 
-void parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
-                          SymbolType type, const char* name, void* data)
+Symbol* parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
+                             SymbolType type, const char* name, void* data)
 {
     FRX_ASSERT(parser != NULL);
 
+
     if (visibility == FRX_SYMBOL_VISIBILITY_PRIVATE)
     {
-        symbol_table_insert(&parser->symbol_table, visibility, type, name, data);
+        return source_file_insert_symbol(parser->src_file, visibility, type, name, data);
     }
-    else
-    {
-        module_insert_symbol(parser->module, visibility, type, name, data);
-    }
+
+    return module_insert_symbol(parser->src_file->module, visibility, type, name, data);
 }
 
 Symbol* parser_lookup_symbol(Parser* parser, SymbolType type, const char* name)
@@ -152,69 +147,10 @@ Symbol* parser_lookup_symbol(Parser* parser, SymbolType type, const char* name)
     Symbol* symbol = symbol_table_lookup(&parser->symbol_table, type, name);
     if (symbol == NULL)
     {
-        symbol = module_lookup_symbol(parser->module, type, name);
+        symbol = module_lookup_symbol(parser->src_file->module, type, name);
     }
 
     return symbol;
-}
-
-Module* parser_find_module_by_path_segments(Parser* parser, const List* path_segments)
-{
-    FRX_ASSERT(parser != NULL);
-
-    FRX_ASSERT(path_segments != NULL);
-
-    if (list_empty(path_segments))
-    {
-        return parser->module;
-    }
-
-    Module* initial_mod = parser->module;
-    Module* mod = initial_mod;
-
-    for (usize i = 0; i < list_size(path_segments); ++i)
-    {
-        Module* submodule = module_find_submodule_by_name(mod, list_get(path_segments, i));
-        if (submodule != NULL)
-        {
-            mod = submodule;
-            if (i == list_size(path_segments) - 1)
-            {
-                return mod;
-            }
-        }
-    }
-
-    mod = initial_mod;
-
-    while (mod != NULL)
-    {
-        if (strcmp(mod->name, list_get(path_segments, 0)) == 0)
-        {
-            for (usize i = 1; i < list_size(path_segments); ++i)
-            {
-                Module* submodule = module_find_submodule_by_name(mod, list_get(path_segments, i));
-                if (submodule != NULL)
-                {
-                    mod = submodule;
-                    if (i == list_size(path_segments) - 1)
-                    {
-                        return mod;
-                    }
-                }
-            }
-
-            initial_mod = initial_mod->parent;
-            mod = initial_mod;
-        }
-        else
-        {
-            initial_mod = initial_mod->parent;
-            mod = initial_mod;
-        }
-    }
-
-    return NULL;
 }
 
 void parser_fail(Parser* parser)

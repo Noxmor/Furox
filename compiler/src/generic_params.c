@@ -7,7 +7,7 @@ static AST* trait_bound_create(AST* type)
     FRX_ASSERT(type != NULL);
 
     AST* ast = ast_create(FRX_AST_TYPE_TRAIT_BOUND);
-    TraitBound* trait_bound = &ast->trait_bound;
+    ASTTraitBound* trait_bound = &ast->trait_bound;
 
     trait_bound->type = type;
 
@@ -19,13 +19,13 @@ static AST* trait_bound_parse(Parser* parser)
     return trait_bound_create(type_specifier_parse(parser));
 }
 
-static void generic_param_init(GenericParam* generic_param, const char* name)
+static void generic_param_init(ASTGenericParam* generic_param, const char* name)
 {
     generic_param->name = name;
     list_init(&generic_param->trait_bounds);
 }
 
-static void generic_param_add_trait_bound(GenericParam* generic_param,
+static void generic_param_add_trait_bound(ASTGenericParam* generic_param,
                                           AST* trait_bound)
 {
     FRX_ASSERT(generic_param != NULL);
@@ -38,7 +38,7 @@ static void generic_param_add_trait_bound(GenericParam* generic_param,
 static AST* generic_param_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_GENERIC_PARAM);
-    GenericParam* generic_param = &ast->generic_param;
+    ASTGenericParam* generic_param = &ast->generic_param;
 
     ast->range.start = parser_current_location(parser);
 
@@ -67,12 +67,12 @@ static AST* generic_param_parse(Parser* parser)
     return ast;
 }
 
-static void generic_params_init(GenericParams* params)
+static void generic_params_init(ASTGenericParams* params)
 {
     list_init(&params->params);
 }
 
-static void generic_params_add_param(GenericParams* generic_params,
+static void generic_params_add_param(ASTGenericParams* generic_params,
                                      AST* generic_param)
 {
     FRX_ASSERT(generic_params != NULL);
@@ -85,7 +85,7 @@ static void generic_params_add_param(GenericParams* generic_params,
 AST* generic_params_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_GENERIC_PARAMS);
-    GenericParams* generic_params = &ast->generic_params;
+    ASTGenericParams* generic_params = &ast->generic_params;
 
     ast->range.start = parser_current_location(parser);
 

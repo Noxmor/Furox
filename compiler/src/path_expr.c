@@ -1,80 +1,51 @@
 #include "assert.h"
 #include "ast.h"
-#include "codegen.h"
 #include "parser.h"
+#include "resolution.h"
 #include "symbol_table.h"
 #include "token.h"
 
-static void path_segment_init(PathSegment* path_segment, const char* name,
-                              b8 external)
-{
-    FRX_ASSERT(name != NULL || external == FRX_TRUE);
-
-    path_segment->name = name;
-    path_segment->external = external;
-}
-
-static AST* path_segment_parse(Parser* parser)
-{
-    AST* ast = ast_create(FRX_AST_TYPE_PATH_SEGMENT);
-    PathSegment* path_segment = &ast->path_segment;
-
-    ast->range.start = parser_current_location(parser);
-
-    b8 external = FRX_FALSE;
-    const char* name = NULL;
-
-    if (parser_match(parser, FRX_TOKEN_TYPE_KW_EXTERN))
-    {
-        external = FRX_TRUE;
-        parser_eat(parser, FRX_TOKEN_TYPE_KW_EXTERN);
-    }
-    else
-    {
-        name = parser_current_token(parser)->identifier;
-        parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
-    }
-
-    path_segment_init(path_segment, name, external);
-
-    ast->range.end = parser_current_location(parser);
-
-    return ast;
-}
-
-static void path_expr_init(PathExpr* path_expr)
+static void path_expr_init(ASTPathExpr* path_expr, ASTPathType path_type)
 {
     FRX_ASSERT(path_expr != NULL);
 
+    FRX_ASSERT(path_type < FRX_PATH_TYPE_COUNT);
+
+    path_expr->type = path_type;
     list_init(&path_expr->path_segments);
-}
-
-static void path_expr_add_segment(PathExpr* path_expr, AST* path_segment)
-{
-    FRX_ASSERT(path_expr != NULL);
-
-    FRX_ASSERT(path_segment->type == FRX_AST_TYPE_PATH_SEGMENT);
-
-    list_add(&path_expr->path_segments, path_segment);
 }
 
 AST* path_expr_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_PATH_EXPR);
-    PathExpr* path_expr = &ast->path_expr;
+    ASTPathExpr* path_expr = &ast->path_expr;
 
     ast->range.start = parser_current_location(parser);
 
-    path_expr_init(path_expr);
+    ASTPathType path_type = FRX_PATH_TYPE_ABSOLUTE;
+    if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_EXTERN)
+    {
+        path_type = FRX_PATH_TYPE_EXTERN;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_EXTERN);
+        parser_eat(parser, FRX_TOKEN_TYPE_RESOLUTION);
+    }
+    else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_MOD)
+    {
+        path_type = FRX_PATH_TYPE_MOD;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_MOD);
+        parser_eat(parser, FRX_TOKEN_TYPE_RESOLUTION);
+    }
 
-    AST* path_segment = path_segment_parse(parser);
-    path_expr_add_segment(path_expr, path_segment);
+    path_expr_init(path_expr, path_type);
+
+    list_add(&path_expr->path_segments, (char*)parser_current_token(parser)->identifier);
+    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
     while (parser_match(parser, FRX_TOKEN_TYPE_RESOLUTION))
     {
         parser_eat(parser, FRX_TOKEN_TYPE_RESOLUTION);
-        path_segment = path_segment_parse(parser);
-        path_expr_add_segment(path_expr, path_segment);
+        list_add(&path_expr->path_segments, (char*)parser_current_token(parser)->identifier);
+        parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
     }
 
     ast->range.end = parser_current_location(parser);
@@ -82,64 +53,38 @@ AST* path_expr_parse(Parser* parser)
     return ast;
 }
 
-void path_expr_resolve(AST* ast, Parser* parser)
+void path_expr_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_PATH_EXPR);
 
-    PathExpr* path_expr = &ast->path_expr;
-    AST* path_segment = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
-    const char* name = path_segment->path_segment.name;
+    ASTPathExpr* path_expr = &ast->path_expr;
+    const char* name = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
 
-    path_expr->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_FUNC, name);
+    path_expr->symbol = symbol_table_lookup(&ctx->src_file->symbol_table, FRX_SYMBOL_TYPE_FUNC, name);
     if (path_expr->symbol == NULL)
     {
-        path_expr->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_EXTERN_FUNC, name);
-    }
-
-    if (path_expr->symbol == NULL)
-    {
-        path_expr->symbol = parser_lookup_symbol(parser, FRX_SYMBOL_TYPE_PARAM, name);
+        path_expr->symbol = symbol_table_lookup(&ctx->src_file->symbol_table, FRX_SYMBOL_TYPE_EXTERN_FUNC, name);
     }
 
     if (path_expr->symbol == NULL)
     {
-        parser_fail(parser);
-    }
-}
-
-void path_expr_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_PATH_EXPR);
-
-    FRX_ASSERT(ctx != NULL);
-
-    PathExpr* path_expr = &ast->path_expr;
-
-    Symbol* symbol = path_expr->symbol;
-
-    if (symbol->type != FRX_SYMBOL_TYPE_PARAM && symbol->type != FRX_SYMBOL_TYPE_VAR)
-    {
-        codegen_mangle_module(ctx->source, ctx->mod);
-        fprintf(ctx->source, "%p_", symbol->data);
+        path_expr->symbol = symbol_table_lookup(&ctx->src_file->symbol_table, FRX_SYMBOL_TYPE_PARAM, name);
     }
 
-    for (usize i = 0; i < list_size(&path_expr->path_segments); ++i)
+    if (path_expr->symbol == NULL)
     {
-        if (i > 0)
-        {
-            fprintf(ctx->source, "_");
-        }
+        path_expr->symbol = symbol_table_lookup(&ctx->src_file->symbol_table, FRX_SYMBOL_TYPE_VAR, name);
+    }
 
-        AST* segment = list_get(&path_expr->path_segments, i);
-        PathSegment* path_segment = &segment->path_segment;
+    if (path_expr->symbol == NULL)
+    {
+        path_expr->symbol = symbol_table_lookup_type(&ctx->src_file->symbol_table, name);
+    }
 
-        if (!path_segment->external)
-        {
-            fprintf(ctx->source, "%s", path_segment->name);
-        }
+    if (path_expr->symbol == NULL)
+    {
+        resolution_context_fail(ctx);
     }
 }

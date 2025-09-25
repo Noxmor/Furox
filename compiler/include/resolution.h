@@ -1,46 +1,65 @@
 #ifndef FRX_RESOLUTION_H
 #define FRX_RESOLUTION_H
 
-#include "parser.h"
+#include "source_file.h"
+#include "symbol_table.h"
+#include "hir.h"
 
-void ast_resolve(AST* ast, Parser* parser);
+typedef struct ResolutionContext
+{
+    SourceFile* src_file;
+    b8 failed;
+} ResolutionContext;
 
-void translation_unit_resolve(AST* ast, Parser* parser);
+void resolution_context_init(ResolutionContext* ctx, SourceFile* src_file);
 
-void use_stmt_resolve(AST* ast, Parser* parser);
+Symbol* resolution_context_lookup_symbol(ResolutionContext* ctx, SymbolType type,
+                                         const char* name);
 
-void type_specifier_resolve(AST* ast, Parser* parser);
+void resolution_context_fail(ResolutionContext* ctx);
 
-void struct_def_resolve(AST* ast, Parser* parser);
+b8 resolution_context_failed(const ResolutionContext* ctx);
 
-void enum_def_resolve(AST* ast, Parser* parser);
+void ast_resolve(AST* ast, ResolutionContext* ctx);
 
-void trait_resolve(AST* ast, Parser* parser);
+void translation_unit_resolve(AST* ast, ResolutionContext* ctx);
 
-void impl_block_resolve(AST* ast, Parser* parser);
+void use_stmt_resolve(AST* ast, ResolutionContext* ctx);
 
-void func_params_resolve(AST* ast, Parser* parser);
+Type* type_specifier_resolve(AST* ast, ResolutionContext* ctx);
 
-void func_decl_resolve(AST* ast, Parser* parser);
+void struct_def_resolve(AST* ast, ResolutionContext* ctx);
 
-void func_def_resolve(AST* ast, Parser* parser);
+void enum_def_resolve(AST* ast, ResolutionContext* ctx);
 
-void scope_resolve(AST* ast, Parser* parser);
+void trait_resolve(AST* ast, ResolutionContext* ctx);
 
-void expr_stmt_resolve(AST* ast, Parser* parser);
+void impl_block_resolve(AST* ast, ResolutionContext* ctx);
 
-void return_stmt_resolve(AST* ast, Parser* parser);
+FuncParams* func_params_resolve(AST* ast, ResolutionContext* ctx);
 
-void let_stmt_resolve(AST* ast, Parser* parser);
+void func_decl_resolve(AST* ast, ResolutionContext* ctx);
 
-void if_stmt_resolve(AST* ast, Parser* parser);
+void func_def_resolve(AST* ast, ResolutionContext* ctx);
 
-void unary_expr_resolve(AST* ast, Parser* parser);
+void scope_resolve(AST* ast, ResolutionContext* ctx);
 
-void binary_expr_resolve(AST* ast, Parser* parser);
+void expr_stmt_resolve(AST* ast, ResolutionContext* ctx);
 
-void path_expr_resolve(AST* ast, Parser* parser);
+void return_stmt_resolve(AST* ast, ResolutionContext* ctx);
 
-void call_expr_resolve(AST* ast, Parser* parser);
+void let_stmt_resolve(AST* ast, ResolutionContext* ctx);
+
+void if_stmt_resolve(AST* ast, ResolutionContext* ctx);
+
+void unary_expr_resolve(AST* ast, ResolutionContext* ctx);
+
+void binary_expr_resolve(AST* ast, ResolutionContext* ctx);
+
+void field_expr_resolve(AST* ast, ResolutionContext* ctx);
+
+void path_expr_resolve(AST* ast, ResolutionContext* ctx);
+
+void call_expr_resolve(AST* ast, ResolutionContext* ctx);
 
 #endif

@@ -1,29 +1,29 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
+#include "hir.h"
 #include "parser.h"
-#include "type_context.h"
 #include "resolution.h"
 #include "sema.h"
 
-static void struct_field_init(StructField* field, const char* name, AST* type)
+static void struct_field_init(ASTStructField* field, const char* name, AST* type)
 {
     field->name = name;
     field->type = type;
 }
 
-static void struct_def_init(StructDef* struct_def, const char* name,
+static void struct_def_init(ASTStructDef* struct_def, const char* name,
                             AST* generic_params)
 {
     struct_def->name = name;
     struct_def->generic_params = generic_params;
     list_init(&struct_def->fields);
+    struct_def->symbol = NULL;
 }
 
 AST* struct_field_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_STRUCT_FIELD);
-    StructField* field = &ast->struct_field;
+    ASTStructField* field = &ast->struct_field;
 
     ast->range.start = parser_current_location(parser);
 
@@ -43,21 +43,23 @@ AST* struct_field_parse(Parser* parser)
     return ast;
 }
 
-void struct_field_resolve(AST* ast, Parser* parser)
+static StructField* struct_field_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_STRUCT_FIELD);
 
-    StructField* field = &ast->struct_field;
+    ASTStructField* field = &ast->struct_field;
 
-    type_specifier_resolve(field->type, parser);
+    Type* type = type_specifier_resolve(field->type, ctx);
+
+    return struct_field_create(field->name, type);
 }
 
 AST* struct_def_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_STRUCT_DEF);
-    StructDef* struct_def = &ast->struct_def;
+    ASTStructDef* struct_def = &ast->struct_def;
 
     ast->range.start = parser_current_location(parser);
 
@@ -85,15 +87,11 @@ AST* struct_def_parse(Parser* parser)
 
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
-    Type* type = compiler_alloc(sizeof(Type));
-    type->kind = FRX_TYPE_KIND_STRUCT;
-    type->name = struct_def->name;
-    // TODO: Add fields and generics, if this is a generic struct
-
-    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_TYPE,
-                         type->name, type);
-
     ast->range.end = parser_current_location(parser);
+
+    struct_def->symbol = parser_insert_symbol(parser, parser->visibility,
+                                              FRX_SYMBOL_TYPE_STRUCT,
+                                              struct_def->name, NULL);
 
     return ast;
 }
@@ -106,23 +104,28 @@ static void struct_field_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    StructField* field = &ast->struct_field;
+    ASTStructField* field = &ast->struct_field;
 
     type_specifier_sema(field->type, ctx);
 }
 
-void struct_def_resolve(AST* ast, Parser* parser)
+void struct_def_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_STRUCT_DEF);
 
-    StructDef* struct_def = &ast->struct_def;
+    ASTStructDef* struct_def = &ast->struct_def;
+
+    Symbol* symbol = struct_def->symbol;
+    StructDef* data = struct_def_create(struct_def->name);
+    symbol->data = data;
 
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* field = list_get(&struct_def->fields, i);
-        struct_field_resolve(field, parser);
+        StructField* struct_field = struct_field_resolve(field, ctx);
+        struct_def_add_field(data, struct_field);
     }
 }
 
@@ -134,36 +137,11 @@ void struct_def_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    StructDef* struct_def = &ast->struct_def;
+    ASTStructDef* struct_def = &ast->struct_def;
 
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* field = list_get(&struct_def->fields, i);
         struct_field_sema(field, ctx);
     }
-}
-
-void struct_def_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_STRUCT_DEF);
-
-    FRX_ASSERT(ctx != NULL);
-
-    StructDef* struct_def = &ast->struct_def;
-
-    fprintf(ctx->header, "typedef struct %s %s;\n", struct_def->name, struct_def->name);
-
-    fprintf(ctx->source, "struct %s {\n", struct_def->name);
-
-    for (usize i = 0; i < list_size(&struct_def->fields); ++i)
-    {
-        AST* struct_field = list_get(&struct_def->fields, i);
-        StructField* field = &struct_field->struct_field;
-        type_specifier_codegen(field->type, ctx->source);
-        fprintf(ctx->source, " %s;\n", field->name);
-    }
-
-    fprintf(ctx->source, "};\n");
 }

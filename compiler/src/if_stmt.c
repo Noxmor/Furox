@@ -3,9 +3,8 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
-static void if_stmt_init(IfStmt* if_stmt, AST* condition, AST* if_block,
+static void if_stmt_init(ASTIfStmt* if_stmt, AST* condition, AST* if_block,
                          AST* else_block)
 {
     if_stmt->condition = condition;
@@ -16,7 +15,7 @@ static void if_stmt_init(IfStmt* if_stmt, AST* condition, AST* if_block,
 AST* if_stmt_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_IF_STMT);
-    IfStmt* if_stmt = &ast->if_stmt;
+    ASTIfStmt* if_stmt = &ast->if_stmt;
 
     ast->range.start = parser_current_location(parser);
 
@@ -47,27 +46,27 @@ AST* if_stmt_parse(Parser* parser)
     return ast;
 }
 
-void if_stmt_resolve(AST* ast, Parser* parser)
+void if_stmt_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_IF_STMT);
 
-    IfStmt* if_stmt = &ast->if_stmt;
+    ASTIfStmt* if_stmt = &ast->if_stmt;
 
     if (if_stmt->condition != NULL)
     {
-        ast_resolve(if_stmt->condition, parser);
+        ast_resolve(if_stmt->condition, ctx);
     }
 
     if (if_stmt->if_block != NULL)
     {
-        scope_resolve(if_stmt->if_block, parser);
+        scope_resolve(if_stmt->if_block, ctx);
     }
 
     if (if_stmt->else_block != NULL)
     {
-        scope_resolve(if_stmt->else_block, parser);
+        scope_resolve(if_stmt->else_block, ctx);
     }
 }
 
@@ -79,7 +78,7 @@ void if_stmt_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    IfStmt* if_stmt = &ast->if_stmt;
+    ASTIfStmt* if_stmt = &ast->if_stmt;
 
     if (if_stmt->condition != NULL)
     {
@@ -95,18 +94,4 @@ void if_stmt_sema(AST* ast, SemaContext* ctx)
     {
         scope_sema(if_stmt->else_block, ctx);
     }
-}
-
-void if_stmt_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_IF_STMT);
-
-    FRX_ASSERT(ctx != NULL);
-
-    IfStmt* if_stmt = &ast->if_stmt;
-
-    // TODO: Implement
-    (void)if_stmt;
 }

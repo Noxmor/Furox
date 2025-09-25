@@ -11,9 +11,8 @@ void lexer_init_keyword_table(void);
 
 typedef struct Lexer
 {
-    char* filepath;
-    char* buffer;
-    char* pos;
+    const char* source;
+    const char* pos;
 
     SourceLocation location;
 
@@ -26,7 +25,7 @@ typedef struct Lexer
     b8 failed;
 } Lexer;
 
-void lexer_init(Lexer* lexer, const char* filepath);
+void lexer_init(Lexer* lexer, const char* source);
 
 void lexer_read(Lexer* lexer);
 
@@ -39,8 +38,6 @@ Token* lexer_peek(Lexer* lexer, usize offset);
 Token* lexer_current_token(Lexer* lexer);
 
 void lexer_next_token(Lexer* lexer);
-
-const char* lexer_source_file(const Lexer* lexer);
 
 void lexer_destroy(Lexer* lexer);
 

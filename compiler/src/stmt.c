@@ -1,4 +1,3 @@
-#include "assert.h"
 #include "ast.h"
 #include "diagnostics.h"
 #include "parser.h"
@@ -18,10 +17,11 @@ AST* stmt_parse(Parser* parser)
         case FRX_TOKEN_TYPE_KW_IF: return if_stmt_parse(parser);
         default:
         {
-            FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_STMT,
-                                      FRX_DIAGNOSTIC_LVL_ERROR,
-                                      parser_current_token(parser)->range,
-                                      token_type_to_str(parser_current_type(parser)));
+            Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_EXPECTED_STMT,
+                                              FRX_DIAGNOSTIC_LVL_ERROR,
+                                              parser_current_token(parser)->range,
+                                              token_type_to_str(parser_current_type(parser)));
+            parser_add_diagnostic(parser, d);
 
             parser_recover(parser);
 

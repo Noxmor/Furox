@@ -8,139 +8,140 @@
 #include "operator.h"
 #include "symbol_table.h"
 
-typedef struct Module Module;
-
 typedef struct AST AST;
 
-typedef struct IntLiteral
+typedef struct ASTIntLiteral
 {
     u64 value;
-} IntLiteral;
+} ASTIntLiteral;
 
-typedef struct TypeSpecifier TypeSpecifier;
+typedef struct ASTTypeSpecifier ASTTypeSpecifier;
 
-typedef struct GenericArg
+typedef struct ASTGenericArg
 {
     AST* type;
-} GenericArg;
+} ASTGenericArg;
 
-typedef struct GenericArgs
+typedef struct ASTGenericArgs
 {
     List args;
-} GenericArgs;
+} ASTGenericArgs;
 
-typedef struct TypeSpecifier
+enum
+{
+    FRX_TYPE_SPECIFIER_KIND_PRIMITIVE = 0,
+    FRX_TYPE_SPECIFIER_KIND_IDENT,
+    FRX_TYPE_SPECIFIER_KIND_PTR,
+    FRX_TYPE_SPECIFIER_KIND_ARRAY,
+
+    FRX_TYPE_SPECIFIER_KIND_COUNT
+};
+
+typedef u8 ASTTypeSpecifierKind;
+
+typedef struct ASTTypeSpecifier
 {
     AST* generic_args;
-    union
-    {
-        const char* name;
-        TokenType primitive;
-        usize size;
-        struct
-        {
-            AST* base;
-            b8 mutable;
-        } ptr;
-    };
-} TypeSpecifier;
+    ASTTypeSpecifierKind kind;
+    const char* name;
+    TokenType primitive;
+    usize size;
+    AST* base;
+    b8 mutable;
+} ASTTypeSpecifier;
 
-typedef struct UseStmt
+typedef struct ASTUseStmt
 {
     List path_segments;
     const char* symbol_name;
-    Module* module;
-} UseStmt;
+} ASTUseStmt;
 
-typedef struct TraitBound
+typedef struct ASTTraitBound
 {
     AST* type;
-} TraitBound;
+} ASTTraitBound;
 
-typedef struct GenericParam
+typedef struct ASTGenericParam
 {
     const char* name;
     List trait_bounds;
-} GenericParam;
+} ASTGenericParam;
 
-typedef struct GenericParams
+typedef struct ASTGenericParams
 {
     List params;
-} GenericParams;
+} ASTGenericParams;
 
-typedef struct StructField
+typedef struct ASTStructField
 {
     const char* name;
     AST* type;
-} StructField;
+} ASTStructField;
 
-typedef struct StructDef
+typedef struct ASTStructDef
 {
     const char* name;
     AST* generic_params;
     List fields;
-} StructDef;
+    Symbol* symbol;
+} ASTStructDef;
 
-typedef struct EnumConstant
+typedef struct ASTEnumConstant
 {
     const char* name;
-} EnumConstant;
+} ASTEnumConstant;
 
-typedef struct EnumDef
+typedef struct ASTEnumDef
 {
     const char* name;
     AST* type;
     List constants;
-} EnumDef;
+} ASTEnumDef;
 
-typedef struct Trait
+typedef struct ASTTrait
 {
     const char* name;
     List methods;
-} Trait;
+} ASTTrait;
 
-typedef struct ImplBlock
+typedef struct ASTImplBlock
 {
     const char* type_name;
     List methods;
-} ImplBlock;
+} ASTImplBlock;
 
-typedef struct TranslationUnit
+typedef struct ASTTranslationUnit
 {
+    AST* mod_decl;
     List items;
-} TranslationUnit;
+} ASTTranslationUnit;
 
-typedef struct Scope
+typedef struct ASTScope
 {
     List stmts;
-} Scope;
+} ASTScope;
 
-typedef struct FuncParam
+typedef struct ASTFuncParam
 {
     const char* name;
     AST* type;
-} FuncParam;
+} ASTFuncParam;
 
-typedef struct FuncParams
+typedef struct ASTFuncParams
 {
     List params;
     b8 variadic;
-} FuncParams;
+} ASTFuncParams;
 
-typedef struct GenericInstantiation
-{
-    List concrete_types;
-} GenericInstantiation;
-
-typedef struct FuncDecl
+typedef struct ASTFuncDecl
 {
     const char* name;
     AST* generic_params;
     AST* params;
     AST* return_type;
-} FuncDecl;
+} ASTFuncDecl;
 
-typedef struct FuncDef
+typedef struct ASTFuncDef
 {
     const char* name;
     AST* generic_params;
@@ -148,81 +149,101 @@ typedef struct FuncDef
     AST* params;
     AST* return_type;
     AST* body;
-} FuncDef;
+    Symbol* symbol;
+} ASTFuncDef;
 
-typedef u8 ExprType;
+typedef u8 ASTExprType;
 
-typedef struct UnaryExpr
+typedef struct ASTUnaryExpr
 {
     TokenType type;
     Operator operator;
     AST* operand;
-} UnaryExpr;
+} ASTUnaryExpr;
 
-typedef struct BinaryExpr
+typedef struct ASTBinaryExpr
 {
     TokenType type;
     Operator operator;
     AST* left;
     AST* right;
-} BinaryExpr;
+} ASTBinaryExpr;
 
-typedef struct PathSegment
+typedef struct ASTFieldExpr
 {
-    const char* name;
-    b8 external;
-} PathSegment;
+    AST* base;
+    const char* field_name;
+} ASTFieldExpr;
 
-typedef struct PathExpr
+typedef struct ASTModDecl
 {
+    AST* path_expr;
+} ASTModDecl;
+
+enum
+{
+    FRX_PATH_TYPE_ABSOLUTE,
+    FRX_PATH_TYPE_EXTERN,
+    FRX_PATH_TYPE_MOD,
+
+    FRX_PATH_TYPE_COUNT
+};
+
+typedef u8 ASTPathType;
+
+typedef struct ASTPathExpr
+{
+    ASTPathType type;
     List path_segments;
-    Symbol* symbol;
-} PathExpr;
+    const Symbol* symbol;
+} ASTPathExpr;
 
-typedef struct CallExpr
+typedef struct ASTCallExpr
 {
     List args;
-} CallExpr;
+} ASTCallExpr;
 
-typedef struct ExprStmt
+typedef struct ASTExprStmt
 {
     AST* expr;
-} ExprStmt;
+} ASTExprStmt;
 
-typedef struct BreakStmt
+typedef struct ASTBreakStmt
 {
     const char* label;
-} BreakStmt;
+} ASTBreakStmt;
 
-typedef struct ContinueStmt
+typedef struct ASTContinueStmt
 {
     const char* label;
-} ContinueStmt;
+} ASTContinueStmt;
 
-typedef struct ReturnStmt
+typedef struct ASTReturnStmt
 {
     AST* value;
-} ReturnStmt;
+} ASTReturnStmt;
 
-typedef struct IfStmt
+typedef struct ASTIfStmt
 {
     AST* condition;
     AST* if_block;
     AST* else_block;
-} IfStmt;
+} ASTIfStmt;
 
-typedef struct LetStmt
+typedef struct ASTLetStmt
 {
     b8 mutable;
     const char* name;
     AST* type;
     AST* value;
-} LetStmt;
+    Symbol* symbol;
+} ASTLetStmt;
 
 enum
 {
     FRX_AST_TYPE_ERROR,
     FRX_AST_TYPE_TRANSLATION_UNIT,
+    FRX_AST_TYPE_MOD_DECL,
     FRX_AST_TYPE_USE_STMT,
     FRX_AST_TYPE_TYPE_SPECIFIER,
     FRX_AST_TYPE_STRUCT_FIELD,
@@ -249,7 +270,7 @@ enum
     FRX_AST_TYPE_IF_STMT,
     FRX_AST_TYPE_UNARY_EXPR,
     FRX_AST_TYPE_BINARY_EXPR,
-    FRX_AST_TYPE_PATH_SEGMENT,
+    FRX_AST_TYPE_FIELD_EXPR,
     FRX_AST_TYPE_PATH_EXPR,
     FRX_AST_TYPE_CALL_EXPR,
     FRX_AST_TYPE_INT_LIT,
@@ -265,37 +286,38 @@ typedef struct AST
     ASTType type;
     union
     {
-        TranslationUnit translation_unit;
-        UseStmt use_stmt;
-        TypeSpecifier type_specifier;
-        StructField struct_field;
-        StructDef struct_def;
-        EnumConstant enum_constant;
-        EnumDef enum_def;
-        Trait trait;
-        TraitBound trait_bound;
-        ImplBlock impl_block;
-        FuncParam func_param;
-        FuncParams func_params;
-        GenericParam generic_param;
-        GenericParams generic_params;
-        GenericArg generic_arg;
-        GenericArgs generic_args;
-        FuncDecl func_decl;
-        FuncDef func_def;
-        Scope scope;
-        ExprStmt expr_stmt;
-        BreakStmt break_stmt;
-        ContinueStmt continue_stmt;
-        ReturnStmt return_stmt;
-        LetStmt let_stmt;
-        IfStmt if_stmt;
-        UnaryExpr unary_expr;
-        BinaryExpr binary_expr;
-        PathSegment path_segment;
-        PathExpr path_expr;
-        CallExpr call_expr;
-        IntLiteral int_literal;
+        ASTTranslationUnit translation_unit;
+        ASTModDecl mod_decl;
+        ASTUseStmt use_stmt;
+        ASTTypeSpecifier type_specifier;
+        ASTStructField struct_field;
+        ASTStructDef struct_def;
+        ASTEnumConstant enum_constant;
+        ASTEnumDef enum_def;
+        ASTTrait trait;
+        ASTTraitBound trait_bound;
+        ASTImplBlock impl_block;
+        ASTFuncParam func_param;
+        ASTFuncParams func_params;
+        ASTGenericParam generic_param;
+        ASTGenericParams generic_params;
+        ASTGenericArg generic_arg;
+        ASTGenericArgs generic_args;
+        ASTFuncDecl func_decl;
+        ASTFuncDef func_def;
+        ASTScope scope;
+        ASTExprStmt expr_stmt;
+        ASTBreakStmt break_stmt;
+        ASTContinueStmt continue_stmt;
+        ASTReturnStmt return_stmt;
+        ASTLetStmt let_stmt;
+        ASTIfStmt if_stmt;
+        ASTUnaryExpr unary_expr;
+        ASTBinaryExpr binary_expr;
+        ASTFieldExpr field_expr;
+        ASTPathExpr path_expr;
+        ASTCallExpr call_expr;
+        ASTIntLiteral int_literal;
     };
 } AST;
 

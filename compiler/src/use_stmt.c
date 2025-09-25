@@ -1,28 +1,21 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
-#include "diagnostics.h"
 #include "module.h"
 #include "parser.h"
 #include "resolution.h"
-#include "string_table.h"
-#include "symbol_table.h"
 
-#include <string.h>
-
-static void use_stmt_init(UseStmt* use_stmt, const char* name)
+static void use_stmt_init(ASTUseStmt* use_stmt, const char* name)
 {
     FRX_ASSERT(use_stmt != NULL);
 
     list_init(&use_stmt->path_segments);
     use_stmt->symbol_name = name;
-    use_stmt->module = NULL;
 }
 
 AST* use_stmt_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_USE_STMT);
-    UseStmt* use_stmt = &ast->use_stmt;
+    ASTUseStmt* use_stmt = &ast->use_stmt;
 
     ast->range.start = parser_current_location(parser);
 
@@ -53,52 +46,17 @@ AST* use_stmt_parse(Parser* parser)
     return ast;
 }
 
-void use_stmt_resolve(AST* ast, Parser* parser)
+void use_stmt_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_USE_STMT);
 
-    UseStmt* use_stmt = &ast->use_stmt;
+    FRX_ASSERT(ctx != NULL);
 
-    Module* mod = parser_find_module_by_path_segments(parser, &use_stmt->path_segments);
-    if (mod == NULL)
-    {
-        mod = compiler_find_module_by_path_segments(&use_stmt->path_segments);
-    }
+    ASTUseStmt* use_stmt = &ast->use_stmt;
 
-    if (mod == NULL)
-    {
-        usize path_segments_count = list_size(&use_stmt->path_segments);
-        usize path_len = path_segments_count == 0 ? 0 : path_segments_count * 2;
-        for (usize i = 0; i < path_segments_count; ++i)
-        {
-            const char* path_segment = list_get(&use_stmt->path_segments, i);
-            path_len += strlen(path_segment);
-        }
-
-        char path_buffer[path_len + 1];
-        path_buffer[0] = '\0';
-        for (usize i = 0; i < path_segments_count; ++i)
-        {
-            const char* path_segment = list_get(&use_stmt->path_segments, i);
-            strcat(path_buffer, path_segment);
-
-            if (i + 1 < path_segments_count)
-            {
-                strcat(path_buffer, token_type_to_str(FRX_TOKEN_TYPE_RESOLUTION));
-            }
-        }
-
-        const char* path = string_table_intern(path_buffer);
-
-        SourceRange range; //TODO: Replace with correct range
-        range.start.line = 0;
-        range.start.column = 0;
-        FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_INVALID_MODULE_PATH, FRX_DIAGNOSTIC_LVL_ERROR, range, path);
-    }
-    else
-    {
-        use_stmt->module = mod;
-    }
+    // TODO: Implement
+    (void)use_stmt;
+    (void)ctx;
 }

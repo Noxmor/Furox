@@ -37,13 +37,12 @@ typedef struct Diagnostic
 {
     DiagnosticID id;
     DiagnosticLevel lvl;
-    const char* filepath;
     SourceRange range;
     const char* args[FRX_DIAGNOSTICS_MAX_ARGS];
 } Diagnostic;
 
-Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl, const char* filepath, SourceRange range, ...);
+Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl, SourceRange range, ...);
 
-void diagnostic_emit(const Diagnostic* d);
+void diagnostic_emit(const Diagnostic* d, const char* filepath);
 
 #endif

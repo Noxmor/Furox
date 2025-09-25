@@ -22,18 +22,16 @@ static const DiagnosticInfo diagnostic_id_to_info[FRX_DIAGNOSTIC_ID_COUNT] = {
     [FRX_DIAGNOSTIC_ID_INVALID_MODULE_PATH] = { "Invalid module path '%s'", 1 }
 };
 
-Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl, const char* filepath,
+Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl,
                               SourceRange range, ...)
 {
     FRX_ASSERT(id < FRX_DIAGNOSTIC_ID_COUNT);
     FRX_ASSERT(lvl < FRX_DIAGNOSTIC_LVL_COUNT);
-    FRX_ASSERT(filepath != NULL);
 
     Diagnostic* d = compiler_alloc(sizeof(Diagnostic));
 
     d->id = id;
     d->lvl = lvl;
-    d->filepath = filepath;
     d->range = range;
 
     usize args_count = diagnostic_id_to_info[d->id].args_count;
@@ -56,8 +54,12 @@ Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl, const char* 
     return d;
 }
 
-void diagnostic_emit(const Diagnostic* d)
+void diagnostic_emit(const Diagnostic* d, const char* filepath)
 {
+    FRX_ASSERT(d != NULL);
+
+    FRX_ASSERT(filepath != NULL);
+
     const char* lvl_str = NULL;
     const char* color_str = NULL;
     FILE* output = stdout;
@@ -101,7 +103,9 @@ void diagnostic_emit(const Diagnostic* d)
 
     const char* clear_color_str = "\033[0m";
 
-    fprintf(output, "[%s%s%s]: %s:%zu:%zu: ", color_str, lvl_str, clear_color_str, d->filepath, d->range.start.line, d->range.start.column);
+    fprintf(output, "[%s%s%s]: %s:%zu:%zu: ", color_str, lvl_str,
+            clear_color_str, filepath, d->range.start.line,
+            d->range.start.column);
 
     const char* format = diagnostic_id_to_info[d->id].format;
     usize args_count = diagnostic_id_to_info[d->id].args_count;

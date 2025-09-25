@@ -3,36 +3,41 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "assert.h"
+#include "parser.h"
+#include "resolution.h"
+#include "sema.h"
+#include "codegen.h"
 #include "log.h"
 #include "arena.h"
-#include "lexer.h"
 #include "module.h"
-#include "project.h"
 #include "string_table.h"
+#include "source_file.h"
+#include "temp_dir.h"
 
 static Arena* arena;
 static Arena* ast_arena;
-static Arena* mir_arena;
 
-static List projects;
+static List src_files;
+
+static Module* root_module;
 
 static void compiler_init(void)
 {
     FRX_LOG_INFO("Initializing compiler...");
 
+    temp_dir_init();
+
     lexer_init_keyword_table();
 
     arena = arena_create();
     ast_arena = arena_create();
-    mir_arena = arena_create();
-    list_init(&projects);
+    list_init(&src_files);
 
-    ProjectSpecificiation spec;
-    spec.type = FRX_PROJECT_TYPE_LIB;
+    root_module = module_create_root();
 
-    Project* stdlib = project_create(spec, "/usr/local/lib/furox/std");
-    list_add(&projects, stdlib);
+    // TODO: Add every source file from std to the source files.
+    // Project* stdlib = project_create(spec, "/usr/local/lib/furox/std");
+    // list_add(&projects, stdlib);
 }
 
 static void compiler_shutdown(void)
@@ -43,7 +48,6 @@ static void compiler_shutdown(void)
 
     arena_destroy(arena);
     arena_destroy(ast_arena);
-    arena_destroy(mir_arena);
 }
 
 void* compiler_alloc(usize size)
@@ -56,58 +60,74 @@ void* compiler_alloc_ast(usize size)
     return arena_alloc(ast_arena, size);
 }
 
-void* compiler_alloc_mir(usize size)
-{
-    return arena_alloc(mir_arena, size);
-}
-
 int compiler_run(int argc, char** argv)
 {
     compiler_init();
 
     for (int i = 1; i < argc; ++i)
     {
-        char* project_path = argv[i];
-        if (project_path[strlen(project_path) - 1] == '/')
-        {
-            project_path[strlen(project_path) - 1] = '\0';
-        }
+        const char* filepath = argv[i];
 
-        ProjectSpecificiation spec;
-        spec.type = i == argc - 1 ? FRX_PROJECT_TYPE_APP : FRX_PROJECT_TYPE_LIB;
-
-        Project* project = project_create(spec, project_path);
-        list_add(&projects, project);
-    }
-
-    for (usize i = 0; i < list_size(&projects); ++i)
-    {
-        Project* project = list_get(&projects, i);
-        project_compile(project);
-    }
-
-    for (usize i = 0; i < list_size(&projects); ++i)
-    {
-        Project* project = list_get(&projects, i);
-        if (project_failed(project))
+        SourceFile* src_file = compiler_alloc(sizeof(SourceFile));
+        if (source_file_load_from_disk(src_file, filepath))
         {
             return EXIT_FAILURE;
         }
+
+        list_add(&src_files, src_file);
     }
 
-    for (usize i = 0; i < list_size(&projects); ++i)
+    u8 parsing_failed = FRX_FALSE;
+    for (usize i = 0; i < list_size(&src_files); ++i)
     {
-        Project* project = list_get(&projects, i);
-        if (project_codegen(project))
-        {
-            return EXIT_FAILURE;
-        }
+        SourceFile* src_file = list_get(&src_files, i);
+        Parser parser;
+        parser_init(&parser, src_file);
+        src_file->ast = parser_parse(&parser);
+        parsing_failed |= parser_failed(&parser);
     }
 
-    for (usize i = 0; i < list_size(&projects); ++i)
+    if (parsing_failed)
     {
-        Project* project = list_get(&projects, i);
-        project_destroy(project);
+        return EXIT_FAILURE;
+    }
+
+    for (usize i = 0; i < list_size(&src_files); ++i)
+    {
+        SourceFile* src_file = list_get(&src_files, i);
+        ResolutionContext ctx;
+        resolution_context_init(&ctx, src_file);
+        ast_resolve(src_file->ast, &ctx);
+    }
+
+    b8 sema_failed = FRX_FALSE;
+    for (usize i = 0; i < list_size(&src_files); ++i)
+    {
+        SourceFile* src_file = list_get(&src_files, i);
+        SemaContext ctx;
+        sema_context_init(&ctx, src_file);
+        ast_sema(src_file->ast, &ctx);
+        sema_failed |= sema_context_failed(&ctx);
+    }
+
+    if (sema_failed)
+    {
+        return EXIT_FAILURE;
+    }
+
+    CodegenContext ctx;
+    codegen_context_init(&ctx, root_module, &src_files, "frx");
+    codegen_context_emit_declarations(&ctx);
+    codegen_context_emit_definitions(&ctx);
+    codegen_context_end(&ctx);
+
+    const char* temp_dir = temp_dir_path();
+    char command[strlen("gcc ") + strlen(temp_dir) + strlen("/frx.c") + 1];
+    sprintf(command, "gcc %s/frx.c", temp_dir);
+    FRX_LOG_INFO("Executing command: %s\n", command);
+    if (system(command) != 0)
+    {
+        return EXIT_FAILURE;
     }
 
     compiler_shutdown();
@@ -115,19 +135,7 @@ int compiler_run(int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
-Module* compiler_find_module_by_path_segments(const List* path_segments)
+Module* compiler_root_module(void)
 {
-    FRX_ASSERT(path_segments != NULL);
-
-    for (usize i = 0; i < list_size(&projects); ++i)
-    {
-        Project* project = list_get(&projects, i);
-        Module* mod = project_find_module_by_path_segments(project, path_segments);
-        if (mod != NULL)
-        {
-            return mod;
-        }
-    }
-
-    return NULL;
+    return root_module;
 }

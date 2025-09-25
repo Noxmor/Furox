@@ -2,6 +2,7 @@
 #define FRX_CODEGEN_H
 
 #include "ast.h"
+#include "module.h"
 
 #include <stdio.h>
 
@@ -9,20 +10,24 @@ typedef struct CodegenContext
 {
     FILE* source;
     FILE* header;
-    Module* mod;
+    const Module* root_mod;
+    List* src_files;
 } CodegenContext;
 
-u8 codegen_context_begin(CodegenContext* ctx, const char* name);
+u8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
+                        List* src_files, const char* filename);
+
+void codegen_context_emit_declarations(CodegenContext* ctx);
+
+void codegen_context_emit_definitions(CodegenContext* ctx);
 
 void codegen_context_end(CodegenContext* ctx);
 
-void codegen_mangle_module(FILE* f, Module* mod);
-
-void ast_codegen(AST* ast, CodegenContext* ctx);
+void codegen_mangle_module(FILE* f, const Module* mod);
 
 void translation_unit_codegen(AST* ast, CodegenContext* ctx);
 
-void func_params_codegen(AST* ast, FILE* f);
+void func_params_codegen(AST* ast, CodegenContext* ctx);
 
 void func_decl_codegen(AST* ast, CodegenContext* ctx);
 

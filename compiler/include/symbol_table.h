@@ -3,8 +3,6 @@
 
 #include "types.h"
 
-typedef struct Parser Parser;
-
 enum
 {
     FRX_SYMBOL_VISIBILITY_PRIVATE,
@@ -20,7 +18,9 @@ enum
 {
     FRX_SYMBOL_TYPE_FUNC,
     FRX_SYMBOL_TYPE_EXTERN_FUNC,
-    FRX_SYMBOL_TYPE_TYPE,
+    FRX_SYMBOL_TYPE_STRUCT,
+    FRX_SYMBOL_TYPE_UNION,
+    FRX_SYMBOL_TYPE_ENUM,
     FRX_SYMBOL_TYPE_PARAM,
     FRX_SYMBOL_TYPE_VAR,
 
@@ -55,10 +55,12 @@ typedef struct SymbolTable
 
 void symbol_table_init(SymbolTable* table, SymbolTable* parent);
 
-void symbol_table_insert(SymbolTable* table, SymbolVisibility visibility,
-                         SymbolType type, const char* name, void* data);
+Symbol* symbol_table_insert(SymbolTable* table, SymbolVisibility visibility,
+                            SymbolType type, const char* name, void* data);
 
-Symbol* symbol_table_lookup(SymbolTable* table, SymbolType type,
+Symbol* symbol_table_lookup(const SymbolTable* table, SymbolType type,
                             const char* name);
+
+Symbol* symbol_table_lookup_type(const SymbolTable* table, const char* name);
 
 #endif

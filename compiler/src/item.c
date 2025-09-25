@@ -1,8 +1,6 @@
-#include "assert.h"
 #include "ast.h"
 #include "diagnostics.h"
 #include "parser.h"
-#include "codegen.h"
 #include "token.h"
 
 AST* item_parse(Parser* parser)
@@ -21,10 +19,12 @@ AST* item_parse(Parser* parser)
             case FRX_TOKEN_TYPE_KW_TRAIT: return trait_parse(parser);
             default:
             {
-                FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_ITEM,
-                                          FRX_DIAGNOSTIC_LVL_ERROR,
-                                          parser_current_token(parser)->range,
-                                          token_type_to_str(parser_current_type(parser)));
+                Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_EXPECTED_ITEM,
+                                                  FRX_DIAGNOSTIC_LVL_ERROR,
+                                                  parser_current_token(parser)->range,
+                                                  token_type_to_str(parser_current_type(parser)));
+                parser_add_diagnostic(parser, d);
+
                 parser_recover(parser);
 
                 return ast_create(FRX_AST_TYPE_ERROR);
@@ -45,10 +45,12 @@ AST* item_parse(Parser* parser)
         case FRX_TOKEN_TYPE_KW_IMPL: return impl_block_parse(parser);
         default:
         {
-            FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_ITEM,
-                                      FRX_DIAGNOSTIC_LVL_ERROR,
-                                      parser_current_token(parser)->range,
-                                      token_type_to_str(parser_current_type(parser)));
+            Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_EXPECTED_ITEM,
+                                              FRX_DIAGNOSTIC_LVL_ERROR,
+                                              parser_current_token(parser)->range,
+                                              token_type_to_str(parser_current_type(parser)));
+            parser_add_diagnostic(parser, d);
+
             parser_recover(parser);
 
             return ast_create(FRX_AST_TYPE_ERROR);

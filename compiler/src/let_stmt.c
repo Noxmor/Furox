@@ -1,13 +1,12 @@
 #include "assert.h"
 #include "ast.h"
-#include "codegen.h"
-#include "diagnostics.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "symbol_table.h"
 #include "type_inference.h"
 
-static void let_stmt_init(LetStmt* let_stmt, b8 mutable, const char* name,
+static void let_stmt_init(ASTLetStmt* let_stmt, b8 mutable, const char* name,
                               AST* type, AST* value)
 {
     FRX_ASSERT(name != NULL);
@@ -21,7 +20,7 @@ static void let_stmt_init(LetStmt* let_stmt, b8 mutable, const char* name,
 AST* let_stmt_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_LET_STMT);
-    LetStmt* let_stmt = &ast->let_stmt;
+    ASTLetStmt* let_stmt = &ast->let_stmt;
 
     ast->range.start = parser_current_location(parser);
 
@@ -65,26 +64,33 @@ AST* let_stmt_parse(Parser* parser)
 
     ast->range.end = parser_current_location(parser);
 
+    let_stmt->symbol = parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_VAR, let_stmt->name, NULL);
+
     return ast;
 }
 
-void let_stmt_resolve(AST* ast, Parser* parser)
+void let_stmt_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_LET_STMT);
 
-    LetStmt* let_stmt = &ast->let_stmt;
+    ASTLetStmt* let_stmt = &ast->let_stmt;
 
+    Type* type = NULL;
     if (let_stmt->type != NULL)
     {
-        type_specifier_resolve(let_stmt->type, parser);
+        type = type_specifier_resolve(let_stmt->type, ctx);
     }
 
     if (let_stmt->value != NULL)
     {
-        ast_resolve(let_stmt->value, parser);
+        ast_resolve(let_stmt->value, ctx);
     }
+
+    Symbol* symbol = let_stmt->symbol;
+    Variable* data = variable_create(let_stmt->name, type ? type : expr_infer_type(let_stmt->value));
+    symbol->data = data;
 }
 
 void let_stmt_sema(AST* ast, SemaContext* ctx)
@@ -95,7 +101,7 @@ void let_stmt_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    LetStmt* let_stmt = &ast->let_stmt;
+    ASTLetStmt* let_stmt = &ast->let_stmt;
 
     if (let_stmt->type != NULL)
     {
@@ -105,34 +111,5 @@ void let_stmt_sema(AST* ast, SemaContext* ctx)
     if (let_stmt->value != NULL)
     {
         ast_sema(let_stmt->value, ctx);
-
-        if (let_stmt->type == NULL)
-        {
-            AST* type = ast_create(FRX_AST_TYPE_TYPE_SPECIFIER);
-            type->type_specifier = *expr_infer_type(let_stmt->value);
-            let_stmt->type = type;
-        }
     }
-}
-
-void let_stmt_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_LET_STMT);
-
-    FRX_ASSERT(ctx != NULL);
-
-    LetStmt* let_stmt = &ast->let_stmt;
-
-    type_specifier_codegen(let_stmt->type, ctx->source);
-    fprintf(ctx->source, " %s", let_stmt->name);
-
-    if (let_stmt->value != NULL)
-    {
-        fprintf(ctx->source, " = ");
-        ast_codegen(let_stmt->value, ctx);
-    }
-
-    fprintf(ctx->source, ";\n");
 }

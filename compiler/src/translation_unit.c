@@ -3,14 +3,16 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
-static void translation_unit_init(TranslationUnit* unit)
+static void translation_unit_init(ASTTranslationUnit* unit)
 {
+    FRX_ASSERT(unit != NULL);
+
+    unit->mod_decl = NULL;
     list_init(&unit->items);
 }
 
-static void translation_unit_add_item(TranslationUnit* unit, AST* item)
+static void translation_unit_add_item(ASTTranslationUnit* unit, AST* item)
 {
     FRX_ASSERT(unit != NULL);
     FRX_ASSERT(item != NULL);
@@ -21,11 +23,13 @@ static void translation_unit_add_item(TranslationUnit* unit, AST* item)
 AST* translation_unit_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_TRANSLATION_UNIT);
-    TranslationUnit* unit = &ast->translation_unit;
+    ASTTranslationUnit* unit = &ast->translation_unit;
 
     ast->range.start = parser_current_location(parser);
 
     translation_unit_init(unit);
+
+    unit->mod_decl = mod_decl_parse(parser);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_EOF))
     {
@@ -43,18 +47,18 @@ AST* translation_unit_parse(Parser* parser)
     return ast;
 }
 
-void translation_unit_resolve(AST* ast, Parser* parser)
+void translation_unit_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_TRANSLATION_UNIT);
 
-    TranslationUnit* unit = &ast->translation_unit;
+    ASTTranslationUnit* unit = &ast->translation_unit;
 
     for (usize i = 0; i < list_size(&unit->items); ++i)
     {
         AST* item = list_get(&unit->items, i);
-        ast_resolve(item, parser);
+        ast_resolve(item, ctx);
     }
 }
 
@@ -66,28 +70,11 @@ void translation_unit_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    TranslationUnit* unit = &ast->translation_unit;
+    ASTTranslationUnit* unit = &ast->translation_unit;
 
     for (usize i = 0; i < list_size(&unit->items); ++i)
     {
         AST* item = list_get(&unit->items, i);
         ast_sema(item, ctx);
-    }
-}
-
-void translation_unit_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_TRANSLATION_UNIT);
-
-    FRX_ASSERT(ctx != NULL);
-
-    TranslationUnit* unit = &ast->translation_unit;
-
-    for (usize i = 0; i < list_size(&unit->items); ++i)
-    {
-        AST* item = list_get(&unit->items, i);
-        ast_codegen(item, ctx);
     }
 }

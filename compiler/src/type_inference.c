@@ -1,13 +1,13 @@
 #include "type_inference.h"
-#include "assert.h"
-#include "ast.h"
 
-TypeSpecifier default_type = {
+#include "assert.h"
+
+Type default_type = {
     .kind = FRX_TYPE_KIND_PRIMITIVE,
-    .primitive = FRX_TOKEN_TYPE_KW_I32
+    .primitive_type = FRX_TOKEN_TYPE_KW_I32
 };
 
-static TypeSpecifier* int_literal_infer_type(IntLiteral* literal)
+static Type* int_literal_infer_type(const ASTIntLiteral* literal)
 {
     //TODO: Add other pre-allocated types for different int types if the value is too big for i32
     (void)literal;
@@ -15,17 +15,17 @@ static TypeSpecifier* int_literal_infer_type(IntLiteral* literal)
     return &default_type;
 }
 
-static TypeSpecifier* unary_expr_infer_type(UnaryExpr* unary_expr)
+static Type* unary_expr_infer_type(const ASTUnaryExpr* unary_expr)
 {
     return expr_infer_type(unary_expr->operand);
 }
 
-static TypeSpecifier* binary_expr_infer_type(BinaryExpr* binary_expr)
+static Type* binary_expr_infer_type(const ASTBinaryExpr* binary_expr)
 {
     return expr_infer_type(binary_expr->left);
 }
 
-TypeSpecifier* expr_infer_type(AST* expr)
+Type* expr_infer_type(const AST* expr)
 {
     FRX_ASSERT(expr != NULL);
 

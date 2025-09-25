@@ -71,41 +71,18 @@ void lexer_init_keyword_table(void)
 
 static void lexer_read_token(Lexer* lexer, Token* token);
 
-void lexer_init(Lexer* lexer, const char* filepath)
+void lexer_init(Lexer* lexer, const char* source)
 {
     FRX_ASSERT(lexer != NULL);
-    FRX_ASSERT(filepath != NULL);
+    FRX_ASSERT(source != NULL);
 
     lexer->failed = FRX_FALSE;
 
     lexer->identifier_placeholder = malloc(sizeof(char) *FRX_LEXER_IDENT_INITIAL_SIZE);
     lexer->identifier_placeholder_size = FRX_LEXER_IDENT_INITIAL_SIZE;
 
-    FILE* f = fopen(filepath, "r");
-    if(f == NULL)
-    {
-        lexer->buffer = NULL;
-        lexer_fail(lexer);
-    }
-    else
-    {
-        fseek(f, 0, SEEK_END);
-        usize size = ftell(f);
-        fseek(f, 0, SEEK_SET);
-        lexer->buffer = malloc(sizeof(char) * (size + 1));
-        lexer->buffer[size] = '\0';
-
-        if (fread(lexer->buffer, sizeof(char), size, f) != size)
-        {
-            lexer_fail(lexer);
-        }
-
-        fclose(f);
-    }
-
-    lexer->pos = lexer->buffer;
-
-    lexer->filepath = strdup(filepath);
+    lexer->source = source;
+    lexer->pos = lexer->source;
 
     lexer->location.pos = 0;
     lexer->location.line = 1;
@@ -153,7 +130,7 @@ Token* lexer_current_token(Lexer* lexer)
 char lexer_peek_char(Lexer* lexer, usize offset)
 {
     FRX_ASSERT(lexer != NULL);
-    FRX_ASSERT((lexer->pos - lexer->buffer) + offset <= strlen(lexer->buffer));
+    FRX_ASSERT((lexer->pos - lexer->source) + offset <= strlen(lexer->source));
 
     return lexer->pos[offset];
 }
@@ -820,18 +797,9 @@ void lexer_next_token(Lexer* lexer)
     }
 }
 
-const char* lexer_source_file(const Lexer* lexer)
-{
-    FRX_ASSERT(lexer != NULL);
-
-    return lexer->filepath;
-}
-
 void lexer_destroy(Lexer* lexer)
 {
     FRX_ASSERT(lexer != NULL);
 
-    free(lexer->filepath);
-    free(lexer->buffer);
     free(lexer->identifier_placeholder);
 }

@@ -1,16 +1,16 @@
 #include "assert.h"
 #include "ast.h"
-#include "codegen.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "codegen.h"
 
 static AST* enum_constant_create(const char* name)
 {
     FRX_ASSERT(name != NULL);
 
     AST* ast = ast_create(FRX_AST_TYPE_ENUM_CONSTANT);
-    EnumConstant* constant = &ast->enum_constant;
+    ASTEnumConstant* constant = &ast->enum_constant;
 
     constant->name = name;
 
@@ -25,7 +25,7 @@ static AST* enum_constant_parse(Parser* parser)
     return enum_constant_create(name);
 }
 
-static void enum_def_init(EnumDef* enum_def, const char* name, AST* type)
+static void enum_def_init(ASTEnumDef* enum_def, const char* name, AST* type)
 {
     FRX_ASSERT(name != NULL);
 
@@ -36,7 +36,7 @@ static void enum_def_init(EnumDef* enum_def, const char* name, AST* type)
     list_init(&enum_def->constants);
 }
 
-static void enum_def_add_constant(EnumDef* enum_def, AST* constant)
+static void enum_def_add_constant(ASTEnumDef* enum_def, AST* constant)
 {
     FRX_ASSERT(enum_def != NULL);
 
@@ -50,7 +50,7 @@ static void enum_def_add_constant(EnumDef* enum_def, AST* constant)
 AST* enum_def_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_ENUM_DEF);
-    EnumDef* enum_def = &ast->enum_def;
+    ASTEnumDef* enum_def = &ast->enum_def;
 
     ast->range.start = parser_current_location(parser);
 
@@ -82,14 +82,15 @@ AST* enum_def_parse(Parser* parser)
     return ast;
 }
 
-void enum_def_resolve(AST* ast, Parser* parser)
+void enum_def_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_ENUM_DEF);
 
     // TODO: Implement
-    (void)parser;
+    (void)ast;
+    (void)ctx;
 }
 
 void enum_def_sema(AST* ast, SemaContext* ctx)
@@ -101,15 +102,6 @@ void enum_def_sema(AST* ast, SemaContext* ctx)
     FRX_ASSERT(ctx != NULL);
 
     // TODO: Implement
-}
-
-void enum_def_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_ENUM_DEF);
-
-    FRX_ASSERT(ctx != NULL);
-
-    // TODO: Implement
+    (void)ast;
+    (void)ctx;
 }

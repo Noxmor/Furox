@@ -3,14 +3,13 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
-static void scope_init(Scope* scope)
+static void scope_init(ASTScope* scope)
 {
     list_init(&scope->stmts);
 }
 
-static void scope_add_stmt(Scope* scope, AST* stmt)
+static void scope_add_stmt(ASTScope* scope, AST* stmt)
 {
     FRX_ASSERT(scope != NULL);
     FRX_ASSERT(stmt != NULL);
@@ -21,7 +20,7 @@ static void scope_add_stmt(Scope* scope, AST* stmt)
 AST* scope_from_stmt(AST* stmt)
 {
     AST* ast = ast_create(FRX_AST_TYPE_SCOPE);
-    Scope* scope = &ast->scope;
+    ASTScope* scope = &ast->scope;
 
     scope_init(scope);
     scope_add_stmt(scope, stmt);
@@ -32,7 +31,7 @@ AST* scope_from_stmt(AST* stmt)
 AST* scope_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_SCOPE);
-    Scope* scope = &ast->scope;
+    ASTScope* scope = &ast->scope;
 
     ast->range.start = parser_current_location(parser);
 
@@ -52,18 +51,18 @@ AST* scope_parse(Parser* parser)
     return ast;
 }
 
-void scope_resolve(AST* ast, Parser* parser)
+void scope_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_SCOPE);
 
-    Scope* scope = &ast->scope;
+    ASTScope* scope = &ast->scope;
 
     for (usize i = 0; i < list_size(&scope->stmts); ++i)
     {
         AST* stmt = list_get(&scope->stmts, i);
-        ast_resolve(stmt, parser);
+        ast_resolve(stmt, ctx);
     }
 }
 
@@ -75,32 +74,11 @@ void scope_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    Scope* scope = &ast->scope;
+    ASTScope* scope = &ast->scope;
 
     for (usize i = 0; i < list_size(&scope->stmts); ++i)
     {
         AST* stmt = list_get(&scope->stmts, i);
         ast_sema(stmt, ctx);
     }
-}
-
-void scope_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_SCOPE);
-
-    FRX_ASSERT(ctx != NULL);
-
-    Scope* scope = &ast->scope;
-
-    fprintf(ctx->source, "{\n");
-
-    for (usize i = 0; i < list_size(&scope->stmts); ++i)
-    {
-        AST* stmt = list_get(&scope->stmts, i);
-        ast_codegen(stmt, ctx);
-    }
-
-    fprintf(ctx->source, "}\n");
 }

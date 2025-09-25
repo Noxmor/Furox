@@ -3,9 +3,8 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
-static void return_stmt_init(ReturnStmt* return_stmt, AST* value)
+static void return_stmt_init(ASTReturnStmt* return_stmt, AST* value)
 {
     return_stmt->value = value;
 }
@@ -13,7 +12,7 @@ static void return_stmt_init(ReturnStmt* return_stmt, AST* value)
 AST* return_stmt_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_RETURN_STMT);
-    ReturnStmt* return_stmt = &ast->return_stmt;
+    ASTReturnStmt* return_stmt = &ast->return_stmt;
 
     ast->range.start = parser_current_location(parser);
 
@@ -35,17 +34,17 @@ AST* return_stmt_parse(Parser* parser)
     return ast;
 }
 
-void return_stmt_resolve(AST* ast, Parser* parser)
+void return_stmt_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_RETURN_STMT);
 
-    ReturnStmt* return_stmt = &ast->return_stmt;
+    ASTReturnStmt* return_stmt = &ast->return_stmt;
 
     if (return_stmt->value != NULL)
     {
-        ast_resolve(return_stmt->value, parser);
+        ast_resolve(return_stmt->value, ctx);
     }
 }
 
@@ -57,31 +56,10 @@ void return_stmt_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    ReturnStmt* return_stmt = &ast->return_stmt;
+    ASTReturnStmt* return_stmt = &ast->return_stmt;
 
     if (return_stmt->value != NULL)
     {
         ast_sema(return_stmt->value, ctx);
     }
-}
-
-void return_stmt_codegen(AST* ast, CodegenContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_RETURN_STMT);
-
-    FRX_ASSERT(ctx != NULL);
-
-    ReturnStmt* return_stmt = &ast->return_stmt;
-
-    fprintf(ctx->source, "return");
-
-    if (return_stmt->value != NULL)
-    {
-        fprintf(ctx->source, " ");
-        ast_codegen(return_stmt->value, ctx);
-    }
-
-    fprintf(ctx->source, ";\n");
 }

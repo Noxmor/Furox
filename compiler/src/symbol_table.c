@@ -25,8 +25,8 @@ void symbol_table_init(SymbolTable* table, SymbolTable* parent)
     table->parent = parent;
 }
 
-void symbol_table_insert(SymbolTable* table, SymbolVisibility visibility,
-                         SymbolType type, const char* name, void* data)
+Symbol* symbol_table_insert(SymbolTable* table, SymbolVisibility visibility,
+                            SymbolType type, const char* name, void* data)
 {
     FRX_ASSERT(table != NULL);
 
@@ -43,9 +43,11 @@ void symbol_table_insert(SymbolTable* table, SymbolVisibility visibility,
     new_entry->next = entry;
 
     table->entries[index] = new_entry;
+
+    return &new_entry->symbol;
 }
 
-Symbol* symbol_table_lookup(SymbolTable* table, SymbolType type, const char* name)
+Symbol* symbol_table_lookup(const SymbolTable* table, SymbolType type, const char* name)
 {
     FRX_ASSERT(table != NULL);
 
@@ -61,6 +63,36 @@ Symbol* symbol_table_lookup(SymbolTable* table, SymbolType type, const char* nam
         if (entry->symbol.type == type && entry->name == name)
         {
             return &entry->symbol;
+        }
+
+        entry = entry->next;
+    }
+
+    return NULL;
+}
+
+Symbol* symbol_table_lookup_type(const SymbolTable* table, const char* name)
+{
+    FRX_ASSERT(table != NULL);
+
+    FRX_ASSERT(name != NULL);
+
+    u64 index = (usize)name % FRX_SYMBOL_TABLE_CAPACITY;
+    SymbolTableEntry* entry = table->entries[index];
+
+    while (entry != NULL)
+    {
+        if (entry->name == name)
+        {
+            switch (entry->symbol.type)
+            {
+                case FRX_SYMBOL_TYPE_STRUCT:
+                case FRX_SYMBOL_TYPE_UNION:
+                case FRX_SYMBOL_TYPE_ENUM:
+                {
+                    return &entry->symbol;
+                }
+            }
         }
 
         entry = entry->next;

@@ -2,11 +2,17 @@
 #define FRX_SEMA_H
 
 #include "ast.h"
+#include "source_file.h"
 
 typedef struct SemaContext
 {
-
+    const SourceFile* src_file;
+    b8 failed;
 } SemaContext;
+
+void sema_context_init(SemaContext* ctx, const SourceFile* src_file);
+
+b8 sema_context_failed(const SemaContext* ctx);
 
 void ast_sema(AST* ast, SemaContext* ctx);
 
@@ -42,8 +48,8 @@ void unary_expr_sema(AST* ast, SemaContext* ctx);
 
 void binary_expr_sema(AST* ast, SemaContext* ctx);
 
-void call_expr_sema(AST* ast, SemaContext* ctx);
+void field_expr_sema(AST* ast, SemaContext* ctx);
 
-TypeSpecifier* expr_infer_type(AST* expr);
+void call_expr_sema(AST* ast, SemaContext* ctx);
 
 #endif

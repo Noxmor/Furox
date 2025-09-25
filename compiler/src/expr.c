@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "ast.h"
 #include "diagnostics.h"
+#include "operator.h"
 #include "parser.h"
 
 static AST* unary_expr_create(TokenType type, Operator operator, AST* operand)
@@ -10,7 +11,7 @@ static AST* unary_expr_create(TokenType type, Operator operator, AST* operand)
     FRX_ASSERT(operator < FRX_OPERATOR_COUNT);
 
     AST* ast = ast_create(FRX_AST_TYPE_UNARY_EXPR);
-    UnaryExpr* unary_expr = &ast->unary_expr;
+    ASTUnaryExpr* unary_expr = &ast->unary_expr;
 
     unary_expr->type = type;
     unary_expr->operator = operator;
@@ -27,12 +28,27 @@ static AST* binary_expr_create(TokenType type, Operator operator,
     FRX_ASSERT(operator < FRX_OPERATOR_COUNT);
 
     AST* ast = ast_create(FRX_AST_TYPE_BINARY_EXPR);
-    BinaryExpr* binary_expr = &ast->binary_expr;
+    ASTBinaryExpr* binary_expr = &ast->binary_expr;
 
     binary_expr->type = type;
     binary_expr->operator = operator;
     binary_expr->left = left;
     binary_expr->right = right;
+
+    return ast;
+}
+
+static AST* field_expr_create(AST* base, const char* field_name)
+{
+    FRX_ASSERT(base != NULL);
+
+    FRX_ASSERT(field_name != NULL);
+
+    AST* ast = ast_create(FRX_AST_TYPE_FIELD_EXPR);
+    ASTFieldExpr* field_expr = &ast->field_expr;
+
+    field_expr->base = base;
+    field_expr->field_name = field_name;
 
     return ast;
 }
@@ -46,10 +62,12 @@ static AST* expr_parse_primary(Parser* parser)
         case FRX_TOKEN_TYPE_IDENT: return path_expr_parse(parser);
         default:
         {
-            FRX_PARSER_ADD_DIAGNOSTIC(parser, FRX_DIAGNOSTIC_ID_EXPECTED_EXPR,
-                                      FRX_DIAGNOSTIC_LVL_ERROR,
-                                      parser_current_token(parser)->range,
-                                      token_type_to_str(parser_current_type(parser)));
+            Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_EXPECTED_EXPR,
+                                              FRX_DIAGNOSTIC_LVL_ERROR,
+                                              parser_current_token(parser)->range,
+                                              token_type_to_str(parser_current_type(parser)));
+            parser_add_diagnostic(parser, d);
+
             parser_recover(parser);
 
             return ast_create(FRX_AST_TYPE_ERROR);
@@ -124,6 +142,16 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
                 }
 
                 expr = binary_expr_create(type, operator, expr, index);
+            }
+            else if (operator == FRX_OPERATOR_MEMBER_ACCESS)
+            {
+                const char* field_name = parser_current_token(parser)->identifier;
+                if (parser_eat(parser, FRX_TOKEN_TYPE_IDENT))
+                {
+                    return NULL;
+                }
+
+                expr = field_expr_create(expr, field_name);
             }
             else if (operator == FRX_OPERATOR_CALL)
             {

@@ -2,7 +2,8 @@
 #define FRX_TYPE_INFERENCE_H
 
 #include "ast.h"
+#include "hir.h"
 
-TypeSpecifier* expr_infer_type(AST* expr);
+Type* expr_infer_type(const AST* expr);
 
 #endif

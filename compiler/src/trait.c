@@ -4,7 +4,7 @@
 #include "resolution.h"
 #include "sema.h"
 
-static void trait_init(Trait* trait, const char* name)
+static void trait_init(ASTTrait* trait, const char* name)
 {
     FRX_ASSERT(name != NULL);
 
@@ -15,7 +15,7 @@ static void trait_init(Trait* trait, const char* name)
 AST* trait_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_TRAIT);
-    Trait* trait = &ast->trait;
+    ASTTrait* trait = &ast->trait;
 
     ast->range.start = parser_current_location(parser);
 
@@ -40,18 +40,18 @@ AST* trait_parse(Parser* parser)
     return ast;
 }
 
-void trait_resolve(AST* ast, Parser* parser)
+void trait_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_TRAIT);
 
-    Trait* trait = &ast->trait;
+    ASTTrait* trait = &ast->trait;
 
     for (usize i = 0; i < list_size(&trait->methods); ++i)
     {
         AST* func_decl = list_get(&trait->methods, i);
-        func_decl_resolve(func_decl, parser);
+        func_decl_resolve(func_decl, ctx);
     }
 }
 
@@ -63,7 +63,7 @@ void trait_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    Trait* trait = &ast->trait;
+    ASTTrait* trait = &ast->trait;
 
     for (usize i = 0; i < list_size(&trait->methods); ++i)
     {

@@ -13,6 +13,8 @@ void* compiler_alloc_ast(usize size);
 
 void* compiler_alloc_mir(usize size);
 
+Module* compiler_root_module(void);
+
 Module* compiler_find_module_by_path_segments(const List* path_segments);
 
 #endif
