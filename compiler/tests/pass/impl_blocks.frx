@@ -1,29 +1,57 @@
 mod test;
 
-use std::libc::malloc;
-use std::libc::free;
-
 struct Foo
 {
     x: i32;
+    bar: Bar;
 }
 
 impl Foo
 {
-    fn new(x: i32) -> Foo*
+    fn new(x: i32) -> Foo
     {
-        let foo: Foo* = malloc(4);
+        let foo: Foo;
+        foo.x = x;
+        foo.bar = Bar::new(42);
 
         return foo;
     }
 
     fn get_value(foo: Foo*) -> i32
     {
-        return 0;
+        return foo.x;
+    }
+
+    fn get_bar(foo: Foo*) -> Bar*
+    {
+        return &foo.bar;
+    }
+}
+
+struct Bar
+{
+    y: i32;
+}
+
+impl Bar
+{
+    fn new(y: i32) -> Bar
+    {
+        let bar: Bar;
+        bar.y = y;
+
+        return bar;
+    }
+
+    fn get_value(bar: Bar*) -> i32
+    {
+        return bar.y;
     }
 }
 
 fn main() -> i32
 {
-    return 0;
+    let foo = Foo::new(42);
+
+    return foo.get_value() - foo.get_bar().get_value();
 }
