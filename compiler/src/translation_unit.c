@@ -29,7 +29,10 @@ AST* translation_unit_parse(Parser* parser)
 
     translation_unit_init(unit);
 
-    unit->mod_decl = mod_decl_parse(parser);
+    if (parser_match(parser, FRX_TOKEN_TYPE_KW_MOD))
+    {
+        unit->mod_decl = mod_decl_parse(parser);
+    }
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_EOF))
     {

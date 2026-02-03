@@ -12,14 +12,13 @@ typedef struct CodegenContext
     FILE* header;
     const Module* root_mod;
     List* src_files;
+    List symbol_list;
 } CodegenContext;
 
 u8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
                         List* src_files, const char* filename);
 
-void codegen_context_emit_declarations(CodegenContext* ctx);
-
-void codegen_context_emit_definitions(CodegenContext* ctx);
+void codegen_context_transpile(CodegenContext* ctx);
 
 void codegen_context_end(CodegenContext* ctx);
 
@@ -27,11 +26,9 @@ void codegen_mangle_module(FILE* f, const Module* mod);
 
 void translation_unit_codegen(AST* ast, CodegenContext* ctx);
 
-void func_params_codegen(AST* ast, CodegenContext* ctx);
+void func_param_codegen(AST* ast, CodegenContext* ctx);
 
 void func_decl_codegen(AST* ast, CodegenContext* ctx);
-
-void func_def_codegen(AST* ast, CodegenContext* ctx);
 
 void struct_def_codegen(AST* ast, CodegenContext* ctx);
 

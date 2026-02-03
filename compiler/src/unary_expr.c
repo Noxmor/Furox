@@ -25,4 +25,7 @@ void unary_expr_sema(AST* ast, SemaContext* ctx)
     ASTUnaryExpr* unary_expr = &ast->unary_expr;
 
     ast_sema(unary_expr->operand, ctx);
+
+    // TODO: Type checking
+    unary_expr->resolved_type = expr_infer_type(unary_expr->operand);
 }

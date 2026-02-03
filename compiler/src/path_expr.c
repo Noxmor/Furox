@@ -1,8 +1,8 @@
 #include "assert.h"
 #include "ast.h"
+#include "module.h"
 #include "parser.h"
 #include "resolution.h"
-#include "symbol_table.h"
 #include "token.h"
 
 static void path_expr_init(ASTPathExpr* path_expr, ASTPathType path_type)
@@ -13,6 +13,7 @@ static void path_expr_init(ASTPathExpr* path_expr, ASTPathType path_type)
 
     path_expr->type = path_type;
     list_init(&path_expr->path_segments);
+    path_expr->symbol = NULL;
 }
 
 AST* path_expr_parse(Parser* parser)
@@ -60,27 +61,32 @@ void path_expr_resolve(AST* ast, ResolutionContext* ctx)
     FRX_ASSERT(ast->type == FRX_AST_TYPE_PATH_EXPR);
 
     ASTPathExpr* path_expr = &ast->path_expr;
-    const char* name = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
+    const char* symbol_name = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
 
-    path_expr->symbol = symbol_table_lookup(&ctx->src_file->symbol_table, FRX_SYMBOL_TYPE_FUNC, name);
-    if (path_expr->symbol == NULL)
+    if (list_size(&path_expr->path_segments) == 1)
     {
-        path_expr->symbol = symbol_table_lookup(&ctx->src_file->symbol_table, FRX_SYMBOL_TYPE_EXTERN_FUNC, name);
+        path_expr->symbol = resolution_context_lookup_symbol(ctx, symbol_name);
     }
-
-    if (path_expr->symbol == NULL)
+    else
     {
-        path_expr->symbol = symbol_table_lookup(&ctx->src_file->symbol_table, FRX_SYMBOL_TYPE_PARAM, name);
-    }
+        Module* mod = ctx->root_mod;
+        for (usize i = 1; i < list_size(&path_expr->path_segments); ++i)
+        {
+            const char* name = list_get(&path_expr->path_segments, i - 1);
+            Module* submodule = module_find_submodule_by_name(mod, name);
 
-    if (path_expr->symbol == NULL)
-    {
-        path_expr->symbol = symbol_table_lookup(&ctx->src_file->symbol_table, FRX_SYMBOL_TYPE_VAR, name);
-    }
+            if (submodule == NULL)
+            {
+                resolution_context_fail(ctx);
+                return;
+            }
+            else
+            {
+                mod = submodule;
+            }
+        }
 
-    if (path_expr->symbol == NULL)
-    {
-        path_expr->symbol = symbol_table_lookup_type(&ctx->src_file->symbol_table, name);
+        path_expr->symbol = module_lookup_symbol(mod, symbol_name);
     }
 
     if (path_expr->symbol == NULL)

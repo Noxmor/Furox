@@ -59,7 +59,11 @@ void call_expr_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    // TODO: Implement
-    (void)ast;
-    (void)ctx;
+    ASTCallExpr* call_expr = &ast->call_expr;
+
+    for (usize i = 0; i < list_size(&call_expr->args); ++i)
+    {
+        AST* arg = list_get(&call_expr->args, i);
+        ast_sema(arg, ctx);
+    }
 }

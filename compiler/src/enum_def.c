@@ -34,6 +34,7 @@ static void enum_def_init(ASTEnumDef* enum_def, const char* name, AST* type)
     enum_def->name = name;
     enum_def->type = type;
     list_init(&enum_def->constants);
+    enum_def->resolved_type = NULL;
 }
 
 static void enum_def_add_constant(ASTEnumDef* enum_def, AST* constant)
@@ -78,6 +79,9 @@ AST* enum_def_parse(Parser* parser)
     }
 
     ast->range.end = parser_current_location(parser);
+
+    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_ENUM,
+                         name, enum_def);
 
     return ast;
 }

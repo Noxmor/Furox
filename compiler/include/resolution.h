@@ -3,18 +3,23 @@
 
 #include "source_file.h"
 #include "symbol_table.h"
-#include "hir.h"
 
 typedef struct ResolutionContext
 {
     SourceFile* src_file;
+    Module* root_mod;
+    Scope* current_scope;
     b8 failed;
 } ResolutionContext;
 
-void resolution_context_init(ResolutionContext* ctx, SourceFile* src_file);
+void resolution_context_init(ResolutionContext* ctx, SourceFile* src_file,
+                             Module* root_mod);
 
-Symbol* resolution_context_lookup_symbol(ResolutionContext* ctx, SymbolType type,
-                                         const char* name);
+void resolution_context_push_scope(ResolutionContext* ctx, Scope* scope);
+
+void resolution_context_pop_scope(ResolutionContext* ctx);
+
+Symbol* resolution_context_lookup_symbol(ResolutionContext* ctx, const char* name);
 
 void resolution_context_fail(ResolutionContext* ctx);
 
@@ -26,7 +31,7 @@ void translation_unit_resolve(AST* ast, ResolutionContext* ctx);
 
 void use_stmt_resolve(AST* ast, ResolutionContext* ctx);
 
-Type* type_specifier_resolve(AST* ast, ResolutionContext* ctx);
+void type_specifier_resolve(AST* ast, ResolutionContext* ctx);
 
 void struct_def_resolve(AST* ast, ResolutionContext* ctx);
 
@@ -36,11 +41,9 @@ void trait_resolve(AST* ast, ResolutionContext* ctx);
 
 void impl_block_resolve(AST* ast, ResolutionContext* ctx);
 
-FuncParams* func_params_resolve(AST* ast, ResolutionContext* ctx);
+void func_param_resolve(AST* ast, ResolutionContext* ctx);
 
 void func_decl_resolve(AST* ast, ResolutionContext* ctx);
-
-void func_def_resolve(AST* ast, ResolutionContext* ctx);
 
 void scope_resolve(AST* ast, ResolutionContext* ctx);
 
@@ -61,5 +64,7 @@ void field_expr_resolve(AST* ast, ResolutionContext* ctx);
 void path_expr_resolve(AST* ast, ResolutionContext* ctx);
 
 void call_expr_resolve(AST* ast, ResolutionContext* ctx);
+
+void int_literal_resolve(AST* ast, ResolutionContext* ctx);
 
 #endif

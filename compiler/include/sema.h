@@ -28,11 +28,9 @@ void trait_sema(AST* ast, SemaContext* ctx);
 
 void impl_block_sema(AST* ast, SemaContext* ctx);
 
-void func_params_sema(AST* ast, SemaContext* ctx);
+void func_param_sema(AST* ast, SemaContext* ctx);
 
 void func_decl_sema(AST* ast, SemaContext* ctx);
-
-void func_def_sema(AST* ast, SemaContext* ctx);
 
 void scope_sema(AST* ast, SemaContext* ctx);
 

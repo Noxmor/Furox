@@ -46,6 +46,21 @@ void* list_get(const List* list, usize index)
     return list->items[index];
 }
 
+b8 list_contains(const List* list, const void* data)
+{
+    FRX_ASSERT(list != NULL);
+
+    for (usize i = 0; i < list->size; ++i)
+    {
+        if (list->items[i] == data)
+        {
+            return FRX_TRUE;
+        }
+    }
+
+    return FRX_FALSE;
+}
+
 void list_destroy(List* list)
 {
     FRX_ASSERT(list != NULL);

@@ -17,7 +17,11 @@ AST* mod_decl_parse(Parser* parser)
 {
     parser_eat(parser, FRX_TOKEN_TYPE_KW_MOD);
 
-    AST* path_expr = path_expr_parse(parser);
+    AST* path_expr = NULL;
+    if (parser_current_type(parser) != FRX_TOKEN_TYPE_SEMI)
+    {
+        path_expr = path_expr_parse(parser);
+    }
 
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
@@ -26,7 +30,7 @@ AST* mod_decl_parse(Parser* parser)
     Module* root_mod = compiler_root_module();
     Module* current_mod = root_mod;
 
-    for (usize i = 0; i < list_size(&path_expr->path_expr.path_segments); ++i)
+    for (usize i = 0; path_expr != NULL && i < list_size(&path_expr->path_expr.path_segments); ++i)
     {
         const char* name = list_get(&path_expr->path_expr.path_segments, i);
         Module* submodule = module_find_submodule_by_name(current_mod, name);

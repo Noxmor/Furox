@@ -52,17 +52,8 @@ static void type_specifier_init(ASTTypeSpecifier* type, ASTTypeSpecifierKind kin
 
     type->kind = kind;
     type->generic_args = NULL;
-}
-
-static void type_specifier_init_ident(ASTTypeSpecifier* type, const char* name)
-{
-    FRX_ASSERT(type != NULL);
-
-    FRX_ASSERT(name != NULL);
-
-    type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_IDENT);
-
-    type->name = name;
+    type->resolved_type = NULL;
+    type->path_expr = NULL;
 }
 
 static void type_specifier_init_primitive(ASTTypeSpecifier* type, TokenType primitive)
@@ -74,6 +65,17 @@ static void type_specifier_init_primitive(ASTTypeSpecifier* type, TokenType prim
     type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_PRIMITIVE);
 
     type->primitive = primitive;
+}
+
+static void type_specifier_init_path_expr(ASTTypeSpecifier* type, AST* path_expr)
+{
+    FRX_ASSERT(type != NULL);
+
+    FRX_ASSERT(path_expr != NULL);
+
+    type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_PATH_EXPR);
+
+    type->path_expr = path_expr;
 }
 
 static void type_specifier_init_pointer(ASTTypeSpecifier* type, AST* base, b8 mutable)
@@ -104,10 +106,8 @@ AST* type_specifier_parse(Parser* parser)
     }
     else if (parser_current_type(parser) == FRX_TOKEN_TYPE_IDENT)
     {
-        const char* name = parser_current_token(parser)->identifier;
-        parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
-
-        type_specifier_init_ident(type, name);
+        AST* path_expr = path_expr_parse(parser);
+        type_specifier_init_path_expr(type, path_expr);
     }
     else
     {
@@ -140,7 +140,7 @@ AST* type_specifier_parse(Parser* parser)
     return ast;
 }
 
-Type* type_specifier_resolve(AST* ast, ResolutionContext* ctx)
+void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -151,18 +151,32 @@ Type* type_specifier_resolve(AST* ast, ResolutionContext* ctx)
     ASTTypeSpecifier* type_specifier = &ast->type_specifier;
     switch(type_specifier->kind)
     {
-        case FRX_TYPE_SPECIFIER_KIND_PRIMITIVE: return type_create_primitive(type_specifier->primitive);
-        case FRX_TYPE_SPECIFIER_KIND_IDENT:
+        case FRX_TYPE_SPECIFIER_KIND_PRIMITIVE: type_specifier->resolved_type = type_create_primitive(type_specifier->primitive); break;
+        case FRX_TYPE_SPECIFIER_KIND_PATH_EXPR:
         {
-            const Symbol* symbol = symbol_table_lookup_type(&ctx->src_file->symbol_table, type_specifier->name);
-            return type_create_symbol(symbol);
+            path_expr_resolve(type_specifier->path_expr, ctx);
+
+            break;
         }
-        case FRX_TYPE_SPECIFIER_KIND_PTR: return type_create_ptr(type_specifier_resolve(type_specifier->base, ctx));
-        case FRX_TYPE_SPECIFIER_KIND_ARRAY: return type_create_array(type_specifier_resolve(type_specifier->base, ctx), type_specifier->size);
+        case FRX_TYPE_SPECIFIER_KIND_PTR:
+        {
+            AST* base = type_specifier->base;
+            type_specifier_resolve(base, ctx);
+            type_specifier->resolved_type = type_create_ptr(base->type_specifier.resolved_type, base->type_specifier.mutable);
+
+            break;
+        }
+        case FRX_TYPE_SPECIFIER_KIND_ARRAY:
+        {
+            AST* base = type_specifier->base;
+            type_specifier_resolve(base, ctx);
+            type_specifier->resolved_type = type_create_array(base->type_specifier.resolved_type, base->type_specifier.size);
+
+            break;
+        }
+
         default: FRX_ASSERT(FRX_FALSE); break;
     }
-
-    return NULL;
 }
 
 void type_specifier_sema(AST* ast, SemaContext* ctx)
@@ -173,9 +187,20 @@ void type_specifier_sema(AST* ast, SemaContext* ctx)
 
     FRX_ASSERT(ctx != NULL);
 
-    ASTTypeSpecifier* type = &ast->type_specifier;
+    ASTTypeSpecifier* type_specifier = &ast->type_specifier;
+    switch(type_specifier->kind)
+    {
+        case FRX_TYPE_SPECIFIER_KIND_PRIMITIVE: break;
+        case FRX_TYPE_SPECIFIER_KIND_PATH_EXPR:
+        {
+            ASTPathExpr* path_expr = &type_specifier->path_expr->path_expr;
+            type_specifier->resolved_type = symbol_infer_type(path_expr->symbol);
 
-    // TODO: Implement
-    (void)type;
-    (void)ctx;
+            break;
+        }
+        case FRX_TYPE_SPECIFIER_KIND_PTR: break;
+        case FRX_TYPE_SPECIFIER_KIND_ARRAY: break;
+
+        default: FRX_ASSERT(FRX_FALSE); break;
+    }
 }

@@ -3,24 +3,46 @@
 #include "assert.h"
 #include "log.h"
 
-void resolution_context_init(ResolutionContext* ctx, SourceFile* src_file)
+void resolution_context_init(ResolutionContext* ctx, SourceFile* src_file,
+                             Module* root_mod)
 {
     FRX_ASSERT(ctx != NULL);
 
     FRX_ASSERT(src_file != NULL);
 
+    FRX_ASSERT(root_mod != NULL);
+
     FRX_LOG_INFO("Initializing resolution context for file: %s...", src_file->path);
 
     ctx->src_file = src_file;
+    ctx->root_mod = root_mod;
+    ctx->current_scope = src_file->global_scope;
     ctx->failed = FRX_FALSE;
 }
 
-Symbol* resolution_context_lookup_symbol(ResolutionContext* ctx, SymbolType type,
-                                         const char* name)
+void resolution_context_push_scope(ResolutionContext* ctx, Scope* scope)
 {
     FRX_ASSERT(ctx != NULL);
 
-    return source_file_lookup_symbol(ctx->src_file, type, name);
+    FRX_ASSERT(scope != NULL);
+
+    ctx->current_scope = scope;
+}
+
+void resolution_context_pop_scope(ResolutionContext* ctx)
+{
+    FRX_ASSERT(ctx != NULL);
+
+    FRX_ASSERT(ctx->current_scope != NULL);
+
+    ctx->current_scope = ctx->current_scope->parent;
+}
+
+Symbol* resolution_context_lookup_symbol(ResolutionContext* ctx, const char* name)
+{
+    FRX_ASSERT(ctx != NULL);
+
+    return scope_lookup_symbol(ctx->current_scope, name);
 }
 
 void resolution_context_fail(ResolutionContext* ctx)

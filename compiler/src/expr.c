@@ -16,6 +16,7 @@ static AST* unary_expr_create(TokenType type, Operator operator, AST* operand)
     unary_expr->type = type;
     unary_expr->operator = operator;
     unary_expr->operand = operand;
+    unary_expr->resolved_type = NULL;
 
     return ast;
 }
@@ -34,6 +35,7 @@ static AST* binary_expr_create(TokenType type, Operator operator,
     binary_expr->operator = operator;
     binary_expr->left = left;
     binary_expr->right = right;
+    binary_expr->resolved_type = NULL;
 
     return ast;
 }

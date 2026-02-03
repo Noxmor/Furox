@@ -1,9 +1,9 @@
 #include "assert.h"
 #include "ast.h"
-#include "hir.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "type_system.h"
 
 static void struct_field_init(ASTStructField* field, const char* name, AST* type)
 {
@@ -17,7 +17,7 @@ static void struct_def_init(ASTStructDef* struct_def, const char* name,
     struct_def->name = name;
     struct_def->generic_params = generic_params;
     list_init(&struct_def->fields);
-    struct_def->symbol = NULL;
+    struct_def->resolved_type = NULL;
 }
 
 AST* struct_field_parse(Parser* parser)
@@ -43,7 +43,7 @@ AST* struct_field_parse(Parser* parser)
     return ast;
 }
 
-static StructField* struct_field_resolve(AST* ast, ResolutionContext* ctx)
+static void struct_field_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -51,9 +51,7 @@ static StructField* struct_field_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTStructField* field = &ast->struct_field;
 
-    Type* type = type_specifier_resolve(field->type, ctx);
-
-    return struct_field_create(field->name, type);
+    type_specifier_resolve(field->type, ctx);
 }
 
 AST* struct_def_parse(Parser* parser)
@@ -89,9 +87,11 @@ AST* struct_def_parse(Parser* parser)
 
     ast->range.end = parser_current_location(parser);
 
-    struct_def->symbol = parser_insert_symbol(parser, parser->visibility,
-                                              FRX_SYMBOL_TYPE_STRUCT,
-                                              struct_def->name, NULL);
+    const Symbol* symbol = parser_insert_symbol(parser, parser->visibility,
+                                                FRX_SYMBOL_TYPE_STRUCT,
+                                                struct_def->name, struct_def);
+
+    struct_def->resolved_type = type_create_symbol(symbol);
 
     return ast;
 }
@@ -117,15 +117,10 @@ void struct_def_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTStructDef* struct_def = &ast->struct_def;
 
-    Symbol* symbol = struct_def->symbol;
-    StructDef* data = struct_def_create(struct_def->name);
-    symbol->data = data;
-
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* field = list_get(&struct_def->fields, i);
-        StructField* struct_field = struct_field_resolve(field, ctx);
-        struct_def_add_field(data, struct_field);
+        struct_field_resolve(field, ctx);
     }
 }
 

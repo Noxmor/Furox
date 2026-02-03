@@ -13,7 +13,7 @@ AST* item_parse(Parser* parser)
 
         switch (parser_current_type(parser))
         {
-            case FRX_TOKEN_TYPE_KW_FN: return func_def_parse(parser);
+            case FRX_TOKEN_TYPE_KW_FN: return func_decl_parse(parser);
             case FRX_TOKEN_TYPE_KW_STRUCT: return struct_def_parse(parser);
             case FRX_TOKEN_TYPE_KW_ENUM: return enum_def_parse(parser);
             case FRX_TOKEN_TYPE_KW_TRAIT: return trait_parse(parser);
@@ -38,7 +38,7 @@ AST* item_parse(Parser* parser)
     {
         case FRX_TOKEN_TYPE_KW_USE: return use_stmt_parse(parser);
         case FRX_TOKEN_TYPE_KW_EXTERN: parser_eat(parser, FRX_TOKEN_TYPE_KW_EXTERN); return func_decl_parse(parser);
-        case FRX_TOKEN_TYPE_KW_FN: return func_def_parse(parser);
+        case FRX_TOKEN_TYPE_KW_FN: return func_decl_parse(parser);
         case FRX_TOKEN_TYPE_KW_STRUCT: return struct_def_parse(parser);
         case FRX_TOKEN_TYPE_KW_ENUM: return enum_def_parse(parser);
         case FRX_TOKEN_TYPE_KW_TRAIT: return trait_parse(parser);

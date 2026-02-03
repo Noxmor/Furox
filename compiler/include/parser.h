@@ -3,17 +3,15 @@
 
 #include "lexer.h"
 #include "ast.h"
-#include "symbol_table.h"
+#include "scope.h"
 #include "source_file.h"
 
 typedef struct Parser
 {
     SourceFile* src_file;
     Lexer lexer;
-    AST* translation_unit;
-    SymbolTable symbol_table;
-    SymbolTable* current_symbol_table;
-    List use_stmts;
+    Scope* global_scope;
+    Scope* current_scope;
     SymbolVisibility visibility;
     b8 external;
     b8 failed;
@@ -42,10 +40,14 @@ b8 parser_eat(Parser* parser, TokenType type);
 
 void parser_recover(Parser* parser);
 
+Scope* parser_push_scope(Parser* parser);
+
+void parser_pop_scope(Parser* parser);
+
 Symbol* parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
                              SymbolType type, const char* name, void* data);
 
-Symbol* parser_lookup_symbol(Parser* parser, SymbolType type, const char* name);
+Symbol* parser_lookup_symbol(Parser* parser, const char* name);
 
 void parser_fail(Parser* parser);
 
@@ -71,13 +73,11 @@ AST* trait_parse(Parser* parser);
 
 AST* impl_block_parse(Parser* parser);
 
-AST* func_params_parse(Parser* parser);
+AST* func_param_parse(Parser* parser);
 
 AST* generic_params_parse(Parser* parser);
 
 AST* func_decl_parse(Parser* parser);
-
-AST* func_def_parse(Parser* parser);
 
 AST* scope_parse(Parser* parser);
 

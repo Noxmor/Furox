@@ -6,13 +6,15 @@
 #include "list.h"
 #include "source_range.h"
 #include "operator.h"
-#include "symbol_table.h"
+#include "type_system.h"
+#include "scope.h"
 
 typedef struct AST AST;
 
 typedef struct ASTIntLiteral
 {
     u64 value;
+    Type* resolved_type;
 } ASTIntLiteral;
 
 typedef struct ASTTypeSpecifier ASTTypeSpecifier;
@@ -30,7 +32,7 @@ typedef struct ASTGenericArgs
 enum
 {
     FRX_TYPE_SPECIFIER_KIND_PRIMITIVE = 0,
-    FRX_TYPE_SPECIFIER_KIND_IDENT,
+    FRX_TYPE_SPECIFIER_KIND_PATH_EXPR,
     FRX_TYPE_SPECIFIER_KIND_PTR,
     FRX_TYPE_SPECIFIER_KIND_ARRAY,
 
@@ -45,9 +47,11 @@ typedef struct ASTTypeSpecifier
     ASTTypeSpecifierKind kind;
     const char* name;
     TokenType primitive;
+    AST* path_expr;
     usize size;
     AST* base;
     b8 mutable;
+    Type* resolved_type;
 } ASTTypeSpecifier;
 
 typedef struct ASTUseStmt
@@ -83,7 +87,7 @@ typedef struct ASTStructDef
     const char* name;
     AST* generic_params;
     List fields;
-    Symbol* symbol;
+    Type* resolved_type;
 } ASTStructDef;
 
 typedef struct ASTEnumConstant
@@ -96,6 +100,7 @@ typedef struct ASTEnumDef
     const char* name;
     AST* type;
     List constants;
+    Type* resolved_type;
 } ASTEnumDef;
 
 typedef struct ASTTrait
@@ -106,6 +111,7 @@ typedef struct ASTTrait
 
 typedef struct ASTImplBlock
 {
+    Scope* scope;
     const char* type_name;
     List methods;
 } ASTImplBlock;
@@ -118,6 +124,7 @@ typedef struct ASTTranslationUnit
 
 typedef struct ASTScope
 {
+    Scope* scope;
     List stmts;
 } ASTScope;
 
@@ -127,30 +134,16 @@ typedef struct ASTFuncParam
     AST* type;
 } ASTFuncParam;
 
-typedef struct ASTFuncParams
-{
-    List params;
-    b8 variadic;
-} ASTFuncParams;
-
 typedef struct ASTFuncDecl
 {
+    Scope* scope;
     const char* name;
     AST* generic_params;
-    AST* params;
-    AST* return_type;
-} ASTFuncDecl;
-
-typedef struct ASTFuncDef
-{
-    const char* name;
-    AST* generic_params;
-    List generic_instantiations;
-    AST* params;
+    List params;
+    b8 is_variadic;
     AST* return_type;
     AST* body;
-    Symbol* symbol;
-} ASTFuncDef;
+} ASTFuncDecl;
 
 typedef u8 ASTExprType;
 
@@ -159,6 +152,7 @@ typedef struct ASTUnaryExpr
     TokenType type;
     Operator operator;
     AST* operand;
+    Type* resolved_type;
 } ASTUnaryExpr;
 
 typedef struct ASTBinaryExpr
@@ -167,12 +161,14 @@ typedef struct ASTBinaryExpr
     Operator operator;
     AST* left;
     AST* right;
+    Type* resolved_type;
 } ASTBinaryExpr;
 
 typedef struct ASTFieldExpr
 {
     AST* base;
     const char* field_name;
+    Type* resolved_type;
 } ASTFieldExpr;
 
 typedef struct ASTModDecl
@@ -236,7 +232,7 @@ typedef struct ASTLetStmt
     const char* name;
     AST* type;
     AST* value;
-    Symbol* symbol;
+    Type* resolved_type;
 } ASTLetStmt;
 
 enum
@@ -254,13 +250,11 @@ enum
     FRX_AST_TYPE_TRAIT_BOUND,
     FRX_AST_TYPE_IMPL_BLOCK,
     FRX_AST_TYPE_FUNC_PARAM,
-    FRX_AST_TYPE_FUNC_PARAMS,
     FRX_AST_TYPE_GENERIC_PARAM,
     FRX_AST_TYPE_GENERIC_PARAMS,
     FRX_AST_TYPE_GENERIC_ARG,
     FRX_AST_TYPE_GENERIC_ARGS,
     FRX_AST_TYPE_FUNC_DECL,
-    FRX_AST_TYPE_FUNC_DEF,
     FRX_AST_TYPE_SCOPE,
     FRX_AST_TYPE_EXPR_STMT,
     FRX_AST_TYPE_BREAK_STMT,
@@ -298,13 +292,11 @@ typedef struct AST
         ASTTraitBound trait_bound;
         ASTImplBlock impl_block;
         ASTFuncParam func_param;
-        ASTFuncParams func_params;
         ASTGenericParam generic_param;
         ASTGenericParams generic_params;
         ASTGenericArg generic_arg;
         ASTGenericArgs generic_args;
         ASTFuncDecl func_decl;
-        ASTFuncDef func_def;
         ASTScope scope;
         ASTExprStmt expr_stmt;
         ASTBreakStmt break_stmt;
@@ -324,5 +316,7 @@ typedef struct AST
 AST* ast_create(ASTType type);
 
 AST* scope_from_stmt(AST* stmt);
+
+Type* expr_infer_type(AST* expr);
 
 #endif

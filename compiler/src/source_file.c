@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "assert.h"
+#include "compiler.h"
 #include "symbol_table.h"
 
 b8 source_file_load_from_disk(SourceFile* source_file, const char* filepath)
@@ -38,9 +39,9 @@ b8 source_file_load_from_disk(SourceFile* source_file, const char* filepath)
 
     source_file->data[source_file->data_len] = '\0';
 
-    source_file->module = NULL;
+    source_file->module = compiler_root_module();
     list_init(&source_file->diagnostics);
-    symbol_table_init(&source_file->symbol_table, NULL);
+    source_file->global_scope = scope_create_global();
 
     return FRX_FALSE;
 }
@@ -59,15 +60,14 @@ Symbol* source_file_insert_symbol(SourceFile* source_file, SymbolVisibility visi
 {
     FRX_ASSERT(source_file != NULL);
 
-    return symbol_table_insert(&source_file->symbol_table, visibility, type, name, data);
+    return scope_insert_symbol(source_file->global_scope, visibility, type, name, data);
 }
 
-Symbol* source_file_lookup_symbol(SourceFile* source_file, SymbolType type,
-                                  const char* name)
+Symbol* source_file_lookup_symbol(SourceFile* source_file, const char* name)
 {
     FRX_ASSERT(source_file != NULL);
 
-    return symbol_table_lookup(&source_file->symbol_table, type, name);
+    return scope_lookup_symbol(source_file->global_scope, name);
 }
 
 const char* source_file_data(const SourceFile* source_file)

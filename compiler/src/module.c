@@ -11,7 +11,7 @@ Module* module_create_root(void)
     mod->parent = NULL;
     mod->name = "";
     list_init(&mod->submodules);
-    symbol_table_init(&mod->symbol_table, NULL);
+    symbol_table_init(&mod->symbol_table);
 
     return mod;
 }
@@ -27,26 +27,25 @@ Module* module_create(Module* parent, const char* name)
     mod->parent = parent;
     mod->name = name;
     list_init(&mod->submodules);
-    symbol_table_init(&mod->symbol_table, NULL);
+    symbol_table_init(&mod->symbol_table);
 
     list_add(&mod->parent->submodules, mod);
 
     return mod;
 }
 
-Symbol* module_insert_symbol(Module* mod, SymbolVisibility visibility,
-                             SymbolType type, const char* name, void* data)
+Symbol* module_insert_symbol(Module* mod, Symbol* symbol)
 {
     FRX_ASSERT(mod != NULL);
 
-    return symbol_table_insert(&mod->symbol_table, visibility, type, name, data);
+    return symbol_table_insert_symbol(&mod->symbol_table, symbol);
 }
 
-Symbol* module_lookup_symbol(Module* mod, SymbolType type, const char* name)
+Symbol* module_lookup_symbol(Module* mod, const char* name)
 {
     FRX_ASSERT(mod != NULL);
 
-    return symbol_table_lookup(&mod->symbol_table, type, name);
+    return symbol_table_lookup(&mod->symbol_table, name);
 }
 
 Module* module_find_submodule_by_name(Module* mod, const char* name)

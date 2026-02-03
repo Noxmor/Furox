@@ -14,6 +14,8 @@ static void trait_init(ASTTrait* trait, const char* name)
 
 AST* trait_parse(Parser* parser)
 {
+    parser_push_scope(parser);
+
     AST* ast = ast_create(FRX_AST_TYPE_TRAIT);
     ASTTrait* trait = &ast->trait;
 
@@ -36,6 +38,8 @@ AST* trait_parse(Parser* parser)
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
     ast->range.end = parser_current_location(parser);
+
+    parser_pop_scope(parser);
 
     return ast;
 }

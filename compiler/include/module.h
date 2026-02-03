@@ -18,10 +18,9 @@ Module* module_create_root(void);
 
 Module* module_create(Module* parent, const char* name);
 
-Symbol* module_insert_symbol(Module* mod, SymbolVisibility visibility,
-                             SymbolType type, const char* name, void* data);
+Symbol* module_insert_symbol(Module* mod, Symbol* symbol);
 
-Symbol* module_lookup_symbol(Module* mod, SymbolType type, const char* name);
+Symbol* module_lookup_symbol(Module* mod, const char* name);
 
 Module* module_find_submodule_by_name(Module* mod, const char* name);
 

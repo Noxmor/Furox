@@ -30,8 +30,10 @@ AST* scope_from_stmt(AST* stmt)
 
 AST* scope_parse(Parser* parser)
 {
+
     AST* ast = ast_create(FRX_AST_TYPE_SCOPE);
     ASTScope* scope = &ast->scope;
+    scope->scope = parser_push_scope(parser);
 
     ast->range.start = parser_current_location(parser);
 
@@ -48,6 +50,8 @@ AST* scope_parse(Parser* parser)
 
     ast->range.end = parser_current_location(parser);
 
+    parser_pop_scope(parser);
+
     return ast;
 }
 
@@ -59,11 +63,15 @@ void scope_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTScope* scope = &ast->scope;
 
+    resolution_context_push_scope(ctx, scope->scope);
+
     for (usize i = 0; i < list_size(&scope->stmts); ++i)
     {
         AST* stmt = list_get(&scope->stmts, i);
         ast_resolve(stmt, ctx);
     }
+
+    resolution_context_pop_scope(ctx);
 }
 
 void scope_sema(AST* ast, SemaContext* ctx)

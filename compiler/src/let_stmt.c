@@ -3,8 +3,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "symbol_table.h"
-#include "type_inference.h"
 
 static void let_stmt_init(ASTLetStmt* let_stmt, b8 mutable, const char* name,
                               AST* type, AST* value)
@@ -64,7 +62,8 @@ AST* let_stmt_parse(Parser* parser)
 
     ast->range.end = parser_current_location(parser);
 
-    let_stmt->symbol = parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_VAR, let_stmt->name, NULL);
+    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_VAR,
+                         name, let_stmt);
 
     return ast;
 }
@@ -77,20 +76,15 @@ void let_stmt_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTLetStmt* let_stmt = &ast->let_stmt;
 
-    Type* type = NULL;
     if (let_stmt->type != NULL)
     {
-        type = type_specifier_resolve(let_stmt->type, ctx);
+        type_specifier_resolve(let_stmt->type, ctx);
     }
 
     if (let_stmt->value != NULL)
     {
         ast_resolve(let_stmt->value, ctx);
     }
-
-    Symbol* symbol = let_stmt->symbol;
-    Variable* data = variable_create(let_stmt->name, type ? type : expr_infer_type(let_stmt->value));
-    symbol->data = data;
 }
 
 void let_stmt_sema(AST* ast, SemaContext* ctx)
@@ -106,10 +100,16 @@ void let_stmt_sema(AST* ast, SemaContext* ctx)
     if (let_stmt->type != NULL)
     {
         type_specifier_sema(let_stmt->type, ctx);
+        let_stmt->resolved_type = let_stmt->type->type_specifier.resolved_type;
     }
 
     if (let_stmt->value != NULL)
     {
         ast_sema(let_stmt->value, ctx);
+
+        if (let_stmt->type == NULL)
+        {
+            let_stmt->resolved_type = expr_infer_type(let_stmt->value);
+        }
     }
 }

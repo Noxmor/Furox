@@ -25,4 +25,7 @@ void binary_expr_sema(AST* ast, SemaContext* ctx)
 
     ast_sema(binary_expr->left, ctx);
     ast_sema(binary_expr->right, ctx);
+
+    // TODO: Type checking
+    binary_expr->resolved_type = expr_infer_type(binary_expr->left);
 }

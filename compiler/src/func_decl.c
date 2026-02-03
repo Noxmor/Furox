@@ -5,20 +5,23 @@
 #include "sema.h"
 
 static void func_decl_init(ASTFuncDecl* func_decl, const char* name,
-                           AST* generic_params, AST* params, AST* return_type)
+                           AST* generic_params, AST* return_type, AST* body)
 {
     FRX_ASSERT(name != NULL);
 
     func_decl->name = name;
     func_decl->generic_params = generic_params;
-    func_decl->params = params;
+    func_decl->is_variadic = FRX_FALSE;
     func_decl->return_type = return_type;
+    func_decl->body = body;
 }
 
 AST* func_decl_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_FUNC_DECL);
     ASTFuncDecl* func_decl = &ast->func_decl;
+    list_init(&func_decl->params);
+    func_decl->scope = parser_push_scope(parser);
 
     ast->range.start = parser_current_location(parser);
 
@@ -39,23 +42,51 @@ AST* func_decl_parse(Parser* parser)
         generic_params = generic_params_parse(parser);
     }
 
-    AST* params = func_params_parse(parser);
+    parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
 
-    if (parser_eat(parser, FRX_TOKEN_TYPE_ARROW))
+    while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
     {
-        ast->type = FRX_AST_TYPE_ERROR;
+        if (!list_empty(&func_decl->params))
+        {
+            parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
+        }
+
+        if (parser_match(parser, FRX_TOKEN_TYPE_ELLIPSIS))
+        {
+            parser_eat(parser, FRX_TOKEN_TYPE_ELLIPSIS);
+            func_decl->is_variadic = FRX_TRUE;
+
+            continue;
+        }
+
+        AST* param = func_param_parse(parser);
+        list_add(&func_decl->params, param);
     }
+
+    parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
+
+    parser_eat(parser, FRX_TOKEN_TYPE_ARROW);
 
     AST* return_type = type_specifier_parse(parser);
 
-    if (parser_eat(parser, FRX_TOKEN_TYPE_SEMI))
+    AST* body = NULL;
+    if (parser_match(parser, FRX_TOKEN_TYPE_LBRACE))
     {
-        ast->type = FRX_AST_TYPE_ERROR;
+        body = scope_parse(parser);
+    }
+    else
+    {
+        parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
     }
 
-    func_decl_init(func_decl, name, generic_params, params, return_type);
+    parser_pop_scope(parser);
+
+    func_decl_init(func_decl, name, generic_params, return_type, body);
 
     ast->range.end = parser_current_location(parser);
+
+    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_FUNC,
+                         name, func_decl);
 
     return ast;
 }
@@ -68,15 +99,25 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTFuncDecl* func_decl = &ast->func_decl;
 
-    if (func_decl->params != NULL)
+    resolution_context_push_scope(ctx, func_decl->scope);
+
+    for (usize i = 0; i < list_size(&func_decl->params); ++i)
     {
-        func_params_resolve(func_decl->params, ctx);
+        AST* param = list_get(&func_decl->params, i);
+        func_param_resolve(param, ctx);
     }
 
     if (func_decl->return_type != NULL)
     {
         type_specifier_resolve(func_decl->return_type, ctx);
     }
+
+    if (func_decl->body != NULL)
+    {
+        scope_resolve(func_decl->body, ctx);
+    }
+
+    resolution_context_pop_scope(ctx);
 }
 
 void func_decl_sema(AST* ast, SemaContext* ctx)
@@ -89,13 +130,19 @@ void func_decl_sema(AST* ast, SemaContext* ctx)
 
     ASTFuncDecl* func_decl = &ast->func_decl;
 
-    if (func_decl->params != NULL)
+    for (usize i = 0; i < list_size(&func_decl->params); ++i)
     {
-        func_params_sema(func_decl->params, ctx);
+        AST* param = list_get(&func_decl->params, i);
+        func_param_sema(param, ctx);
     }
 
     if (func_decl->return_type != NULL)
     {
         type_specifier_sema(func_decl->return_type, ctx);
+    }
+
+    if (func_decl->body != NULL)
+    {
+        scope_sema(func_decl->body, ctx);
     }
 }

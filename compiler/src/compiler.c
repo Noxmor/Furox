@@ -96,7 +96,7 @@ int compiler_run(int argc, char** argv)
     {
         SourceFile* src_file = list_get(&src_files, i);
         ResolutionContext ctx;
-        resolution_context_init(&ctx, src_file);
+        resolution_context_init(&ctx, src_file, root_module);
         ast_resolve(src_file->ast, &ctx);
     }
 
@@ -117,8 +117,7 @@ int compiler_run(int argc, char** argv)
 
     CodegenContext ctx;
     codegen_context_init(&ctx, root_module, &src_files, "frx");
-    codegen_context_emit_declarations(&ctx);
-    codegen_context_emit_definitions(&ctx);
+    codegen_context_transpile(&ctx);
     codegen_context_end(&ctx);
 
     const char* temp_dir = temp_dir_path();

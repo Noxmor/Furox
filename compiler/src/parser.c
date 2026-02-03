@@ -6,8 +6,8 @@
 #include "lexer.h"
 #include "assert.h"
 #include "log.h"
+#include "scope.h"
 #include "source_file.h"
-#include "symbol_table.h"
 #include "token.h"
 #include "module.h"
 
@@ -21,8 +21,8 @@ void parser_init(Parser* parser, SourceFile* src_file)
 
     parser->src_file = src_file;
     lexer_init(&parser->lexer, source_file_data(src_file));
-    symbol_table_init(&parser->symbol_table, NULL);
-    list_init(&parser->use_stmts);
+    parser->global_scope = src_file->global_scope;
+    parser->current_scope = parser->global_scope;
     parser->failed = FRX_FALSE;
     parser->recovery = FRX_FALSE;
 }
@@ -31,9 +31,10 @@ AST* parser_parse(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    parser->translation_unit = translation_unit_parse(parser);
+    AST* ast = translation_unit_parse(parser);
+    parser->src_file->ast = ast;
 
-    return parser->translation_unit;
+    return ast;
 }
 
 void parser_add_diagnostic(Parser* parser, Diagnostic* d)
@@ -126,31 +127,45 @@ void parser_recover(Parser* parser)
     }
 }
 
+Scope* parser_push_scope(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    Scope* scope = scope_create(parser->current_scope);
+    parser->current_scope = scope;
+
+    return parser->current_scope;
+}
+
+void parser_pop_scope(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(parser->current_scope != NULL);
+
+    parser->current_scope = parser->current_scope->parent;
+}
+
 Symbol* parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
                              SymbolType type, const char* name, void* data)
 {
     FRX_ASSERT(parser != NULL);
 
+    Symbol* symbol = scope_insert_symbol(parser->current_scope, visibility, type, name, data);
 
-    if (visibility == FRX_SYMBOL_VISIBILITY_PRIVATE)
+    if (visibility != FRX_SYMBOL_VISIBILITY_PRIVATE && symbol != NULL)
     {
-        return source_file_insert_symbol(parser->src_file, visibility, type, name, data);
-    }
-
-    return module_insert_symbol(parser->src_file->module, visibility, type, name, data);
-}
-
-Symbol* parser_lookup_symbol(Parser* parser, SymbolType type, const char* name)
-{
-    FRX_ASSERT(parser != NULL);
-
-    Symbol* symbol = symbol_table_lookup(&parser->symbol_table, type, name);
-    if (symbol == NULL)
-    {
-        symbol = module_lookup_symbol(parser->src_file->module, type, name);
+        module_insert_symbol(parser->src_file->module, symbol);
     }
 
     return symbol;
+}
+
+Symbol* parser_lookup_symbol(Parser* parser, const char* name)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return scope_lookup_symbol(parser->current_scope, name);
 }
 
 void parser_fail(Parser* parser)

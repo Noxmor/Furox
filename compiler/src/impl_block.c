@@ -16,6 +16,7 @@ AST* impl_block_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_IMPL_BLOCK);
     ASTImplBlock* impl_block = &ast->impl_block;
+    impl_block->scope = parser_push_scope(parser);
 
     ast->range.start = parser_current_location(parser);
 
@@ -29,11 +30,13 @@ AST* impl_block_parse(Parser* parser)
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
-        AST* func_def = func_def_parse(parser);
-        list_add(&impl_block->methods, func_def);
+        AST* func_decl = func_decl_parse(parser);
+        list_add(&impl_block->methods, func_decl);
     }
 
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
+
+    parser_pop_scope(parser);
 
     return ast;
 }
@@ -44,13 +47,18 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_IMPL_BLOCK);
 
+
     ASTImplBlock* impl_block = &ast->impl_block;
+
+    resolution_context_push_scope(ctx, impl_block->scope);
 
     for (usize i = 0; i < list_size(&impl_block->methods); ++i)
     {
-        AST* func_def = list_get(&impl_block->methods, i);
-        func_def_resolve(func_def, ctx);
+        AST* func_decl = list_get(&impl_block->methods, i);
+        func_decl_resolve(func_decl, ctx);
     }
+
+    resolution_context_pop_scope(ctx);
 }
 
 void impl_block_sema(AST* ast, SemaContext* ctx)
@@ -65,7 +73,7 @@ void impl_block_sema(AST* ast, SemaContext* ctx)
 
     for (usize i = 0; i < list_size(&impl_block->methods); ++i)
     {
-        AST* func_def = list_get(&impl_block->methods, i);
-        func_def_sema(func_def, ctx);
+        AST* func_decl = list_get(&impl_block->methods, i);
+        func_decl_sema(func_decl, ctx);
     }
 }

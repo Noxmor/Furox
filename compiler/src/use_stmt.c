@@ -39,7 +39,7 @@ AST* use_stmt_parse(Parser* parser)
 
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    list_add(&parser->use_stmts, use_stmt);
+    //list_add(&parser->use_stmts, use_stmt);
 
     ast->range.end = parser_current_location(parser);
 
