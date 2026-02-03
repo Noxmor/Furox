@@ -333,7 +333,9 @@ static void emit_field_expr(AST* ast, FILE* f)
 
     emit_ast(field_expr->base, f);
 
-    fprintf(f, ".%s", field_expr->field_name);
+    const char* access_token = expr_infer_type(field_expr->base)->kind == FRX_TYPE_KIND_PTR ? "->" : ".";
+
+    fprintf(f, "%s%s", access_token, field_expr->field_name);
 }
 
 static void emit_call_expr(AST* ast, FILE* f)
@@ -356,6 +358,35 @@ static void emit_call_expr(AST* ast, FILE* f)
         }
 
         AST* arg = list_get(&call_expr->args, i);
+        emit_ast(arg, f);
+    }
+
+    fprintf(f, ")");
+}
+
+static void emit_method_call_expr(AST* ast, FILE* f)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_METHOD_CALL_EXPR);
+
+    FRX_ASSERT(f != NULL);
+
+    ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
+
+    fprintf(f, "%s%p(", method_call_expr->name, method_call_expr->symbol->data);
+
+    if (expr_infer_type(method_call_expr->callee)->kind != FRX_TYPE_KIND_PTR)
+    {
+        fprintf(f, "&");
+    }
+
+    emit_ast(method_call_expr->callee, f);
+
+    for (usize i = 0; i < list_size(&method_call_expr->args); ++i)
+    {
+        fprintf(f, ", ");
+        AST* arg = list_get(&method_call_expr->args, i);
         emit_ast(arg, f);
     }
 
@@ -410,6 +441,7 @@ static void emit_ast(AST* ast, FILE* f)
         case FRX_AST_TYPE_BINARY_EXPR: emit_binary_expr(ast, f); break;
         case FRX_AST_TYPE_FIELD_EXPR: emit_field_expr(ast, f); break;
         case FRX_AST_TYPE_CALL_EXPR: emit_call_expr(ast, f); break;
+        case FRX_AST_TYPE_METHOD_CALL_EXPR: emit_method_call_expr(ast, f); break;
         case FRX_AST_TYPE_EXPR_STMT: emit_expr_stmt(ast, f); break;
         case FRX_AST_TYPE_RETURN_STMT: emit_return_stmt(ast, f); break;
         default: FRX_ASSERT(FRX_FALSE); break;
@@ -548,6 +580,19 @@ void codegen_context_transpile(CodegenContext* ctx)
         }
     }
 
+    List* type_infos = type_system_get_type_infos();
+    for (usize i = 0; i < list_size(type_infos); ++i)
+    {
+        TypeInfo* info = list_get(type_infos, i);
+        List* methods = &info->methods;
+        for (usize j = 0; j < list_size(methods); ++j)
+        {
+            Symbol* method = list_get(methods, j);
+            emit_func_sig(method->data, ctx->header);
+            fprintf(ctx->header, ";\n");
+        }
+    }
+
     // 5. Emit all function definitions
     for (usize i = 0; i < list_size(ctx->src_files); ++i)
     {
@@ -578,6 +623,20 @@ void codegen_context_transpile(CodegenContext* ctx)
             }
         }
     }
+
+    for (usize i = 0; i < list_size(type_infos); ++i)
+    {
+        TypeInfo* info = list_get(type_infos, i);
+        List* methods = &info->methods;
+        for (usize j = 0; j < list_size(methods); ++j)
+        {
+            Symbol* method = list_get(methods, j);
+            emit_func_sig(method->data, ctx->source);
+            fprintf(ctx->source, "\n");
+            emit_func_body(method->data, ctx->source);
+        }
+    }
+
 }
 
 void codegen_context_end(CodegenContext* ctx)

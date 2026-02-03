@@ -18,17 +18,11 @@ void ast_sema(AST* ast, SemaContext* ctx);
 
 void translation_unit_sema(AST* ast, SemaContext* ctx);
 
-void type_specifier_sema(AST* ast, SemaContext* ctx);
-
-void struct_def_sema(AST* ast, SemaContext* ctx);
-
 void enum_def_sema(AST* ast, SemaContext* ctx);
 
 void trait_sema(AST* ast, SemaContext* ctx);
 
 void impl_block_sema(AST* ast, SemaContext* ctx);
-
-void func_param_sema(AST* ast, SemaContext* ctx);
 
 void func_decl_sema(AST* ast, SemaContext* ctx);
 
@@ -49,5 +43,7 @@ void binary_expr_sema(AST* ast, SemaContext* ctx);
 void field_expr_sema(AST* ast, SemaContext* ctx);
 
 void call_expr_sema(AST* ast, SemaContext* ctx);
+
+void method_call_expr_sema(AST* ast, SemaContext* ctx);
 
 #endif

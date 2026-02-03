@@ -155,6 +155,7 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_TYPE_SPECIFIER_KIND_PATH_EXPR:
         {
             path_expr_resolve(type_specifier->path_expr, ctx);
+            type_specifier->resolved_type = symbol_infer_type(type_specifier->path_expr->path_expr.symbol);
 
             break;
         }
@@ -174,32 +175,6 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
 
             break;
         }
-
-        default: FRX_ASSERT(FRX_FALSE); break;
-    }
-}
-
-void type_specifier_sema(AST* ast, SemaContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_TYPE_SPECIFIER);
-
-    FRX_ASSERT(ctx != NULL);
-
-    ASTTypeSpecifier* type_specifier = &ast->type_specifier;
-    switch(type_specifier->kind)
-    {
-        case FRX_TYPE_SPECIFIER_KIND_PRIMITIVE: break;
-        case FRX_TYPE_SPECIFIER_KIND_PATH_EXPR:
-        {
-            ASTPathExpr* path_expr = &type_specifier->path_expr->path_expr;
-            type_specifier->resolved_type = symbol_infer_type(path_expr->symbol);
-
-            break;
-        }
-        case FRX_TYPE_SPECIFIER_KIND_PTR: break;
-        case FRX_TYPE_SPECIFIER_KIND_ARRAY: break;
 
         default: FRX_ASSERT(FRX_FALSE); break;
     }

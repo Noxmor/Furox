@@ -96,19 +96,6 @@ AST* struct_def_parse(Parser* parser)
     return ast;
 }
 
-static void struct_field_sema(AST* ast, SemaContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_STRUCT_FIELD);
-
-    FRX_ASSERT(ctx != NULL);
-
-    ASTStructField* field = &ast->struct_field;
-
-    type_specifier_sema(field->type, ctx);
-}
-
 void struct_def_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -121,22 +108,5 @@ void struct_def_resolve(AST* ast, ResolutionContext* ctx)
     {
         AST* field = list_get(&struct_def->fields, i);
         struct_field_resolve(field, ctx);
-    }
-}
-
-void struct_def_sema(AST* ast, SemaContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_STRUCT_DEF);
-
-    FRX_ASSERT(ctx != NULL);
-
-    ASTStructDef* struct_def = &ast->struct_def;
-
-    for (usize i = 0; i < list_size(&struct_def->fields); ++i)
-    {
-        AST* field = list_get(&struct_def->fields, i);
-        struct_field_sema(field, ctx);
     }
 }

@@ -38,6 +38,8 @@ static void compiler_init(void)
     // TODO: Add every source file from std to the source files.
     // Project* stdlib = project_create(spec, "/usr/local/lib/furox/std");
     // list_add(&projects, stdlib);
+
+    type_system_init();
 }
 
 static void compiler_shutdown(void)

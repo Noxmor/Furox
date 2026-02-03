@@ -2,13 +2,15 @@
 #include "ast.h"
 #include "parser.h"
 #include "resolution.h"
+#include "scope.h"
 #include "sema.h"
+#include "type_system.h"
 
-static void impl_block_init(ASTImplBlock* impl_block, const char* type_name)
+static void impl_block_init(ASTImplBlock* impl_block, TokenType primitive,
+                            AST* path_expr)
 {
-    FRX_ASSERT(type_name != NULL);
-
-    impl_block->type_name = type_name;
+    impl_block->primitive = primitive;
+    impl_block->path_expr = path_expr;
     list_init(&impl_block->methods);
 }
 
@@ -22,10 +24,20 @@ AST* impl_block_parse(Parser* parser)
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_IMPL);
 
-    const char* type_name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    TokenType primitive = FRX_TOKEN_TYPE_EOF;
+    AST* path_expr = NULL;
 
-    impl_block_init(impl_block, type_name);
+    if (token_type_is_primitive(parser_current_type(parser)))
+    {
+        primitive = parser_current_type(parser);
+        parser_eat(parser, primitive);
+    }
+    else
+    {
+        path_expr = path_expr_parse(parser);
+    }
+
+    impl_block_init(impl_block, primitive, path_expr);
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
@@ -47,8 +59,20 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_IMPL_BLOCK);
 
-
     ASTImplBlock* impl_block = &ast->impl_block;
+
+    if (impl_block->path_expr != NULL)
+    {
+        path_expr_resolve(impl_block->path_expr, ctx);
+
+        Type* type = symbol_infer_type(impl_block->path_expr->path_expr.symbol);
+
+        for (usize i = 0; i < list_size(&impl_block->methods); ++i)
+        {
+            AST* func_decl = list_get(&impl_block->methods, i);
+            type_register_method(type, scope_lookup_symbol(impl_block->scope, func_decl->func_decl.name));
+        }
+    }
 
     resolution_context_push_scope(ctx, impl_block->scope);
 

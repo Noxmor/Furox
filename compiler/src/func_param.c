@@ -47,19 +47,3 @@ void func_param_resolve(AST* ast, ResolutionContext* ctx)
         type_specifier_resolve(param->type, ctx);
     }
 }
-
-void func_param_sema(AST* ast, SemaContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_PARAM);
-
-    FRX_ASSERT(ctx != NULL);
-
-    ASTFuncParam* param = &ast->func_param;
-
-    if (param->type != NULL)
-    {
-        type_specifier_sema(param->type, ctx);
-    }
-}

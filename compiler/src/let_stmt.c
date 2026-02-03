@@ -79,6 +79,7 @@ void let_stmt_resolve(AST* ast, ResolutionContext* ctx)
     if (let_stmt->type != NULL)
     {
         type_specifier_resolve(let_stmt->type, ctx);
+        let_stmt->resolved_type = let_stmt->type->type_specifier.resolved_type;
     }
 
     if (let_stmt->value != NULL)
@@ -96,12 +97,6 @@ void let_stmt_sema(AST* ast, SemaContext* ctx)
     FRX_ASSERT(ctx != NULL);
 
     ASTLetStmt* let_stmt = &ast->let_stmt;
-
-    if (let_stmt->type != NULL)
-    {
-        type_specifier_sema(let_stmt->type, ctx);
-        let_stmt->resolved_type = let_stmt->type->type_specifier.resolved_type;
-    }
 
     if (let_stmt->value != NULL)
     {

@@ -147,13 +147,21 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
             }
             else if (operator == FRX_OPERATOR_MEMBER_ACCESS)
             {
-                const char* field_name = parser_current_token(parser)->identifier;
+                const char* name = parser_current_token(parser)->identifier;
                 if (parser_eat(parser, FRX_TOKEN_TYPE_IDENT))
                 {
                     return NULL;
                 }
 
-                expr = field_expr_create(expr, field_name);
+                if (parser_current_type(parser) == FRX_TOKEN_TYPE_LPAREN)
+                {
+                    AST* method_call_expr = method_call_expr_parse(parser, name, expr);
+                    expr = method_call_expr;
+                }
+                else
+                {
+                    expr = field_expr_create(expr, name);
+                }
             }
             else if (operator == FRX_OPERATOR_CALL)
             {

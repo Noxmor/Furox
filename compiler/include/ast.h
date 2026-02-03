@@ -112,7 +112,8 @@ typedef struct ASTTrait
 typedef struct ASTImplBlock
 {
     Scope* scope;
-    const char* type_name;
+    TokenType primitive;
+    AST* path_expr;
     List methods;
 } ASTImplBlock;
 
@@ -196,8 +197,18 @@ typedef struct ASTPathExpr
 
 typedef struct ASTCallExpr
 {
+    AST* callee;
     List args;
 } ASTCallExpr;
+
+typedef struct ASTMethodCallExpr
+{
+    AST* callee;
+    const char* name;
+    List args;
+    Type* resolved_type;
+    const Symbol* symbol;
+} ASTMethodCallExpr;
 
 typedef struct ASTExprStmt
 {
@@ -267,6 +278,7 @@ enum
     FRX_AST_TYPE_FIELD_EXPR,
     FRX_AST_TYPE_PATH_EXPR,
     FRX_AST_TYPE_CALL_EXPR,
+    FRX_AST_TYPE_METHOD_CALL_EXPR,
     FRX_AST_TYPE_INT_LIT,
 
     FRX_AST_TYPE_COUNT
@@ -309,6 +321,7 @@ typedef struct AST
         ASTFieldExpr field_expr;
         ASTPathExpr path_expr;
         ASTCallExpr call_expr;
+        ASTMethodCallExpr method_call_expr;
         ASTIntLiteral int_literal;
     };
 } AST;

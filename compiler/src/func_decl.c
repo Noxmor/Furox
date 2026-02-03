@@ -130,17 +130,6 @@ void func_decl_sema(AST* ast, SemaContext* ctx)
 
     ASTFuncDecl* func_decl = &ast->func_decl;
 
-    for (usize i = 0; i < list_size(&func_decl->params); ++i)
-    {
-        AST* param = list_get(&func_decl->params, i);
-        func_param_sema(param, ctx);
-    }
-
-    if (func_decl->return_type != NULL)
-    {
-        type_specifier_sema(func_decl->return_type, ctx);
-    }
-
     if (func_decl->body != NULL)
     {
         scope_sema(func_decl->body, ctx);

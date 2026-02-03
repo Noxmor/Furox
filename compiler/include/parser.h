@@ -101,6 +101,8 @@ AST* path_expr_parse(Parser* parser);
 
 AST* call_expr_parse(Parser* parser);
 
+AST* method_call_expr_parse(Parser* parser, const char* name, AST* callee);
+
 AST* int_literal_parse(Parser* parser);
 
 #endif
