@@ -64,7 +64,7 @@ AST* path_expr_parse(Parser* parser)
 
     return ast;
 }
-#include <stdio.h>
+
 void path_expr_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -115,10 +115,5 @@ void path_expr_resolve(AST* ast, ResolutionContext* ctx)
     if (path_expr->symbol == NULL)
     {
         resolution_context_fail(ctx);
-        printf("FAIL: %s\n", name);
-    }
-    else
-    {
-        printf("PASS: %s\n", name);
     }
 }
