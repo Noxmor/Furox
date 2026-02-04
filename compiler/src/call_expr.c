@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -35,6 +36,8 @@ AST* call_expr_parse(Parser* parser, AST* callee)
 
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
+    compiler_register_expr(ast);
+
     return ast;
 }
 
@@ -51,7 +54,7 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
     const Symbol* symbol = call_expr->callee->path_expr.symbol;
     if (symbol->associated_type != NULL)
     {
-        const char* name = list_get(&call_expr->callee->path_expr.path_segments, list_size(&call_expr->callee->path_expr.path_segments));
+        const char* name = list_get(&call_expr->callee->path_expr.path_segments, list_size(&call_expr->callee->path_expr.path_segments) - 1);
         List args = call_expr->args;
 
         ast->type = FRX_AST_TYPE_METHOD_CALL_EXPR;

@@ -80,11 +80,11 @@ void method_call_expr_sema(AST* ast, SemaContext* ctx)
     if (method_call_expr->callee != NULL)
     {
         ast_sema(method_call_expr->callee, ctx);
-    }
 
-    Type* type = expr_infer_type(method_call_expr->callee);
-    method_call_expr->symbol = type_lookup_method(type, method_call_expr->name);
-    method_call_expr->resolved_type = symbol_infer_type(method_call_expr->symbol);
+        Type* type = expr_infer_type(method_call_expr->callee);
+        method_call_expr->symbol = type_lookup_method(type, method_call_expr->name);
+        method_call_expr->resolved_type = symbol_infer_type(method_call_expr->symbol);
+    }
 
     for (usize i = 0; i < list_size(&method_call_expr->args); ++i)
     {

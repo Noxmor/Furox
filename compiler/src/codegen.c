@@ -378,16 +378,23 @@ static void emit_method_call_expr(AST* ast, FILE* f)
 
     fprintf(f, "%s%p(", method_call_expr->name, method_call_expr->symbol->data);
 
-    if (expr_infer_type(method_call_expr->callee)->kind != FRX_TYPE_KIND_PTR)
+    if (method_call_expr->callee != NULL)
     {
-        fprintf(f, "&");
-    }
+        if (expr_infer_type(method_call_expr->callee)->kind != FRX_TYPE_KIND_PTR)
+        {
+            fprintf(f, "&");
+        }
 
-    emit_ast(method_call_expr->callee, f);
+        emit_ast(method_call_expr->callee, f);
+    }
 
     for (usize i = 0; i < list_size(&method_call_expr->args); ++i)
     {
-        fprintf(f, ", ");
+        if (i > 0 || method_call_expr->callee != NULL)
+        {
+            fprintf(f, ", ");
+        }
+
         AST* arg = list_get(&method_call_expr->args, i);
         emit_ast(arg, f);
     }
