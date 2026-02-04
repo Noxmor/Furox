@@ -99,7 +99,7 @@ AST* expr_parse(Parser* parser);
 
 AST* path_expr_parse(Parser* parser);
 
-AST* call_expr_parse(Parser* parser);
+AST* call_expr_parse(Parser* parser, AST* callee);
 
 AST* method_call_expr_parse(Parser* parser, const char* name, AST* callee);
 

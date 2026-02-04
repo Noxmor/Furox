@@ -8,15 +8,16 @@ void resolution_context_init(ResolutionContext* ctx, SourceFile* src_file,
 {
     FRX_ASSERT(ctx != NULL);
 
-    FRX_ASSERT(src_file != NULL);
-
     FRX_ASSERT(root_mod != NULL);
 
-    FRX_LOG_INFO("Initializing resolution context for file: %s...", src_file->path);
+    if (src_file != NULL)
+    {
+        FRX_LOG_INFO("Initializing resolution context for file: %s...", src_file->path);
+    }
 
     ctx->src_file = src_file;
     ctx->root_mod = root_mod;
-    ctx->current_scope = src_file->global_scope;
+    ctx->current_scope = src_file != NULL ? src_file->global_scope : NULL;
     ctx->failed = FRX_FALSE;
 }
 

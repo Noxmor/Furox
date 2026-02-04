@@ -17,6 +17,7 @@ Symbol* symbol_create(const char* name, SymbolVisibility visibility,
     symbol->visibility = visibility;
     symbol->type = type;
     symbol->data = data;
+    symbol->associated_type = NULL;
 
     return symbol;
 }

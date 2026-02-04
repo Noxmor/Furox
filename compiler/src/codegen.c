@@ -348,6 +348,8 @@ static void emit_call_expr(AST* ast, FILE* f)
 
     ASTCallExpr* call_expr = &ast->call_expr;
 
+    emit_ast(call_expr->callee, f);
+
     fprintf(f, "(");
 
     for (usize i = 0; i < list_size(&call_expr->args); ++i)

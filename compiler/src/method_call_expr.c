@@ -55,7 +55,10 @@ void method_call_expr_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
 
-    ast_resolve(method_call_expr->callee, ctx);
+    if (method_call_expr->callee != NULL)
+    {
+        ast_resolve(method_call_expr->callee, ctx);
+    }
 
     for (usize i = 0; i < list_size(&method_call_expr->args); ++i)
     {
@@ -74,7 +77,10 @@ void method_call_expr_sema(AST* ast, SemaContext* ctx)
 
     ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
 
-    ast_sema(method_call_expr->callee, ctx);
+    if (method_call_expr->callee != NULL)
+    {
+        ast_sema(method_call_expr->callee, ctx);
+    }
 
     Type* type = expr_infer_type(method_call_expr->callee);
     method_call_expr->symbol = type_lookup_method(type, method_call_expr->name);

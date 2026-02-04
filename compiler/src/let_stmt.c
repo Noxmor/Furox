@@ -81,11 +81,6 @@ void let_stmt_resolve(AST* ast, ResolutionContext* ctx)
         type_specifier_resolve(let_stmt->type, ctx);
         let_stmt->resolved_type = let_stmt->type->type_specifier.resolved_type;
     }
-
-    if (let_stmt->value != NULL)
-    {
-        ast_resolve(let_stmt->value, ctx);
-    }
 }
 
 void let_stmt_sema(AST* ast, SemaContext* ctx)

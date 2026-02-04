@@ -2,7 +2,6 @@
 #define FRX_RESOLUTION_H
 
 #include "source_file.h"
-#include "symbol_table.h"
 
 typedef struct ResolutionContext
 {
@@ -47,19 +46,9 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx);
 
 void scope_resolve(AST* ast, ResolutionContext* ctx);
 
-void expr_stmt_resolve(AST* ast, ResolutionContext* ctx);
-
-void return_stmt_resolve(AST* ast, ResolutionContext* ctx);
-
 void let_stmt_resolve(AST* ast, ResolutionContext* ctx);
 
 void if_stmt_resolve(AST* ast, ResolutionContext* ctx);
-
-void unary_expr_resolve(AST* ast, ResolutionContext* ctx);
-
-void binary_expr_resolve(AST* ast, ResolutionContext* ctx);
-
-void field_expr_resolve(AST* ast, ResolutionContext* ctx);
 
 void path_expr_resolve(AST* ast, ResolutionContext* ctx);
 

@@ -8,6 +8,7 @@
 #include "operator.h"
 #include "type_system.h"
 #include "scope.h"
+#include "module.h"
 
 typedef struct AST AST;
 
@@ -192,6 +193,8 @@ typedef struct ASTPathExpr
 {
     ASTPathType type;
     List path_segments;
+    Scope* scope;
+    Module* mod;
     const Symbol* symbol;
 } ASTPathExpr;
 

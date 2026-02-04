@@ -80,6 +80,9 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
     {
         AST* func_decl = list_get(&impl_block->methods, i);
         func_decl_resolve(func_decl, ctx);
+
+        Symbol* symbol = resolution_context_lookup_symbol(ctx, func_decl->func_decl.name);
+        symbol->associated_type = expr_infer_type(impl_block->path_expr);
     }
 
     resolution_context_pop_scope(ctx);

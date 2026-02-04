@@ -165,8 +165,7 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
             }
             else if (operator == FRX_OPERATOR_CALL)
             {
-                AST* call_expr = call_expr_parse(parser);
-                expr = binary_expr_create(type, operator, expr, call_expr);
+                expr = call_expr_parse(parser, expr);
             }
             else
             {

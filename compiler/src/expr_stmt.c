@@ -1,7 +1,6 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
-#include "resolution.h"
 #include "sema.h"
 
 AST* expr_stmt_parse(Parser* parser)
@@ -17,17 +16,6 @@ AST* expr_stmt_parse(Parser* parser)
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
     return ast;
-}
-
-void expr_stmt_resolve(AST* ast, ResolutionContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_EXPR_STMT);
-
-    ASTExprStmt* expr_stmt = &ast->expr_stmt;
-
-    ast_resolve(expr_stmt->expr, ctx);
 }
 
 void expr_stmt_sema(AST* ast, SemaContext* ctx)

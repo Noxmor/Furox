@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "assert.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -18,6 +19,7 @@ static Arena* arena;
 static Arena* ast_arena;
 
 static List src_files;
+static List expressions;
 
 static Module* root_module;
 
@@ -32,6 +34,7 @@ static void compiler_init(void)
     arena = arena_create();
     ast_arena = arena_create();
     list_init(&src_files);
+    list_init(&expressions);
 
     root_module = module_create_root();
 
@@ -94,12 +97,28 @@ int compiler_run(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    b8 resolution_failed = FRX_FALSE;
     for (usize i = 0; i < list_size(&src_files); ++i)
     {
         SourceFile* src_file = list_get(&src_files, i);
         ResolutionContext ctx;
         resolution_context_init(&ctx, src_file, root_module);
         ast_resolve(src_file->ast, &ctx);
+        resolution_failed |= resolution_context_failed(&ctx);
+    }
+
+    for (usize i = 0; i < list_size(&expressions); ++i)
+    {
+        ResolutionContext ctx;
+        resolution_context_init(&ctx, NULL, root_module);
+        AST* expr = list_get(&expressions, i);
+        ast_resolve(expr, &ctx);
+        resolution_failed |= resolution_context_failed(&ctx);
+    }
+
+    if (resolution_failed)
+    {
+        return EXIT_FAILURE;
     }
 
     b8 sema_failed = FRX_FALSE;
@@ -139,4 +158,11 @@ int compiler_run(int argc, char** argv)
 Module* compiler_root_module(void)
 {
     return root_module;
+}
+
+void compiler_register_expr(AST *expr)
+{
+    FRX_ASSERT(expr != NULL);
+
+    list_add(&expressions, expr);
 }
