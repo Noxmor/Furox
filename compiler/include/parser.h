@@ -61,6 +61,8 @@ AST* mod_decl_parse(Parser* parser);
 
 AST* item_parse(Parser* parser);
 
+AST* use_tree_parse(Parser* parser);
+
 AST* use_stmt_parse(Parser* parser);
 
 AST* type_specifier_parse(Parser* parser);

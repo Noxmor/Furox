@@ -3,8 +3,6 @@
 #include "diagnostics.h"
 #include "parser.h"
 #include "resolution.h"
-#include "sema.h"
-#include "symbol_table.h"
 #include "token.h"
 
 static void generic_args_init(ASTGenericArgs* generic_args)

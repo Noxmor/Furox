@@ -499,7 +499,9 @@ void codegen_context_transpile(CodegenContext* ctx)
 {
     FRX_ASSERT(ctx != NULL);
 
-    // 1. Emit all enums
+    List symbols;
+    list_init(&symbols);
+
     for (usize i = 0; i < list_size(ctx->src_files); ++i)
     {
         SourceFile* src_file = list_get(ctx->src_files, i);
@@ -513,89 +515,61 @@ void codegen_context_transpile(CodegenContext* ctx)
             {
                 Symbol* symbol = entry->symbol;
 
-                switch (symbol->type)
+                if (!list_contains(&symbols, symbol))
                 {
-                    case FRX_SYMBOL_TYPE_ENUM: emit_enum_definition(symbol->data, ctx->header); break;
-                    default: break;
+                    list_add(&symbols, symbol);
                 }
 
                 entry = entry->next;
             }
+        }
+    }
+
+    // 1. Emit all enums
+    for (usize i = 0; i < list_size(&symbols); ++i)
+    {
+        Symbol* symbol = list_get(&symbols, i);
+
+        switch (symbol->type)
+        {
+            case FRX_SYMBOL_TYPE_ENUM: emit_enum_definition(symbol->data, ctx->header); break;
+            default: break;
         }
     }
 
     // 2. Emit all struct declarations
-    for (usize i = 0; i < list_size(ctx->src_files); ++i)
+    for (usize i = 0; i < list_size(&symbols); ++i)
     {
-        SourceFile* src_file = list_get(ctx->src_files, i);
-        SymbolTable* symbol_table = &src_file->global_scope->symbols;
+        Symbol* symbol = list_get(&symbols, i);
 
-        for (usize j = 0; j < FRX_SYMBOL_TABLE_CAPACITY; ++j)
+        switch (symbol->type)
         {
-            SymbolTableEntry* entry = symbol_table->entries[j];
-
-            while (entry != NULL)
-            {
-                Symbol* symbol = entry->symbol;
-
-                switch (symbol->type)
-                {
-                    case FRX_SYMBOL_TYPE_STRUCT: emit_struct_declaration(symbol->data, ctx->header); break;
-                    default: break;
-                }
-
-                entry = entry->next;
-            }
+            case FRX_SYMBOL_TYPE_STRUCT: emit_struct_declaration(symbol->data, ctx->header); break;
+            default: break;
         }
     }
 
     // 3. Emit all struct definitions dependency based
-    for (usize i = 0; i < list_size(ctx->src_files); ++i)
+    for (usize i = 0; i < list_size(&symbols); ++i)
     {
-        SourceFile* src_file = list_get(ctx->src_files, i);
-        SymbolTable* symbol_table = &src_file->global_scope->symbols;
+        Symbol* symbol = list_get(&symbols, i);
 
-        for (usize j = 0; j < FRX_SYMBOL_TABLE_CAPACITY; ++j)
+        switch (symbol->type)
         {
-            SymbolTableEntry* entry = symbol_table->entries[j];
-
-            while (entry != NULL)
-            {
-                Symbol* symbol = entry->symbol;
-
-                switch (symbol->type)
-                {
-                    case FRX_SYMBOL_TYPE_STRUCT: emit_struct_definition(symbol->data, ctx->header, ctx); break;
-                    default: break;
-                }
-
-                entry = entry->next;
-            }
+            case FRX_SYMBOL_TYPE_STRUCT: emit_struct_definition(symbol->data, ctx->header, ctx); break;
+            default: break;
         }
     }
 
     // 4. Emit all function declarations
-    for (usize i = 0; i < list_size(ctx->src_files); ++i)
+    for (usize i = 0; i < list_size(&symbols); ++i)
     {
-        SourceFile* src_file = list_get(ctx->src_files, i);
-        SymbolTable* symbol_table = &src_file->global_scope->symbols;
+        Symbol* symbol = list_get(&symbols, i);
 
-        for (usize j = 0; j < FRX_SYMBOL_TABLE_CAPACITY; ++j)
+        switch (symbol->type)
         {
-            SymbolTableEntry* entry = symbol_table->entries[j];
-
-            while (entry != NULL)
-            {
-                Symbol* symbol = entry->symbol;
-
-                switch (symbol->type)
-                {
-                    case FRX_SYMBOL_TYPE_FUNC: emit_func_sig(symbol->data, ctx->header); fprintf(ctx->header, ";\n"); break;
-                    default: break;
-                }
-
-                entry = entry->next;
-            }
+            case FRX_SYMBOL_TYPE_FUNC: emit_func_sig(symbol->data, ctx->header); fprintf(ctx->header, ";\n"); break;
+            default: break;
         }
     }
 
@@ -613,33 +587,20 @@ void codegen_context_transpile(CodegenContext* ctx)
     }
 
     // 5. Emit all function definitions
-    for (usize i = 0; i < list_size(ctx->src_files); ++i)
+    for (usize i = 0; i < list_size(&symbols); ++i)
     {
-        SourceFile* src_file = list_get(ctx->src_files, i);
-        SymbolTable* symbol_table = &src_file->global_scope->symbols;
+        Symbol* symbol = list_get(&symbols, i);
 
-        for (usize j = 0; j < FRX_SYMBOL_TABLE_CAPACITY; ++j)
+        switch (symbol->type)
         {
-            SymbolTableEntry* entry = symbol_table->entries[j];
-
-            while (entry != NULL)
+            case FRX_SYMBOL_TYPE_FUNC:
             {
-                Symbol* symbol = entry->symbol;
-
-                switch (symbol->type)
-                {
-                    case FRX_SYMBOL_TYPE_FUNC:
-                    {
-                        emit_func_sig(symbol->data, ctx->source);
-                        fprintf(ctx->source, "\n");
-                        emit_func_body(symbol->data, ctx->source);
-                        break;
-                    }
-                    default: break;
-                }
-
-                entry = entry->next;
+                emit_func_sig(symbol->data, ctx->source);
+                fprintf(ctx->source, "\n");
+                emit_func_body(symbol->data, ctx->source);
+                break;
             }
+            default: break;
         }
     }
 
@@ -655,7 +616,6 @@ void codegen_context_transpile(CodegenContext* ctx)
             emit_func_body(method->data, ctx->source);
         }
     }
-
 }
 
 void codegen_context_end(CodegenContext* ctx)

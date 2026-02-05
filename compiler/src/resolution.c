@@ -17,6 +17,7 @@ void resolution_context_init(ResolutionContext* ctx, SourceFile* src_file,
 
     ctx->src_file = src_file;
     ctx->root_mod = root_mod;
+    ctx->current_mod = NULL;
     ctx->current_scope = src_file != NULL ? src_file->global_scope : NULL;
     ctx->failed = FRX_FALSE;
 }

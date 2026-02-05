@@ -7,6 +7,7 @@ typedef struct ResolutionContext
 {
     SourceFile* src_file;
     Module* root_mod;
+    Module* current_mod;
     Scope* current_scope;
     b8 failed;
 } ResolutionContext;
@@ -27,6 +28,8 @@ b8 resolution_context_failed(const ResolutionContext* ctx);
 void ast_resolve(AST* ast, ResolutionContext* ctx);
 
 void translation_unit_resolve(AST* ast, ResolutionContext* ctx);
+
+void use_tree_resolve(AST* ast, ResolutionContext* ctx);
 
 void use_stmt_resolve(AST* ast, ResolutionContext* ctx);
 

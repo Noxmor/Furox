@@ -55,10 +55,27 @@ typedef struct ASTTypeSpecifier
     Type* resolved_type;
 } ASTTypeSpecifier;
 
+enum
+{
+    FRX_AST_USE_TREE_TYPE_SIMPLE = 0,
+    FRX_AST_USE_TREE_TYPE_GLOB,
+    FRX_AST_USE_TREE_TYPE_NESTED,
+
+    FRX_AST_USE_TREE_TYPE_COUNT
+};
+
+typedef u8 ASTUseTreeType;
+
+typedef struct ASTUseTree
+{
+    ASTUseTreeType type;
+    const char* path_segment;
+    List childs;
+} ASTUseTree;
+
 typedef struct ASTUseStmt
 {
-    List path_segments;
-    const char* symbol_name;
+    AST* use_tree;
 } ASTUseStmt;
 
 typedef struct ASTTraitBound
@@ -256,6 +273,7 @@ enum
     FRX_AST_TYPE_ERROR,
     FRX_AST_TYPE_TRANSLATION_UNIT,
     FRX_AST_TYPE_MOD_DECL,
+    FRX_AST_TYPE_USE_TREE,
     FRX_AST_TYPE_USE_STMT,
     FRX_AST_TYPE_TYPE_SPECIFIER,
     FRX_AST_TYPE_STRUCT_FIELD,
@@ -299,6 +317,7 @@ typedef struct AST
     {
         ASTTranslationUnit translation_unit;
         ASTModDecl mod_decl;
+        ASTUseTree use_tree;
         ASTUseStmt use_stmt;
         ASTTypeSpecifier type_specifier;
         ASTStructField struct_field;
