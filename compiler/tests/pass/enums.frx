@@ -1,0 +1,12 @@
+enum Foo : u8
+{
+    Foo;
+    Bar;
+    Buz = 42;
+    NextBuz;
+}
+
+fn main() -> i32
+{
+    return Foo::Foo + Foo::Bar + Foo::Buz - Foo::NextBuz;
+}
