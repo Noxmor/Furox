@@ -146,8 +146,8 @@ void use_tree_resolve(AST* ast, ResolutionContext* ctx)
     ctx->current_mod = ctx->src_file->module;
     if (module_lookup_symbol(ctx->current_mod, use_tree->path_segment) == NULL)
     {
-        ctx->current_mod = module_find_submodule_by_name(ctx->src_file->module, use_tree->path_segment);
-        if (ctx->current_mod == NULL)
+        Module* mod = module_find_submodule_by_name(ctx->src_file->module, use_tree->path_segment);
+        if (mod == NULL)
         {
             ctx->current_mod = ctx->root_mod;
         }
