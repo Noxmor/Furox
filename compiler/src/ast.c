@@ -100,3 +100,21 @@ Type* expr_infer_type(AST* expr)
         default: FRX_ASSERT(FRX_FALSE); return NULL;
     }
 }
+
+ASTEnumConstant* enum_def_lookup_constant(ASTEnumDef* enum_def, const char* name)
+{
+    FRX_ASSERT(enum_def != NULL);
+
+    FRX_ASSERT(name != NULL);
+
+    for (usize i = 0; i < list_size(&enum_def->constants); ++i)
+    {
+        AST* constant = list_get(&enum_def->constants, i);
+        if (constant->enum_constant.name == name)
+        {
+            return &constant->enum_constant;
+        }
+    }
+
+    return NULL;
+}

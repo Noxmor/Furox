@@ -78,6 +78,8 @@ b8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
     return FRX_FALSE;
 }
 
+static void emit_ast(AST* ast, FILE* f);
+
 static void emit_type(const Type* type, FILE* f)
 {
     FRX_ASSERT(type != NULL);
@@ -112,7 +114,27 @@ static void emit_enum_definition(ASTEnumDef* enum_def, FILE* f)
 
     FRX_ASSERT(f != NULL);
 
-    // TODO: Implement
+    fprintf(f, "enum\n{\n");
+
+    for (usize i = 0; i < list_size(&enum_def->constants); ++i)
+    {
+        AST* ast = list_get(&enum_def->constants, i);
+        ASTEnumConstant* constant = &ast->enum_constant;
+
+        fprintf(f, "%s%p", constant->name, constant);
+
+        if (constant->value != NULL)
+        {
+            fprintf(f, " = ");
+            emit_ast(constant->value, f);
+        }
+
+        fprintf(f, ",\n");
+    }
+
+    fprintf(f, "};\ntypedef ");
+    emit_type(enum_def->resolved_type, f);
+    fprintf(f, " %s%p;\n", enum_def->name, enum_def);
 }
 
 static void emit_struct_declaration(ASTStructDef* struct_def, FILE* f)
@@ -219,8 +241,6 @@ static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f)
     fprintf(f, ")");
 }
 
-static void emit_ast(AST* ast, FILE* f);
-
 static void emit_int_literal(AST* ast, FILE* f)
 {
     FRX_ASSERT(ast != NULL);
@@ -242,20 +262,10 @@ static void emit_path_expr(AST* ast, FILE* f)
 
     ASTPathExpr* path_expr = &ast->path_expr;
 
-    const char* last_name = NULL;
-    for (usize i = 0; i < list_size(&path_expr->path_segments); ++i)
-    {
-        if (i > 0)
-        {
-            fprintf(f, "_");
-        }
+    const char* last_path = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
+    fprintf(f, "%s", last_path);
 
-        const char* name = list_get(&path_expr->path_segments, i);
-        last_name = name;
-        fprintf(f, "%s", name);
-    }
-
-    if (list_size(&path_expr->path_segments) > 1 || strcmp(last_name, "main") != 0)
+    if (list_size(&path_expr->path_segments) > 1 || strcmp(last_path, "main") != 0)
     {
         FRX_ASSERT(path_expr->symbol != NULL);
 

@@ -94,6 +94,8 @@ typedef struct ASTStructDef
 typedef struct ASTEnumConstant
 {
     const char* name;
+    AST* value;
+    Symbol* symbol;
 } ASTEnumConstant;
 
 typedef struct ASTEnumDef
@@ -334,5 +336,7 @@ AST* ast_create(ASTType type);
 AST* scope_from_stmt(AST* stmt);
 
 Type* expr_infer_type(AST* expr);
+
+ASTEnumConstant* enum_def_lookup_constant(ASTEnumDef* enum_def, const char* name);
 
 #endif

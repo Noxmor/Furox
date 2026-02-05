@@ -3,9 +3,8 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
-#include "codegen.h"
 
-static AST* enum_constant_create(const char* name)
+static AST* enum_constant_create(const char* name, AST* value)
 {
     FRX_ASSERT(name != NULL);
 
@@ -13,6 +12,8 @@ static AST* enum_constant_create(const char* name)
     ASTEnumConstant* constant = &ast->enum_constant;
 
     constant->name = name;
+    constant->value = value;
+    constant->symbol = NULL;
 
     return ast;
 }
@@ -22,7 +23,14 @@ static AST* enum_constant_parse(Parser* parser)
     const char* name = parser_current_token(parser)->identifier;
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    return enum_constant_create(name);
+    AST* value = NULL;
+    if (parser_match(parser, FRX_TOKEN_TYPE_EQ))
+    {
+        parser_eat(parser, FRX_TOKEN_TYPE_EQ);
+        value = expr_parse(parser);
+    }
+
+    return enum_constant_create(name, value);
 }
 
 static void enum_def_init(ASTEnumDef* enum_def, const char* name, AST* type)
@@ -69,19 +77,24 @@ AST* enum_def_parse(Parser* parser)
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
-        if (!list_empty(&enum_def->constants))
-        {
-            parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
-        }
-
         AST* constant = enum_constant_parse(parser);
         enum_def_add_constant(enum_def, constant);
+
+        parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
     }
+
+    parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
     ast->range.end = parser_current_location(parser);
 
-    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_ENUM,
+    Symbol* symbol = parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_ENUM,
                          name, enum_def);
+
+    for (usize i = 0; i < list_size(&enum_def->constants); ++i)
+    {
+        AST* constant = list_get(&enum_def->constants, i);
+        constant->enum_constant.symbol = symbol;
+    }
 
     return ast;
 }
@@ -92,9 +105,11 @@ void enum_def_resolve(AST* ast, ResolutionContext* ctx)
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_ENUM_DEF);
 
-    // TODO: Implement
-    (void)ast;
-    (void)ctx;
+    ASTEnumDef* enum_def = &ast->enum_def;
+
+    ast_resolve(enum_def->type, ctx);
+
+    enum_def->resolved_type = enum_def->type->type_specifier.resolved_type;
 }
 
 void enum_def_sema(AST* ast, SemaContext* ctx)
@@ -104,8 +119,4 @@ void enum_def_sema(AST* ast, SemaContext* ctx)
     FRX_ASSERT(ast->type == FRX_AST_TYPE_ENUM_DEF);
 
     FRX_ASSERT(ctx != NULL);
-
-    // TODO: Implement
-    (void)ast;
-    (void)ctx;
 }
