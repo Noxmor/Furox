@@ -77,18 +77,40 @@ void method_call_expr_sema(AST* ast, SemaContext* ctx)
 
     ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
 
+    for (usize i = 0; i < list_size(&method_call_expr->args); ++i)
+    {
+        AST* arg = list_get(&method_call_expr->args, i);
+        ast_sema(arg, ctx);
+    }
+
     if (method_call_expr->callee != NULL)
     {
         ast_sema(method_call_expr->callee, ctx);
 
         Type* type = expr_infer_type(method_call_expr->callee);
         method_call_expr->symbol = type_lookup_method(type, method_call_expr->name);
-        method_call_expr->resolved_type = symbol_infer_type(method_call_expr->symbol);
-    }
 
-    for (usize i = 0; i < list_size(&method_call_expr->args); ++i)
-    {
-        AST* arg = list_get(&method_call_expr->args, i);
-        ast_sema(arg, ctx);
+        if (method_call_expr->symbol == NULL)
+        {
+            AST* base = method_call_expr->callee;
+            const char* name = method_call_expr->name;
+            List args = method_call_expr->args;
+
+            ast->type = FRX_AST_TYPE_CALL_EXPR;
+            ASTCallExpr* call_expr = &ast->call_expr;
+
+            AST* field_expr = ast_create(FRX_AST_TYPE_FIELD_EXPR);
+            field_expr->field_expr.field_name = name;
+            field_expr->field_expr.base = base;
+            field_expr->field_expr.resolved_type = type;
+
+            call_expr->callee = field_expr;
+            call_expr->args = args;
+        }
+        else
+        {
+            method_call_expr->resolved_type = ((ASTFuncDecl*)method_call_expr->symbol->data)->return_type->type_specifier.resolved_type;
+        }
+
     }
 }

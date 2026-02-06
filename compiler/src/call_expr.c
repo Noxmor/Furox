@@ -63,7 +63,7 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
         method_call_expr->symbol = symbol;
         method_call_expr->name = name;
         method_call_expr->args = args;
-        method_call_expr->resolved_type = symbol_infer_type(method_call_expr->symbol);
+        method_call_expr->resolved_type = ((ASTFuncDecl*)method_call_expr->symbol->data)->return_type->type_specifier.resolved_type;
     }
 }
 

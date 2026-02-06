@@ -9,6 +9,7 @@
 enum
 {
     FRX_TYPE_KIND_PRIMITIVE = 0,
+    FRX_TYPE_KIND_FUNC,
     FRX_TYPE_KIND_PTR,
     FRX_TYPE_KIND_ARRAY,
     FRX_TYPE_KIND_SYMBOL,
@@ -28,6 +29,13 @@ typedef struct Type
         {
             TokenType type;
         } primitive;
+
+        struct
+        {
+            List params;
+            Type* return_type;
+            b8 is_variadic;
+        } func;
 
         struct
         {
@@ -54,7 +62,11 @@ typedef struct TypeInfo
     List methods;
 } TypeInfo;
 
+typedef struct AST AST;
+
 Type* type_create_primitive(TokenType primitive_type);
+
+Type* type_create_func(List* params, AST* return_type, b8 is_variadic);
 
 Type* type_create_ptr(Type* base, b8 mutable);
 

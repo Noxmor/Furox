@@ -23,6 +23,35 @@ Type* type_create_primitive(TokenType primitive_type)
     return type;
 }
 
+Type* type_create_func(List* params, AST* return_type, b8 is_variadic)
+{
+    FRX_ASSERT(params != NULL);
+
+    FRX_ASSERT(return_type != NULL);
+
+    Type* type = type_create(FRX_TYPE_KIND_FUNC);
+
+    list_init(&type->func.params);
+
+    for (usize i = 0; i < list_size(params); ++i)
+    {
+        AST* param = list_get(params, i);
+
+        switch (param->type)
+        {
+            case FRX_AST_TYPE_TYPE_SPECIFIER: list_add(&type->func.params, param->type_specifier.resolved_type); break;
+            case FRX_AST_TYPE_FUNC_PARAM: list_add(&type->func.params, param->func_param.type->type_specifier.resolved_type); break;
+
+            default: FRX_ASSERT(FRX_FALSE); break;
+        }
+    }
+
+    type->func.return_type = return_type->type_specifier.resolved_type;
+    type->func.is_variadic = is_variadic;
+
+    return type;
+}
+
 Type* type_create_ptr(Type* base, b8 mutable)
 {
     FRX_ASSERT(base != NULL);
@@ -64,7 +93,7 @@ Type* symbol_infer_type(const Symbol* symbol)
 
     switch (symbol->type)
     {
-        case FRX_SYMBOL_TYPE_FUNC: return ((ASTFuncDecl*)symbol->data)->return_type->type_specifier.resolved_type;
+        case FRX_SYMBOL_TYPE_FUNC: return ((ASTFuncDecl*)symbol->data)->resolved_type;
         case FRX_SYMBOL_TYPE_STRUCT: return ((ASTStructDef*)symbol->data)->resolved_type;
         case FRX_SYMBOL_TYPE_ENUM: return ((ASTEnumDef*)symbol->data)->resolved_type;
         case FRX_SYMBOL_TYPE_ENUM_CONSTANT: return symbol_infer_type(((ASTEnumConstant*)symbol->data)->symbol);

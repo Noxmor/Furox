@@ -52,6 +52,9 @@ static void type_specifier_init(ASTTypeSpecifier* type, ASTTypeSpecifierKind kin
     type->generic_args = NULL;
     type->resolved_type = NULL;
     type->path_expr = NULL;
+    list_init(&type->func_params);
+    type->func_return_type = NULL;
+    type->is_variadic = FRX_FALSE;
 }
 
 static void type_specifier_init_primitive(ASTTypeSpecifier* type, TokenType primitive)
@@ -75,6 +78,14 @@ static void type_specifier_init_path_expr(ASTTypeSpecifier* type, AST* path_expr
 
     type->path_expr = path_expr;
 }
+
+static void type_specifier_init_func(ASTTypeSpecifier* type)
+{
+    FRX_ASSERT(type != NULL);
+
+    type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_FUNC);
+}
+
 
 static void type_specifier_init_pointer(ASTTypeSpecifier* type, AST* base, b8 mutable)
 {
@@ -106,6 +117,40 @@ AST* type_specifier_parse(Parser* parser)
     {
         AST* path_expr = path_expr_parse(parser);
         type_specifier_init_path_expr(type, path_expr);
+    }
+    else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_FN)
+    {
+        type_specifier_init_func(type);
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_FN);
+        parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
+
+        while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
+        {
+            if (parser_current_type(parser) == FRX_TOKEN_TYPE_ELLIPSIS)
+            {
+                type->is_variadic = FRX_TRUE;
+                parser_eat(parser, FRX_TOKEN_TYPE_ELLIPSIS);
+                break;
+            }
+
+            AST* param_type = type_specifier_parse(parser);
+            list_add(&type->func_params, param_type);
+
+            if (parser_current_type(parser) == FRX_TOKEN_TYPE_COMMA)
+            {
+                parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
+        parser_eat(parser, FRX_TOKEN_TYPE_ARROW);
+
+        AST* return_type = type_specifier_parse(parser);
+        type->func_return_type = return_type;
     }
     else
     {
@@ -154,6 +199,20 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
         {
             path_expr_resolve(type_specifier->path_expr, ctx);
             type_specifier->resolved_type = symbol_infer_type(type_specifier->path_expr->path_expr.symbol);
+
+            break;
+        }
+        case FRX_TYPE_SPECIFIER_KIND_FUNC:
+        {
+            for (usize i = 0; i < list_size(&type_specifier->func_params); ++i)
+            {
+                AST* param = list_get(&type_specifier->func_params, i);
+                type_specifier_resolve(param, ctx);
+            }
+
+            type_specifier_resolve(type_specifier->func_return_type, ctx);
+
+            type_specifier->resolved_type = type_create_func(&type_specifier->func_params, type_specifier->func_return_type, type_specifier->is_variadic);
 
             break;
         }

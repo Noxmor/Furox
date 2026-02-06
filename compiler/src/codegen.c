@@ -80,7 +80,7 @@ b8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
 
 static void emit_ast(AST* ast, FILE* f);
 
-static void emit_type(const Type* type, FILE* f)
+static void emit_type(const Type* type, const char* name, FILE* f)
 {
     FRX_ASSERT(type != NULL);
 
@@ -89,6 +89,31 @@ static void emit_type(const Type* type, FILE* f)
     switch (type->kind)
     {
         case FRX_TYPE_KIND_PRIMITIVE: fprintf(f, "%s", token_type_to_str(type->primitive.type)); break;
+        case FRX_TYPE_KIND_FUNC:
+        {
+            emit_type(type->func.return_type, NULL, f);
+            fprintf(f, " (*%s)(", name);
+
+            for (usize i = 0; i < list_size(&type->func.params); ++i)
+            {
+                if (i > 0)
+                {
+                    fprintf(f, ", ");
+                }
+
+                Type* param = list_get(&type->func.params, i);
+                emit_type(param, NULL, f);
+            }
+
+            if (type->func.is_variadic)
+            {
+                fprintf(f, ", ...");
+            }
+
+            fprintf(f, ")");
+
+            break;
+        }
         case FRX_TYPE_KIND_SYMBOL:
         {
             const Symbol* symbol = type->symbol.symbol;
@@ -102,8 +127,8 @@ static void emit_type(const Type* type, FILE* f)
 
             break;
         }
-        case FRX_TYPE_KIND_PTR: emit_type(type->ptr.base, f); fprintf(f, "*"); break;
-        case FRX_TYPE_KIND_ARRAY: emit_type(type->array.base, f); fprintf(f, "[%zu]", type->array.size); break;
+        case FRX_TYPE_KIND_PTR: emit_type(type->ptr.base, NULL, f); fprintf(f, "*"); break;
+        case FRX_TYPE_KIND_ARRAY: emit_type(type->array.base, NULL, f); fprintf(f, "[%zu]", type->array.size); break;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 }
@@ -133,7 +158,7 @@ static void emit_enum_definition(ASTEnumDef* enum_def, FILE* f)
     }
 
     fprintf(f, "};\ntypedef ");
-    emit_type(enum_def->resolved_type, f);
+    emit_type(enum_def->resolved_type, NULL, f);
     fprintf(f, " %s%p;\n", enum_def->name, enum_def);
 }
 
@@ -152,8 +177,14 @@ static void emit_struct_field(ASTStructField* struct_field, FILE* f)
 
     FRX_ASSERT(f != NULL);
 
-    emit_type(struct_field->type->type_specifier.resolved_type, f);
-    fprintf(f, " %s;\n", struct_field->name);
+    emit_type(struct_field->type->type_specifier.resolved_type, struct_field->name, f);
+
+    if (struct_field->type->type_specifier.resolved_type->kind != FRX_TYPE_KIND_FUNC)
+    {
+        fprintf(f, " %s", struct_field->name);
+    }
+
+    fprintf(f, ";\n");
 }
 
 static void emit_struct_definition(ASTStructDef* struct_def, FILE* f, CodegenContext* ctx)
@@ -206,7 +237,9 @@ static void emit_func_param(ASTFuncParam* func_param, FILE* f)
 
     FRX_ASSERT(f != NULL);
 
-    emit_type(func_param->type->type_specifier.resolved_type, f);
+    char mangled_name[strlen(func_param->name) + 2 + 16 + 1];
+    sprintf(mangled_name, "%s%p", func_param->name, func_param);
+    emit_type(func_param->type->type_specifier.resolved_type, mangled_name, f);
     fprintf(f, " %s%p", func_param->name, func_param);
 }
 
@@ -221,7 +254,9 @@ static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f)
         fprintf(f, "extern ");
     }
 
-    emit_type(func_decl->return_type->type_specifier.resolved_type, f);
+    char mangled_name[strlen(func_decl->name) + 2 + 16 + 1];
+    sprintf(mangled_name, "%s%p", func_decl->name, func_decl);
+    emit_type(func_decl->return_type->type_specifier.resolved_type, mangled_name, f);
     fprintf(f, " %s", func_decl->name);
 
     if (strcmp(func_decl->name, "main") != 0 && !func_decl->external)
@@ -314,8 +349,15 @@ static void emit_let_stmt(AST* ast, FILE* f)
     FRX_ASSERT(f != NULL);
 
     ASTLetStmt* let_stmt = &ast->let_stmt;
-    emit_type(let_stmt->resolved_type, f);
-    fprintf(f, " %s%p", let_stmt->name, let_stmt);
+
+    char mangled_name[strlen(let_stmt->name) + 2 + 16 + 1];
+    sprintf(mangled_name, "%s%p", let_stmt->name, let_stmt);
+    emit_type(let_stmt->resolved_type, mangled_name, f);
+
+    if (let_stmt->resolved_type->kind != FRX_TYPE_KIND_FUNC)
+    {
+        fprintf(f, " %s%p", let_stmt->name, let_stmt);
+    }
 
     if (let_stmt->value)
     {

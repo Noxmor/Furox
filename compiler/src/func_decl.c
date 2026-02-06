@@ -4,6 +4,7 @@
 #include "resolution.h"
 #include "sema.h"
 #include "symbol.h"
+#include "type_system.h"
 
 static void func_decl_init(ASTFuncDecl* func_decl, const char* name, b8 external,
                            b8 is_variadic, AST* generic_params, AST* return_type,
@@ -17,6 +18,7 @@ static void func_decl_init(ASTFuncDecl* func_decl, const char* name, b8 external
     func_decl->is_variadic = is_variadic;
     func_decl->return_type = return_type;
     func_decl->body = body;
+    func_decl->resolved_type = NULL;
 }
 
 AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
@@ -128,6 +130,8 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx)
     {
         scope_resolve(func_decl->body, ctx);
     }
+
+    func_decl->resolved_type = type_create_func(&func_decl->params, func_decl->return_type, func_decl->is_variadic);
 
     resolution_context_pop_scope(ctx);
 }

@@ -44,6 +44,7 @@ enum
 {
     FRX_TYPE_SPECIFIER_KIND_PRIMITIVE = 0,
     FRX_TYPE_SPECIFIER_KIND_PATH_EXPR,
+    FRX_TYPE_SPECIFIER_KIND_FUNC,
     FRX_TYPE_SPECIFIER_KIND_PTR,
     FRX_TYPE_SPECIFIER_KIND_ARRAY,
 
@@ -59,6 +60,9 @@ typedef struct ASTTypeSpecifier
     const char* name;
     TokenType primitive;
     AST* path_expr;
+    List func_params;
+    AST* func_return_type;
+    b8 is_variadic;
     usize size;
     AST* base;
     b8 mutable;
@@ -193,6 +197,7 @@ typedef struct ASTFuncDecl
     b8 is_variadic;
     AST* return_type;
     AST* body;
+    Type* resolved_type;
 } ASTFuncDecl;
 
 typedef u8 ASTExprType;
