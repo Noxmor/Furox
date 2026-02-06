@@ -2,3 +2,4 @@ mod std::libc;
 
 pub extern fn malloc(size: usize) -> void*;
 pub extern fn free(ptr: void*) -> void;
+pub extern fn printf(format: char*, ...) -> i32;
