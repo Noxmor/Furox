@@ -123,6 +123,7 @@ typedef u8 StructKind;
 typedef struct ASTStructField
 {
     const char* name;
+    SymbolVisibility visibility;
     AST* type;
 } ASTStructField;
 

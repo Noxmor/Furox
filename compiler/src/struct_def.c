@@ -5,9 +5,11 @@
 #include "symbol.h"
 #include "type_system.h"
 
-static void struct_field_init(ASTStructField* field, const char* name, AST* type)
+static void struct_field_init(ASTStructField* field, const char* name,
+                              SymbolVisibility visibility, AST* type)
 {
     field->name = name;
+    field->visibility = visibility;
     field->type = type;
 }
 
@@ -28,6 +30,18 @@ AST* struct_field_parse(Parser* parser)
 
     ast->range.start = parser_current_location(parser);
 
+    SymbolVisibility visibility = FRX_SYMBOL_VISIBILITY_PRIVATE;
+    if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_PUB)
+    {
+        visibility = FRX_SYMBOL_VISIBILITY_PUBLIC;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_PUB);
+    }
+    else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_MOD)
+    {
+        visibility = FRX_SYMBOL_VISIBILITY_MODULE;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_MOD);
+    }
+
     const char* name = parser_current_token(parser)->identifier;
 
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
@@ -37,7 +51,7 @@ AST* struct_field_parse(Parser* parser)
 
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    struct_field_init(field, name, type);
+    struct_field_init(field, name, visibility, type);
 
     ast->range.end = parser_current_location(parser);
 
