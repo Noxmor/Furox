@@ -180,7 +180,6 @@ static void emit_struct_definition(ASTStructDef* struct_def, FILE* f, CodegenCon
             switch (symbol->type)
             {
                 case FRX_SYMBOL_TYPE_STRUCT: emit_struct_definition(symbol->data, f, ctx);
-                case FRX_SYMBOL_TYPE_UNION: break; // TODO: Implement
 
                 default: break;
             }

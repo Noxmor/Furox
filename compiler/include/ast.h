@@ -110,6 +110,16 @@ typedef struct ASTGenericParams
     List params;
 } ASTGenericParams;
 
+enum
+{
+    FRX_STRUCT_KIND_NAMED,
+    FRX_STRUCT_KIND_UNION,
+
+    FRX_STRUCT_KIND_COUNT
+};
+
+typedef u8 StructKind;
+
 typedef struct ASTStructField
 {
     const char* name;
@@ -119,6 +129,7 @@ typedef struct ASTStructField
 typedef struct ASTStructDef
 {
     const char* name;
+    StructKind kind;
     AST* generic_params;
     List fields;
     Type* resolved_type;

@@ -2,7 +2,6 @@
 #include "ast.h"
 #include "parser.h"
 #include "resolution.h"
-#include "sema.h"
 #include "symbol.h"
 #include "type_system.h"
 
@@ -13,9 +12,10 @@ static void struct_field_init(ASTStructField* field, const char* name, AST* type
 }
 
 static void struct_def_init(ASTStructDef* struct_def, const char* name,
-                            AST* generic_params)
+                            StructKind kind, AST* generic_params)
 {
     struct_def->name = name;
+    struct_def->kind = kind;
     struct_def->generic_params = generic_params;
     list_init(&struct_def->fields);
     struct_def->resolved_type = NULL;
@@ -62,7 +62,17 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
 
     ast->range.start = parser_current_location(parser);
 
-    parser_eat(parser, FRX_TOKEN_TYPE_KW_STRUCT);
+    StructKind kind = FRX_STRUCT_KIND_COUNT;
+    if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_STRUCT)
+    {
+        kind = FRX_STRUCT_KIND_NAMED;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_STRUCT);
+    }
+    else
+    {
+        kind = FRX_STRUCT_KIND_UNION;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_UNION);
+    }
 
     const char* name = parser_current_token(parser)->identifier;
 
@@ -76,7 +86,7 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
 
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
-    struct_def_init(struct_def, name, generic_params);
+    struct_def_init(struct_def, name, kind, generic_params);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
