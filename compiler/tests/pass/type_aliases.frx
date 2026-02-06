@@ -1,0 +1,8 @@
+type Foo = i32;
+
+fn main() -> i32
+{
+    let foo: Foo = 0;
+
+    return foo;
+}
