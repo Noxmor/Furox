@@ -298,7 +298,7 @@ static void emit_path_expr(AST* ast, FILE* f)
     fprintf(f, "%s", last_path);
 
     if ((list_size(&path_expr->path_segments) > 1 || strcmp(last_path, "main") != 0)
-        && (path_expr->symbol->type != FRX_SYMBOL_TYPE_FUNC || path_expr->symbol->type == FRX_SYMBOL_TYPE_FUNC && !((ASTFuncDecl*)path_expr->symbol->data)->external))
+        && (path_expr->symbol->type != FRX_SYMBOL_TYPE_FUNC || (path_expr->symbol->type == FRX_SYMBOL_TYPE_FUNC && !((ASTFuncDecl*)path_expr->symbol->data)->external)))
     {
         FRX_ASSERT(path_expr->symbol != NULL);
 

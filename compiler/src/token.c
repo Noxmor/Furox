@@ -41,6 +41,7 @@ static char* token_type_names[] = {
     [FRX_TOKEN_TYPE_KW_EXTERN] = "extern",
     [FRX_TOKEN_TYPE_KW_STRUCT] = "struct",
     [FRX_TOKEN_TYPE_KW_ENUM] = "enum",
+    [FRX_TOKEN_TYPE_KW_TYPE] = "type",
     [FRX_TOKEN_TYPE_KW_IF] = "if",
     [FRX_TOKEN_TYPE_KW_ELSE] = "else",
     [FRX_TOKEN_TYPE_KW_SWITCH] = "switch",

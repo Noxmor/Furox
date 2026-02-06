@@ -26,6 +26,7 @@ void ast_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_AST_TYPE_TRANSLATION_UNIT: translation_unit_resolve(ast, ctx); break;
         case FRX_AST_TYPE_USE_STMT: use_stmt_resolve(ast, ctx); break;
         case FRX_AST_TYPE_TYPE_SPECIFIER: type_specifier_resolve(ast, ctx); break;
+        case FRX_AST_TYPE_TYPE_ALIAS: return type_alias_resolve(ast, ctx); break;
         case FRX_AST_TYPE_STRUCT_DEF: struct_def_resolve(ast, ctx); break;
         case FRX_AST_TYPE_ENUM_DEF: enum_def_resolve(ast, ctx); break;
         case FRX_AST_TYPE_TRAIT: trait_resolve(ast, ctx); break;
@@ -60,6 +61,7 @@ void ast_sema(AST* ast, SemaContext* ctx)
         case FRX_AST_TYPE_TRANSLATION_UNIT: translation_unit_sema(ast, ctx); break;
         case FRX_AST_TYPE_USE_STMT: break;
         case FRX_AST_TYPE_TYPE_SPECIFIER: break;
+        case FRX_AST_TYPE_TYPE_ALIAS: break;
         case FRX_AST_TYPE_STRUCT_DEF: break;
         case FRX_AST_TYPE_ENUM_DEF: enum_def_sema(ast, ctx); break;
         case FRX_AST_TYPE_TRAIT: trait_sema(ast, ctx); break;

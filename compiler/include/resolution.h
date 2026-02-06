@@ -33,6 +33,8 @@ void use_tree_resolve(AST* ast, ResolutionContext* ctx);
 
 void use_stmt_resolve(AST* ast, ResolutionContext* ctx);
 
+void type_alias_resolve(AST* ast, ResolutionContext* ctx);
+
 void type_specifier_resolve(AST* ast, ResolutionContext* ctx);
 
 void struct_def_resolve(AST* ast, ResolutionContext* ctx);

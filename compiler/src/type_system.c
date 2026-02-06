@@ -69,6 +69,7 @@ Type* symbol_infer_type(const Symbol* symbol)
         case FRX_SYMBOL_TYPE_UNION: return NULL; // TODO: Implement
         case FRX_SYMBOL_TYPE_ENUM: return ((ASTEnumDef*)symbol->data)->resolved_type;
         case FRX_SYMBOL_TYPE_ENUM_CONSTANT: return symbol_infer_type(((ASTEnumConstant*)symbol->data)->symbol);
+        case FRX_SYMBOL_TYPE_TYPE_ALIAS: return ((ASTTypeAlias*)symbol->data)->type->type_specifier.resolved_type;
         case FRX_SYMBOL_TYPE_PARAM: return ((ASTFuncParam*)symbol->data)->type->type_specifier.resolved_type;
         case FRX_SYMBOL_TYPE_VAR: return ((ASTLetStmt*)symbol->data)->resolved_type;
 
