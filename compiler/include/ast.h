@@ -18,6 +18,16 @@ typedef struct ASTIntLiteral
     Type* resolved_type;
 } ASTIntLiteral;
 
+typedef struct ASTCharLiteral
+{
+    const char* value;
+} ASTCharLiteral;
+
+typedef struct ASTStringLiteral
+{
+    const char* value;
+} ASTStringLiteral;
+
 typedef struct ASTTypeSpecifier ASTTypeSpecifier;
 
 typedef struct ASTGenericArg
@@ -303,6 +313,8 @@ enum
     FRX_AST_TYPE_CALL_EXPR,
     FRX_AST_TYPE_METHOD_CALL_EXPR,
     FRX_AST_TYPE_INT_LIT,
+    FRX_AST_TYPE_CHAR_LIT,
+    FRX_AST_TYPE_STRING_LIT,
 
     FRX_AST_TYPE_COUNT
 };
@@ -347,6 +359,8 @@ typedef struct AST
         ASTCallExpr call_expr;
         ASTMethodCallExpr method_call_expr;
         ASTIntLiteral int_literal;
+        ASTCharLiteral char_literal;
+        ASTStringLiteral string_literal;
     };
 } AST;
 

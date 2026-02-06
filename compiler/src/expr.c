@@ -60,6 +60,8 @@ static AST* expr_parse_primary(Parser* parser)
     switch (parser_current_type(parser))
     {
         case FRX_TOKEN_TYPE_INT_LIT: return int_literal_parse(parser);
+        case FRX_TOKEN_TYPE_CHAR_LIT: return char_literal_parse(parser);
+        case FRX_TOKEN_TYPE_STR_LIT: return string_literal_parse(parser);
         case FRX_TOKEN_TYPE_KW_EXTERN:
         case FRX_TOKEN_TYPE_IDENT: return path_expr_parse(parser);
         default:

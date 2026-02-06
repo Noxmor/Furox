@@ -252,6 +252,28 @@ static void emit_int_literal(AST* ast, FILE* f)
     fprintf(f, "%zu", ast->int_literal.value);
 }
 
+static void emit_char_literal(AST* ast, FILE* f)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_CHAR_LIT);
+
+    FRX_ASSERT(f != NULL);
+
+    fprintf(f, "'%s'", ast->char_literal.value);
+}
+
+static void emit_string_literal(AST* ast, FILE* f)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_STRING_LIT);
+
+    FRX_ASSERT(f != NULL);
+
+    fprintf(f, "\"%s\"", ast->string_literal.value);
+}
+
 static void emit_path_expr(AST* ast, FILE* f)
 {
     FRX_ASSERT(ast != NULL);
@@ -454,6 +476,8 @@ static void emit_ast(AST* ast, FILE* f)
     switch (ast->type)
     {
         case FRX_AST_TYPE_INT_LIT: emit_int_literal(ast, f); break;
+        case FRX_AST_TYPE_CHAR_LIT: emit_char_literal(ast, f); break;
+        case FRX_AST_TYPE_STRING_LIT: emit_string_literal(ast, f); break;
         case FRX_AST_TYPE_PATH_EXPR: emit_path_expr(ast, f); break;
         case FRX_AST_TYPE_LET_STMT: emit_let_stmt(ast, f); break;
         case FRX_AST_TYPE_UNARY_EXPR: emit_unary_expr(ast, f); break;
