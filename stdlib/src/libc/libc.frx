@@ -1,10 +1,4 @@
-extern fn malloc(size: usize) -> void*;
-extern fn free(ptr: void*) -> void;
+mod std::libc;
 
-pub fn malloc(size: usize) -> void* {
-    return extern::malloc(size);
-}
-
-pub fn free(ptr: void*) -> void {
-    extern::free(ptr);
-}
+pub extern fn malloc(size: usize) -> void*;
+pub extern fn free(ptr: void*) -> void;
