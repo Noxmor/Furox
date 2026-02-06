@@ -3,6 +3,7 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "symbol.h"
 #include "type_system.h"
 
 static void struct_field_init(ASTStructField* field, const char* name, AST* type)
@@ -54,7 +55,7 @@ static void struct_field_resolve(AST* ast, ResolutionContext* ctx)
     type_specifier_resolve(field->type, ctx);
 }
 
-AST* struct_def_parse(Parser* parser)
+AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
 {
     AST* ast = ast_create(FRX_AST_TYPE_STRUCT_DEF);
     ASTStructDef* struct_def = &ast->struct_def;
@@ -87,7 +88,7 @@ AST* struct_def_parse(Parser* parser)
 
     ast->range.end = parser_current_location(parser);
 
-    const Symbol* symbol = parser_insert_symbol(parser, parser->visibility,
+    const Symbol* symbol = parser_insert_symbol(parser, visibility,
                                                 FRX_SYMBOL_TYPE_STRUCT,
                                                 struct_def->name, struct_def);
 

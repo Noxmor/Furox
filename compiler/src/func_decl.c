@@ -3,20 +3,23 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "symbol.h"
 
-static void func_decl_init(ASTFuncDecl* func_decl, const char* name,
-                           AST* generic_params, AST* return_type, AST* body)
+static void func_decl_init(ASTFuncDecl* func_decl, const char* name, b8 external,
+                           b8 is_variadic, AST* generic_params, AST* return_type,
+                           AST* body)
 {
     FRX_ASSERT(name != NULL);
 
     func_decl->name = name;
+    func_decl->external = external;
     func_decl->generic_params = generic_params;
-    func_decl->is_variadic = FRX_FALSE;
+    func_decl->is_variadic = is_variadic;
     func_decl->return_type = return_type;
     func_decl->body = body;
 }
 
-AST* func_decl_parse(Parser* parser)
+AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
 {
     AST* ast = ast_create(FRX_AST_TYPE_FUNC_DECL);
     ASTFuncDecl* func_decl = &ast->func_decl;
@@ -24,6 +27,13 @@ AST* func_decl_parse(Parser* parser)
     func_decl->scope = parser_push_scope(parser);
 
     ast->range.start = parser_current_location(parser);
+
+    b8 external = FRX_FALSE;
+    if (parser_match(parser, FRX_TOKEN_TYPE_KW_EXTERN))
+    {
+        external = FRX_TRUE;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_EXTERN);
+    }
 
     if (parser_eat(parser, FRX_TOKEN_TYPE_KW_FN))
     {
@@ -44,6 +54,8 @@ AST* func_decl_parse(Parser* parser)
 
     parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
 
+    b8 is_variadic = FRX_FALSE;
+
     while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
     {
         if (!list_empty(&func_decl->params))
@@ -54,7 +66,7 @@ AST* func_decl_parse(Parser* parser)
         if (parser_match(parser, FRX_TOKEN_TYPE_ELLIPSIS))
         {
             parser_eat(parser, FRX_TOKEN_TYPE_ELLIPSIS);
-            func_decl->is_variadic = FRX_TRUE;
+            is_variadic = FRX_TRUE;
 
             continue;
         }
@@ -81,11 +93,11 @@ AST* func_decl_parse(Parser* parser)
 
     parser_pop_scope(parser);
 
-    func_decl_init(func_decl, name, generic_params, return_type, body);
+    func_decl_init(func_decl, name, external, is_variadic, generic_params, return_type, body);
 
     ast->range.end = parser_current_location(parser);
 
-    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_FUNC,
+    parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_FUNC,
                          name, func_decl);
 
     return ast;

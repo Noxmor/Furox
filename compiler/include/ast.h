@@ -169,6 +169,7 @@ typedef struct ASTFuncDecl
 {
     Scope* scope;
     const char* name;
+    b8 external;
     AST* generic_params;
     List params;
     b8 is_variadic;

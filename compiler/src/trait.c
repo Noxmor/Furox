@@ -3,6 +3,7 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "symbol.h"
 
 static void trait_init(ASTTrait* trait, const char* name)
 {
@@ -31,7 +32,7 @@ AST* trait_parse(Parser* parser)
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
-        AST* func_decl = func_decl_parse(parser);
+        AST* func_decl = func_decl_parse(parser, FRX_SYMBOL_VISIBILITY_PRIVATE);
         list_add(&trait->methods, func_decl);
     }
 

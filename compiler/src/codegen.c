@@ -217,10 +217,15 @@ static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f)
 
     FRX_ASSERT(f != NULL);
 
+    if (func_decl->external)
+    {
+        fprintf(f, "extern ");
+    }
+
     emit_type(func_decl->return_type->type_specifier.resolved_type, f);
     fprintf(f, " %s", func_decl->name);
 
-    if (strcmp(func_decl->name, "main") != 0)
+    if (strcmp(func_decl->name, "main") != 0 && !func_decl->external)
     {
         fprintf(f, "%p", func_decl);
     }
@@ -236,6 +241,11 @@ static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f)
 
         AST* func_param = list_get(&func_decl->params, i);
         emit_func_param(&func_param->func_param, f);
+    }
+
+    if (func_decl->is_variadic)
+    {
+        fprintf(f, ", ...");
     }
 
     fprintf(f, ")");
@@ -287,7 +297,7 @@ static void emit_path_expr(AST* ast, FILE* f)
     const char* last_path = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
     fprintf(f, "%s", last_path);
 
-    if (list_size(&path_expr->path_segments) > 1 || strcmp(last_path, "main") != 0)
+    if (strcmp(last_path, "main") != 0 && (path_expr->symbol->type == FRX_SYMBOL_TYPE_FUNC && !((ASTFuncDecl*)path_expr->symbol->data)->external))
     {
         FRX_ASSERT(path_expr->symbol != NULL);
 
@@ -619,9 +629,13 @@ void codegen_context_transpile(CodegenContext* ctx)
         {
             case FRX_SYMBOL_TYPE_FUNC:
             {
-                emit_func_sig(symbol->data, ctx->source);
-                fprintf(ctx->source, "\n");
-                emit_func_body(symbol->data, ctx->source);
+                if (!((ASTFuncDecl*)symbol->data)->external)
+                {
+                    emit_func_sig(symbol->data, ctx->source);
+                    fprintf(ctx->source, "\n");
+                    emit_func_body(symbol->data, ctx->source);
+                }
+
                 break;
             }
             default: break;

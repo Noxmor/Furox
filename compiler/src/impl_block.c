@@ -42,7 +42,8 @@ AST* impl_block_parse(Parser* parser)
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
-        AST* func_decl = func_decl_parse(parser);
+        SymbolVisibility visibility = parse_visibility(parser);
+        AST* func_decl = func_decl_parse(parser, visibility);
         list_add(&impl_block->methods, func_decl);
     }
 

@@ -3,6 +3,7 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "symbol.h"
 
 static void let_stmt_init(ASTLetStmt* let_stmt, b8 mutable, const char* name,
                               AST* type, AST* value)
@@ -62,7 +63,7 @@ AST* let_stmt_parse(Parser* parser)
 
     ast->range.end = parser_current_location(parser);
 
-    parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_VAR,
+    parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_VAR,
                          name, let_stmt);
 
     return ast;

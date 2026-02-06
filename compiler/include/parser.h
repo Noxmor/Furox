@@ -5,6 +5,7 @@
 #include "ast.h"
 #include "scope.h"
 #include "source_file.h"
+#include "symbol.h"
 
 typedef struct Parser
 {
@@ -12,7 +13,6 @@ typedef struct Parser
     Lexer lexer;
     Scope* global_scope;
     Scope* current_scope;
-    SymbolVisibility visibility;
     b8 external;
     b8 failed;
     b8 recovery;
@@ -37,6 +37,8 @@ Token* parser_peek(Parser* parser, usize offset);
 b8 parser_match(Parser* parser, TokenType type);
 
 b8 parser_eat(Parser* parser, TokenType type);
+
+SymbolVisibility parse_visibility(Parser* parser);
 
 void parser_recover(Parser* parser);
 
@@ -67,9 +69,9 @@ AST* use_stmt_parse(Parser* parser);
 
 AST* type_specifier_parse(Parser* parser);
 
-AST* struct_def_parse(Parser* parser);
+AST* struct_def_parse(Parser* parser, SymbolVisibility visibility);
 
-AST* enum_def_parse(Parser* parser);
+AST* enum_def_parse(Parser* parser, SymbolVisibility visibility);
 
 AST* trait_parse(Parser* parser);
 
@@ -79,7 +81,7 @@ AST* func_param_parse(Parser* parser);
 
 AST* generic_params_parse(Parser* parser);
 
-AST* func_decl_parse(Parser* parser);
+AST* func_decl_parse(Parser* parser, SymbolVisibility visibility);
 
 AST* scope_parse(Parser* parser);
 

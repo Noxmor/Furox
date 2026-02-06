@@ -3,6 +3,7 @@
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
+#include "symbol.h"
 
 static AST* enum_constant_create(const char* name, AST* value)
 {
@@ -56,7 +57,7 @@ static void enum_def_add_constant(ASTEnumDef* enum_def, AST* constant)
     list_add(&enum_def->constants, constant);
 }
 
-AST* enum_def_parse(Parser* parser)
+AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
 {
     AST* ast = ast_create(FRX_AST_TYPE_ENUM_DEF);
     ASTEnumDef* enum_def = &ast->enum_def;
@@ -87,7 +88,7 @@ AST* enum_def_parse(Parser* parser)
 
     ast->range.end = parser_current_location(parser);
 
-    Symbol* symbol = parser_insert_symbol(parser, parser->visibility, FRX_SYMBOL_TYPE_ENUM,
+    Symbol* symbol = parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_ENUM,
                          name, enum_def);
 
     for (usize i = 0; i < list_size(&enum_def->constants); ++i)

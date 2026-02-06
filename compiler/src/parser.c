@@ -112,6 +112,26 @@ b8 parser_eat(Parser* parser, TokenType type)
     return FRX_TRUE;
 }
 
+SymbolVisibility parse_visibility(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    SymbolVisibility visibility = FRX_SYMBOL_VISIBILITY_PRIVATE;
+
+    if (parser_match(parser, FRX_TOKEN_TYPE_KW_PUB))
+    {
+        visibility = FRX_SYMBOL_VISIBILITY_PUBLIC;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_PUB);
+    }
+    else if (parser_match(parser, FRX_TOKEN_TYPE_KW_MOD))
+    {
+        visibility = FRX_SYMBOL_VISIBILITY_MODULE;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_MOD);
+    }
+
+    return visibility;
+}
+
 void parser_recover(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
