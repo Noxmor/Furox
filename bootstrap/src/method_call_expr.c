@@ -87,7 +87,7 @@ void method_call_expr_sema(AST* ast, SemaContext* ctx)
     {
         ast_sema(method_call_expr->callee, ctx);
 
-        Type* type = expr_infer_type(method_call_expr->callee);
+        const Type* type = expr_infer_type(method_call_expr->callee);
         method_call_expr->symbol = type_lookup_method(type, method_call_expr->name);
 
         if (method_call_expr->symbol == NULL)

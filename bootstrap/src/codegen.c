@@ -101,7 +101,7 @@ static void emit_type(const Type* type, const char* name, FILE* f)
                     fprintf(f, ", ");
                 }
 
-                Type* param = list_get(&type->func.params, i);
+                const Type* param = list_get(&type->func.params, i);
                 emit_type(param, NULL, f);
             }
 
@@ -202,7 +202,7 @@ static void emit_struct_definition(ASTStructDef* struct_def, FILE* f, CodegenCon
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* struct_field = list_get(&struct_def->fields, i);
-        Type* type = struct_field->struct_field.type->type_specifier.resolved_type;
+        const Type* type = struct_field->struct_field.type->type_specifier.resolved_type;
 
         if (type->kind == FRX_TYPE_KIND_SYMBOL)
         {

@@ -88,22 +88,8 @@ void ast_sema(AST* ast, SemaContext* ctx)
     }
 }
 
-static Type char_type = {
-    .kind = FRX_TYPE_KIND_PRIMITIVE,
-    .primitive = {
-        .type = FRX_TOKEN_TYPE_KW_CHAR
-    }
-};
 
-static Type string_literal_type = {
-    .kind = FRX_TYPE_KIND_PTR,
-    .ptr = {
-        .base = &char_type,
-        .mutable = FRX_FALSE
-    }
-};
-
-Type* expr_infer_type(AST* expr)
+const Type* expr_infer_type(AST* expr)
 {
     FRX_ASSERT(expr != NULL);
 
@@ -116,8 +102,8 @@ Type* expr_infer_type(AST* expr)
         case FRX_AST_TYPE_CALL_EXPR: return expr_infer_type(expr->call_expr.callee);
         case FRX_AST_TYPE_METHOD_CALL_EXPR: return expr->method_call_expr.resolved_type;
         case FRX_AST_TYPE_INT_LIT: return expr->int_literal.resolved_type;
-        case FRX_AST_TYPE_CHAR_LIT: return &char_type;
-        case FRX_AST_TYPE_STRING_LIT: return &string_literal_type;
+        case FRX_AST_TYPE_CHAR_LIT: return type_intern_char_lit();
+        case FRX_AST_TYPE_STRING_LIT: return type_intern_string_lit();
 
         default: FRX_ASSERT(FRX_FALSE); return NULL;
     }

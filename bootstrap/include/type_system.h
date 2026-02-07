@@ -9,6 +9,7 @@
 enum
 {
     FRX_TYPE_KIND_PRIMITIVE = 0,
+    FRX_TYPE_KIND_STRUCT,
     FRX_TYPE_KIND_FUNC,
     FRX_TYPE_KIND_PTR,
     FRX_TYPE_KIND_ARRAY,
@@ -32,20 +33,26 @@ typedef struct Type
 
         struct
         {
+            List field_types;
+            List field_names;
+        } strct;
+
+        struct
+        {
             List params;
-            Type* return_type;
+            const struct Type* return_type;
             b8 is_variadic;
         } func;
 
         struct
         {
-            struct Type* base;
+            const struct Type* base;
             b8 mutable;
         } ptr;
 
         struct
         {
-            struct Type* base;
+            const struct Type* base;
             usize size;
         } array;
 
@@ -64,19 +71,25 @@ typedef struct TypeInfo
 
 typedef struct AST AST;
 
-Type* type_create_primitive(TokenType primitive_type);
-
-Type* type_create_func(List* params, AST* return_type, b8 is_variadic);
-
-Type* type_create_ptr(Type* base, b8 mutable);
-
-Type* type_create_array(Type* base, usize size);
-
-Type* type_create_symbol(const Symbol* symbol);
-
-Type* symbol_infer_type(const Symbol* symbol);
-
 void type_system_init(void);
+
+const Type* type_intern_primitive(TokenType primitive);
+
+const Type* type_intern_struct(const List* fields);
+
+const Type* type_intern_func(const List* params, const Type* return_type, b8 is_variadic);
+
+const Type* type_intern_ptr(const Type* base, b8 mutable);
+
+const Type* type_intern_array(const Type* base, usize size);
+
+const Type* type_intern_symbol(const Symbol* symbol);
+
+const Type* type_intern_char_lit(void);
+
+const Type* type_intern_string_lit(void);
+
+const Type* symbol_infer_type(const Symbol* symbol);
 
 void type_register_method(const Type* type, Symbol* symbol);
 

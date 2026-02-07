@@ -38,7 +38,7 @@ typedef struct Symbol
     SymbolVisibility visibility;
     SymbolType type;
     void* data;
-    Type* associated_type;
+    const Type* associated_type;
 } Symbol;
 
 Symbol* symbol_create(const char* name, SymbolVisibility visibility,

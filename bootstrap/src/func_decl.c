@@ -131,7 +131,7 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx)
         scope_resolve(func_decl->body, ctx);
     }
 
-    func_decl->resolved_type = type_create_func(&func_decl->params, func_decl->return_type, func_decl->is_variadic);
+    func_decl->resolved_type = type_intern_func(&func_decl->params, func_decl->return_type->type_specifier.resolved_type, func_decl->is_variadic);
 
     resolution_context_pop_scope(ctx);
 }

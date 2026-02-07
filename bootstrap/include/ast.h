@@ -15,7 +15,7 @@ typedef struct AST AST;
 typedef struct ASTIntLiteral
 {
     u64 value;
-    Type* resolved_type;
+    const Type* resolved_type;
 } ASTIntLiteral;
 
 typedef struct ASTCharLiteral
@@ -66,7 +66,7 @@ typedef struct ASTTypeSpecifier
     usize size;
     AST* base;
     b8 mutable;
-    Type* resolved_type;
+    const Type* resolved_type;
 } ASTTypeSpecifier;
 
 enum
@@ -137,7 +137,7 @@ typedef struct ASTStructDef
     StructKind kind;
     AST* generic_params;
     List fields;
-    Type* resolved_type;
+    const Type* resolved_type;
 } ASTStructDef;
 
 typedef struct ASTEnumConstant
@@ -152,7 +152,7 @@ typedef struct ASTEnumDef
     const char* name;
     AST* type;
     List constants;
-    Type* resolved_type;
+    const Type* resolved_type;
 } ASTEnumDef;
 
 typedef struct ASTTrait
@@ -197,7 +197,7 @@ typedef struct ASTFuncDecl
     b8 is_variadic;
     AST* return_type;
     AST* body;
-    Type* resolved_type;
+    const Type* resolved_type;
 } ASTFuncDecl;
 
 typedef u8 ASTExprType;
@@ -207,7 +207,7 @@ typedef struct ASTUnaryExpr
     TokenType type;
     Operator operator;
     AST* operand;
-    Type* resolved_type;
+    const Type* resolved_type;
 } ASTUnaryExpr;
 
 typedef struct ASTBinaryExpr
@@ -216,14 +216,14 @@ typedef struct ASTBinaryExpr
     Operator operator;
     AST* left;
     AST* right;
-    Type* resolved_type;
+    const Type* resolved_type;
 } ASTBinaryExpr;
 
 typedef struct ASTFieldExpr
 {
     AST* base;
     const char* field_name;
-    Type* resolved_type;
+    const Type* resolved_type;
 } ASTFieldExpr;
 
 typedef struct ASTModDecl
@@ -262,7 +262,7 @@ typedef struct ASTMethodCallExpr
     AST* callee;
     const char* name;
     List args;
-    Type* resolved_type;
+    const Type* resolved_type;
     const Symbol* symbol;
 } ASTMethodCallExpr;
 
@@ -299,7 +299,7 @@ typedef struct ASTLetStmt
     const char* name;
     AST* type;
     AST* value;
-    Type* resolved_type;
+    const Type* resolved_type;
 } ASTLetStmt;
 
 enum
@@ -394,7 +394,7 @@ AST* ast_create(ASTType type);
 
 AST* scope_from_stmt(AST* stmt);
 
-Type* expr_infer_type(AST* expr);
+const Type* expr_infer_type(AST* expr);
 
 ASTEnumConstant* enum_def_lookup_constant(ASTEnumDef* enum_def, const char* name);
 

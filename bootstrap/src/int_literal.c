@@ -38,5 +38,5 @@ void int_literal_resolve(AST* ast, ResolutionContext* ctx)
     // TODO: Resolve type to i32 by default or smallest type to fit the value
     ASTIntLiteral* literal = &ast->int_literal;
 
-    literal->resolved_type = type_create_primitive(FRX_TOKEN_TYPE_KW_I32);
+    literal->resolved_type = type_intern_primitive(FRX_TOKEN_TYPE_KW_I32);
 }

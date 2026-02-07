@@ -116,7 +116,7 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
                                                 FRX_SYMBOL_TYPE_STRUCT,
                                                 struct_def->name, struct_def);
 
-    struct_def->resolved_type = type_create_symbol(symbol);
+    struct_def->resolved_type = type_intern_symbol(symbol);
 
     return ast;
 }

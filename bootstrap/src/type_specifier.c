@@ -194,7 +194,7 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
     ASTTypeSpecifier* type_specifier = &ast->type_specifier;
     switch(type_specifier->kind)
     {
-        case FRX_TYPE_SPECIFIER_KIND_PRIMITIVE: type_specifier->resolved_type = type_create_primitive(type_specifier->primitive); break;
+        case FRX_TYPE_SPECIFIER_KIND_PRIMITIVE: type_specifier->resolved_type = type_intern_primitive(type_specifier->primitive); break;
         case FRX_TYPE_SPECIFIER_KIND_PATH_EXPR:
         {
             path_expr_resolve(type_specifier->path_expr, ctx);
@@ -212,7 +212,7 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
 
             type_specifier_resolve(type_specifier->func_return_type, ctx);
 
-            type_specifier->resolved_type = type_create_func(&type_specifier->func_params, type_specifier->func_return_type, type_specifier->is_variadic);
+            type_specifier->resolved_type = type_intern_func(&type_specifier->func_params, type_specifier->func_return_type->type_specifier.resolved_type, type_specifier->is_variadic);
 
             break;
         }
@@ -220,7 +220,7 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
         {
             AST* base = type_specifier->base;
             type_specifier_resolve(base, ctx);
-            type_specifier->resolved_type = type_create_ptr(base->type_specifier.resolved_type, base->type_specifier.mutable);
+            type_specifier->resolved_type = type_intern_ptr(base->type_specifier.resolved_type, base->type_specifier.mutable);
 
             break;
         }
@@ -228,7 +228,7 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
         {
             AST* base = type_specifier->base;
             type_specifier_resolve(base, ctx);
-            type_specifier->resolved_type = type_create_array(base->type_specifier.resolved_type, base->type_specifier.size);
+            type_specifier->resolved_type = type_intern_array(base->type_specifier.resolved_type, base->type_specifier.size);
 
             break;
         }
