@@ -1,0 +1,12 @@
+struct Foo<T>
+{
+    data: T;
+}
+
+fn main() -> i32
+{
+    let foo: Foo<i32>;
+    foo.data = 0;
+
+    return foo.data;
+}
