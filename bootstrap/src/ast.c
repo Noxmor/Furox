@@ -3,6 +3,7 @@
 #include "resolution.h"
 #include "sema.h"
 #include "compiler.h"
+#include "symbol.h"
 #include "type_system.h"
 
 AST* ast_create(ASTType type)
@@ -103,6 +104,7 @@ const Type* expr_infer_type(AST* expr)
             switch (expr->path_expr.symbol->type)
             {
                 case FRX_SYMBOL_TYPE_STRUCT: return type_intern_struct(expr->path_expr.symbol, &((AST*)list_get(&expr->path_expr.path_segments, list_size(&expr->path_expr.path_segments) - 1))->path_segment.generic_args);
+                case FRX_SYMBOL_TYPE_GENERIC_PARAM: return type_intern_generic(expr->path_expr.symbol);
                 default: break;
             }
 

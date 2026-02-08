@@ -13,6 +13,8 @@ typedef struct CodegenContext
     const Module* root_mod;
     List* src_files;
     List symbol_list;
+    const AST* generic_params;
+    const List* generic_args;
 } CodegenContext;
 
 u8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,

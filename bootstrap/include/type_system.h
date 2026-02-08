@@ -15,6 +15,7 @@ enum
     FRX_TYPE_KIND_FUNC,
     FRX_TYPE_KIND_PTR,
     FRX_TYPE_KIND_ARRAY,
+    FRX_TYPE_KIND_GENERIC,
 
     FRX_TYPE_KIND_COUNT
 };
@@ -36,7 +37,6 @@ typedef struct Type
         {
             const Symbol* symbol;
             const List* generic_args;
-            List field_types;
         } strct;
 
         struct
@@ -62,6 +62,11 @@ typedef struct Type
             const struct Type* base;
             usize size;
         } array;
+
+        struct
+        {
+            const Symbol* symbol;
+        } generic;
     };
 } Type;
 
@@ -79,8 +84,6 @@ void type_system_init(void);
 
 const Type* type_intern_primitive(TokenType primitive);
 
-const Type* type_intern_generic(const AST* ast, const ASTGenericParams* generic_params, const List* generic_args);
-
 const Type* type_intern_struct(const Symbol* symbol, const List* generic_args);
 
 const Type* type_intern_enum(const Symbol* symbol);
@@ -90,6 +93,8 @@ const Type* type_intern_func(const List* params, const Type* return_type, b8 is_
 const Type* type_intern_ptr(const Type* base, b8 mutable);
 
 const Type* type_intern_array(const Type* base, usize size);
+
+const Type* type_intern_generic(const Symbol* symbol);
 
 const Type* type_intern_char_lit(void);
 
