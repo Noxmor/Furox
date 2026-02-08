@@ -7,10 +7,13 @@
 typedef struct SemaContext
 {
     const SourceFile* src_file;
+    ASTImplBlock* current_impl_block;
     b8 failed;
 } SemaContext;
 
 void sema_context_init(SemaContext* ctx, const SourceFile* src_file);
+
+void sema_context_fail(SemaContext* ctx);
 
 b8 sema_context_failed(const SemaContext* ctx);
 

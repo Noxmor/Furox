@@ -152,6 +152,7 @@ typedef struct ASTTrait
 typedef struct ASTImplBlock
 {
     Scope* scope;
+    AST* generic_params;
     TokenType primitive;
     AST* path_expr;
     List methods;

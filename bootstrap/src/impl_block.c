@@ -6,9 +6,10 @@
 #include "sema.h"
 #include "type_system.h"
 
-static void impl_block_init(ASTImplBlock* impl_block, TokenType primitive,
-                            AST* path_expr)
+static void impl_block_init(ASTImplBlock* impl_block, AST* generic_params,
+                            TokenType primitive, AST* path_expr)
 {
+    impl_block->generic_params = generic_params;
     impl_block->primitive = primitive;
     impl_block->path_expr = path_expr;
     list_init(&impl_block->methods);
@@ -24,6 +25,12 @@ AST* impl_block_parse(Parser* parser)
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_IMPL);
 
+    AST* generic_params = NULL;
+    if (parser_current_type(parser) == FRX_TOKEN_TYPE_LT)
+    {
+        generic_params = generic_params_parse(parser);
+    }
+
     TokenType primitive = FRX_TOKEN_TYPE_EOF;
     AST* path_expr = NULL;
 
@@ -37,7 +44,7 @@ AST* impl_block_parse(Parser* parser)
         path_expr = path_expr_parse(parser);
     }
 
-    impl_block_init(impl_block, primitive, path_expr);
+    impl_block_init(impl_block, generic_params, primitive, path_expr);
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
@@ -97,10 +104,13 @@ void impl_block_sema(AST* ast, SemaContext* ctx)
     FRX_ASSERT(ctx != NULL);
 
     ASTImplBlock* impl_block = &ast->impl_block;
+    ctx->current_impl_block = impl_block;
 
     for (usize i = 0; i < list_size(&impl_block->methods); ++i)
     {
         AST* func_decl = list_get(&impl_block->methods, i);
         func_decl_sema(func_decl, ctx);
     }
+
+    ctx->current_impl_block = NULL;
 }
