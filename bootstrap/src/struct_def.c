@@ -3,7 +3,6 @@
 #include "parser.h"
 #include "resolution.h"
 #include "symbol.h"
-#include "type_system.h"
 
 static void struct_field_init(ASTStructField* field, const char* name,
                               SymbolVisibility visibility, AST* type)
@@ -92,6 +91,8 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
 
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
+    parser_push_scope(parser);
+
     AST* generic_params = NULL;
     if (parser_match(parser, FRX_TOKEN_TYPE_LT))
     {
@@ -109,6 +110,8 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
     }
 
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
+
+    parser_pop_scope(parser);
 
     ast->range.end = parser_current_location(parser);
 
