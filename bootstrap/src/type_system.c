@@ -109,8 +109,6 @@ static const Type* type_create_generic(const Symbol* symbol)
 {
     FRX_ASSERT(symbol != NULL);
 
-    ASTGenericParam* generic_param = symbol->data;
-
     Type* type = type_create(FRX_TYPE_KIND_GENERIC);
 
     type->generic.symbol = symbol;

@@ -76,10 +76,6 @@ typedef struct TypeInfo
     List methods;
 } TypeInfo;
 
-typedef struct AST AST;
-
-typedef struct ASTGenericParams ASTGenericParams;
-
 void type_system_init(void);
 
 const Type* type_intern_primitive(TokenType primitive);
