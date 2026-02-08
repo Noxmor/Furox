@@ -2,6 +2,7 @@
 
 #include "assert.h"
 #include "ast.h"
+#include "compiler.h"
 #include "log.h"
 #include "module.h"
 #include "symbol_table.h"
@@ -89,6 +90,9 @@ static void emit_type(const Type* type, const char* name, FILE* f)
     switch (type->kind)
     {
         case FRX_TYPE_KIND_PRIMITIVE: fprintf(f, "%s", token_type_to_str(type->primitive.type)); break;
+        case FRX_TYPE_KIND_STRUCT:
+        case FRX_TYPE_KIND_UNION: fprintf(f, "%s%p%p", type->strct.symbol->name, type->strct.symbol->data, type); break;
+        case FRX_TYPE_KIND_ENUM: fprintf(f, "%s%p", type->enumeration.symbol->name, type->enumeration.symbol->data); break;
         case FRX_TYPE_KIND_FUNC:
         {
             emit_type(type->func.return_type, NULL, f);
@@ -114,21 +118,9 @@ static void emit_type(const Type* type, const char* name, FILE* f)
 
             break;
         }
-        case FRX_TYPE_KIND_SYMBOL:
-        {
-            const Symbol* symbol = type->symbol.symbol;
-            switch (symbol->type)
-            {
-                case FRX_SYMBOL_TYPE_STRUCT: fprintf(f, "%s", ((ASTStructDef*)symbol->data)->name); break;
-                default: FRX_ASSERT(FRX_FALSE); break;
-            }
-
-            fprintf(f, "%p", symbol->data);
-
-            break;
-        }
         case FRX_TYPE_KIND_PTR: emit_type(type->ptr.base, NULL, f); fprintf(f, "*"); break;
         case FRX_TYPE_KIND_ARRAY: emit_type(type->array.base, NULL, f); fprintf(f, "[%zu]", type->array.size); break;
+
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 }
@@ -158,8 +150,8 @@ static void emit_enum_definition(ASTEnumDef* enum_def, FILE* f)
     }
 
     fprintf(f, "};\ntypedef ");
-    emit_type(enum_def->resolved_type, NULL, f);
-    fprintf(f, " %s%p;\n", enum_def->name, enum_def);
+    emit_type(enum_def->type->type_specifier.resolved_type, NULL, f);
+    fprintf(f, " ENUM%p;\n", enum_def);
 }
 
 static void emit_struct_declaration(ASTStructDef* struct_def, FILE* f)
@@ -168,18 +160,22 @@ static void emit_struct_declaration(ASTStructDef* struct_def, FILE* f)
 
     FRX_ASSERT(f != NULL);
 
-    fprintf(f, "typedef struct %s%p %s%p;\n", struct_def->name, struct_def, struct_def->name, struct_def);
+    for (usize i = 0; i < list_size(&struct_def->instantiated_types); ++i)
+    {
+        const Type* type = list_get(&struct_def->instantiated_types, i);
+        fprintf(f, "typedef struct %s%p%p %s%p%p;\n", struct_def->name, struct_def, type, struct_def->name, struct_def, type);
+    }
 }
 
-static void emit_struct_field(ASTStructField* struct_field, FILE* f)
+static void emit_struct_field(ASTStructField* struct_field, const Type* type, FILE* f)
 {
     FRX_ASSERT(struct_field != NULL);
 
     FRX_ASSERT(f != NULL);
 
-    emit_type(struct_field->type->type_specifier.resolved_type, struct_field->name, f);
+    emit_type(type, struct_field->name, f);
 
-    if (struct_field->type->type_specifier.resolved_type->kind != FRX_TYPE_KIND_FUNC)
+    if (type->kind != FRX_TYPE_KIND_FUNC)
     {
         fprintf(f, " %s", struct_field->name);
     }
@@ -187,48 +183,53 @@ static void emit_struct_field(ASTStructField* struct_field, FILE* f)
     fprintf(f, ";\n");
 }
 
-static void emit_struct_definition(ASTStructDef* struct_def, FILE* f, CodegenContext* ctx)
+static void emit_struct_definition(const Type* type, FILE* f, CodegenContext* ctx)
 {
-    FRX_ASSERT(struct_def != NULL);
+    FRX_ASSERT(type != NULL);
+
+    FRX_ASSERT(type->kind == FRX_TYPE_KIND_STRUCT || type->kind == FRX_TYPE_KIND_UNION);
 
     FRX_ASSERT(f != NULL);
 
     // Check if we are already transpiled
-    if (list_contains(&ctx->symbol_list, struct_def))
+    if (list_contains(&ctx->symbol_list, type))
     {
         return;
     }
 
+    ASTStructDef* struct_def = type->strct.symbol->data;
+
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
-        AST* struct_field = list_get(&struct_def->fields, i);
-        const Type* type = struct_field->struct_field.type->type_specifier.resolved_type;
+        AST* field = list_get(&struct_def->fields, i);
+        const Type* field_type = type_intern_generic(field->struct_field.type, &struct_def->generic_params->generic_params, type->strct.generic_args);
+        list_add((List*)&type->strct.field_types, (Type*)field_type);
+    }
 
-        if (type->kind == FRX_TYPE_KIND_SYMBOL)
+    for (usize i = 0; i < list_size(&type->strct.field_types); ++i)
+    {
+        const Type* field_type = list_get(&type->strct.field_types, i);
+        if (field_type->kind == FRX_TYPE_KIND_STRUCT || field_type->kind == FRX_TYPE_KIND_UNION)
         {
             // Found dependency
-            const Symbol* symbol = type->symbol.symbol;
-            switch (symbol->type)
-            {
-                case FRX_SYMBOL_TYPE_STRUCT: emit_struct_definition(symbol->data, f, ctx);
-
-                default: break;
-            }
+            emit_struct_definition(field_type, f, ctx);
         }
     }
 
-    fprintf(f, "struct %s%p\n{\n", struct_def->name, struct_def);
+    fprintf(f, "struct %s%p%p\n{\n", struct_def->name, struct_def, type);
 
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* struct_field = list_get(&struct_def->fields, i);
-        emit_struct_field(&struct_field->struct_field, f);
+        const Type* real_type = list_get(&type->strct.field_types, i);
+
+        emit_struct_field(&struct_field->struct_field, real_type, f);
     }
 
     fprintf(f, "};\n");
 
     // Mark ourself as transpiled
-    list_add(&ctx->symbol_list, struct_def);
+    list_add(&ctx->symbol_list, (Type*)type);
 }
 
 static void emit_func_param(ASTFuncParam* func_param, FILE* f)
@@ -328,7 +329,8 @@ static void emit_path_expr(AST* ast, FILE* f)
 
     ASTPathExpr* path_expr = &ast->path_expr;
 
-    const char* last_path = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
+    AST* path_segment = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
+    const char* last_path = path_segment->path_segment.name;
     fprintf(f, "%s", last_path);
 
     if ((list_size(&path_expr->path_segments) > 1 || strcmp(last_path, "main") != 0)
@@ -614,25 +616,27 @@ void codegen_context_transpile(CodegenContext* ctx)
     }
 
     // 2. Emit all struct declarations
-    for (usize i = 0; i < list_size(&symbols); ++i)
+    for (usize i = 0; i < list_size(compiler_get_types()); ++i)
     {
-        Symbol* symbol = list_get(&symbols, i);
+        const Type* type = list_get(compiler_get_types(), i);
 
-        switch (symbol->type)
+        switch (type->kind)
         {
-            case FRX_SYMBOL_TYPE_STRUCT: emit_struct_declaration(symbol->data, ctx->header); break;
+            case FRX_TYPE_KIND_STRUCT:
+            case FRX_TYPE_KIND_UNION: emit_struct_declaration(type->strct.symbol->data, ctx->header); break;
             default: break;
         }
     }
 
     // 3. Emit all struct definitions dependency based
-    for (usize i = 0; i < list_size(&symbols); ++i)
+    for (usize i = 0; i < list_size(compiler_get_types()); ++i)
     {
-        Symbol* symbol = list_get(&symbols, i);
+        const Type* type = list_get(compiler_get_types(), i);
 
-        switch (symbol->type)
+        switch (type->kind)
         {
-            case FRX_SYMBOL_TYPE_STRUCT: emit_struct_definition(symbol->data, ctx->header, ctx); break;
+            case FRX_TYPE_KIND_STRUCT:
+            case FRX_TYPE_KIND_UNION: emit_struct_definition(type, ctx->header, ctx); break;
             default: break;
         }
     }

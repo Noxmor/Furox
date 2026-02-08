@@ -20,7 +20,7 @@ static void struct_def_init(ASTStructDef* struct_def, const char* name,
     struct_def->kind = kind;
     struct_def->generic_params = generic_params;
     list_init(&struct_def->fields);
-    struct_def->resolved_type = NULL;
+    list_init(&struct_def->instantiated_types);
 }
 
 AST* struct_field_parse(Parser* parser)
@@ -112,11 +112,8 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
 
     ast->range.end = parser_current_location(parser);
 
-    const Symbol* symbol = parser_insert_symbol(parser, visibility,
-                                                FRX_SYMBOL_TYPE_STRUCT,
-                                                struct_def->name, struct_def);
-
-    struct_def->resolved_type = type_intern_symbol(symbol);
+    parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_STRUCT,
+                         struct_def->name, struct_def);
 
     return ast;
 }

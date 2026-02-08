@@ -65,8 +65,7 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
     if (impl_block->path_expr != NULL)
     {
         path_expr_resolve(impl_block->path_expr, ctx);
-
-        const Type* type = symbol_infer_type(impl_block->path_expr->path_expr.symbol);
+        const Type* type = expr_infer_type(impl_block->path_expr);
 
         for (usize i = 0; i < list_size(&impl_block->methods); ++i)
         {

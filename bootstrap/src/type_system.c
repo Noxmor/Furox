@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "ast.h"
 #include "compiler.h"
+#include "symbol.h"
 #include "type_system.h"
 
 static Type* type_create(TypeKind kind)
@@ -23,21 +24,72 @@ const Type* type_create_primitive(TokenType primitive_type)
     return type;
 }
 
-const Type* type_create_struct(const List* fields)
+const Type* type_intern_generic(const AST* ast, const ASTGenericParams* generic_params, const List* generic_args)
 {
-    FRX_ASSERT(fields != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    Type* type = type_create(FRX_TYPE_KIND_STRUCT);
-    list_init(&type->strct.field_types);
-    list_init(&type->strct.field_names);
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TYPE_SPECIFIER);
 
-    for (usize i = 0; i < list_size(fields); ++i)
+    const Type* type = ast->type_specifier.resolved_type;
+    if (type == NULL)
     {
-        AST* ast = list_get(fields, i);
-        ASTStructField* field = &ast->struct_field;
-        list_add(&type->strct.field_types, (Type*)field->type->type_specifier.resolved_type);
-        list_add(&type->strct.field_names, (char*)field->name);
+        FRX_ASSERT(generic_params != NULL);
+
+        FRX_ASSERT(generic_args != NULL);
+
+        for (usize i = 0; i < list_size(&generic_params->params); ++i)
+        {
+            AST* generic_param = list_get(&generic_params->params, i);
+            if (generic_param->generic_param.name == ((AST*)list_get(&ast->type_specifier.path_expr->path_expr.path_segments, 0))->path_segment.name)
+            {
+                return ((AST*)list_get(generic_args, i))->type_specifier.resolved_type;
+            }
+        }
+
+        FRX_ASSERT(FRX_FALSE);
+
+        return NULL;
     }
+
+    switch (type->kind)
+    {
+        case FRX_TYPE_KIND_PRIMITIVE:
+        case FRX_TYPE_KIND_STRUCT:
+        case FRX_TYPE_KIND_UNION:
+        case FRX_TYPE_KIND_ENUM:
+        case FRX_TYPE_KIND_FUNC: return type;
+        case FRX_TYPE_KIND_PTR: return type_intern_ptr(type_intern_generic(ast->type_specifier.base, generic_params, generic_args), type->ptr.mutable);
+        case FRX_TYPE_KIND_ARRAY: return type_intern_array(type_intern_generic(ast->type_specifier.base, generic_params, generic_args), type->array.size);
+
+        default: FRX_ASSERT(FRX_FALSE); return NULL;
+    }
+}
+
+const Type* type_create_struct(const Symbol* symbol, const List* generic_args)
+{
+    FRX_ASSERT(symbol != NULL);
+
+    const ASTStructDef* struct_def = symbol->data;
+
+    Type* type = type_create(struct_def->kind == FRX_STRUCT_KIND_NAMED ? FRX_TYPE_KIND_STRUCT : FRX_TYPE_KIND_UNION);
+    type->strct.symbol = symbol;
+    type->strct.generic_args = generic_args;
+    list_init(&type->strct.field_types);
+
+    list_add((List*)&struct_def->instantiated_types, type);
+
+    compiler_register_type(type);
+
+    return type;
+}
+
+static const Type* type_create_enum(const Symbol* symbol)
+{
+    FRX_ASSERT(symbol != NULL);
+
+    Type* type = type_create(FRX_TYPE_KIND_ENUM);
+
+    type->enumeration.symbol = symbol;
 
     return type;
 }
@@ -91,17 +143,6 @@ const Type* type_create_array(const Type* base, usize size)
 
     type->array.base = base;
     type->array.size = size;
-
-    return type;
-}
-
-const Type* type_create_symbol(const Symbol* symbol)
-{
-    FRX_ASSERT(symbol != NULL);
-
-    Type* type = type_create(FRX_TYPE_KIND_SYMBOL);
-
-    type->symbol.symbol = symbol;
 
     return type;
 }
@@ -257,39 +298,47 @@ const Type* type_intern_primitive(TokenType primitive)
     return NULL;
 }
 
-const Type* type_intern_struct(const List* fields)
+const Type* type_intern_struct(const Symbol* symbol, const List* generic_args)
 {
-    u64 index =  (usize)fields % FRX_TYPE_TABLE_CAPACITY;
+    FRX_ASSERT(symbol != NULL);
+
+    u64 index =  (usize)symbol % FRX_TYPE_TABLE_CAPACITY;
     TypeTableEntry* entry = type_table.entries[index];
     while (entry != NULL)
     {
         const Type* type = entry->type;
-        if (type->kind == FRX_TYPE_KIND_STRUCT
-            && list_size(&type->strct.field_types) == list_size(fields))
+        if ((type->kind == FRX_TYPE_KIND_STRUCT || type->kind == FRX_TYPE_KIND_UNION) && type->strct.symbol == symbol)
         {
-            b8 equal = FRX_TRUE;
-            for (usize i = 0; i < list_size(fields); ++i)
-            {
-                AST* ast = list_get(fields, i);
-                const Type* field_type = list_get(&type->strct.field_types, i);
-
-                if (ast->struct_field.type->type_specifier.resolved_type != field_type)
-                {
-                    equal = FRX_FALSE;
-                    break;
-                }
-            }
-
-            if (equal)
-            {
-                return type;
-            }
+            return type;
         }
 
         entry = entry->next;
     }
 
-    const Type* type = type_create_struct(fields);
+    const Type* type = type_create_struct(symbol, generic_args);
+    type_table.entries[index] = type_table_entry_create(type, type_table.entries[index]);
+
+    return type;
+}
+
+const Type* type_intern_enum(const Symbol* symbol)
+{
+    FRX_ASSERT(symbol != NULL);
+
+    u64 index =  (usize)symbol % FRX_TYPE_TABLE_CAPACITY;
+    TypeTableEntry* entry = type_table.entries[index];
+    while (entry != NULL)
+    {
+        const Type* type = entry->type;
+        if (type->kind == FRX_TYPE_KIND_ENUM && type->enumeration.symbol == symbol)
+        {
+            return type;
+        }
+
+        entry = entry->next;
+    }
+
+    const Type* type = type_create_enum(symbol);
     type_table.entries[index] = type_table_entry_create(type, type_table.entries[index]);
 
     return type;
@@ -385,27 +434,6 @@ const Type* type_intern_array(const Type* base, usize size)
     return type;
 }
 
-const Type* type_intern_symbol(const Symbol* symbol)
-{
-    u64 index =  (usize)symbol % FRX_TYPE_TABLE_CAPACITY;
-    TypeTableEntry* entry = type_table.entries[index];
-    while (entry != NULL)
-    {
-        const Type* type = entry->type;
-        if (type->kind == FRX_TYPE_KIND_SYMBOL && type->symbol.symbol == symbol)
-        {
-            return type;
-        }
-
-        entry = entry->next;
-    }
-
-    const Type* type = type_create_symbol(symbol);
-    type_table.entries[index] = type_table_entry_create(type, type_table.entries[index]);
-
-    return type;
-}
-
 const Type* type_intern_char_lit(void)
 {
     return &char_type;
@@ -423,12 +451,13 @@ const Type* symbol_infer_type(const Symbol* symbol)
     switch (symbol->type)
     {
         case FRX_SYMBOL_TYPE_FUNC: return ((ASTFuncDecl*)symbol->data)->resolved_type;
-        case FRX_SYMBOL_TYPE_STRUCT: return ((ASTStructDef*)symbol->data)->resolved_type;
-        case FRX_SYMBOL_TYPE_ENUM: return ((ASTEnumDef*)symbol->data)->resolved_type;
+        case FRX_SYMBOL_TYPE_STRUCT: return type_intern_struct(symbol, NULL);
+        case FRX_SYMBOL_TYPE_ENUM: return type_intern_enum(symbol);
         case FRX_SYMBOL_TYPE_ENUM_CONSTANT: return symbol_infer_type(((ASTEnumConstant*)symbol->data)->symbol);
         case FRX_SYMBOL_TYPE_TYPE_ALIAS: return ((ASTTypeAlias*)symbol->data)->type->type_specifier.resolved_type;
         case FRX_SYMBOL_TYPE_PARAM: return ((ASTFuncParam*)symbol->data)->type->type_specifier.resolved_type;
         case FRX_SYMBOL_TYPE_VAR: return ((ASTLetStmt*)symbol->data)->resolved_type;
+        case FRX_SYMBOL_TYPE_GENERIC_PARAM: return NULL;
 
         default: FRX_ASSERT(FRX_FALSE); return NULL;
     }

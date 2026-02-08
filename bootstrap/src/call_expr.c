@@ -54,14 +54,14 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
     const Symbol* symbol = call_expr->callee->path_expr.symbol;
     if (symbol->associated_type != NULL)
     {
-        const char* name = list_get(&call_expr->callee->path_expr.path_segments, list_size(&call_expr->callee->path_expr.path_segments) - 1);
+        AST* path_segment = list_get(&call_expr->callee->path_expr.path_segments, list_size(&call_expr->callee->path_expr.path_segments) - 1);
         List args = call_expr->args;
 
         ast->type = FRX_AST_TYPE_METHOD_CALL_EXPR;
         ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
         method_call_expr->callee = NULL;
         method_call_expr->symbol = symbol;
-        method_call_expr->name = name;
+        method_call_expr->name = path_segment->path_segment.name;
         method_call_expr->args = args;
         method_call_expr->resolved_type = ((ASTFuncDecl*)method_call_expr->symbol->data)->return_type->type_specifier.resolved_type;
     }

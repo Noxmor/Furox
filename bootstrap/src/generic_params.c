@@ -1,6 +1,7 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
+#include "symbol.h"
 
 static AST* trait_bound_create(AST* type)
 {
@@ -63,6 +64,9 @@ static AST* generic_param_parse(Parser* parser)
     }
 
     ast->range.end = parser_current_location(parser);
+
+    parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE,
+                         FRX_SYMBOL_TYPE_GENERIC_PARAM, name, generic_param);
 
     return ast;
 }

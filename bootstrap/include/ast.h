@@ -30,16 +30,6 @@ typedef struct ASTStringLiteral
 
 typedef struct ASTTypeSpecifier ASTTypeSpecifier;
 
-typedef struct ASTGenericArg
-{
-    AST* type;
-} ASTGenericArg;
-
-typedef struct ASTGenericArgs
-{
-    List args;
-} ASTGenericArgs;
-
 enum
 {
     FRX_TYPE_SPECIFIER_KIND_PRIMITIVE = 0,
@@ -55,7 +45,6 @@ typedef u8 ASTTypeSpecifierKind;
 
 typedef struct ASTTypeSpecifier
 {
-    AST* generic_args;
     ASTTypeSpecifierKind kind;
     const char* name;
     TokenType primitive;
@@ -137,7 +126,7 @@ typedef struct ASTStructDef
     StructKind kind;
     AST* generic_params;
     List fields;
-    const Type* resolved_type;
+    List instantiated_types;
 } ASTStructDef;
 
 typedef struct ASTEnumConstant
@@ -152,7 +141,6 @@ typedef struct ASTEnumDef
     const char* name;
     AST* type;
     List constants;
-    const Type* resolved_type;
 } ASTEnumDef;
 
 typedef struct ASTTrait
@@ -230,6 +218,12 @@ typedef struct ASTModDecl
 {
     AST* path_expr;
 } ASTModDecl;
+
+typedef struct ASTPathSegment
+{
+    const char* name;
+    List generic_args;
+} ASTPathSegment;
 
 enum
 {
@@ -321,8 +315,6 @@ enum
     FRX_AST_TYPE_FUNC_PARAM,
     FRX_AST_TYPE_GENERIC_PARAM,
     FRX_AST_TYPE_GENERIC_PARAMS,
-    FRX_AST_TYPE_GENERIC_ARG,
-    FRX_AST_TYPE_GENERIC_ARGS,
     FRX_AST_TYPE_FUNC_DECL,
     FRX_AST_TYPE_SCOPE,
     FRX_AST_TYPE_EXPR_STMT,
@@ -334,6 +326,7 @@ enum
     FRX_AST_TYPE_UNARY_EXPR,
     FRX_AST_TYPE_BINARY_EXPR,
     FRX_AST_TYPE_FIELD_EXPR,
+    FRX_AST_TYPE_PATH_SEGMENT,
     FRX_AST_TYPE_PATH_EXPR,
     FRX_AST_TYPE_CALL_EXPR,
     FRX_AST_TYPE_METHOD_CALL_EXPR,
@@ -368,8 +361,6 @@ typedef struct AST
         ASTFuncParam func_param;
         ASTGenericParam generic_param;
         ASTGenericParams generic_params;
-        ASTGenericArg generic_arg;
-        ASTGenericArgs generic_args;
         ASTFuncDecl func_decl;
         ASTScope scope;
         ASTExprStmt expr_stmt;
@@ -381,6 +372,7 @@ typedef struct AST
         ASTUnaryExpr unary_expr;
         ASTBinaryExpr binary_expr;
         ASTFieldExpr field_expr;
+        ASTPathSegment path_segment;
         ASTPathExpr path_expr;
         ASTCallExpr call_expr;
         ASTMethodCallExpr method_call_expr;

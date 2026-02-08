@@ -32,12 +32,12 @@ AST* mod_decl_parse(Parser* parser)
 
     for (usize i = 0; path_expr != NULL && i < list_size(&path_expr->path_expr.path_segments); ++i)
     {
-        const char* name = list_get(&path_expr->path_expr.path_segments, i);
-        Module* submodule = module_find_submodule_by_name(current_mod, name);
+        AST* path_segment = list_get(&path_expr->path_expr.path_segments, i);
+        Module* submodule = module_find_submodule_by_name(current_mod, path_segment->path_segment.name);
 
         if (submodule == NULL)
         {
-            current_mod = module_create(current_mod, name);
+            current_mod = module_create(current_mod, path_segment->path_segment.name);
         }
         else
         {

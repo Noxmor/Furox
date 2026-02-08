@@ -23,6 +23,8 @@ static List expressions;
 
 static Module* root_module;
 
+static List type_list;
+
 static void compiler_init(void)
 {
     FRX_LOG_INFO("Initializing compiler...");
@@ -43,6 +45,8 @@ static void compiler_init(void)
     // list_add(&projects, stdlib);
 
     type_system_init();
+
+    list_init(&type_list);
 }
 
 static void compiler_shutdown(void)
@@ -165,4 +169,16 @@ void compiler_register_expr(AST *expr)
     FRX_ASSERT(expr != NULL);
 
     list_add(&expressions, expr);
+}
+
+void compiler_register_type(const Type* type)
+{
+    FRX_ASSERT(type != NULL);
+
+    list_add(&type_list, (Type*)type);
+}
+
+List* compiler_get_types(void)
+{
+    return &type_list;
 }

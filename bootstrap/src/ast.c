@@ -98,7 +98,16 @@ const Type* expr_infer_type(AST* expr)
         case FRX_AST_TYPE_UNARY_EXPR: return expr->unary_expr.resolved_type;
         case FRX_AST_TYPE_BINARY_EXPR: return expr->binary_expr.resolved_type;
         case FRX_AST_TYPE_FIELD_EXPR: return expr->field_expr.resolved_type;
-        case FRX_AST_TYPE_PATH_EXPR: return symbol_infer_type(expr->path_expr.symbol);
+        case FRX_AST_TYPE_PATH_EXPR:
+        {
+            switch (expr->path_expr.symbol->type)
+            {
+                case FRX_SYMBOL_TYPE_STRUCT: return type_intern_struct(expr->path_expr.symbol, &((AST*)list_get(&expr->path_expr.path_segments, list_size(&expr->path_expr.path_segments) - 1))->path_segment.generic_args);
+                default: break;
+            }
+
+            return symbol_infer_type(expr->path_expr.symbol);
+        }
         case FRX_AST_TYPE_CALL_EXPR: return expr_infer_type(expr->call_expr.callee);
         case FRX_AST_TYPE_METHOD_CALL_EXPR: return expr->method_call_expr.resolved_type;
         case FRX_AST_TYPE_INT_LIT: return expr->int_literal.resolved_type;

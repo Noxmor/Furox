@@ -4,43 +4,7 @@
 #include "parser.h"
 #include "resolution.h"
 #include "token.h"
-
-static void generic_args_init(ASTGenericArgs* generic_args)
-{
-    FRX_ASSERT(generic_args != NULL);
-
-    list_init(&generic_args->args);
-}
-
-static AST* generic_args_parse(Parser* parser)
-{
-    AST* ast = ast_create(FRX_AST_TYPE_GENERIC_ARGS);
-    ASTGenericArgs* generic_args = &ast->generic_args;
-
-    ast->range.start = parser_current_location(parser);
-
-    generic_args_init(generic_args);
-
-    parser_eat(parser, FRX_TOKEN_TYPE_LT);
-
-    while (!parser_match(parser, FRX_TOKEN_TYPE_GT))
-    {
-        if (!list_empty(&generic_args->args))
-        {
-            parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
-        }
-
-        AST* arg = ast_create(FRX_AST_TYPE_GENERIC_ARG);
-        arg->generic_arg.type = type_specifier_parse(parser);
-        list_add(&generic_args->args, arg);
-    }
-
-    parser_eat(parser, FRX_TOKEN_TYPE_GT);
-
-    ast->range.end = parser_current_location(parser);
-
-    return ast;
-}
+#include "type_system.h"
 
 static void type_specifier_init(ASTTypeSpecifier* type, ASTTypeSpecifierKind kind)
 {
@@ -49,7 +13,6 @@ static void type_specifier_init(ASTTypeSpecifier* type, ASTTypeSpecifierKind kin
     FRX_ASSERT(kind < FRX_TYPE_SPECIFIER_KIND_COUNT);
 
     type->kind = kind;
-    type->generic_args = NULL;
     type->resolved_type = NULL;
     type->path_expr = NULL;
     list_init(&type->func_params);
@@ -163,11 +126,6 @@ AST* type_specifier_parse(Parser* parser)
         return ast_create(FRX_AST_TYPE_ERROR);
     }
 
-    if (parser_match(parser, FRX_TOKEN_TYPE_LT))
-    {
-        type->generic_args = generic_args_parse(parser);
-    }
-
     while (parser_match(parser, FRX_TOKEN_TYPE_STAR) ||
         parser_match(parser, FRX_TOKEN_TYPE_BIT_AND))
     {
@@ -198,7 +156,7 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_TYPE_SPECIFIER_KIND_PATH_EXPR:
         {
             path_expr_resolve(type_specifier->path_expr, ctx);
-            type_specifier->resolved_type = symbol_infer_type(type_specifier->path_expr->path_expr.symbol);
+            type_specifier->resolved_type = expr_infer_type(type_specifier->path_expr);
 
             break;
         }

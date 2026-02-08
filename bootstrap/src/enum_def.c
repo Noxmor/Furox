@@ -43,7 +43,6 @@ static void enum_def_init(ASTEnumDef* enum_def, const char* name, AST* type)
     enum_def->name = name;
     enum_def->type = type;
     list_init(&enum_def->constants);
-    enum_def->resolved_type = NULL;
 }
 
 static void enum_def_add_constant(ASTEnumDef* enum_def, AST* constant)
@@ -109,8 +108,6 @@ void enum_def_resolve(AST* ast, ResolutionContext* ctx)
     ASTEnumDef* enum_def = &ast->enum_def;
 
     ast_resolve(enum_def->type, ctx);
-
-    enum_def->resolved_type = enum_def->type->type_specifier.resolved_type;
 }
 
 void enum_def_sema(AST* ast, SemaContext* ctx)
