@@ -10,7 +10,7 @@ fn foo() -> i32
 
 struct FuncWrapper
 {
-    func: fn() -> i32;
+    pub func: fn() -> i32;
 }
 
 fn main() -> i32

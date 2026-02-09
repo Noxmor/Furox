@@ -1,7 +1,7 @@
 mod test;
 
 struct Foo {
-    bar: i32;
+    pub bar: i32;
 }
 
 fn main() -> i32 {

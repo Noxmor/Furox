@@ -1,6 +1,6 @@
 struct Foo<T>
 {
-    data: T;
+    pub data: T;
 }
 
 fn main() -> i32
