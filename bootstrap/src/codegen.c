@@ -168,7 +168,7 @@ static void emit_enum_definition(ASTEnumDef* enum_def, FILE* f, CodegenContext* 
 
     fprintf(f, "};\ntypedef ");
     emit_type(enum_def->type->type_specifier.resolved_type, NULL, f, ctx);
-    fprintf(f, " ENUM%p;\n", enum_def);
+    fprintf(f, " %s%p;\n", enum_def->name, enum_def);
 }
 
 static void emit_struct_declaration(ASTStructDef* struct_def, FILE* f)
