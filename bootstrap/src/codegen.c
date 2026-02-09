@@ -28,6 +28,8 @@ b8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
     ctx->root_mod = root_mod;
     ctx->src_files = src_files;
     list_init(&ctx->symbol_list);
+    ctx->generic_params = NULL;
+    ctx->generic_args = NULL;
 
     const char* temp_dir = temp_dir_path();
     char header_buffer[strlen(temp_dir) + 1 + strlen(filename) + 3];
@@ -280,6 +282,12 @@ static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f, CodegenContext* ctx)
         fprintf(f, "extern ");
     }
 
+    const AST* prev_generic_params = ctx->generic_params;
+    const List* prev_generic_args = ctx->generic_args;
+
+    ctx->generic_params = func_decl->generic_params;
+    ctx->generic_args = NULL;
+
     char mangled_name[strlen(func_decl->name) + 2 + 16 + 1];
     sprintf(mangled_name, "%s%p", func_decl->name, func_decl);
     emit_type(func_decl->return_type->type_specifier.resolved_type, mangled_name, f, ctx);
@@ -309,6 +317,9 @@ static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f, CodegenContext* ctx)
     }
 
     fprintf(f, ")");
+
+    ctx->generic_params = prev_generic_params;
+    ctx->generic_args = prev_generic_args;
 }
 
 static void emit_int_literal(AST* ast, FILE* f)
