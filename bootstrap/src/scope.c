@@ -1,92 +1,52 @@
 #include "assert.h"
-#include "ast.h"
-#include "parser.h"
-#include "resolution.h"
-#include "sema.h"
+#include "compiler.h"
+#include "scope.h"
+#include "symbol_table.h"
 
-static void scope_init(ASTScope* scope)
+Scope* scope_create_global(void)
 {
-    list_init(&scope->stmts);
+    Scope* scope = compiler_alloc(sizeof(Scope));
+
+    scope->parent = NULL;
+    symbol_table_init(&scope->symbols);
+
+    return scope;
 }
 
-static void scope_add_stmt(ASTScope* scope, AST* stmt)
+Scope* scope_create(Scope* parent)
 {
-    FRX_ASSERT(scope != NULL);
-    FRX_ASSERT(stmt != NULL);
+    FRX_ASSERT(parent != NULL);
 
-    list_add(&scope->stmts, stmt);
+    Scope* scope = compiler_alloc(sizeof(Scope));
+
+    scope->parent = parent;
+    symbol_table_init(&scope->symbols);
+
+    return scope;
 }
 
-AST* scope_from_stmt(AST* stmt)
+Symbol* scope_insert_symbol(Scope* scope, SymbolVisibility visibility,
+                            SymbolType type, const char* name, void* data)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_SCOPE);
-    ASTScope* scope = &ast->scope;
+    Symbol* symbol = scope_lookup_symbol(scope, name);
 
-    scope_init(scope);
-    scope_add_stmt(scope, stmt);
-
-    return ast;
-}
-
-AST* scope_parse(Parser* parser)
-{
-
-    AST* ast = ast_create(FRX_AST_TYPE_SCOPE);
-    ASTScope* scope = &ast->scope;
-    scope->scope = parser_push_scope(parser);
-
-    ast->range.start = parser_current_location(parser);
-
-    parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
-
-    scope_init(scope);
-    while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
+    if (symbol != NULL)
     {
-        AST* stmt = stmt_parse(parser);
-        scope_add_stmt(scope, stmt);
+        return symbol;
     }
 
-    parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
-
-    ast->range.end = parser_current_location(parser);
-
-    parser_pop_scope(parser);
-
-    return ast;
+    return symbol_table_insert(&scope->symbols, visibility, type, name, data);
 }
 
-void scope_resolve(AST* ast, ResolutionContext* ctx)
+Symbol* scope_lookup_symbol(Scope* scope, const char* name)
 {
-    FRX_ASSERT(ast != NULL);
+    Symbol* symbol = NULL;
 
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_SCOPE);
-
-    ASTScope* scope = &ast->scope;
-
-    resolution_context_push_scope(ctx, scope->scope);
-
-    for (usize i = 0; i < list_size(&scope->stmts); ++i)
+    while (symbol == NULL && scope != NULL)
     {
-        AST* stmt = list_get(&scope->stmts, i);
-        ast_resolve(stmt, ctx);
+        symbol = symbol_table_lookup(&scope->symbols, name);
+        scope = scope->parent;
     }
 
-    resolution_context_pop_scope(ctx);
-}
-
-void scope_sema(AST* ast, SemaContext* ctx)
-{
-    FRX_ASSERT(ast != NULL);
-
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_SCOPE);
-
-    FRX_ASSERT(ctx != NULL);
-
-    ASTScope* scope = &ast->scope;
-
-    for (usize i = 0; i < list_size(&scope->stmts); ++i)
-    {
-        AST* stmt = list_get(&scope->stmts, i);
-        ast_sema(stmt, ctx);
-    }
+    return symbol;
 }

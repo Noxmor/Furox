@@ -85,7 +85,7 @@ AST* generic_params_parse(Parser* parser);
 
 AST* func_decl_parse(Parser* parser, SymbolVisibility visibility);
 
-AST* scope_parse(Parser* parser);
+AST* block_parse(Parser* parser);
 
 AST* stmt_parse(Parser* parser);
 

@@ -29,7 +29,7 @@ void impl_block_sema(AST* ast, SemaContext* ctx);
 
 void func_decl_sema(AST* ast, SemaContext* ctx);
 
-void scope_sema(AST* ast, SemaContext* ctx);
+void block_sema(AST* ast, SemaContext* ctx);
 
 void expr_stmt_sema(AST* ast, SemaContext* ctx);
 

@@ -164,11 +164,11 @@ typedef struct ASTTranslationUnit
     List items;
 } ASTTranslationUnit;
 
-typedef struct ASTScope
+typedef struct ASTBlock
 {
     Scope* scope;
     List stmts;
-} ASTScope;
+} ASTBlock;
 
 typedef struct ASTFuncParam
 {
@@ -317,7 +317,7 @@ enum
     FRX_AST_TYPE_GENERIC_PARAM,
     FRX_AST_TYPE_GENERIC_PARAMS,
     FRX_AST_TYPE_FUNC_DECL,
-    FRX_AST_TYPE_SCOPE,
+    FRX_AST_TYPE_BLOCK,
     FRX_AST_TYPE_EXPR_STMT,
     FRX_AST_TYPE_BREAK_STMT,
     FRX_AST_TYPE_CONTINUE_STMT,
@@ -363,7 +363,7 @@ typedef struct AST
         ASTGenericParam generic_param;
         ASTGenericParams generic_params;
         ASTFuncDecl func_decl;
-        ASTScope scope;
+        ASTBlock block;
         ASTExprStmt expr_stmt;
         ASTBreakStmt break_stmt;
         ASTContinueStmt continue_stmt;
@@ -385,7 +385,7 @@ typedef struct AST
 
 AST* ast_create(ASTType type);
 
-AST* scope_from_stmt(AST* stmt);
+AST* block_from_stmt(AST* stmt);
 
 const Type* expr_infer_type(AST* expr);
 

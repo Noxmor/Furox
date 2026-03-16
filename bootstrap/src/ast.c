@@ -34,7 +34,7 @@ void ast_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_AST_TYPE_IMPL_BLOCK: impl_block_resolve(ast, ctx); break;
         case FRX_AST_TYPE_GENERIC_PARAMS: break;
         case FRX_AST_TYPE_FUNC_DECL: func_decl_resolve(ast, ctx); break;
-        case FRX_AST_TYPE_SCOPE: scope_resolve(ast, ctx); break;
+        case FRX_AST_TYPE_BLOCK: block_resolve(ast, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: break;
         case FRX_AST_TYPE_BREAK_STMT: break;
         case FRX_AST_TYPE_CONTINUE_STMT: break;
@@ -69,7 +69,7 @@ void ast_sema(AST* ast, SemaContext* ctx)
         case FRX_AST_TYPE_IMPL_BLOCK: impl_block_sema(ast, ctx); break;
         case FRX_AST_TYPE_GENERIC_PARAMS: break;
         case FRX_AST_TYPE_FUNC_DECL: func_decl_sema(ast, ctx); break;
-        case FRX_AST_TYPE_SCOPE: scope_sema(ast, ctx); break;
+        case FRX_AST_TYPE_BLOCK: block_sema(ast, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: expr_stmt_sema(ast, ctx); break;
         case FRX_AST_TYPE_BREAK_STMT: break;
         case FRX_AST_TYPE_CONTINUE_STMT: break;

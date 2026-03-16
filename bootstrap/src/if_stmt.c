@@ -22,7 +22,7 @@ AST* if_stmt_parse(Parser* parser)
     parser_eat(parser, FRX_TOKEN_TYPE_KW_IF);
 
     AST* condition = expr_parse(parser);
-    AST* if_block = scope_parse(parser);
+    AST* if_block = block_parse(parser);
     AST* else_block = NULL;
 
     if (parser_match(parser, FRX_TOKEN_TYPE_KW_ELSE))
@@ -31,11 +31,11 @@ AST* if_stmt_parse(Parser* parser)
 
         if (parser_match(parser, FRX_TOKEN_TYPE_KW_IF))
         {
-            else_block = scope_from_stmt(stmt_parse(parser));
+            else_block = block_from_stmt(stmt_parse(parser));
         }
         else
         {
-            else_block = scope_parse(parser);
+            else_block = block_parse(parser);
         }
     }
 
@@ -56,12 +56,12 @@ void if_stmt_resolve(AST* ast, ResolutionContext* ctx)
 
     if (if_stmt->if_block != NULL)
     {
-        scope_resolve(if_stmt->if_block, ctx);
+        block_resolve(if_stmt->if_block, ctx);
     }
 
     if (if_stmt->else_block != NULL)
     {
-        scope_resolve(if_stmt->else_block, ctx);
+        block_resolve(if_stmt->else_block, ctx);
     }
 }
 
@@ -82,11 +82,11 @@ void if_stmt_sema(AST* ast, SemaContext* ctx)
 
     if (if_stmt->if_block != NULL)
     {
-        scope_sema(if_stmt->if_block, ctx);
+        block_sema(if_stmt->if_block, ctx);
     }
 
     if (if_stmt->else_block != NULL)
     {
-        scope_sema(if_stmt->else_block, ctx);
+        block_sema(if_stmt->else_block, ctx);
     }
 }

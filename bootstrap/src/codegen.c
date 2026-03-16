@@ -585,17 +585,17 @@ static void emit_scope(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_SCOPE);
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_BLOCK);
 
     FRX_ASSERT(f != NULL);
 
-    ASTScope* scope = &ast->scope;
+    ASTBlock* block = &ast->block;
 
     fprintf(f, "{\n");
 
-    for (usize i = 0; i < list_size(&scope->stmts); ++i)
+    for (usize i = 0; i < list_size(&block->stmts); ++i)
     {
-        AST* stmt = list_get(&scope->stmts, i);
+        AST* stmt = list_get(&block->stmts, i);
         emit_ast(stmt, f, ctx);
     }
 

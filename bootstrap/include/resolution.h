@@ -49,7 +49,7 @@ void func_param_resolve(AST* ast, ResolutionContext* ctx);
 
 void func_decl_resolve(AST* ast, ResolutionContext* ctx);
 
-void scope_resolve(AST* ast, ResolutionContext* ctx);
+void block_resolve(AST* ast, ResolutionContext* ctx);
 
 void let_stmt_resolve(AST* ast, ResolutionContext* ctx);
 

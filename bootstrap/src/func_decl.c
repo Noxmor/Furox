@@ -86,7 +86,7 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
     AST* body = NULL;
     if (parser_match(parser, FRX_TOKEN_TYPE_LBRACE))
     {
-        body = scope_parse(parser);
+        body = block_parse(parser);
     }
     else
     {
@@ -128,7 +128,7 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx)
 
     if (func_decl->body != NULL)
     {
-        scope_resolve(func_decl->body, ctx);
+        block_resolve(func_decl->body, ctx);
     }
 
     func_decl->resolved_type = type_intern_func(&func_decl->params, func_decl->return_type->type_specifier.resolved_type, func_decl->is_variadic);
@@ -148,6 +148,6 @@ void func_decl_sema(AST* ast, SemaContext* ctx)
 
     if (func_decl->body != NULL)
     {
-        scope_sema(func_decl->body, ctx);
+        block_sema(func_decl->body, ctx);
     }
 }
