@@ -69,6 +69,8 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTImplBlock* impl_block = &ast->impl_block;
 
+    resolution_context_push_scope(ctx, impl_block->scope);
+
     if (impl_block->path_expr != NULL)
     {
         path_expr_resolve(impl_block->path_expr, ctx);
@@ -77,19 +79,22 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
         for (usize i = 0; i < list_size(&impl_block->methods); ++i)
         {
             AST* func_decl = list_get(&impl_block->methods, i);
-            type_register_method(type, scope_lookup_symbol(impl_block->scope, func_decl->func_decl.name));
+            func_decl_resolve(func_decl, ctx);
+
+            Symbol* symbol = resolution_context_lookup_symbol(ctx, func_decl->func_decl.name);
+            FRX_ASSERT(symbol != NULL);
+            symbol->associated_type = type;
+
+            type_register_method(type, symbol);
         }
     }
-
-    resolution_context_push_scope(ctx, impl_block->scope);
-
-    for (usize i = 0; i < list_size(&impl_block->methods); ++i)
+    else
     {
-        AST* func_decl = list_get(&impl_block->methods, i);
-        func_decl_resolve(func_decl, ctx);
-
-        Symbol* symbol = resolution_context_lookup_symbol(ctx, func_decl->func_decl.name);
-        symbol->associated_type = expr_infer_type(impl_block->path_expr);
+        for (usize i = 0; i < list_size(&impl_block->methods); ++i)
+        {
+            AST* func_decl = list_get(&impl_block->methods, i);
+            func_decl_resolve(func_decl, ctx);
+        }
     }
 
     resolution_context_pop_scope(ctx);
