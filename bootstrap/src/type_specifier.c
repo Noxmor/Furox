@@ -64,6 +64,13 @@ static void type_specifier_init_pointer(ASTTypeSpecifier* type, AST* base, b8 mu
     type->mutable = mutable;
 }
 
+static void type_specifier_init_self(ASTTypeSpecifier* type)
+{
+    FRX_ASSERT(type != NULL);
+
+    type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_SELF);
+}
+
 AST* type_specifier_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_TYPE_SPECIFIER);
@@ -114,6 +121,11 @@ AST* type_specifier_parse(Parser* parser)
 
         AST* return_type = type_specifier_parse(parser);
         type->func_return_type = return_type;
+    }
+    else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_SELF_UPPER)
+    {
+        type_specifier_init_self(type);
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_SELF_UPPER);
     }
     else
     {
@@ -187,6 +199,12 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
             AST* base = type_specifier->base;
             type_specifier_resolve(base, ctx);
             type_specifier->resolved_type = type_intern_array(base->type_specifier.resolved_type, base->type_specifier.size);
+
+            break;
+        }
+        case FRX_TYPE_SPECIFIER_KIND_SELF:
+        {
+            type_specifier->resolved_type = expr_infer_type(ctx->current_impl_block->impl_block.type_path_expr);
 
             break;
         }

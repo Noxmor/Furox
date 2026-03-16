@@ -92,6 +92,7 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
     ASTImplBlock* impl_block = &ast->impl_block;
 
     resolution_context_push_scope(ctx, impl_block->scope);
+    ctx->current_impl_block = ast;
 
     if (impl_block->trait_path_expr != NULL)
     {
@@ -125,6 +126,7 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
     }
 
     resolution_context_pop_scope(ctx);
+    ctx->current_impl_block = NULL;
 }
 
 void impl_block_sema(AST* ast, SemaContext* ctx)

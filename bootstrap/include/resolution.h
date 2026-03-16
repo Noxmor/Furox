@@ -9,6 +9,7 @@ typedef struct ResolutionContext
     Module* root_mod;
     Module* current_mod;
     Scope* current_scope;
+    AST* current_impl_block;
     b8 failed;
 } ResolutionContext;
 
