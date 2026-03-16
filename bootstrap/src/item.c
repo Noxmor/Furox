@@ -17,7 +17,7 @@ AST* item_parse(Parser* parser)
         case FRX_TOKEN_TYPE_KW_STRUCT: return struct_def_parse(parser, visibility);
         case FRX_TOKEN_TYPE_KW_ENUM: return enum_def_parse(parser, visibility);
         case FRX_TOKEN_TYPE_KW_TYPE: return type_alias_parse(parser, visibility);
-        case FRX_TOKEN_TYPE_KW_TRAIT: return trait_parse(parser);
+        case FRX_TOKEN_TYPE_KW_TRAIT: return trait_parse(parser, visibility);
         case FRX_TOKEN_TYPE_KW_IMPL: return impl_block_parse(parser);
         default:
         {

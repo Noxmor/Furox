@@ -153,8 +153,9 @@ typedef struct ASTImplBlock
 {
     Scope* scope;
     AST* generic_params;
+    AST* trait_path_expr;
+    AST* type_path_expr;
     TokenType primitive;
-    AST* path_expr;
     List methods;
 } ASTImplBlock;
 

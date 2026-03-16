@@ -13,7 +13,7 @@ static void trait_init(ASTTrait* trait, const char* name)
     list_init(&trait->methods);
 }
 
-AST* trait_parse(Parser* parser)
+AST* trait_parse(Parser* parser, SymbolVisibility visibility)
 {
     parser_push_scope(parser);
 
@@ -41,6 +41,9 @@ AST* trait_parse(Parser* parser)
     ast->range.end = parser_current_location(parser);
 
     parser_pop_scope(parser);
+
+    parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_TRAIT,
+                         trait->name, trait);
 
     return ast;
 }

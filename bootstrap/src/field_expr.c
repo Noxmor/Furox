@@ -33,7 +33,7 @@ void field_expr_sema(AST* ast, SemaContext* ctx)
         }
 
         if (field->struct_field.visibility == FRX_SYMBOL_VISIBILITY_PRIVATE
-            && (ctx->current_impl_block == NULL || expr_infer_type(ctx->current_impl_block->path_expr) != type))
+            && (ctx->current_impl_block == NULL || expr_infer_type(ctx->current_impl_block->type_path_expr) != type))
         {
             sema_context_fail(ctx);
         }

@@ -75,7 +75,7 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility);
 
 AST* enum_def_parse(Parser* parser, SymbolVisibility visibility);
 
-AST* trait_parse(Parser* parser);
+AST* trait_parse(Parser* parser, SymbolVisibility visibility);
 
 AST* impl_block_parse(Parser* parser);
 

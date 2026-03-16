@@ -17,6 +17,7 @@ typedef u8 SymbolVisibility;
 enum
 {
     FRX_SYMBOL_TYPE_MODULE = 0,
+    FRX_SYMBOL_TYPE_TRAIT,
     FRX_SYMBOL_TYPE_FUNC,
     FRX_SYMBOL_TYPE_STRUCT,
     FRX_SYMBOL_TYPE_ENUM,
