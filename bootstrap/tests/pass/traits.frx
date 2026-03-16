@@ -1,9 +1,35 @@
 mod test;
 
-trait Sizeable {
+trait Sizeable
+{
     fn size(ptr: void*) -> usize;
 }
 
-fn main() -> i32 {
-    return 0;
+struct Foo
+{
+    x: usize;
+}
+
+impl Foo
+{
+    pub fn new(x: usize) -> Foo
+    {
+        let foo: Foo;
+        foo.x = x;
+        return foo;
+    }
+}
+
+impl Sizeable for Foo
+{
+    fn size(foo: Foo*) -> usize
+    {
+        return foo.x;
+    }
+}
+
+fn main() -> i32
+{
+    let foo = Foo::new(0);
+    return foo.size();
 }
