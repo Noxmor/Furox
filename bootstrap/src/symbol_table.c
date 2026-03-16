@@ -25,11 +25,6 @@ Symbol* symbol_table_insert(SymbolTable* table, SymbolVisibility visibility,
     u64 index = (usize)name % FRX_SYMBOL_TABLE_CAPACITY;
     SymbolTableEntry* entry = table->entries[index];
 
-    if (entry != NULL)
-    {
-        return NULL;
-    }
-
     SymbolTableEntry* new_entry = compiler_alloc(sizeof(SymbolTableEntry));
     new_entry->symbol = symbol_create(name, visibility, type, data);
     new_entry->next = entry;
@@ -47,11 +42,6 @@ Symbol* symbol_table_insert_symbol(SymbolTable* table, Symbol* symbol)
 
     u64 index = (usize)symbol->name % FRX_SYMBOL_TABLE_CAPACITY;
     SymbolTableEntry* entry = table->entries[index];
-
-    if (entry != NULL)
-    {
-        return NULL;
-    }
 
     SymbolTableEntry* new_entry = compiler_alloc(sizeof(SymbolTableEntry));
     new_entry->symbol = symbol;
