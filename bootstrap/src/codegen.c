@@ -419,6 +419,29 @@ static void emit_let_stmt(AST* ast, FILE* f, CodegenContext* ctx)
     fprintf(f, ";\n");
 }
 
+static void emit_if_stmt(AST* ast, FILE* f, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_IF_STMT);
+
+    FRX_ASSERT(f != NULL);
+
+    ASTIfStmt* if_stmt = &ast->if_stmt;
+
+    fprintf(f, "if (");
+    emit_ast(if_stmt->condition, f, ctx);
+    fprintf(f, ")\n");
+
+    emit_scope(if_stmt->if_block, f, ctx);
+
+    if (if_stmt->else_block != NULL)
+    {
+        fprintf(f, "else\n");
+        emit_scope(if_stmt->else_block, f, ctx);
+    }
+}
+
 static void emit_for_loop(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -633,6 +656,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_STRING_LIT: emit_string_literal(ast, f); break;
         case FRX_AST_TYPE_PATH_EXPR: emit_path_expr(ast, f); break;
         case FRX_AST_TYPE_LET_STMT: emit_let_stmt(ast, f, ctx); break;
+        case FRX_AST_TYPE_IF_STMT: emit_if_stmt(ast, f, ctx); break;
         case FRX_AST_TYPE_FOR_LOOP: emit_for_loop(ast, f, ctx); break;
         case FRX_AST_TYPE_UNARY_EXPR: emit_unary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_BINARY_EXPR: emit_binary_expr(ast, f, ctx); break;
