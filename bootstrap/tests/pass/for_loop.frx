@@ -1,0 +1,17 @@
+fn main() -> i32
+{
+    let result = 0;
+
+    for (let i = 0; i < 10; ++i)
+    {
+        result += i;
+    }
+
+    let i = 1;
+    for (i = 0; i < 10; i++)
+    {
+        result -= i;
+    }
+
+    return result;
+}
