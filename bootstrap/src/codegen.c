@@ -471,7 +471,7 @@ static void emit_field_expr(AST* ast, FILE* f, CodegenContext* ctx)
     fprintf(f, "%s%s", access_token, field_expr->field_name);
 }
 
-static void emit_self_expr(AST* ast, FILE* f, CodegenContext* ctx)
+static void emit_self_expr(AST* ast, FILE* f)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -595,7 +595,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_UNARY_EXPR: emit_unary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_BINARY_EXPR: emit_binary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_FIELD_EXPR: emit_field_expr(ast, f, ctx); break;
-        case FRX_AST_TYPE_SELF_EXPR: emit_self_expr(ast, f, ctx); break;
+        case FRX_AST_TYPE_SELF_EXPR: emit_self_expr(ast, f); break;
         case FRX_AST_TYPE_CALL_EXPR: emit_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: emit_method_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: emit_expr_stmt(ast, f, ctx); break;
