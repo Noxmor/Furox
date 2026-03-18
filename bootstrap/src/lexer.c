@@ -543,6 +543,11 @@ static void lexer_read_token(Lexer* lexer, Token* token)
                 token->type = FRX_TOKEN_TYPE_ARROW;
                 lexer_advance(lexer);
             }
+            else if (next == '=')
+            {
+                token->type = FRX_TOKEN_TYPE_MINUS_EQ;
+                lexer_advance(lexer);
+            }
             else if (next == '-')
             {
                 token->type = FRX_TOKEN_TYPE_MINUS_MINUS;
