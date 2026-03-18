@@ -10,6 +10,7 @@ typedef struct ResolutionContext
     Module* current_mod;
     Scope* current_scope;
     AST* current_impl_block;
+    AST* current_func_decl;
     b8 failed;
 } ResolutionContext;
 
@@ -52,9 +53,21 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx);
 
 void block_resolve(AST* ast, ResolutionContext* ctx);
 
+void expr_stmt_resolve(AST* ast, ResolutionContext* ctx);
+
+void return_stmt_resolve(AST* ast, ResolutionContext* ctx);
+
 void let_stmt_resolve(AST* ast, ResolutionContext* ctx);
 
 void if_stmt_resolve(AST* ast, ResolutionContext* ctx);
+
+void unary_expr_resolve(AST* ast, ResolutionContext* ctx);
+
+void binary_expr_resolve(AST* ast, ResolutionContext* ctx);
+
+void field_expr_resolve(AST* ast, ResolutionContext* ctx);
+
+void self_expr_resolve(AST* ast, ResolutionContext* ctx);
 
 void path_expr_resolve(AST* ast, ResolutionContext* ctx);
 

@@ -1,7 +1,21 @@
 #include "ast.h"
 #include "assert.h"
+#include "resolution.h"
 #include "sema.h"
 #include "symbol.h"
+
+void field_expr_resolve(AST* ast, ResolutionContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FIELD_EXPR);
+
+    FRX_ASSERT(ctx != NULL);
+
+    ASTFieldExpr* field_expr = &ast->field_expr;
+
+    ast_resolve(field_expr->base, ctx);
+}
 
 void field_expr_sema(AST* ast, SemaContext* ctx)
 {
@@ -15,8 +29,14 @@ void field_expr_sema(AST* ast, SemaContext* ctx)
 
     ast_sema(field_expr->base, ctx);
 
-    ASTStructDef* struct_def = expr_infer_type(field_expr->base)->strct.symbol->data;
+    const Type* struct_type = expr_infer_type(field_expr->base);
+    FRX_ASSERT(struct_type != NULL);
+    if (struct_type->kind == FRX_TYPE_KIND_PTR)
+    {
+        struct_type = struct_type->ptr.base;
+    }
 
+    ASTStructDef* struct_def = struct_type->strct.symbol->data;
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* field = list_get(&struct_def->fields, i);

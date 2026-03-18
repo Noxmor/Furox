@@ -300,6 +300,17 @@ static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f, CodegenContext* ctx)
 
     fprintf(f, "(");
 
+    if (func_decl->receiver != FRX_FUNC_RECEIVER_NONE)
+    {
+        emit_type(func_decl->receiver_type, NULL, f, ctx);
+        fprintf(f, " self");
+
+        if (!list_empty(&func_decl->params))
+        {
+            fprintf(f, ", ");
+        }
+    }
+
     for (usize i = 0; i < list_size(&func_decl->params); ++i)
     {
         if (i > 0)
@@ -460,6 +471,17 @@ static void emit_field_expr(AST* ast, FILE* f, CodegenContext* ctx)
     fprintf(f, "%s%s", access_token, field_expr->field_name);
 }
 
+static void emit_self_expr(AST* ast, FILE* f, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_SELF_EXPR);
+
+    FRX_ASSERT(f != NULL);
+
+    fprintf(f, "self");
+}
+
 static void emit_call_expr(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -573,6 +595,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_UNARY_EXPR: emit_unary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_BINARY_EXPR: emit_binary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_FIELD_EXPR: emit_field_expr(ast, f, ctx); break;
+        case FRX_AST_TYPE_SELF_EXPR: emit_self_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_CALL_EXPR: emit_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: emit_method_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: emit_expr_stmt(ast, f, ctx); break;

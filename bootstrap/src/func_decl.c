@@ -7,14 +7,16 @@
 #include "type_system.h"
 
 static void func_decl_init(ASTFuncDecl* func_decl, const char* name, b8 external,
-                           b8 is_variadic, AST* generic_params, AST* return_type,
-                           AST* body)
+                           FuncReceiver receiver, b8 is_variadic, AST* generic_params,
+                           AST* return_type, AST* body)
 {
     FRX_ASSERT(name != NULL);
 
     func_decl->name = name;
     func_decl->external = external;
     func_decl->generic_params = generic_params;
+    func_decl->receiver = receiver;
+    func_decl->return_type = NULL;
     func_decl->is_variadic = is_variadic;
     func_decl->return_type = return_type;
     func_decl->body = body;
@@ -56,6 +58,7 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
 
     parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
 
+    FuncReceiver receiver = FRX_FUNC_RECEIVER_NONE;
     b8 is_variadic = FRX_FALSE;
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
@@ -63,6 +66,28 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
         if (!list_empty(&func_decl->params))
         {
             parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
+        }
+
+        if (list_empty(&func_decl->params) && parser_current_type(parser) == FRX_TOKEN_TYPE_KW_SELF_LOWER)
+        {
+            parser_eat(parser, FRX_TOKEN_TYPE_KW_SELF_LOWER);
+
+            if (parser_current_type(parser) == FRX_TOKEN_TYPE_STAR)
+            {
+                parser_eat(parser, FRX_TOKEN_TYPE_STAR);
+                receiver = FRX_FUNC_RECEIVER_SELF_PTR;
+            }
+            else if (parser_current_type(parser) == FRX_TOKEN_TYPE_BIT_AND)
+            {
+                parser_eat(parser, FRX_TOKEN_TYPE_BIT_AND);
+                receiver = FRX_FUNC_RECEIVER_SELF_REF;
+            }
+            else
+            {
+                // TODO: Error, self must specify if pointer or reference!
+            }
+
+            continue;
         }
 
         if (parser_match(parser, FRX_TOKEN_TYPE_ELLIPSIS))
@@ -95,7 +120,8 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
 
     parser_pop_scope(parser);
 
-    func_decl_init(func_decl, name, external, is_variadic, generic_params, return_type, body);
+    func_decl_init(func_decl, name, external, receiver, is_variadic,
+                   generic_params, return_type, body);
 
     ast->range.end = parser_current_location(parser);
 
@@ -113,7 +139,16 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTFuncDecl* func_decl = &ast->func_decl;
 
+    ctx->current_func_decl = ast;
     resolution_context_push_scope(ctx, func_decl->scope);
+
+    switch (func_decl->receiver)
+    {
+        case FRX_FUNC_RECEIVER_NONE: break;
+        case FRX_FUNC_RECEIVER_SELF_PTR: func_decl->receiver_type = type_intern_ptr(expr_infer_type(ctx->current_impl_block->impl_block.type_path_expr), FRX_TRUE); break;
+        case FRX_FUNC_RECEIVER_SELF_REF: func_decl->receiver_type = type_intern_ptr(expr_infer_type(ctx->current_impl_block->impl_block.type_path_expr), FRX_FALSE); break;
+        default: FRX_ASSERT(FRX_FALSE); break;
+    }
 
     for (usize i = 0; i < list_size(&func_decl->params); ++i)
     {
@@ -134,6 +169,7 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx)
     func_decl->resolved_type = type_intern_func(&func_decl->params, func_decl->return_type->type_specifier.resolved_type, func_decl->is_variadic);
 
     resolution_context_pop_scope(ctx);
+    ctx->current_func_decl = NULL;
 }
 
 void func_decl_sema(AST* ast, SemaContext* ctx)

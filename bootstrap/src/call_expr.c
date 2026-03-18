@@ -51,6 +51,8 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTCallExpr* call_expr = &ast->call_expr;
 
+    path_expr_resolve(call_expr->callee, ctx);
+
     const Symbol* symbol = call_expr->callee->path_expr.symbol;
     if (symbol->associated_type != NULL)
     {

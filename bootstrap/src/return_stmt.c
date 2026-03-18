@@ -34,6 +34,22 @@ AST* return_stmt_parse(Parser* parser)
     return ast;
 }
 
+void return_stmt_resolve(AST* ast, ResolutionContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_RETURN_STMT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    ASTReturnStmt* return_stmt = &ast->return_stmt;
+
+    if (return_stmt->value != NULL)
+    {
+        ast_resolve(return_stmt->value, ctx);
+    }
+}
+
 void return_stmt_sema(AST* ast, SemaContext* ctx)
 {
     FRX_ASSERT(ast != NULL);

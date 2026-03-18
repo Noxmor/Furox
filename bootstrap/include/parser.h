@@ -103,6 +103,8 @@ AST* if_stmt_parse(Parser* parser);
 
 AST* expr_parse(Parser* parser);
 
+AST* self_expr_parse(Parser* parser);
+
 AST* path_expr_parse(Parser* parser);
 
 AST* call_expr_parse(Parser* parser, AST* callee);

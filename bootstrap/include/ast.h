@@ -172,6 +172,17 @@ typedef struct ASTBlock
     List stmts;
 } ASTBlock;
 
+enum
+{
+    FRX_FUNC_RECEIVER_NONE = 0,
+    FRX_FUNC_RECEIVER_SELF_PTR,
+    FRX_FUNC_RECEIVER_SELF_REF,
+
+    FRX_FUNC_RECEIVER_COUNT
+};
+
+typedef u8 FuncReceiver;
+
 typedef struct ASTFuncParam
 {
     const char* name;
@@ -185,13 +196,13 @@ typedef struct ASTFuncDecl
     b8 external;
     AST* generic_params;
     List params;
+    FuncReceiver receiver;
+    const Type* receiver_type;
     b8 is_variadic;
     AST* return_type;
     AST* body;
     const Type* resolved_type;
 } ASTFuncDecl;
-
-typedef u8 ASTExprType;
 
 typedef struct ASTUnaryExpr
 {
@@ -216,6 +227,11 @@ typedef struct ASTFieldExpr
     const char* field_name;
     const Type* resolved_type;
 } ASTFieldExpr;
+
+typedef struct ASTSelfExpr
+{
+    const Type* resolved_type;
+} ASTSelfExpr;
 
 typedef struct ASTModDecl
 {
@@ -329,6 +345,7 @@ enum
     FRX_AST_TYPE_UNARY_EXPR,
     FRX_AST_TYPE_BINARY_EXPR,
     FRX_AST_TYPE_FIELD_EXPR,
+    FRX_AST_TYPE_SELF_EXPR,
     FRX_AST_TYPE_PATH_SEGMENT,
     FRX_AST_TYPE_PATH_EXPR,
     FRX_AST_TYPE_CALL_EXPR,
@@ -375,6 +392,7 @@ typedef struct AST
         ASTUnaryExpr unary_expr;
         ASTBinaryExpr binary_expr;
         ASTFieldExpr field_expr;
+        ASTSelfExpr self_expr;
         ASTPathSegment path_segment;
         ASTPathExpr path_expr;
         ASTCallExpr call_expr;
