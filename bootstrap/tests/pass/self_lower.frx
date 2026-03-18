@@ -1,0 +1,29 @@
+mod test;
+
+struct Foo
+{
+    x: i32;
+}
+
+impl Foo
+{
+    fn new(x: i32) -> Self
+    {
+        let foo: Self;
+        foo.x = x;
+
+        return foo;
+    }
+
+    fn x(self&) -> i32
+    {
+        return self.x;
+    }
+}
+
+fn main() -> i32
+{
+    let foo = Foo::new(0);
+
+    return foo.x();
+}
