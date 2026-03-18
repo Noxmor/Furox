@@ -12,6 +12,8 @@
 
 #include <string.h>
 
+static void emit_scope(AST* ast, FILE* f, CodegenContext* ctx);
+
 b8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
                         List* src_files, const char* filename)
 {
@@ -417,6 +419,45 @@ static void emit_let_stmt(AST* ast, FILE* f, CodegenContext* ctx)
     fprintf(f, ";\n");
 }
 
+static void emit_for_loop(AST* ast, FILE* f, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FOR_LOOP);
+
+    FRX_ASSERT(f != NULL);
+
+    ASTForLoop* for_loop = &ast->for_loop;
+
+    fprintf(f, "for (");
+
+    if (for_loop->init != NULL)
+    {
+        emit_ast(for_loop->init, f, ctx);
+
+        if (for_loop->init->type != FRX_AST_TYPE_LET_STMT)
+        {
+            fprintf(f, ";");
+        }
+    }
+    else
+    {
+        fprintf(f, "; ");
+    }
+
+    emit_ast(for_loop->condition, f, ctx);
+    fprintf(f, "; ");
+
+    if (for_loop->increment != NULL)
+    {
+        emit_ast(for_loop->increment, f, ctx);
+    }
+
+    fprintf(f, ")\n");
+
+    emit_scope(for_loop->body, f, ctx);
+}
+
 static void emit_unary_expr(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -592,6 +633,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_STRING_LIT: emit_string_literal(ast, f); break;
         case FRX_AST_TYPE_PATH_EXPR: emit_path_expr(ast, f); break;
         case FRX_AST_TYPE_LET_STMT: emit_let_stmt(ast, f, ctx); break;
+        case FRX_AST_TYPE_FOR_LOOP: emit_for_loop(ast, f, ctx); break;
         case FRX_AST_TYPE_UNARY_EXPR: emit_unary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_BINARY_EXPR: emit_binary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_FIELD_EXPR: emit_field_expr(ast, f, ctx); break;

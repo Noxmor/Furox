@@ -64,7 +64,7 @@ static AST* expr_parse_primary(Parser* parser)
         case FRX_TOKEN_TYPE_STR_LIT: return string_literal_parse(parser);
         case FRX_TOKEN_TYPE_KW_SELF_LOWER: return self_expr_parse(parser);
         case FRX_TOKEN_TYPE_KW_EXTERN:
-        case FRX_TOKEN_TYPE_IDENT: return path_expr_parse(parser);
+        case FRX_TOKEN_TYPE_IDENT: return path_expr_parse(parser, FRX_PATH_STYLE_EXPR);
         default:
         {
             Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_EXPECTED_EXPR,

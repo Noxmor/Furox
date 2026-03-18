@@ -20,7 +20,7 @@ AST* mod_decl_parse(Parser* parser)
     AST* path_expr = NULL;
     if (parser_current_type(parser) != FRX_TOKEN_TYPE_SEMI)
     {
-        path_expr = path_expr_parse(parser);
+        path_expr = path_expr_parse(parser, FRX_PATH_STYLE_TYPE);
     }
 
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);

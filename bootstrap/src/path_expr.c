@@ -19,9 +19,11 @@ static void path_segment_init(ASTPathSegment* path_segment, const char* name)
     list_init(&path_segment->generic_args);
 }
 
-static AST* path_segment_parse(Parser* parser)
+static AST* path_segment_parse(Parser* parser, PathStyle style)
 {
     FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(style < FRX_PATH_STYLE_COUNT);
 
     AST* ast = ast_create(FRX_AST_TYPE_PATH_SEGMENT);
     ASTPathSegment* path_segment = &ast->path_segment;
@@ -37,7 +39,7 @@ static AST* path_segment_parse(Parser* parser)
         parser_eat(parser, FRX_TOKEN_TYPE_RESOLUTION);
     }
 
-    if (parser_current_type(parser) == FRX_TOKEN_TYPE_LT)
+    if (style == FRX_PATH_STYLE_TYPE && parser_current_type(parser) == FRX_TOKEN_TYPE_LT)
     {
         parser_eat(parser, FRX_TOKEN_TYPE_LT);
 
@@ -87,8 +89,12 @@ static void path_expr_init(ASTPathExpr* path_expr, ASTPathType path_type)
     path_expr->symbol = NULL;
 }
 
-AST* path_expr_parse(Parser* parser)
+AST* path_expr_parse(Parser* parser, PathStyle style)
 {
+    FRX_ASSERT(parser != NULL);
+
+    FRX_ASSERT(style < FRX_PATH_STYLE_COUNT);
+
     AST* ast = ast_create(FRX_AST_TYPE_PATH_EXPR);
     ASTPathExpr* path_expr = &ast->path_expr;
 
@@ -113,12 +119,12 @@ AST* path_expr_parse(Parser* parser)
     path_expr->scope = parser->current_scope;
     path_expr->mod = parser->src_file->module;
 
-    list_add(&path_expr->path_segments, path_segment_parse(parser));
+    list_add(&path_expr->path_segments, path_segment_parse(parser, style));
 
     while (parser_match(parser, FRX_TOKEN_TYPE_RESOLUTION))
     {
         parser_eat(parser, FRX_TOKEN_TYPE_RESOLUTION);
-        list_add(&path_expr->path_segments, path_segment_parse(parser));
+        list_add(&path_expr->path_segments, path_segment_parse(parser, style));
     }
 
     ast->range.end = parser_current_location(parser);

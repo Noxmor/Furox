@@ -101,11 +101,13 @@ AST* let_stmt_parse(Parser* parser);
 
 AST* if_stmt_parse(Parser* parser);
 
+AST* for_loop_parse(Parser* parser);
+
 AST* expr_parse(Parser* parser);
 
 AST* self_expr_parse(Parser* parser);
 
-AST* path_expr_parse(Parser* parser);
+AST* path_expr_parse(Parser* parser, PathStyle style);
 
 AST* call_expr_parse(Parser* parser, AST* callee);
 

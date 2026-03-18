@@ -77,10 +77,19 @@ void let_stmt_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTLetStmt* let_stmt = &ast->let_stmt;
 
+    if (let_stmt->value != NULL)
+    {
+        ast_resolve(let_stmt->value, ctx);
+    }
+
     if (let_stmt->type != NULL)
     {
         type_specifier_resolve(let_stmt->type, ctx);
         let_stmt->resolved_type = let_stmt->type->type_specifier.resolved_type;
+    }
+    else if (let_stmt->value != NULL)
+    {
+        let_stmt->resolved_type = expr_infer_type(let_stmt->value);
     }
 }
 

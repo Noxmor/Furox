@@ -255,6 +255,16 @@ enum
 
 typedef u8 ASTPathType;
 
+enum
+{
+    FRX_PATH_STYLE_EXPR,
+    FRX_PATH_STYLE_TYPE,
+
+    FRX_PATH_STYLE_COUNT
+};
+
+typedef u8 PathStyle;
+
 typedef struct ASTPathExpr
 {
     ASTPathType type;
@@ -306,6 +316,14 @@ typedef struct ASTIfStmt
     AST* else_block;
 } ASTIfStmt;
 
+typedef struct ASTForLoop
+{
+    AST* init;
+    AST* condition;
+    AST* increment;
+    AST* body;
+} ASTForLoop;
+
 typedef struct ASTLetStmt
 {
     b8 mutable;
@@ -342,6 +360,7 @@ enum
     FRX_AST_TYPE_RETURN_STMT,
     FRX_AST_TYPE_LET_STMT,
     FRX_AST_TYPE_IF_STMT,
+    FRX_AST_TYPE_FOR_LOOP,
     FRX_AST_TYPE_UNARY_EXPR,
     FRX_AST_TYPE_BINARY_EXPR,
     FRX_AST_TYPE_FIELD_EXPR,
@@ -389,6 +408,7 @@ typedef struct AST
         ASTReturnStmt return_stmt;
         ASTLetStmt let_stmt;
         ASTIfStmt if_stmt;
+        ASTForLoop for_loop;
         ASTUnaryExpr unary_expr;
         ASTBinaryExpr binary_expr;
         ASTFieldExpr field_expr;

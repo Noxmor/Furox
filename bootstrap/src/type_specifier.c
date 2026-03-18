@@ -85,7 +85,7 @@ AST* type_specifier_parse(Parser* parser)
     }
     else if (parser_current_type(parser) == FRX_TOKEN_TYPE_IDENT)
     {
-        AST* path_expr = path_expr_parse(parser);
+        AST* path_expr = path_expr_parse(parser, FRX_PATH_STYLE_TYPE);
         type_specifier_init_path_expr(type, path_expr);
     }
     else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_FN)

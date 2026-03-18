@@ -41,6 +41,7 @@ void ast_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_AST_TYPE_RETURN_STMT: return_stmt_resolve(ast, ctx); break;
         case FRX_AST_TYPE_LET_STMT: let_stmt_resolve(ast, ctx); break;
         case FRX_AST_TYPE_IF_STMT: if_stmt_resolve(ast, ctx); break;
+        case FRX_AST_TYPE_FOR_LOOP: for_loop_resolve(ast, ctx); break;
         case FRX_AST_TYPE_UNARY_EXPR: unary_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_BINARY_EXPR: binary_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_FIELD_EXPR: field_expr_resolve(ast, ctx); break;
@@ -77,6 +78,7 @@ void ast_sema(AST* ast, SemaContext* ctx)
         case FRX_AST_TYPE_RETURN_STMT: return_stmt_sema(ast, ctx); break;
         case FRX_AST_TYPE_LET_STMT: let_stmt_sema(ast, ctx); break;
         case FRX_AST_TYPE_IF_STMT: if_stmt_sema(ast, ctx); break;
+        case FRX_AST_TYPE_FOR_LOOP: for_loop_sema(ast, ctx); break;
         case FRX_AST_TYPE_UNARY_EXPR: unary_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_BINARY_EXPR: binary_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_FIELD_EXPR: field_expr_sema(ast, ctx); break;

@@ -43,7 +43,7 @@ AST* impl_block_parse(Parser* parser)
     }
     else
     {
-        type_path_expr = path_expr_parse(parser);
+        type_path_expr = path_expr_parse(parser, FRX_PATH_STYLE_TYPE);
     }
 
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_FOR)
@@ -60,7 +60,7 @@ AST* impl_block_parse(Parser* parser)
         }
         else
         {
-            type_path_expr = path_expr_parse(parser);
+            type_path_expr = path_expr_parse(parser, FRX_PATH_STYLE_TYPE);
         }
     }
 
