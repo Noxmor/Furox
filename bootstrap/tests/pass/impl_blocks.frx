@@ -17,9 +17,9 @@ impl Foo
         return foo;
     }
 
-    fn get_value(foo: Foo*) -> i32
+    fn get_value(self*) -> i32
     {
-        return foo.x;
+        return self.x;
     }
 
     fn get_bar(foo: Foo*) -> Bar*
@@ -43,9 +43,9 @@ impl Bar
         return bar;
     }
 
-    fn get_value(bar: Bar*) -> i32
+    fn get_value(self*) -> i32
     {
-        return bar.y;
+        return self.y;
     }
 }
 

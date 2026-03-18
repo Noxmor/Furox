@@ -22,9 +22,9 @@ impl Foo
 
 impl Sizeable for Foo
 {
-    fn size(foo: Foo*) -> usize
+    fn size(self*) -> usize
     {
-        return foo.x;
+        return self.x;
     }
 }
 
