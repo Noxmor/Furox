@@ -10,9 +10,11 @@ impl Foo
 {
     fn new(x: i32) -> Foo
     {
-        let foo: Foo;
-        foo.x = x;
-        foo.bar = Bar::new(42);
+        let foo = Foo
+        {
+            x: x;
+            bar: Bar::new(42);
+        };
 
         return foo;
     }
@@ -37,8 +39,10 @@ impl Bar
 {
     fn new(y: i32) -> Bar
     {
-        let bar: Bar;
-        bar.y = y;
+        let bar = Bar
+        {
+            y: y;
+        };
 
         return bar;
     }

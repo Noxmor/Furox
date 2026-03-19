@@ -14,8 +14,11 @@ impl Foo
 {
     pub fn new(x: usize) -> Foo
     {
-        let foo: Foo;
-        foo.x = x;
+        let foo = Foo
+        {
+            x: x;
+        };
+
         return foo;
     }
 }

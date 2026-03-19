@@ -5,8 +5,10 @@ struct Foo {
 }
 
 fn main() -> i32 {
-    let foo: Foo;
-    foo.bar = 0;
+    let foo = Foo
+    {
+        bar: 0;
+    };
 
     return foo.bar;
 }

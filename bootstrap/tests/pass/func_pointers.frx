@@ -15,8 +15,10 @@ struct FuncWrapper
 
 fn main() -> i32
 {
-    let wrapper: FuncWrapper;
-    wrapper.func = func;
+    let wrapper = FuncWrapper
+    {
+        func: func;
+    };
 
     let f = foo;
 
