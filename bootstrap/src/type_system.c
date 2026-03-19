@@ -434,6 +434,11 @@ const Type* type_intern_string_lit(void)
     return &string_literal_type;
 }
 
+const Type* type_intern_bool(void)
+{
+    return &b8_type;
+}
+
 const Type* symbol_infer_type(const Symbol* symbol)
 {
     FRX_ASSERT(symbol != NULL);

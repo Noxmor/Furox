@@ -233,6 +233,11 @@ typedef struct ASTSelfExpr
     const Type* resolved_type;
 } ASTSelfExpr;
 
+typedef struct ASTBoolExpr
+{
+    b8 value;
+} ASTBoolExpr;
+
 typedef struct ASTModDecl
 {
     AST* path_expr;
@@ -365,6 +370,7 @@ enum
     FRX_AST_TYPE_BINARY_EXPR,
     FRX_AST_TYPE_FIELD_EXPR,
     FRX_AST_TYPE_SELF_EXPR,
+    FRX_AST_TYPE_BOOL_EXPR,
     FRX_AST_TYPE_PATH_SEGMENT,
     FRX_AST_TYPE_PATH_EXPR,
     FRX_AST_TYPE_CALL_EXPR,
@@ -413,6 +419,7 @@ typedef struct AST
         ASTBinaryExpr binary_expr;
         ASTFieldExpr field_expr;
         ASTSelfExpr self_expr;
+        ASTBoolExpr bool_expr;
         ASTPathSegment path_segment;
         ASTPathExpr path_expr;
         ASTCallExpr call_expr;

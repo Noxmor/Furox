@@ -75,6 +75,9 @@ b8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
     fprintf(ctx->header, "typedef u32 b32;\n");
     fprintf(ctx->header, "typedef u64 b64;\n");
 
+    fprintf(ctx->header, "#define FRX_TRUE 1\n");
+    fprintf(ctx->header, "#define FRX_FALSE 0\n");
+
     fprintf(ctx->header, "typedef float f32;\n");
     fprintf(ctx->header, "typedef double f64;\n");
 
@@ -546,6 +549,26 @@ static void emit_self_expr(AST* ast, FILE* f)
     fprintf(f, "self");
 }
 
+static void emit_bool_expr(AST* ast, FILE* f)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_BOOL_EXPR);
+
+    FRX_ASSERT(f != NULL);
+
+    ASTBoolExpr* bool_expr = &ast->bool_expr;
+
+    if (bool_expr->value == FRX_TRUE)
+    {
+        fprintf(f, "FRX_TRUE");
+    }
+    else
+    {
+        fprintf(f, "FRX_FALSE");
+    }
+}
+
 static void emit_call_expr(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -662,6 +685,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_BINARY_EXPR: emit_binary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_FIELD_EXPR: emit_field_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_SELF_EXPR: emit_self_expr(ast, f); break;
+        case FRX_AST_TYPE_BOOL_EXPR: emit_bool_expr(ast, f); break;
         case FRX_AST_TYPE_CALL_EXPR: emit_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: emit_method_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: emit_expr_stmt(ast, f, ctx); break;

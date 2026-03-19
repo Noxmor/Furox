@@ -96,6 +96,8 @@ const Type* type_intern_char_lit(void);
 
 const Type* type_intern_string_lit(void);
 
+const Type* type_intern_bool(void);
+
 const Type* symbol_infer_type(const Symbol* symbol);
 
 void type_register_method(const Type* type, Symbol* symbol);

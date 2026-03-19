@@ -46,6 +46,7 @@ void ast_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_AST_TYPE_BINARY_EXPR: binary_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_FIELD_EXPR: field_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_SELF_EXPR: self_expr_resolve(ast, ctx); break;
+        case FRX_AST_TYPE_BOOL_EXPR: break;
         case FRX_AST_TYPE_PATH_EXPR: path_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_CALL_EXPR: call_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: method_call_expr_resolve(ast, ctx); break;
@@ -83,6 +84,7 @@ void ast_sema(AST* ast, SemaContext* ctx)
         case FRX_AST_TYPE_BINARY_EXPR: binary_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_FIELD_EXPR: field_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_SELF_EXPR: break;
+        case FRX_AST_TYPE_BOOL_EXPR: break;
         case FRX_AST_TYPE_PATH_EXPR: break;
         case FRX_AST_TYPE_CALL_EXPR: call_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: method_call_expr_sema(ast, ctx); break;
@@ -104,6 +106,7 @@ const Type* expr_infer_type(AST* expr)
         case FRX_AST_TYPE_BINARY_EXPR: return expr->binary_expr.resolved_type;
         case FRX_AST_TYPE_FIELD_EXPR: return expr->field_expr.resolved_type;
         case FRX_AST_TYPE_SELF_EXPR: return expr->self_expr.resolved_type;
+        case FRX_AST_TYPE_BOOL_EXPR: return type_intern_bool();
         case FRX_AST_TYPE_PATH_EXPR:
         {
             switch (expr->path_expr.symbol->type)

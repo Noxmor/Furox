@@ -107,6 +107,8 @@ AST* expr_parse(Parser* parser);
 
 AST* self_expr_parse(Parser* parser);
 
+AST* bool_expr_parse(Parser* parser);
+
 AST* path_expr_parse(Parser* parser, PathStyle style);
 
 AST* call_expr_parse(Parser* parser, AST* callee);
