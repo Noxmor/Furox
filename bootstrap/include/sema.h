@@ -51,4 +51,6 @@ void call_expr_sema(AST* ast, SemaContext* ctx);
 
 void method_call_expr_sema(AST* ast, SemaContext* ctx);
 
+void struct_literal_sema(AST* ast, SemaContext* ctx);
+
 #endif

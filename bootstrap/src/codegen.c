@@ -394,6 +394,36 @@ static void emit_path_expr(AST* ast, FILE* f)
     }
 }
 
+static void emit_struct_literal(AST* ast, FILE* f, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_STRUCT_LIT);
+
+    FRX_ASSERT(f != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    ASTStructLiteral* literal = &ast->struct_literal;
+
+    fprintf(f, "(");
+    const Type* type = expr_infer_type(literal->path_expr);
+    emit_type(type, NULL, f, ctx);
+    fprintf(f, ") { ");
+
+    for (usize i = 0; i < list_size(&literal->fields); ++i)
+    {
+        AST* struct_field = list_get(&literal->fields, i);
+        ASTStructLiteralField* field = &struct_field->struct_literal_field;
+
+        fprintf(f, ".%s = ", field->name);
+        emit_ast(field->value, f, ctx);
+        fprintf(f, ", ");
+    }
+
+    fprintf(f, "}");
+}
+
 static void emit_let_stmt(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -677,6 +707,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_INT_LIT: emit_int_literal(ast, f); break;
         case FRX_AST_TYPE_CHAR_LIT: emit_char_literal(ast, f); break;
         case FRX_AST_TYPE_STRING_LIT: emit_string_literal(ast, f); break;
+        case FRX_AST_TYPE_STRUCT_LIT: emit_struct_literal(ast, f, ctx); break;
         case FRX_AST_TYPE_PATH_EXPR: emit_path_expr(ast, f); break;
         case FRX_AST_TYPE_LET_STMT: emit_let_stmt(ast, f, ctx); break;
         case FRX_AST_TYPE_IF_STMT: emit_if_stmt(ast, f, ctx); break;

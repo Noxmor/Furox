@@ -79,4 +79,6 @@ void method_call_expr_resolve(AST* ast, ResolutionContext* ctx);
 
 void int_literal_resolve(AST* ast, ResolutionContext* ctx);
 
+void struct_literal_resolve(AST* ast, ResolutionContext* ctx);
+
 #endif

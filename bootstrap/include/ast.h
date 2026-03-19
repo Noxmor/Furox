@@ -28,6 +28,18 @@ typedef struct ASTStringLiteral
     const char* value;
 } ASTStringLiteral;
 
+typedef struct ASTStructLiteralField
+{
+    const char* name;
+    AST* value;
+} ASTStructLiteralField;
+
+typedef struct ASTStructLiteral
+{
+    AST* path_expr;
+    List fields;
+} ASTStructLiteral;
+
 typedef struct ASTTypeSpecifier ASTTypeSpecifier;
 
 enum
@@ -378,6 +390,8 @@ enum
     FRX_AST_TYPE_INT_LIT,
     FRX_AST_TYPE_CHAR_LIT,
     FRX_AST_TYPE_STRING_LIT,
+    FRX_AST_TYPE_STRUCT_LIT,
+    FRX_AST_TYPE_STRUCT_LIT_FIELD,
 
     FRX_AST_TYPE_COUNT
 };
@@ -427,6 +441,8 @@ typedef struct AST
         ASTIntLiteral int_literal;
         ASTCharLiteral char_literal;
         ASTStringLiteral string_literal;
+        ASTStructLiteral struct_literal;
+        ASTStructLiteralField struct_literal_field;
     };
 } AST;
 

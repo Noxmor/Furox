@@ -51,6 +51,7 @@ void ast_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_AST_TYPE_CALL_EXPR: call_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: method_call_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_INT_LIT: int_literal_resolve(ast, ctx); break;
+        case FRX_AST_TYPE_STRUCT_LIT: struct_literal_resolve(ast, ctx); break;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 }
@@ -91,6 +92,7 @@ void ast_sema(AST* ast, SemaContext* ctx)
         case FRX_AST_TYPE_INT_LIT: break;
         case FRX_AST_TYPE_CHAR_LIT: break;
         case FRX_AST_TYPE_STRING_LIT: break;
+        case FRX_AST_TYPE_STRUCT_LIT: struct_literal_sema(ast, ctx); break;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 }
@@ -123,6 +125,7 @@ const Type* expr_infer_type(AST* expr)
         case FRX_AST_TYPE_INT_LIT: return expr->int_literal.resolved_type;
         case FRX_AST_TYPE_CHAR_LIT: return type_intern_char_lit();
         case FRX_AST_TYPE_STRING_LIT: return type_intern_string_lit();
+        case FRX_AST_TYPE_STRUCT_LIT: return expr_infer_type(expr->struct_literal.path_expr);
 
         default: FRX_ASSERT(FRX_FALSE); return NULL;
     }

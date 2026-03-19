@@ -121,4 +121,6 @@ AST* char_literal_parse(Parser* parser);
 
 AST* string_literal_parse(Parser* parser);
 
+AST* struct_literal_parse(Parser* parser, AST* path_expr);
+
 #endif
