@@ -1,0 +1,21 @@
+mod test;
+
+fn main() -> i32
+{
+    if false
+    {
+        return -1;
+    }
+
+    if !true
+    {
+        return -1;
+    }
+
+    if true
+    {
+        return 0;
+    }
+
+    return -1;
+}
