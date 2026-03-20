@@ -514,6 +514,20 @@ static void emit_for_loop(AST* ast, FILE* f, CodegenContext* ctx)
     emit_scope(for_loop->body, f, ctx);
 }
 
+static void emit_loop(AST* ast, FILE* f, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_LOOP);
+
+    FRX_ASSERT(f != NULL);
+
+    ASTLoop* loop = &ast->loop;
+
+    fprintf(f, "while (FRX_TRUE)\n");
+    emit_scope(loop->body, f, ctx);
+}
+
 static void emit_unary_expr(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -734,6 +748,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_LET_STMT: emit_let_stmt(ast, f, ctx); break;
         case FRX_AST_TYPE_IF_STMT: emit_if_stmt(ast, f, ctx); break;
         case FRX_AST_TYPE_FOR_LOOP: emit_for_loop(ast, f, ctx); break;
+        case FRX_AST_TYPE_LOOP: emit_loop(ast, f, ctx); break;
         case FRX_AST_TYPE_UNARY_EXPR: emit_unary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_BINARY_EXPR: emit_binary_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_FIELD_EXPR: emit_field_expr(ast, f, ctx); break;

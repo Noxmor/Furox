@@ -41,6 +41,8 @@ void if_stmt_sema(AST* ast, SemaContext* ctx);
 
 void for_loop_sema(AST* ast, SemaContext* ctx);
 
+void loop_sema(AST* ast, SemaContext* ctx);
+
 void unary_expr_sema(AST* ast, SemaContext* ctx);
 
 void binary_expr_sema(AST* ast, SemaContext* ctx);

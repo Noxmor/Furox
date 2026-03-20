@@ -9,7 +9,7 @@
 #include "hash.h"
 #include "string_table.h"
 
-#define FRX_KEYWORD_TABLE_SIZE 512
+#define FRX_KEYWORD_TABLE_SIZE 2048
 #define FRX_LEXER_IDENT_INITIAL_SIZE 4
 
 typedef struct KeywordTableEntry

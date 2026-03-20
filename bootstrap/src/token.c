@@ -51,6 +51,7 @@ static char* token_type_names[] = {
     [FRX_TOKEN_TYPE_KW_BREAK] = "break",
     [FRX_TOKEN_TYPE_KW_CONTINUE] = "continue",
     [FRX_TOKEN_TYPE_KW_FOR] = "for",
+    [FRX_TOKEN_TYPE_KW_LOOP] = "loop",
     [FRX_TOKEN_TYPE_KW_WHILE] = "while",
     [FRX_TOKEN_TYPE_KW_DO] = "do",
     [FRX_TOKEN_TYPE_KW_TRAIT] = "trait",
