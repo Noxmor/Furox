@@ -341,6 +341,11 @@ typedef struct ASTForLoop
     AST* body;
 } ASTForLoop;
 
+typedef struct ASTLoop
+{
+    AST* body;
+} ASTLoop;
+
 typedef struct ASTLetStmt
 {
     b8 mutable;
@@ -378,6 +383,7 @@ enum
     FRX_AST_TYPE_LET_STMT,
     FRX_AST_TYPE_IF_STMT,
     FRX_AST_TYPE_FOR_LOOP,
+    FRX_AST_TYPE_LOOP,
     FRX_AST_TYPE_UNARY_EXPR,
     FRX_AST_TYPE_BINARY_EXPR,
     FRX_AST_TYPE_FIELD_EXPR,
@@ -429,6 +435,7 @@ typedef struct AST
         ASTLetStmt let_stmt;
         ASTIfStmt if_stmt;
         ASTForLoop for_loop;
+        ASTLoop loop;
         ASTUnaryExpr unary_expr;
         ASTBinaryExpr binary_expr;
         ASTFieldExpr field_expr;
