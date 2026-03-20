@@ -9,12 +9,14 @@
 #include "token.h"
 #include "type_system.h"
 
-static void path_segment_init(ASTPathSegment* path_segment, const char* name)
+static void path_segment_init(ASTPathSegment* path_segment, PathSegmentType type,
+                              const char* name)
 {
     FRX_ASSERT(path_segment != NULL);
 
-    FRX_ASSERT(name != NULL);
+    FRX_ASSERT(type < FRX_PATH_SEGMENT_TYPE_COUNT);
 
+    path_segment->type = type;
     path_segment->name = name;
     list_init(&path_segment->generic_args);
 }
@@ -28,10 +30,27 @@ static AST* path_segment_parse(Parser* parser, PathStyle style)
     AST* ast = ast_create(FRX_AST_TYPE_PATH_SEGMENT);
     ASTPathSegment* path_segment = &ast->path_segment;
 
-    const char* name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    PathSegmentType type = FRX_PATH_SEGMENT_TYPE_COUNT;
+    const char* name = NULL;
 
-    path_segment_init(path_segment, name);
+    if (parser_current_type(parser) == FRX_TOKEN_TYPE_IDENT)
+    {
+        type = FRX_PATH_SEGMENT_TYPE_IDENT;
+        name = parser_current_token(parser)->identifier;
+        parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    }
+    else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_SELF_LOWER)
+    {
+        type = FRX_PATH_SEGMENT_TYPE_SELF_LOWER;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_SELF_LOWER);
+    }
+    else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_SELF_UPPER)
+    {
+        type = FRX_PATH_SEGMENT_TYPE_SELF_UPPER;
+        parser_eat(parser, FRX_TOKEN_TYPE_KW_SELF_UPPER);
+    }
+
+    path_segment_init(path_segment, type, name);
 
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_RESOLUTION
         && parser_peek(parser, 1)->type == FRX_TOKEN_TYPE_LT)
@@ -87,6 +106,7 @@ static void path_expr_init(ASTPathExpr* path_expr, ASTPathType path_type)
     path_expr->scope = NULL;
     path_expr->mod = NULL;
     path_expr->symbol = NULL;
+    path_expr->resolved_type = NULL;
 }
 
 AST* path_expr_parse(Parser* parser, PathStyle style)

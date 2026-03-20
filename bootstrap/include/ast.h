@@ -255,8 +255,20 @@ typedef struct ASTModDecl
     AST* path_expr;
 } ASTModDecl;
 
+enum
+{
+    FRX_PATH_SEGMENT_TYPE_IDENT,
+    FRX_PATH_SEGMENT_TYPE_SELF_UPPER,
+    FRX_PATH_SEGMENT_TYPE_SELF_LOWER,
+
+    FRX_PATH_SEGMENT_TYPE_COUNT
+};
+
+typedef u8 PathSegmentType;
+
 typedef struct ASTPathSegment
 {
+    PathSegmentType type;
     const char* name;
     List generic_args;
 } ASTPathSegment;
@@ -289,6 +301,7 @@ typedef struct ASTPathExpr
     Scope* scope;
     Module* mod;
     const Symbol* symbol;
+    const Type* resolved_type;
 } ASTPathExpr;
 
 typedef struct ASTCallExpr
