@@ -12,7 +12,7 @@
 
 #include <string.h>
 
-static void emit_scope(AST* ast, FILE* f, CodegenContext* ctx);
+static void emit_block(AST* ast, FILE* f, CodegenContext* ctx);
 
 b8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
                         List* src_files, const char* filename)
@@ -466,12 +466,12 @@ static void emit_if_stmt(AST* ast, FILE* f, CodegenContext* ctx)
     emit_ast(if_stmt->condition, f, ctx);
     fprintf(f, ")\n");
 
-    emit_scope(if_stmt->if_block, f, ctx);
+    emit_block(if_stmt->if_block, f, ctx);
 
     if (if_stmt->else_block != NULL)
     {
         fprintf(f, "else\n");
-        emit_scope(if_stmt->else_block, f, ctx);
+        emit_block(if_stmt->else_block, f, ctx);
     }
 }
 
@@ -511,7 +511,7 @@ static void emit_for_loop(AST* ast, FILE* f, CodegenContext* ctx)
 
     fprintf(f, ")\n");
 
-    emit_scope(for_loop->body, f, ctx);
+    emit_block(for_loop->body, f, ctx);
 }
 
 static void emit_loop(AST* ast, FILE* f, CodegenContext* ctx)
@@ -525,7 +525,7 @@ static void emit_loop(AST* ast, FILE* f, CodegenContext* ctx)
     ASTLoop* loop = &ast->loop;
 
     fprintf(f, "while (FRX_TRUE)\n");
-    emit_scope(loop->body, f, ctx);
+    emit_block(loop->body, f, ctx);
 }
 
 static void emit_unary_expr(AST* ast, FILE* f, CodegenContext* ctx)
@@ -764,7 +764,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
     }
 }
 
-static void emit_scope(AST* ast, FILE* f, CodegenContext* ctx)
+static void emit_block(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -789,7 +789,7 @@ static void emit_func_body(ASTFuncDecl* func_decl, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(func_decl != NULL);
 
-    emit_scope(func_decl->body, f, ctx);
+    emit_block(func_decl->body, f, ctx);
 }
 
 void codegen_context_transpile(CodegenContext* ctx)
