@@ -1,0 +1,11 @@
+fn main() -> i32
+{
+    let i = 42;
+
+    while (i > 0)
+    {
+        i--;
+    }
+
+    return i;
+}
