@@ -103,6 +103,8 @@ AST* if_stmt_parse(Parser* parser);
 
 AST* for_loop_parse(Parser* parser);
 
+AST* while_loop_parse(Parser* parser);
+
 AST* loop_parse(Parser* parser);
 
 AST* expr_parse(Parser* parser);

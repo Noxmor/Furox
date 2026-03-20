@@ -63,6 +63,8 @@ void if_stmt_resolve(AST* ast, ResolutionContext* ctx);
 
 void for_loop_resolve(AST* ast, ResolutionContext* ctx);
 
+void while_loop_resolve(AST* ast, ResolutionContext* ctx);
+
 void loop_resolve(AST* ast, ResolutionContext* ctx);
 
 void unary_expr_resolve(AST* ast, ResolutionContext* ctx);
