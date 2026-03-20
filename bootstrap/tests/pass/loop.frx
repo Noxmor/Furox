@@ -1,0 +1,16 @@
+fn main() -> i32
+{
+    let i = 0;
+
+    loop
+    {
+        i++;
+
+        if i > 10
+        {
+            break;
+        }
+    }
+
+    return 0;
+}
