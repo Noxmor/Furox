@@ -1,7 +1,8 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
-#include "resolution.h"
+#include "early_resolution.h"
+#include "late_resolution.h"
 #include "sema.h"
 #include "symbol.h"
 #include "type_system.h"
@@ -131,7 +132,7 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
     return ast;
 }
 
-void func_decl_resolve(AST* ast, ResolutionContext* ctx)
+void func_decl_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -153,7 +154,7 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx)
     for (usize i = 0; i < list_size(&func_decl->params); ++i)
     {
         AST* param = list_get(&func_decl->params, i);
-        func_param_resolve(param, ctx);
+        func_param_resolve_early(param, ctx);
     }
 
     if (func_decl->return_type != NULL)
@@ -161,12 +162,27 @@ void func_decl_resolve(AST* ast, ResolutionContext* ctx)
         type_specifier_resolve(func_decl->return_type, ctx);
     }
 
+    func_decl->resolved_type = type_intern_func(&func_decl->params, func_decl->return_type->type_specifier.resolved_type, func_decl->is_variadic);
+
+    resolution_context_pop_scope(ctx);
+    ctx->current_func_decl = NULL;
+}
+
+void func_decl_resolve_late(AST* ast, ResolutionContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_FUNC_DECL);
+
+    ASTFuncDecl* func_decl = &ast->func_decl;
+
+    ctx->current_func_decl = ast;
+    resolution_context_push_scope(ctx, func_decl->scope);
+
     if (func_decl->body != NULL)
     {
         block_resolve(func_decl->body, ctx);
     }
-
-    func_decl->resolved_type = type_intern_func(&func_decl->params, func_decl->return_type->type_specifier.resolved_type, func_decl->is_variadic);
 
     resolution_context_pop_scope(ctx);
     ctx->current_func_decl = NULL;

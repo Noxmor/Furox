@@ -2,7 +2,7 @@
 #include "assert.h"
 #include "module.h"
 #include "parser.h"
-#include "resolution.h"
+#include "early_resolution.h"
 #include "symbol_table.h"
 #include "token.h"
 
@@ -70,7 +70,7 @@ AST* use_tree_parse(Parser* parser)
     return ast;
 }
 
-static void use_tree_resolve_impl(AST* ast, ResolutionContext* ctx)
+static void use_tree_resolve_early_impl(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -121,7 +121,7 @@ static void use_tree_resolve_impl(AST* ast, ResolutionContext* ctx)
             for (usize i = 0; i < list_size(&use_tree->childs); ++i)
             {
                 AST* child = list_get(&use_tree->childs, i);
-                use_tree_resolve_impl(child, ctx);
+                use_tree_resolve_early_impl(child, ctx);
             }
 
             ctx->current_mod = ctx->current_mod->parent;
@@ -133,7 +133,7 @@ static void use_tree_resolve_impl(AST* ast, ResolutionContext* ctx)
     }
 }
 
-void use_tree_resolve(AST* ast, ResolutionContext* ctx)
+void use_tree_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -153,7 +153,7 @@ void use_tree_resolve(AST* ast, ResolutionContext* ctx)
         }
     }
 
-    use_tree_resolve_impl(ast, ctx);
+    use_tree_resolve_early_impl(ast, ctx);
 
     ctx->current_mod = NULL;
 }

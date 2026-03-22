@@ -1,6 +1,5 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -35,8 +34,6 @@ AST* call_expr_parse(Parser* parser, AST* callee)
     }
 
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
-
-    compiler_register_expr(ast);
 
     return ast;
 }

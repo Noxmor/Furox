@@ -1,7 +1,7 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
-#include "resolution.h"
+#include "early_resolution.h"
 #include "symbol.h"
 
 static void struct_field_init(ASTStructField* field, const char* name,
@@ -57,7 +57,7 @@ AST* struct_field_parse(Parser* parser)
     return ast;
 }
 
-static void struct_field_resolve(AST* ast, ResolutionContext* ctx)
+static void struct_field_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -121,7 +121,7 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
     return ast;
 }
 
-void struct_def_resolve(AST* ast, ResolutionContext* ctx)
+void struct_def_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -132,6 +132,6 @@ void struct_def_resolve(AST* ast, ResolutionContext* ctx)
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* field = list_get(&struct_def->fields, i);
-        struct_field_resolve(field, ctx);
+        struct_field_resolve_early(field, ctx);
     }
 }

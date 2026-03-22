@@ -2,7 +2,7 @@
 #include "ast.h"
 #include "module.h"
 #include "parser.h"
-#include "resolution.h"
+#include "early_resolution.h"
 
 static void use_stmt_init(ASTUseStmt* use_stmt, AST* use_tree)
 {
@@ -33,7 +33,7 @@ AST* use_stmt_parse(Parser* parser)
     return ast;
 }
 
-void use_stmt_resolve(AST* ast, ResolutionContext* ctx)
+void use_stmt_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -43,5 +43,5 @@ void use_stmt_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTUseStmt* use_stmt = &ast->use_stmt;
 
-    use_tree_resolve(use_stmt->use_tree, ctx);
+    use_tree_resolve_early(use_stmt->use_tree, ctx);
 }

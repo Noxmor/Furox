@@ -1,8 +1,7 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
-#include "resolution.h"
-#include "sema.h"
+#include "early_resolution.h"
 
 static AST* ast_func_param_create(const char* name, AST* type)
 {
@@ -34,7 +33,7 @@ AST* func_param_parse(Parser* parser)
     return ast;
 }
 
-void func_param_resolve(AST* ast, ResolutionContext* ctx)
+void func_param_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 

@@ -1,7 +1,7 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
-#include "resolution.h"
+#include "early_resolution.h"
 #include "sema.h"
 #include "symbol.h"
 
@@ -99,7 +99,7 @@ AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
     return ast;
 }
 
-void enum_def_resolve(AST* ast, ResolutionContext* ctx)
+void enum_def_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 

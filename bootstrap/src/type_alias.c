@@ -26,7 +26,7 @@ AST* type_alias_parse(Parser* parser, SymbolVisibility visibility)
     return ast;
 }
 
-void type_alias_resolve(AST* ast, ResolutionContext* ctx)
+void type_alias_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 

@@ -1,6 +1,8 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
+#include "early_resolution.h"
+#include "late_resolution.h"
 #include "resolution.h"
 #include "sema.h"
 #include "token.h"
@@ -83,7 +85,7 @@ AST* impl_block_parse(Parser* parser)
     return ast;
 }
 
-void impl_block_resolve(AST* ast, ResolutionContext* ctx)
+void impl_block_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -107,7 +109,7 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
         for (usize i = 0; i < list_size(&impl_block->methods); ++i)
         {
             AST* func_decl = list_get(&impl_block->methods, i);
-            func_decl_resolve(func_decl, ctx);
+            func_decl_resolve_early(func_decl, ctx);
 
             Symbol* symbol = resolution_context_lookup_symbol(ctx, func_decl->func_decl.name);
             FRX_ASSERT(symbol != NULL);
@@ -121,8 +123,29 @@ void impl_block_resolve(AST* ast, ResolutionContext* ctx)
         for (usize i = 0; i < list_size(&impl_block->methods); ++i)
         {
             AST* func_decl = list_get(&impl_block->methods, i);
-            func_decl_resolve(func_decl, ctx);
+            func_decl_resolve_early(func_decl, ctx);
         }
+    }
+
+    resolution_context_pop_scope(ctx);
+    ctx->current_impl_block = NULL;
+}
+
+void impl_block_resolve_late(AST* ast, ResolutionContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_IMPL_BLOCK);
+
+    ASTImplBlock* impl_block = &ast->impl_block;
+
+    resolution_context_push_scope(ctx, impl_block->scope);
+    ctx->current_impl_block = ast;
+
+    for (usize i = 0; i < list_size(&impl_block->methods); ++i)
+    {
+        AST* func_decl = list_get(&impl_block->methods, i);
+        func_decl_resolve_late(func_decl, ctx);
     }
 
     resolution_context_pop_scope(ctx);

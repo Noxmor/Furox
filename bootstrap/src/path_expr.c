@@ -1,6 +1,5 @@
 #include "assert.h"
 #include "ast.h"
-#include "compiler.h"
 #include "module.h"
 #include "parser.h"
 #include "resolution.h"
@@ -148,8 +147,6 @@ AST* path_expr_parse(Parser* parser, PathStyle style)
     }
 
     ast->range.end = parser_current_location(parser);
-
-    compiler_register_expr(ast);
 
     return ast;
 }

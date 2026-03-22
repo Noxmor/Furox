@@ -1,6 +1,7 @@
 #include "ast.h"
 #include "assert.h"
-#include "resolution.h"
+#include "early_resolution.h"
+#include "late_resolution.h"
 #include "sema.h"
 #include "compiler.h"
 #include "symbol.h"
@@ -17,6 +18,44 @@ AST* ast_create(ASTType type)
     return ast;
 }
 
+void ast_resolve_early(AST* ast, ResolutionContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    switch (ast->type)
+    {
+        case FRX_AST_TYPE_TRANSLATION_UNIT: translation_unit_resolve_early(ast, ctx); break;
+        case FRX_AST_TYPE_USE_STMT: use_stmt_resolve_early(ast, ctx); break;
+        case FRX_AST_TYPE_TYPE_ALIAS: return type_alias_resolve_early(ast, ctx); break;
+        case FRX_AST_TYPE_ENUM_DEF: enum_def_resolve_early(ast, ctx); break;
+        case FRX_AST_TYPE_STRUCT_DEF: struct_def_resolve_early(ast, ctx); break;
+        case FRX_AST_TYPE_TRAIT: trait_resolve_early(ast, ctx); break;
+        case FRX_AST_TYPE_IMPL_BLOCK: impl_block_resolve_early(ast, ctx); break;
+        case FRX_AST_TYPE_FUNC_DECL: func_decl_resolve_early(ast, ctx); break;
+
+        default: FRX_ASSERT(FRX_FALSE); break;
+    }
+}
+
+void ast_resolve_late(AST* ast, ResolutionContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    switch (ast->type)
+    {
+        case FRX_AST_TYPE_TRANSLATION_UNIT: translation_unit_resolve_late(ast, ctx); break;
+        case FRX_AST_TYPE_USE_STMT: break;
+        case FRX_AST_TYPE_TYPE_ALIAS: break;
+        case FRX_AST_TYPE_ENUM_DEF: break;
+        case FRX_AST_TYPE_STRUCT_DEF: break;
+        case FRX_AST_TYPE_TRAIT: break;
+        case FRX_AST_TYPE_IMPL_BLOCK: impl_block_resolve_late(ast, ctx); break;
+        case FRX_AST_TYPE_FUNC_DECL: func_decl_resolve_late(ast, ctx); break;
+
+        default: FRX_ASSERT(FRX_FALSE); break;
+    }
+}
+
 void ast_resolve(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -24,16 +63,8 @@ void ast_resolve(AST* ast, ResolutionContext* ctx)
     switch (ast->type)
     {
         case FRX_AST_TYPE_ERROR: break;
-        case FRX_AST_TYPE_TRANSLATION_UNIT: translation_unit_resolve(ast, ctx); break;
-        case FRX_AST_TYPE_USE_STMT: use_stmt_resolve(ast, ctx); break;
         case FRX_AST_TYPE_TYPE_SPECIFIER: type_specifier_resolve(ast, ctx); break;
-        case FRX_AST_TYPE_TYPE_ALIAS: return type_alias_resolve(ast, ctx); break;
-        case FRX_AST_TYPE_STRUCT_DEF: struct_def_resolve(ast, ctx); break;
-        case FRX_AST_TYPE_ENUM_DEF: enum_def_resolve(ast, ctx); break;
-        case FRX_AST_TYPE_TRAIT: trait_resolve(ast, ctx); break;
-        case FRX_AST_TYPE_IMPL_BLOCK: impl_block_resolve(ast, ctx); break;
         case FRX_AST_TYPE_GENERIC_PARAMS: break;
-        case FRX_AST_TYPE_FUNC_DECL: func_decl_resolve(ast, ctx); break;
         case FRX_AST_TYPE_BLOCK: block_resolve(ast, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: expr_stmt_resolve(ast, ctx); break;
         case FRX_AST_TYPE_BREAK_STMT: break;

@@ -18,8 +18,6 @@ Module* compiler_root_module(void);
 
 Module* compiler_find_module_by_path_segments(const List* path_segments);
 
-void compiler_register_expr(AST* expr);
-
 void compiler_register_type(const Type* type);
 
 List* compiler_get_types(void);

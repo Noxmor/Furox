@@ -1,7 +1,8 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
-#include "resolution.h"
+#include "early_resolution.h"
+#include "late_resolution.h"
 #include "sema.h"
 
 static void translation_unit_init(ASTTranslationUnit* unit)
@@ -50,7 +51,7 @@ AST* translation_unit_parse(Parser* parser)
     return ast;
 }
 
-void translation_unit_resolve(AST* ast, ResolutionContext* ctx)
+void translation_unit_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -61,7 +62,22 @@ void translation_unit_resolve(AST* ast, ResolutionContext* ctx)
     for (usize i = 0; i < list_size(&unit->items); ++i)
     {
         AST* item = list_get(&unit->items, i);
-        ast_resolve(item, ctx);
+        ast_resolve_early(item, ctx);
+    }
+}
+
+void translation_unit_resolve_late(AST* ast, ResolutionContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_TRANSLATION_UNIT);
+
+    ASTTranslationUnit* unit = &ast->translation_unit;
+
+    for (usize i = 0; i < list_size(&unit->items); ++i)
+    {
+        AST* item = list_get(&unit->items, i);
+        ast_resolve_late(item, ctx);
     }
 }
 

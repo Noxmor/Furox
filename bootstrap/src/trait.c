@@ -1,7 +1,7 @@
 #include "assert.h"
 #include "ast.h"
 #include "parser.h"
-#include "resolution.h"
+#include "early_resolution.h"
 #include "sema.h"
 #include "symbol.h"
 
@@ -48,7 +48,7 @@ AST* trait_parse(Parser* parser, SymbolVisibility visibility)
     return ast;
 }
 
-void trait_resolve(AST* ast, ResolutionContext* ctx)
+void trait_resolve_early(AST* ast, ResolutionContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -59,7 +59,7 @@ void trait_resolve(AST* ast, ResolutionContext* ctx)
     for (usize i = 0; i < list_size(&trait->methods); ++i)
     {
         AST* func_decl = list_get(&trait->methods, i);
-        func_decl_resolve(func_decl, ctx);
+        func_decl_resolve_early(func_decl, ctx);
     }
 }
 

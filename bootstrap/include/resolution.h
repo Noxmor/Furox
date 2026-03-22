@@ -29,27 +29,7 @@ b8 resolution_context_failed(const ResolutionContext* ctx);
 
 void ast_resolve(AST* ast, ResolutionContext* ctx);
 
-void translation_unit_resolve(AST* ast, ResolutionContext* ctx);
-
-void use_tree_resolve(AST* ast, ResolutionContext* ctx);
-
-void use_stmt_resolve(AST* ast, ResolutionContext* ctx);
-
-void type_alias_resolve(AST* ast, ResolutionContext* ctx);
-
 void type_specifier_resolve(AST* ast, ResolutionContext* ctx);
-
-void struct_def_resolve(AST* ast, ResolutionContext* ctx);
-
-void enum_def_resolve(AST* ast, ResolutionContext* ctx);
-
-void trait_resolve(AST* ast, ResolutionContext* ctx);
-
-void impl_block_resolve(AST* ast, ResolutionContext* ctx);
-
-void func_param_resolve(AST* ast, ResolutionContext* ctx);
-
-void func_decl_resolve(AST* ast, ResolutionContext* ctx);
 
 void block_resolve(AST* ast, ResolutionContext* ctx);
 
