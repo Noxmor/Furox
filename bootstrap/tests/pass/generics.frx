@@ -9,5 +9,5 @@ fn main() -> i32
 {
     let x: i32 = 1;
 
-    return generic_func(x);
+    return generic_func<i32>(x);
 }
