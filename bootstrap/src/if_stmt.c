@@ -54,6 +54,11 @@ void if_stmt_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTIfStmt* if_stmt = &ast->if_stmt;
 
+    if (if_stmt->condition != NULL)
+    {
+        ast_resolve(if_stmt->condition, ctx);
+    }
+
     if (if_stmt->if_block != NULL)
     {
         block_resolve(if_stmt->if_block, ctx);
