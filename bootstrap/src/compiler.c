@@ -58,6 +58,20 @@ static void compiler_shutdown(void)
     arena_destroy(ast_arena);
 }
 
+static void compiler_emit_diagnostics(void)
+{
+    for (usize i = 0; i < list_size(&src_files); ++i)
+    {
+        const SourceFile* src_file = list_get(&src_files, i);
+
+        for (usize j = 0; j < list_size(&src_file->diagnostics); ++j)
+        {
+            const Diagnostic* d = list_get(&src_file->diagnostics, j);
+            diagnostic_emit(d, src_file->path);
+        }
+    }
+}
+
 void* compiler_alloc(usize size)
 {
     return arena_alloc(arena, size);
@@ -97,6 +111,7 @@ int compiler_run(int argc, char** argv)
 
     if (parsing_failed)
     {
+        compiler_emit_diagnostics();
         return EXIT_FAILURE;
     }
 
@@ -121,6 +136,7 @@ int compiler_run(int argc, char** argv)
 
     if (resolution_failed)
     {
+        compiler_emit_diagnostics();
         return EXIT_FAILURE;
     }
 
@@ -136,6 +152,7 @@ int compiler_run(int argc, char** argv)
 
     if (sema_failed)
     {
+        compiler_emit_diagnostics();
         return EXIT_FAILURE;
     }
 
