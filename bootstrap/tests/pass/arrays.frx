@@ -1,0 +1,22 @@
+struct Foo
+{
+    x: i32;
+}
+
+fn main() -> i32
+{
+    let arr: [i32; 4];
+
+    for (let i = 0; i < 4; ++i)
+    {
+        arr[i] = i;
+    }
+
+    let result = 0;
+    for (let i = 0; i < 4; ++i)
+    {
+        result += arr[i];
+    }
+
+    return result - (0 + 1 + 2 + 3);
+}
