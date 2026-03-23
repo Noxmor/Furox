@@ -5,6 +5,7 @@
 #include "compiler.h"
 #include "log.h"
 #include "module.h"
+#include "operator.h"
 #include "symbol_table.h"
 #include "temp_dir.h"
 #include "source_file.h"
@@ -126,7 +127,14 @@ static void emit_type(const Type* type, const char* name, FILE* f, CodegenContex
             break;
         }
         case FRX_TYPE_KIND_PTR: emit_type(type->ptr.base, NULL, f, ctx); fprintf(f, "*"); break;
-        case FRX_TYPE_KIND_ARRAY: emit_type(type->array.base, NULL, f, ctx); fprintf(f, "[%zu]", type->array.size); break;
+        case FRX_TYPE_KIND_ARRAY:
+        {
+            emit_type(type->array.base, NULL, f, ctx);
+            fprintf(f, " %s[", name);
+            emit_ast(type->array.size, f, ctx);
+            fprintf(f, "]");
+            break;
+        }
         case FRX_TYPE_KIND_GENERIC:
         {
             const ASTGenericParams* generic_params = &ctx->generic_params->generic_params;
@@ -438,7 +446,8 @@ static void emit_let_stmt(AST* ast, FILE* f, CodegenContext* ctx)
     sprintf(mangled_name, "%s%p", let_stmt->name, let_stmt);
     emit_type(let_stmt->resolved_type, mangled_name, f, ctx);
 
-    if (let_stmt->resolved_type->kind != FRX_TYPE_KIND_FUNC)
+    if (let_stmt->resolved_type->kind != FRX_TYPE_KIND_FUNC
+        && let_stmt->resolved_type->kind != FRX_TYPE_KIND_ARRAY)
     {
         fprintf(f, " %s%p", let_stmt->name, let_stmt);
     }
@@ -578,6 +587,12 @@ static void emit_binary_expr(AST* ast, FILE* f, CodegenContext* ctx)
     }
 
     emit_ast(binary_expr->right, f, ctx);
+
+    if (binary_expr->operator == FRX_OPERATOR_ARRAY_SUBSCRIPT)
+    {
+        fprintf(f, "]");
+    }
+
     fprintf(f, ")");
 }
 

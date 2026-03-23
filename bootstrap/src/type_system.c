@@ -93,7 +93,7 @@ const Type* type_create_ptr(const Type* base, b8 mutable)
     return type;
 }
 
-const Type* type_create_array(const Type* base, usize size)
+const Type* type_create_array(const Type* base, AST* size)
 {
     FRX_ASSERT(base != NULL);
 
@@ -381,7 +381,7 @@ const Type* type_intern_ptr(const Type* base, b8 mutable)
     return type;
 }
 
-const Type* type_intern_array(const Type* base, usize size)
+const Type* type_intern_array(const Type* base, AST* size)
 {
     u64 index =  (usize)base % FRX_TYPE_TABLE_CAPACITY;
     TypeTableEntry* entry = type_table.entries[index];

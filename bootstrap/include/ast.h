@@ -65,8 +65,8 @@ typedef struct ASTTypeSpecifier
     List func_params;
     AST* func_return_type;
     b8 is_variadic;
-    usize size;
     AST* base;
+    AST* size;
     b8 mutable;
     const Type* resolved_type;
 } ASTTypeSpecifier;

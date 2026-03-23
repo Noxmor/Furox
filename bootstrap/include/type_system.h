@@ -6,6 +6,8 @@
 #include "symbol.h"
 #include "list.h"
 
+typedef struct AST AST;
+
 enum
 {
     FRX_TYPE_KIND_PRIMITIVE = 0,
@@ -60,7 +62,7 @@ typedef struct Type
         struct
         {
             const struct Type* base;
-            usize size;
+            AST* size;
         } array;
 
         struct
@@ -88,7 +90,7 @@ const Type* type_intern_func(const List* params, const Type* return_type, b8 is_
 
 const Type* type_intern_ptr(const Type* base, b8 mutable);
 
-const Type* type_intern_array(const Type* base, usize size);
+const Type* type_intern_array(const Type* base, AST* size);
 
 const Type* type_intern_generic(const Symbol* symbol);
 

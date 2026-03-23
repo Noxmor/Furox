@@ -64,6 +64,20 @@ static void type_specifier_init_pointer(ASTTypeSpecifier* type, AST* base, b8 mu
     type->mutable = mutable;
 }
 
+static void type_specifier_init_array(ASTTypeSpecifier* type, AST* base, AST* size)
+{
+    FRX_ASSERT(type != NULL);
+
+    FRX_ASSERT(base != NULL);
+
+    FRX_ASSERT(base->type == FRX_AST_TYPE_TYPE_SPECIFIER);
+
+    type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_ARRAY);
+
+    type->base = base;
+    type->size = size;
+}
+
 static void type_specifier_init_self(ASTTypeSpecifier* type)
 {
     FRX_ASSERT(type != NULL);
@@ -126,6 +140,16 @@ AST* type_specifier_parse(Parser* parser)
     {
         type_specifier_init_self(type);
         parser_eat(parser, FRX_TOKEN_TYPE_KW_SELF_UPPER);
+    }
+    else if (parser_current_type(parser) == FRX_TOKEN_TYPE_LBRACKET)
+    {
+        parser_eat(parser, FRX_TOKEN_TYPE_LBRACKET);
+        AST* base = type_specifier_parse(parser);
+        parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
+        AST* size = expr_parse(parser);
+        parser_eat(parser, FRX_TOKEN_TYPE_RBRACKET);
+
+        type_specifier_init_array(type, base, size);
     }
     else
     {
@@ -198,7 +222,7 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
         {
             AST* base = type_specifier->base;
             type_specifier_resolve(base, ctx);
-            type_specifier->resolved_type = type_intern_array(base->type_specifier.resolved_type, base->type_specifier.size);
+            type_specifier->resolved_type = type_intern_array(base->type_specifier.resolved_type, type_specifier->size);
 
             break;
         }
