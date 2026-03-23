@@ -165,17 +165,17 @@ static void emit_enum_definition(ASTEnumDef* enum_def, FILE* f, CodegenContext* 
 
     fprintf(f, "enum\n{\n");
 
-    for (usize i = 0; i < list_size(&enum_def->constants); ++i)
+    for (usize i = 0; i < list_size(&enum_def->variants); ++i)
     {
-        AST* ast = list_get(&enum_def->constants, i);
-        ASTEnumConstant* constant = &ast->enum_constant;
+        AST* ast = list_get(&enum_def->variants, i);
+        ASTEnumVariant* variant = &ast->enum_variant;
 
-        fprintf(f, "%s%p", constant->name, constant);
+        fprintf(f, "%s%p", variant->name, variant);
 
-        if (constant->value != NULL)
+        if (variant->value != NULL)
         {
             fprintf(f, " = ");
-            emit_ast(constant->value, f, ctx);
+            emit_ast(variant->value, f, ctx);
         }
 
         fprintf(f, ",\n");

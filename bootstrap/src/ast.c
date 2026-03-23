@@ -166,18 +166,18 @@ const Type* expr_infer_type(AST* expr)
     }
 }
 
-ASTEnumConstant* enum_def_lookup_constant(ASTEnumDef* enum_def, const char* name)
+ASTEnumVariant* enum_def_lookup_variant(ASTEnumDef* enum_def, const char* name)
 {
     FRX_ASSERT(enum_def != NULL);
 
     FRX_ASSERT(name != NULL);
 
-    for (usize i = 0; i < list_size(&enum_def->constants); ++i)
+    for (usize i = 0; i < list_size(&enum_def->variants); ++i)
     {
-        AST* constant = list_get(&enum_def->constants, i);
-        if (constant->enum_constant.name == name)
+        AST* variant = list_get(&enum_def->variants, i);
+        if (variant->enum_variant.name == name)
         {
-            return &constant->enum_constant;
+            return &variant->enum_variant;
         }
     }
 

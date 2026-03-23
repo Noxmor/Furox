@@ -5,21 +5,21 @@
 #include "sema.h"
 #include "symbol.h"
 
-static AST* enum_constant_create(const char* name, AST* value)
+static AST* enum_variant_create(const char* name, AST* value)
 {
     FRX_ASSERT(name != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_ENUM_CONSTANT);
-    ASTEnumConstant* constant = &ast->enum_constant;
+    AST* ast = ast_create(FRX_AST_TYPE_ENUM_VARIANT);
+    ASTEnumVariant* variant = &ast->enum_variant;
 
-    constant->name = name;
-    constant->value = value;
-    constant->symbol = NULL;
+    variant->name = name;
+    variant->value = value;
+    variant->symbol = NULL;
 
     return ast;
 }
 
-static AST* enum_constant_parse(Parser* parser)
+static AST* enum_variant_parse(Parser* parser)
 {
     const char* name = parser_current_token(parser)->identifier;
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
@@ -31,7 +31,7 @@ static AST* enum_constant_parse(Parser* parser)
         value = expr_parse(parser);
     }
 
-    return enum_constant_create(name, value);
+    return enum_variant_create(name, value);
 }
 
 static void enum_def_init(ASTEnumDef* enum_def, const char* name, AST* type)
@@ -42,18 +42,18 @@ static void enum_def_init(ASTEnumDef* enum_def, const char* name, AST* type)
 
     enum_def->name = name;
     enum_def->type = type;
-    list_init(&enum_def->constants);
+    list_init(&enum_def->variants);
 }
 
-static void enum_def_add_constant(ASTEnumDef* enum_def, AST* constant)
+static void enum_def_add_variant(ASTEnumDef* enum_def, AST* variant)
 {
     FRX_ASSERT(enum_def != NULL);
 
-    FRX_ASSERT(constant != NULL);
+    FRX_ASSERT(variant != NULL);
 
-    FRX_ASSERT(constant->type == FRX_AST_TYPE_ENUM_CONSTANT);
+    FRX_ASSERT(variant->type == FRX_AST_TYPE_ENUM_VARIANT);
 
-    list_add(&enum_def->constants, constant);
+    list_add(&enum_def->variants, variant);
 }
 
 AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
@@ -77,8 +77,8 @@ AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
     while (!parser_match(parser, FRX_TOKEN_TYPE_RBRACE))
     {
-        AST* constant = enum_constant_parse(parser);
-        enum_def_add_constant(enum_def, constant);
+        AST* variant = enum_variant_parse(parser);
+        enum_def_add_variant(enum_def, variant);
 
         parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
     }
@@ -90,10 +90,10 @@ AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
     Symbol* symbol = parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_ENUM,
                          name, enum_def);
 
-    for (usize i = 0; i < list_size(&enum_def->constants); ++i)
+    for (usize i = 0; i < list_size(&enum_def->variants); ++i)
     {
-        AST* constant = list_get(&enum_def->constants, i);
-        constant->enum_constant.symbol = symbol;
+        AST* variant = list_get(&enum_def->variants, i);
+        variant->enum_variant.symbol = symbol;
     }
 
     return ast;

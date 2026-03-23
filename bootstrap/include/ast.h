@@ -142,18 +142,18 @@ typedef struct ASTStructDef
     List instantiated_types;
 } ASTStructDef;
 
-typedef struct ASTEnumConstant
+typedef struct ASTEnumVariant
 {
     const char* name;
     AST* value;
     Symbol* symbol;
-} ASTEnumConstant;
+} ASTEnumVariant;
 
 typedef struct ASTEnumDef
 {
     const char* name;
     AST* type;
-    List constants;
+    List variants;
 } ASTEnumDef;
 
 typedef struct ASTTrait
@@ -385,7 +385,7 @@ enum
     FRX_AST_TYPE_TYPE_ALIAS,
     FRX_AST_TYPE_STRUCT_FIELD,
     FRX_AST_TYPE_STRUCT_DEF,
-    FRX_AST_TYPE_ENUM_CONSTANT,
+    FRX_AST_TYPE_ENUM_VARIANT,
     FRX_AST_TYPE_ENUM_DEF,
     FRX_AST_TYPE_TRAIT,
     FRX_AST_TYPE_TRAIT_BOUND,
@@ -438,7 +438,7 @@ typedef struct AST
         ASTTypeAlias type_alias;
         ASTStructField struct_field;
         ASTStructDef struct_def;
-        ASTEnumConstant enum_constant;
+        ASTEnumVariant enum_variant;
         ASTEnumDef enum_def;
         ASTTrait trait;
         ASTTraitBound trait_bound;
@@ -480,6 +480,6 @@ AST* block_from_stmt(AST* stmt);
 
 const Type* expr_infer_type(AST* expr);
 
-ASTEnumConstant* enum_def_lookup_constant(ASTEnumDef* enum_def, const char* name);
+ASTEnumVariant* enum_def_lookup_variant(ASTEnumDef* enum_def, const char* name);
 
 #endif

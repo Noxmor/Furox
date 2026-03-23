@@ -448,7 +448,7 @@ const Type* symbol_infer_type(const Symbol* symbol)
         case FRX_SYMBOL_TYPE_FUNC: return ((ASTFuncDecl*)symbol->data)->resolved_type;
         case FRX_SYMBOL_TYPE_STRUCT: return type_intern_struct(symbol, NULL);
         case FRX_SYMBOL_TYPE_ENUM: return type_intern_enum(symbol);
-        case FRX_SYMBOL_TYPE_ENUM_CONSTANT: return symbol_infer_type(((ASTEnumConstant*)symbol->data)->symbol);
+        case FRX_SYMBOL_TYPE_ENUM_VARIANT: return symbol_infer_type(((ASTEnumVariant*)symbol->data)->symbol);
         case FRX_SYMBOL_TYPE_TYPE_ALIAS: return ((ASTTypeAlias*)symbol->data)->type->type_specifier.resolved_type;
         case FRX_SYMBOL_TYPE_PARAM: return ((ASTFuncParam*)symbol->data)->type->type_specifier.resolved_type;
         case FRX_SYMBOL_TYPE_VAR: return ((ASTLetStmt*)symbol->data)->resolved_type;
