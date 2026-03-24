@@ -168,7 +168,7 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
             switch (path->symbol->type)
             {
                 case FRX_SYMBOL_TYPE_STRUCT: type_specifier->resolved_type = type_intern_struct(path->symbol, &((AST*)list_get(&path->path_segments, list_size(&path->path_segments) - 1))->path_segment.generic_args); break;
-                case FRX_SYMBOL_TYPE_ENUM: type_specifier->resolved_type = type_intern_generic(path->symbol); break;
+                case FRX_SYMBOL_TYPE_ENUM: type_specifier->resolved_type = type_intern_enum(path->symbol); break;
 
                 default: type_specifier->resolved_type = symbol_infer_type(path->symbol); break;
             }
