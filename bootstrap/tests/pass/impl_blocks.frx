@@ -8,9 +8,9 @@ struct Foo
 
 impl Foo
 {
-    fn new(x: i32) -> Foo
+    fn new(x: i32) -> Self
     {
-        let foo = Foo
+        let foo = Self
         {
             x: x;
             bar: Bar::new(42);
@@ -37,9 +37,9 @@ struct Bar
 
 impl Bar
 {
-    fn new(y: i32) -> Bar
+    fn new(y: i32) -> Self
     {
-        let bar = Bar
+        let bar = Self
         {
             y: y;
         };

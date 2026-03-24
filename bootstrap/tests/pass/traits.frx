@@ -12,9 +12,9 @@ struct Foo
 
 impl Foo
 {
-    pub fn new(x: usize) -> Foo
+    pub fn new(x: usize) -> Self
     {
-        let foo = Foo
+        let foo = Self
         {
             x: x;
         };
