@@ -58,7 +58,6 @@ typedef struct ASTTypeSpecifier
 {
     ASTTypeSpecifierKind kind;
     const char* name;
-    TokenType primitive;
     AST* path;
     List func_params;
     AST* func_return_type;
