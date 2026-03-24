@@ -50,6 +50,12 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
 
     path_expr_resolve(call_expr->callee, ctx);
 
+    for (usize i = 0; i < list_size(&call_expr->args); ++i)
+    {
+        AST* arg = list_get(&call_expr->args, i);
+        ast_resolve(arg, ctx);
+    }
+
     const Symbol* symbol = call_expr->callee->path_expr.path->path.symbol;
     if (symbol->associated_type != NULL)
     {
