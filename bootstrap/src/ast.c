@@ -144,23 +144,13 @@ const Type* expr_infer_type(AST* expr)
         case FRX_AST_TYPE_FIELD_EXPR: return expr->field_expr.resolved_type;
         case FRX_AST_TYPE_SELF_EXPR: return expr->self_expr.resolved_type;
         case FRX_AST_TYPE_BOOL_EXPR: return type_intern_bool();
-        case FRX_AST_TYPE_PATH_EXPR:
-        {
-            switch (expr->path_expr.symbol->type)
-            {
-                case FRX_SYMBOL_TYPE_STRUCT: return type_intern_struct(expr->path_expr.symbol, &((AST*)list_get(&expr->path_expr.path_segments, list_size(&expr->path_expr.path_segments) - 1))->path_segment.generic_args);
-                case FRX_SYMBOL_TYPE_GENERIC_PARAM: return type_intern_generic(expr->path_expr.symbol);
-                default: break;
-            }
-
-            return symbol_infer_type(expr->path_expr.symbol);
-        }
+        case FRX_AST_TYPE_PATH_EXPR: return expr->path_expr.resolved_type;
         case FRX_AST_TYPE_CALL_EXPR: return expr_infer_type(expr->call_expr.callee);
         case FRX_AST_TYPE_METHOD_CALL_EXPR: return expr->method_call_expr.resolved_type;
         case FRX_AST_TYPE_INT_LIT: return expr->int_literal.resolved_type;
         case FRX_AST_TYPE_CHAR_LIT: return type_intern_char_lit();
         case FRX_AST_TYPE_STRING_LIT: return type_intern_string_lit();
-        case FRX_AST_TYPE_STRUCT_LIT: return expr_infer_type(expr->struct_literal.path_expr);
+        case FRX_AST_TYPE_STRUCT_LIT: return symbol_infer_type(expr->struct_literal.path->path.symbol);
 
         default: FRX_ASSERT(FRX_FALSE); return NULL;
     }

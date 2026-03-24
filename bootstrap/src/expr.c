@@ -55,6 +55,19 @@ static AST* field_expr_create(AST* base, const char* field_name)
     return ast;
 }
 
+static AST* path_expr_create(AST* path)
+{
+    FRX_ASSERT(path != NULL);
+
+    AST* ast = ast_create(FRX_AST_TYPE_PATH_EXPR);
+    ASTPathExpr* path_expr = &ast->path_expr;
+
+    path_expr->path = path;
+    path_expr->resolved_type = NULL;
+
+    return ast;
+}
+
 static AST* expr_parse_primary(Parser* parser)
 {
     switch (parser_current_type(parser))
@@ -68,13 +81,13 @@ static AST* expr_parse_primary(Parser* parser)
         case FRX_TOKEN_TYPE_KW_EXTERN:
         case FRX_TOKEN_TYPE_IDENT:
         {
-            AST* path_expr = path_expr_parse(parser, FRX_PATH_STYLE_EXPR);
+            AST* path = path_parse(parser, FRX_PATH_STYLE_EXPR);
             if (parser_current_type(parser) == FRX_TOKEN_TYPE_LBRACE)
             {
-                return struct_literal_parse(parser, path_expr);
+                return struct_literal_parse(parser, path);
             }
 
-            return path_expr;
+            return path_expr_create(path);
         }
         default:
         {

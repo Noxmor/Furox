@@ -5,7 +5,7 @@
 Symbol* symbol_create(const char* name, SymbolVisibility visibility,
                       SymbolType type, void* data)
 {
-    FRX_ASSERT(name != NULL);
+    FRX_ASSERT(name != NULL || type == FRX_SYMBOL_TYPE_PRIMITIVE);
 
     FRX_ASSERT(visibility < FRX_SYMBOL_VISIBILITY_COUNT);
 
@@ -21,4 +21,3 @@ Symbol* symbol_create(const char* name, SymbolVisibility visibility,
 
     return symbol;
 }
-

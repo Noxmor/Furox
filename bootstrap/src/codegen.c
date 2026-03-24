@@ -379,6 +379,29 @@ static void emit_string_literal(AST* ast, FILE* f)
     fprintf(f, "\"%s\"", ast->string_literal.value);
 }
 
+static void emit_path(AST* ast, FILE* f)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_PATH);
+
+    FRX_ASSERT(f != NULL);
+
+    ASTPath* path = &ast->path;
+
+    AST* path_segment = list_get(&path->path_segments, list_size(&path->path_segments) - 1);
+    const char* last_path = path_segment->path_segment.name;
+    fprintf(f, "%s", last_path);
+
+    if ((list_size(&path->path_segments) > 1 || strcmp(last_path, "main") != 0)
+        && (path->symbol->type != FRX_SYMBOL_TYPE_FUNC || (path->symbol->type == FRX_SYMBOL_TYPE_FUNC && !((ASTFuncDecl*)path->symbol->data)->external)))
+    {
+        FRX_ASSERT(path->symbol != NULL);
+
+        fprintf(f, "%p", path->symbol->data);
+    }
+}
+
 static void emit_path_expr(AST* ast, FILE* f)
 {
     FRX_ASSERT(ast != NULL);
@@ -389,17 +412,7 @@ static void emit_path_expr(AST* ast, FILE* f)
 
     ASTPathExpr* path_expr = &ast->path_expr;
 
-    AST* path_segment = list_get(&path_expr->path_segments, list_size(&path_expr->path_segments) - 1);
-    const char* last_path = path_segment->path_segment.name;
-    fprintf(f, "%s", last_path);
-
-    if ((list_size(&path_expr->path_segments) > 1 || strcmp(last_path, "main") != 0)
-        && (path_expr->symbol->type != FRX_SYMBOL_TYPE_FUNC || (path_expr->symbol->type == FRX_SYMBOL_TYPE_FUNC && !((ASTFuncDecl*)path_expr->symbol->data)->external)))
-    {
-        FRX_ASSERT(path_expr->symbol != NULL);
-
-        fprintf(f, "%p", path_expr->symbol->data);
-    }
+    emit_path(path_expr->path, f);
 }
 
 static void emit_struct_literal(AST* ast, FILE* f, CodegenContext* ctx)
@@ -415,7 +428,7 @@ static void emit_struct_literal(AST* ast, FILE* f, CodegenContext* ctx)
     ASTStructLiteral* literal = &ast->struct_literal;
 
     fprintf(f, "(");
-    const Type* type = expr_infer_type(literal->path_expr);
+    const Type* type = symbol_infer_type(literal->path->path.symbol);
     emit_type(type, NULL, f, ctx);
     fprintf(f, ") { ");
 

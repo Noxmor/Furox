@@ -36,7 +36,7 @@ typedef struct ASTStructLiteralField
 
 typedef struct ASTStructLiteral
 {
-    AST* path_expr;
+    AST* path;
     List fields;
 } ASTStructLiteral;
 
@@ -44,12 +44,10 @@ typedef struct ASTTypeSpecifier ASTTypeSpecifier;
 
 enum
 {
-    FRX_TYPE_SPECIFIER_KIND_PRIMITIVE = 0,
-    FRX_TYPE_SPECIFIER_KIND_PATH_EXPR,
+    FRX_TYPE_SPECIFIER_KIND_PATH = 0,
     FRX_TYPE_SPECIFIER_KIND_FUNC,
     FRX_TYPE_SPECIFIER_KIND_PTR,
     FRX_TYPE_SPECIFIER_KIND_ARRAY,
-    FRX_TYPE_SPECIFIER_KIND_SELF,
 
     FRX_TYPE_SPECIFIER_KIND_COUNT
 };
@@ -61,7 +59,7 @@ typedef struct ASTTypeSpecifier
     ASTTypeSpecifierKind kind;
     const char* name;
     TokenType primitive;
-    AST* path_expr;
+    AST* path;
     List func_params;
     AST* func_return_type;
     b8 is_variadic;
@@ -166,9 +164,8 @@ typedef struct ASTImplBlock
 {
     Scope* scope;
     AST* generic_params;
-    AST* trait_path_expr;
-    AST* type_path_expr;
-    TokenType primitive;
+    AST* trait_path;
+    AST* type_path;
     List methods;
 } ASTImplBlock;
 
@@ -252,14 +249,14 @@ typedef struct ASTBoolExpr
 
 typedef struct ASTModDecl
 {
-    AST* path_expr;
+    AST* path;
 } ASTModDecl;
 
 enum
 {
     FRX_PATH_SEGMENT_TYPE_IDENT,
+    FRX_PATH_SEGMENT_TYPE_PRIMITIVE,
     FRX_PATH_SEGMENT_TYPE_SELF_UPPER,
-    FRX_PATH_SEGMENT_TYPE_SELF_LOWER,
 
     FRX_PATH_SEGMENT_TYPE_COUNT
 };
@@ -270,6 +267,7 @@ typedef struct ASTPathSegment
 {
     PathSegmentType type;
     const char* name;
+    TokenType primitive;
     List generic_args;
 } ASTPathSegment;
 
@@ -294,13 +292,18 @@ enum
 
 typedef u8 PathStyle;
 
-typedef struct ASTPathExpr
+typedef struct ASTPath
 {
     ASTPathType type;
     List path_segments;
     Scope* scope;
     Module* mod;
     const Symbol* symbol;
+} ASTPath;
+
+typedef struct ASTPathExpr
+{
+    AST* path;
     const Type* resolved_type;
 } ASTPathExpr;
 
@@ -410,6 +413,7 @@ enum
     FRX_AST_TYPE_SELF_EXPR,
     FRX_AST_TYPE_BOOL_EXPR,
     FRX_AST_TYPE_PATH_SEGMENT,
+    FRX_AST_TYPE_PATH,
     FRX_AST_TYPE_PATH_EXPR,
     FRX_AST_TYPE_CALL_EXPR,
     FRX_AST_TYPE_METHOD_CALL_EXPR,
@@ -463,6 +467,7 @@ typedef struct AST
         ASTSelfExpr self_expr;
         ASTBoolExpr bool_expr;
         ASTPathSegment path_segment;
+        ASTPath path;
         ASTPathExpr path_expr;
         ASTCallExpr call_expr;
         ASTMethodCallExpr method_call_expr;

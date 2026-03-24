@@ -9,12 +9,11 @@
 #include "type_system.h"
 
 static void impl_block_init(ASTImplBlock* impl_block, AST* generic_params,
-                            AST* trait_path_expr, AST* type_path_expr, TokenType primitive)
+                            AST* trait_path, AST* type_path)
 {
     impl_block->generic_params = generic_params;
-    impl_block->trait_path_expr = trait_path_expr;
-    impl_block->type_path_expr = type_path_expr;
-    impl_block->primitive = primitive;
+    impl_block->trait_path = trait_path;
+    impl_block->type_path = type_path;
     list_init(&impl_block->methods);
 }
 
@@ -34,40 +33,20 @@ AST* impl_block_parse(Parser* parser)
         generic_params = generic_params_parse(parser);
     }
 
-    AST* trait_path_expr = NULL;
-    AST* type_path_expr = NULL;
-    TokenType primitive = FRX_TOKEN_TYPE_EOF;
+    AST* trait_path = NULL;
+    AST* type_path = NULL;
 
-    if (token_type_is_primitive(parser_current_type(parser)))
-    {
-        primitive = parser_current_type(parser);
-        parser_eat(parser, primitive);
-    }
-    else
-    {
-        type_path_expr = path_expr_parse(parser, FRX_PATH_STYLE_TYPE);
-    }
+    type_path = path_parse(parser, FRX_PATH_STYLE_TYPE);
 
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_FOR)
     {
         parser_eat(parser, FRX_TOKEN_TYPE_KW_FOR);
 
-        trait_path_expr = type_path_expr;
-
-        if (token_type_is_primitive(parser_current_type(parser)))
-        {
-            type_path_expr = NULL;
-            primitive = parser_current_type(parser);
-            parser_eat(parser, primitive);
-        }
-        else
-        {
-            type_path_expr = path_expr_parse(parser, FRX_PATH_STYLE_TYPE);
-        }
+        trait_path = type_path;
+        type_path = path_parse(parser, FRX_PATH_STYLE_TYPE);
     }
 
-    impl_block_init(impl_block, generic_params, trait_path_expr, type_path_expr,
-                    primitive);
+    impl_block_init(impl_block, generic_params, trait_path, type_path);
 
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
@@ -96,15 +75,15 @@ void impl_block_resolve_early(AST* ast, ResolutionContext* ctx)
     resolution_context_push_scope(ctx, impl_block->scope);
     ctx->current_impl_block = ast;
 
-    if (impl_block->trait_path_expr != NULL)
+    if (impl_block->trait_path != NULL)
     {
-        path_expr_resolve(impl_block->trait_path_expr, ctx);
+        path_resolve(impl_block->trait_path, ctx);
     }
 
-    if (impl_block->type_path_expr != NULL)
+    if (impl_block->type_path != NULL)
     {
-        path_expr_resolve(impl_block->type_path_expr, ctx);
-        const Type* type = expr_infer_type(impl_block->type_path_expr);
+        path_resolve(impl_block->type_path, ctx);
+        const Type* type = symbol_infer_type(impl_block->type_path->path.symbol);
 
         for (usize i = 0; i < list_size(&impl_block->methods); ++i)
         {
@@ -163,7 +142,7 @@ void impl_block_sema(AST* ast, SemaContext* ctx)
     ASTImplBlock* impl_block = &ast->impl_block;
     ctx->current_impl_block = impl_block;
 
-    if (impl_block->trait_path_expr != NULL)
+    if (impl_block->trait_path != NULL)
     {
         // TODO: Check that the function signatures of this impl block
         // match the function signatures of the specified trait.

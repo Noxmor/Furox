@@ -50,10 +50,10 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
 
     path_expr_resolve(call_expr->callee, ctx);
 
-    const Symbol* symbol = call_expr->callee->path_expr.symbol;
+    const Symbol* symbol = call_expr->callee->path_expr.path->path.symbol;
     if (symbol->associated_type != NULL)
     {
-        AST* path_segment = list_get(&call_expr->callee->path_expr.path_segments, list_size(&call_expr->callee->path_expr.path_segments) - 1);
+        AST* path_segment = list_get(&call_expr->callee->path_expr.path->path.path_segments, list_size(&call_expr->callee->path_expr.path->path.path_segments) - 1);
         List args = call_expr->args;
 
         ast->type = FRX_AST_TYPE_METHOD_CALL_EXPR;

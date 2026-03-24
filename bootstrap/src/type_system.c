@@ -445,6 +445,7 @@ const Type* symbol_infer_type(const Symbol* symbol)
 
     switch (symbol->type)
     {
+        case FRX_SYMBOL_TYPE_PRIMITIVE: return type_intern_primitive(((ASTPathSegment*)symbol->data)->primitive);
         case FRX_SYMBOL_TYPE_FUNC: return ((ASTFuncDecl*)symbol->data)->resolved_type;
         case FRX_SYMBOL_TYPE_STRUCT: return type_intern_struct(symbol, NULL);
         case FRX_SYMBOL_TYPE_ENUM: return type_intern_enum(symbol);
@@ -452,7 +453,7 @@ const Type* symbol_infer_type(const Symbol* symbol)
         case FRX_SYMBOL_TYPE_TYPE_ALIAS: return ((ASTTypeAlias*)symbol->data)->type->type_specifier.resolved_type;
         case FRX_SYMBOL_TYPE_PARAM: return ((ASTFuncParam*)symbol->data)->type->type_specifier.resolved_type;
         case FRX_SYMBOL_TYPE_VAR: return ((ASTLetStmt*)symbol->data)->resolved_type;
-        case FRX_SYMBOL_TYPE_GENERIC_PARAM: return NULL;
+        case FRX_SYMBOL_TYPE_GENERIC_PARAM: return type_intern_generic(symbol);
 
         default: FRX_ASSERT(FRX_FALSE); return NULL;
     }

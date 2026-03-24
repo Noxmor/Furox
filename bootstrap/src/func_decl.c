@@ -146,8 +146,8 @@ void func_decl_resolve_early(AST* ast, ResolutionContext* ctx)
     switch (func_decl->receiver)
     {
         case FRX_FUNC_RECEIVER_NONE: break;
-        case FRX_FUNC_RECEIVER_SELF_PTR: func_decl->receiver_type = type_intern_ptr(expr_infer_type(ctx->current_impl_block->impl_block.type_path_expr), FRX_TRUE); break;
-        case FRX_FUNC_RECEIVER_SELF_REF: func_decl->receiver_type = type_intern_ptr(expr_infer_type(ctx->current_impl_block->impl_block.type_path_expr), FRX_FALSE); break;
+        case FRX_FUNC_RECEIVER_SELF_PTR: func_decl->receiver_type = type_intern_ptr(symbol_infer_type(ctx->current_impl_block->impl_block.type_path->path.symbol), FRX_TRUE); break;
+        case FRX_FUNC_RECEIVER_SELF_REF: func_decl->receiver_type = type_intern_ptr(symbol_infer_type(ctx->current_impl_block->impl_block.type_path->path.symbol), FRX_FALSE); break;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 

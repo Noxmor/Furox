@@ -59,6 +59,8 @@ void parser_destroy(Parser* parser);
 
 AST* translation_unit_parse(Parser* parser);
 
+AST* path_parse(Parser* parser, PathStyle style);
+
 AST* mod_decl_parse(Parser* parser);
 
 AST* item_parse(Parser* parser);
@@ -112,8 +114,6 @@ AST* expr_parse(Parser* parser);
 AST* self_expr_parse(Parser* parser);
 
 AST* bool_expr_parse(Parser* parser);
-
-AST* path_expr_parse(Parser* parser, PathStyle style);
 
 AST* call_expr_parse(Parser* parser, AST* callee);
 

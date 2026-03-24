@@ -14,32 +14,21 @@ static void type_specifier_init(ASTTypeSpecifier* type, ASTTypeSpecifierKind kin
 
     type->kind = kind;
     type->resolved_type = NULL;
-    type->path_expr = NULL;
+    type->path = NULL;
     list_init(&type->func_params);
     type->func_return_type = NULL;
     type->is_variadic = FRX_FALSE;
 }
 
-static void type_specifier_init_primitive(ASTTypeSpecifier* type, TokenType primitive)
+static void type_specifier_init_path(ASTTypeSpecifier* type, AST* path)
 {
     FRX_ASSERT(type != NULL);
 
-    FRX_ASSERT(token_type_is_primitive(primitive));
+    FRX_ASSERT(path != NULL);
 
-    type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_PRIMITIVE);
+    type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_PATH);
 
-    type->primitive = primitive;
-}
-
-static void type_specifier_init_path_expr(ASTTypeSpecifier* type, AST* path_expr)
-{
-    FRX_ASSERT(type != NULL);
-
-    FRX_ASSERT(path_expr != NULL);
-
-    type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_PATH_EXPR);
-
-    type->path_expr = path_expr;
+    type->path = path;
 }
 
 static void type_specifier_init_func(ASTTypeSpecifier* type)
@@ -78,29 +67,17 @@ static void type_specifier_init_array(ASTTypeSpecifier* type, AST* base, AST* si
     type->size = size;
 }
 
-static void type_specifier_init_self(ASTTypeSpecifier* type)
-{
-    FRX_ASSERT(type != NULL);
-
-    type_specifier_init(type, FRX_TYPE_SPECIFIER_KIND_SELF);
-}
-
 AST* type_specifier_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_TYPE_SPECIFIER);
     ASTTypeSpecifier* type = &ast->type_specifier;
 
-    if (token_type_is_primitive(parser_current_type(parser)))
+    if (token_type_is_primitive(parser_current_type(parser))
+        || parser_current_type(parser) == FRX_TOKEN_TYPE_IDENT
+        || parser_current_type(parser) == FRX_TOKEN_TYPE_KW_SELF_UPPER)
     {
-        TokenType primitive = parser_current_type(parser);
-        parser_eat(parser, primitive);
-
-        type_specifier_init_primitive(type, primitive);
-    }
-    else if (parser_current_type(parser) == FRX_TOKEN_TYPE_IDENT)
-    {
-        AST* path_expr = path_expr_parse(parser, FRX_PATH_STYLE_TYPE);
-        type_specifier_init_path_expr(type, path_expr);
+        AST* path = path_parse(parser, FRX_PATH_STYLE_TYPE);
+        type_specifier_init_path(type, path);
     }
     else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_FN)
     {
@@ -135,11 +112,6 @@ AST* type_specifier_parse(Parser* parser)
 
         AST* return_type = type_specifier_parse(parser);
         type->func_return_type = return_type;
-    }
-    else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_SELF_UPPER)
-    {
-        type_specifier_init_self(type);
-        parser_eat(parser, FRX_TOKEN_TYPE_KW_SELF_UPPER);
     }
     else if (parser_current_type(parser) == FRX_TOKEN_TYPE_LBRACKET)
     {
@@ -188,11 +160,18 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
     ASTTypeSpecifier* type_specifier = &ast->type_specifier;
     switch(type_specifier->kind)
     {
-        case FRX_TYPE_SPECIFIER_KIND_PRIMITIVE: type_specifier->resolved_type = type_intern_primitive(type_specifier->primitive); break;
-        case FRX_TYPE_SPECIFIER_KIND_PATH_EXPR:
+        case FRX_TYPE_SPECIFIER_KIND_PATH:
         {
-            path_expr_resolve(type_specifier->path_expr, ctx);
-            type_specifier->resolved_type = expr_infer_type(type_specifier->path_expr);
+            path_resolve(type_specifier->path, ctx);
+
+            ASTPath* path = &type_specifier->path->path;
+            switch (path->symbol->type)
+            {
+                case FRX_SYMBOL_TYPE_STRUCT: type_specifier->resolved_type = type_intern_struct(path->symbol, &((AST*)list_get(&path->path_segments, list_size(&path->path_segments) - 1))->path_segment.generic_args); break;
+                case FRX_SYMBOL_TYPE_ENUM: type_specifier->resolved_type = type_intern_generic(path->symbol); break;
+
+                default: type_specifier->resolved_type = symbol_infer_type(path->symbol); break;
+            }
 
             break;
         }
@@ -223,12 +202,6 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
             AST* base = type_specifier->base;
             type_specifier_resolve(base, ctx);
             type_specifier->resolved_type = type_intern_array(base->type_specifier.resolved_type, type_specifier->size);
-
-            break;
-        }
-        case FRX_TYPE_SPECIFIER_KIND_SELF:
-        {
-            type_specifier->resolved_type = expr_infer_type(ctx->current_impl_block->impl_block.type_path_expr);
 
             break;
         }

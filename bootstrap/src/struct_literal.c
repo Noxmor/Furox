@@ -61,26 +61,26 @@ void struct_literal_field_sema(AST* ast, SemaContext* ctx)
 
 }
 
-static void struct_literal_init(ASTStructLiteral* literal, AST* path_expr)
+static void struct_literal_init(ASTStructLiteral* literal, AST* path)
 {
     FRX_ASSERT(literal != NULL);
 
-    FRX_ASSERT(path_expr != NULL);
+    FRX_ASSERT(path != NULL);
 
-    literal->path_expr = path_expr;
+    literal->path = path;
     list_init(&literal->fields);
 }
 
-AST* struct_literal_parse(Parser* parser, AST* path_expr)
+AST* struct_literal_parse(Parser* parser, AST* path)
 {
     FRX_ASSERT(parser != NULL);
 
-    FRX_ASSERT(path_expr != NULL);
+    FRX_ASSERT(path != NULL);
 
     AST* ast = ast_create(FRX_AST_TYPE_STRUCT_LIT);
     ASTStructLiteral* literal = &ast->struct_literal;
 
-    struct_literal_init(literal, path_expr);
+    struct_literal_init(literal, path);
 
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
@@ -104,7 +104,7 @@ void struct_literal_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTStructLiteral* literal = &ast->struct_literal;
 
-    path_expr_resolve(literal->path_expr, ctx);
+    path_resolve(literal->path, ctx);
 
     for (usize i = 0; i < list_size(&literal->fields); ++i)
     {

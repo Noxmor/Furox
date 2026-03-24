@@ -29,6 +29,8 @@ b8 resolution_context_failed(const ResolutionContext* ctx);
 
 void ast_resolve(AST* ast, ResolutionContext* ctx);
 
+void path_resolve(AST* ast, ResolutionContext* ctx);
+
 void type_specifier_resolve(AST* ast, ResolutionContext* ctx);
 
 void block_resolve(AST* ast, ResolutionContext* ctx);
