@@ -106,10 +106,5 @@ void let_stmt_sema(AST* ast, SemaContext* ctx)
     if (let_stmt->value != NULL)
     {
         ast_sema(let_stmt->value, ctx);
-
-        if (let_stmt->type == NULL)
-        {
-            let_stmt->resolved_type = expr_infer_type(let_stmt->value);
-        }
     }
 }
