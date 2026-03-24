@@ -84,6 +84,8 @@ void ast_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_AST_TYPE_CALL_EXPR: call_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: method_call_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_INT_LIT: int_literal_resolve(ast, ctx); break;
+        case FRX_AST_TYPE_CHAR_LIT: break;
+        case FRX_AST_TYPE_STRING_LIT: break;
         case FRX_AST_TYPE_STRUCT_LIT: struct_literal_resolve(ast, ctx); break;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
