@@ -2,17 +2,17 @@ mod test;
 
 fn main() -> i32
 {
-    if false
+    if (false)
     {
         return -1;
     }
 
-    if !true
+    if (!true)
     {
         return -1;
     }
 
-    if true
+    if (true)
     {
         return 0;
     }
