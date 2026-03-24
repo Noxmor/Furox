@@ -21,7 +21,12 @@ AST* if_stmt_parse(Parser* parser)
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_IF);
 
+    parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
+
     AST* condition = expr_parse(parser);
+
+    parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
+
     AST* if_block = block_parse(parser);
     AST* else_block = NULL;
 
