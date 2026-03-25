@@ -785,8 +785,7 @@ void lexer_next_token(Lexer* lexer)
 {
     FRX_ASSERT(lexer != NULL);
 
-    usize i;
-    for(i = 1; i < lexer->tokens_count; i = (i + 1))
+    for(usize i = 1; i < lexer->tokens_count; ++i)
     {
         memcpy(&lexer->tokens[i - 1], &lexer->tokens[i], sizeof(Token));
     }
