@@ -576,9 +576,23 @@ static void emit_unary_expr(AST* ast, FILE* f, CodegenContext* ctx)
 
     ASTUnaryExpr* unary_expr = &ast->unary_expr;
 
-    fprintf(f, "(%s", token_type_to_str(unary_expr->type));
-    emit_ast(unary_expr->operand, f, ctx);
-    fprintf(f, ")");
+    if (token_type_is_prefix_operator(unary_expr->type))
+    {
+        fprintf(f, "(%s", token_type_to_str(unary_expr->type));
+        emit_ast(unary_expr->operand, f, ctx);
+        fprintf(f, ")");
+    }
+    else if (token_type_is_postfix_operator(unary_expr->type))
+    {
+        fprintf(f, "(");
+        emit_ast(unary_expr->operand, f, ctx);
+        fprintf(f, "%s)", token_type_to_str(unary_expr->type));
+
+    }
+    else
+    {
+        FRX_ASSERT(FRX_FALSE);
+    }
 }
 
 static void emit_binary_expr(AST* ast, FILE* f, CodegenContext* ctx)
