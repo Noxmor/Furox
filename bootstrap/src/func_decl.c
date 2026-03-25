@@ -88,6 +88,11 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
                 // TODO: Error, self must specify if pointer or reference!
             }
 
+            if (parser_current_type(parser) == FRX_TOKEN_TYPE_COMMA)
+            {
+                parser_eat(parser, FRX_TOKEN_TYPE_COMMA);
+            }
+
             continue;
         }
 
