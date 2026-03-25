@@ -1,0 +1,11 @@
+fn main() -> i32
+{
+    let ptr = nullptr;
+
+    if (ptr == nullptr)
+    {
+        return 0;
+    }
+
+    return -1;
+}
