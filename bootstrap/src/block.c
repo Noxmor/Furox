@@ -17,12 +17,17 @@ static void block_add_stmt(ASTBlock* block, AST* stmt)
     list_add(&block->stmts, stmt);
 }
 
-AST* block_from_stmt(AST* stmt)
+AST* block_from_stmt(AST* stmt, Scope* scope)
 {
+    FRX_ASSERT(stmt != NULL);
+
+    FRX_ASSERT(scope != NULL);
+
     AST* ast = ast_create(FRX_AST_TYPE_BLOCK);
     ASTBlock* block = &ast->block;
 
     block_init(block);
+    block->scope = scope;
     block_add_stmt(block, stmt);
 
     return ast;

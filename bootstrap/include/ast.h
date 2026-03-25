@@ -495,7 +495,7 @@ typedef struct AST
 
 AST* ast_create(ASTType type);
 
-AST* block_from_stmt(AST* stmt);
+AST* block_from_stmt(AST* stmt, Scope* scope);
 
 const Type* expr_infer_type(AST* expr);
 

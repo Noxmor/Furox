@@ -36,7 +36,9 @@ AST* if_stmt_parse(Parser* parser)
 
         if (parser_match(parser, FRX_TOKEN_TYPE_KW_IF))
         {
-            else_block = block_from_stmt(stmt_parse(parser));
+            parser_push_scope(parser);
+            else_block = block_from_stmt(stmt_parse(parser), parser->current_scope);
+            parser_pop_scope(parser);
         }
         else
         {
