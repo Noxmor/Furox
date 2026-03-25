@@ -201,6 +201,7 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
         {
             AST* base = type_specifier->base;
             type_specifier_resolve(base, ctx);
+            ast_resolve(type_specifier->size, ctx);
             type_specifier->resolved_type = type_intern_array(base->type_specifier.resolved_type, type_specifier->size);
 
             break;
