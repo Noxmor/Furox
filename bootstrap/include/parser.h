@@ -115,6 +115,8 @@ AST* self_expr_parse(Parser* parser);
 
 AST* bool_expr_parse(Parser* parser);
 
+AST* nullptr_expr_parse(Parser* parser);
+
 AST* call_expr_parse(Parser* parser, AST* callee);
 
 AST* method_call_expr_parse(Parser* parser, const char* name, AST* callee);

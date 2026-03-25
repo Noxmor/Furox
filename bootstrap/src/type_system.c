@@ -238,6 +238,14 @@ static const Type string_literal_type = {
     }
 };
 
+static const Type nullptr_type = {
+    .kind = FRX_TYPE_KIND_PTR,
+    .ptr = {
+        .base = &void_type,
+        .mutable = FRX_TRUE
+    }
+};
+
 const Type* type_intern_primitive(TokenType primitive)
 {
     switch (primitive)
@@ -437,6 +445,11 @@ const Type* type_intern_string_lit(void)
 const Type* type_intern_bool(void)
 {
     return &b8_type;
+}
+
+const Type* type_intern_nullptr(void)
+{
+    return &nullptr_type;
 }
 
 const Type* symbol_infer_type(const Symbol* symbol)

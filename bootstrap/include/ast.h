@@ -246,6 +246,11 @@ typedef struct ASTBoolExpr
     b8 value;
 } ASTBoolExpr;
 
+typedef struct ASTNullptrExpr
+{
+    b8 unused;
+} ASTNullptrExpr;
+
 typedef struct ASTModDecl
 {
     AST* path;
@@ -411,6 +416,7 @@ enum
     FRX_AST_TYPE_FIELD_EXPR,
     FRX_AST_TYPE_SELF_EXPR,
     FRX_AST_TYPE_BOOL_EXPR,
+    FRX_AST_TYPE_NULLPTR_EXPR,
     FRX_AST_TYPE_PATH_SEGMENT,
     FRX_AST_TYPE_PATH,
     FRX_AST_TYPE_PATH_EXPR,
@@ -465,6 +471,7 @@ typedef struct AST
         ASTFieldExpr field_expr;
         ASTSelfExpr self_expr;
         ASTBoolExpr bool_expr;
+        ASTNullptrExpr nullptr_expr;
         ASTPathSegment path_segment;
         ASTPath path;
         ASTPathExpr path_expr;

@@ -657,6 +657,17 @@ static void emit_bool_expr(AST* ast, FILE* f)
     }
 }
 
+static void emit_nullptr_expr(AST* ast, FILE* f)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_NULLPTR_EXPR);
+
+    FRX_ASSERT(f != NULL);
+
+    fprintf(f, "NULL");
+}
+
 static void emit_call_expr(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -799,6 +810,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_FIELD_EXPR: emit_field_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_SELF_EXPR: emit_self_expr(ast, f); break;
         case FRX_AST_TYPE_BOOL_EXPR: emit_bool_expr(ast, f); break;
+        case FRX_AST_TYPE_NULLPTR_EXPR: emit_nullptr_expr(ast, f); break;
         case FRX_AST_TYPE_CALL_EXPR: emit_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: emit_method_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: emit_expr_stmt(ast, f, ctx); break;
