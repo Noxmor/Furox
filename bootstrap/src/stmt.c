@@ -9,6 +9,7 @@ AST* stmt_parse(Parser* parser)
         case FRX_TOKEN_TYPE_IDENT:
         case FRX_TOKEN_TYPE_LPAREN:
         case FRX_TOKEN_TYPE_KW_EXTERN:
+        case FRX_TOKEN_TYPE_KW_SELF_LOWER:
         case FRX_TOKEN_TYPE_INT_LIT:
         case FRX_TOKEN_TYPE_PLUS:
         case FRX_TOKEN_TYPE_MINUS:
