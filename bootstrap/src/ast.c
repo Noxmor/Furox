@@ -84,6 +84,7 @@ void ast_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_AST_TYPE_PATH_EXPR: path_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_CALL_EXPR: call_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: method_call_expr_resolve(ast, ctx); break;
+        case FRX_AST_TYPE_CAST_EXPR: cast_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_INT_LIT: int_literal_resolve(ast, ctx); break;
         case FRX_AST_TYPE_CHAR_LIT: break;
         case FRX_AST_TYPE_STRING_LIT: break;
@@ -128,6 +129,7 @@ void ast_sema(AST* ast, SemaContext* ctx)
         case FRX_AST_TYPE_PATH_EXPR: break;
         case FRX_AST_TYPE_CALL_EXPR: call_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: method_call_expr_sema(ast, ctx); break;
+        case FRX_AST_TYPE_CAST_EXPR: cast_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_INT_LIT: break;
         case FRX_AST_TYPE_CHAR_LIT: break;
         case FRX_AST_TYPE_STRING_LIT: break;
@@ -152,6 +154,7 @@ const Type* expr_infer_type(AST* expr)
         case FRX_AST_TYPE_PATH_EXPR: return expr->path_expr.resolved_type;
         case FRX_AST_TYPE_CALL_EXPR: return expr_infer_type(expr->call_expr.callee);
         case FRX_AST_TYPE_METHOD_CALL_EXPR: return expr->method_call_expr.resolved_type;
+        case FRX_AST_TYPE_CAST_EXPR: return expr->cast_expr.type_specifier->type_specifier.resolved_type;
         case FRX_AST_TYPE_INT_LIT: return expr->int_literal.resolved_type;
         case FRX_AST_TYPE_CHAR_LIT: return type_intern_char_lit();
         case FRX_AST_TYPE_STRING_LIT: return type_intern_string_lit();

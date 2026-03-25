@@ -88,6 +88,7 @@ Operator token_type_to_postfix_operator(TokenType type)
         case FRX_TOKEN_TYPE_LBRACKET: return FRX_OPERATOR_ARRAY_SUBSCRIPT;
         case FRX_TOKEN_TYPE_LPAREN: return FRX_OPERATOR_CALL;
         case FRX_TOKEN_TYPE_DOT: return FRX_OPERATOR_MEMBER_ACCESS;
+        case FRX_TOKEN_TYPE_KW_AS: return FRX_OPERATOR_CAST;
     }
 
     return FRX_OPERATOR_INVALID;
@@ -141,7 +142,8 @@ Precedence operator_to_precedence(Operator operator)
         case FRX_OPERATOR_BIT_RSHIFT_ASSIGN:
         case FRX_OPERATOR_BIT_AND_ASSIGN:
         case FRX_OPERATOR_BIT_XOR_ASSIGN:
-        case FRX_OPERATOR_BIT_OR_ASSIGN: return FRX_PRECEDENCE_14;
+        case FRX_OPERATOR_BIT_OR_ASSIGN:
+        case FRX_OPERATOR_CAST: return FRX_PRECEDENCE_14;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 

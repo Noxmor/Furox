@@ -732,6 +732,23 @@ static void emit_method_call_expr(AST* ast, FILE* f, CodegenContext* ctx)
     fprintf(f, ")");
 }
 
+static void emit_cast_expr(AST* ast, FILE* f, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_CAST_EXPR);
+
+    FRX_ASSERT(f != NULL);
+
+    ASTCastExpr* cast_expr = &ast->cast_expr;
+
+    fprintf(f, "((");
+    emit_type(cast_expr->type_specifier->type_specifier.resolved_type, NULL, f, ctx);
+    fprintf(f, ") ");
+    emit_ast(cast_expr->expr, f, ctx);
+    fprintf(f, ")");
+}
+
 static void emit_expr_stmt(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -813,6 +830,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_NULLPTR_EXPR: emit_nullptr_expr(ast, f); break;
         case FRX_AST_TYPE_CALL_EXPR: emit_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_METHOD_CALL_EXPR: emit_method_call_expr(ast, f, ctx); break;
+        case FRX_AST_TYPE_CAST_EXPR: emit_cast_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: emit_expr_stmt(ast, f, ctx); break;
         case FRX_AST_TYPE_BREAK_STMT: emit_break_stmt(ast, f); break;
         case FRX_AST_TYPE_CONTINUE_STMT: emit_continue_stmt(ast, f); break;

@@ -68,6 +68,21 @@ static AST* path_expr_create(AST* path)
     return ast;
 }
 
+static AST* cast_expr_create(AST* expr, AST* type_specifier)
+{
+    FRX_ASSERT(expr != NULL);
+
+    FRX_ASSERT(type_specifier != NULL);
+
+    AST* ast = ast_create(FRX_AST_TYPE_CAST_EXPR);
+    ASTCastExpr* cast_expr = &ast->cast_expr;
+
+    cast_expr->expr = expr;
+    cast_expr->type_specifier = type_specifier;
+
+    return ast;
+}
+
 static AST* expr_parse_primary(Parser* parser)
 {
     switch (parser_current_type(parser))
@@ -195,6 +210,11 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
             else if (operator == FRX_OPERATOR_CALL)
             {
                 expr = call_expr_parse(parser, expr);
+            }
+            else if (operator == FRX_OPERATOR_CAST)
+            {
+                AST* casted_type = type_specifier_parse(parser);
+                expr = cast_expr_create(expr, casted_type);
             }
             else
             {
