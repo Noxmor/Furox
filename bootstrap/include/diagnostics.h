@@ -2,7 +2,7 @@
 #define FRX_DIAGNOSTICS_H
 
 #include "types.h"
-#include "source_range.h"
+#include "source_span.h"
 
 #define FRX_DIAGNOSTICS_MAX_ARGS 8
 
@@ -37,12 +37,12 @@ typedef struct Diagnostic
 {
     DiagnosticID id;
     DiagnosticLevel lvl;
-    SourceRange range;
+    SourceSpan span;
     const char* args[FRX_DIAGNOSTICS_MAX_ARGS];
 } Diagnostic;
 
-Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl, SourceRange range, ...);
+Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl, SourceSpan span, ...);
 
-void diagnostic_emit(const Diagnostic* d, const char* filepath);
+void diagnostic_emit(const Diagnostic* d);
 
 #endif

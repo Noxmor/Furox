@@ -3,32 +3,24 @@
 #include "parser.h"
 #include "early_resolution.h"
 
-static AST* ast_func_param_create(const char* name, AST* type)
+AST* func_param_parse(Parser* parser)
 {
-    FRX_ASSERT(name != NULL);
-    FRX_ASSERT(type != NULL);
-
     AST* ast = ast_create(FRX_AST_TYPE_FUNC_PARAM);
     ASTFuncParam* param = &ast->func_param;
 
-    param->name = name;
-    param->type = type;
+    ast->span.lo = parser_current_span(parser).lo;
 
-    return ast;
-}
-
-AST* func_param_parse(Parser* parser)
-{
-    const char* name = parser_current_token(parser)->identifier;
+    param->name = parser_current_token(parser)->identifier;
 
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
     parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
-    AST* type = type_specifier_parse(parser);
-    AST* ast = ast_func_param_create(name, type);
+    param->type = type_specifier_parse(parser);
+
+    ast->span.hi = param->type->span.hi;
 
     parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE,
-                         FRX_SYMBOL_TYPE_PARAM, name, &ast->func_param);
+                         FRX_SYMBOL_TYPE_PARAM, param->name, &ast->func_param);
 
     return ast;
 }

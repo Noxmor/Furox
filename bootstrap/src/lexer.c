@@ -7,6 +7,7 @@
 #include "assert.h"
 #include "log.h"
 #include "hash.h"
+#include "source_span.h"
 #include "string_table.h"
 
 #define FRX_KEYWORD_TABLE_SIZE 2048
@@ -70,7 +71,7 @@ void lexer_init_keyword_table(void)
 
 static void lexer_read_token(Lexer* lexer, Token* token);
 
-void lexer_init(Lexer* lexer, const char* source)
+void lexer_init(Lexer* lexer, const char* source, SourceOffset offset)
 {
     FRX_ASSERT(lexer != NULL);
     FRX_ASSERT(source != NULL);
@@ -83,9 +84,7 @@ void lexer_init(Lexer* lexer, const char* source)
     lexer->source = source;
     lexer->pos = lexer->source;
 
-    lexer->location.pos = 0;
-    lexer->location.line = 1;
-    lexer->location.column = 1;
+    lexer->offset = offset;
 
     lexer_read_token(lexer, &lexer->tokens[0]);
 
@@ -152,18 +151,7 @@ static void lexer_advance_n(Lexer* lexer, usize count)
             return;
         }
 
-        if (current == '\n')
-        {
-            lexer->location.line = lexer->location.line + 1;
-            lexer->location.column = 1;
-        }
-        else
-        {
-            lexer->location.column = lexer->location.column + 1;
-        }
-
         ++lexer->pos;
-        ++lexer->location.pos;
     }
 }
 
@@ -244,11 +232,11 @@ static void lexer_parse_identifier(Lexer* lexer, Token* token)
             lexer_grow_identifier_placeholder(lexer);
         }
 
-        token->range.end = lexer->location;
-
         lexer_advance(lexer);
         current = lexer_current_char(lexer);
     }
+
+    token->span.hi = lexer->offset + lexer->pos - lexer->source;
 
     lexer->identifier_placeholder[identifier_index] = '\0';
 
@@ -278,11 +266,11 @@ static void lexer_parse_binary_number(Lexer* lexer, Token* token)
     {
         token->int_literal = token->int_literal * 2 + (current - '0');
 
-        token->range.end = lexer->location;
-
         lexer_advance(lexer);
         current = lexer_current_char(lexer);
     }
+
+    token->span.hi = lexer->offset + lexer->pos - lexer->source;
 }
 
 static void lexer_parse_hex_number(Lexer* lexer, Token* token)
@@ -310,11 +298,11 @@ static void lexer_parse_hex_number(Lexer* lexer, Token* token)
             token->int_literal = token->int_literal * 16 + (current - bit_to_letter[current & 0x20] + 10);
         }
 
-        token->range.end = lexer->location;
-
         lexer_advance(lexer);
         current = lexer_current_char(lexer);
     }
+
+    token->span.hi = lexer->offset + lexer->pos - lexer->source;
 }
 
 static void lexer_parse_number(Lexer* lexer, Token* token)
@@ -330,8 +318,6 @@ static void lexer_parse_number(Lexer* lexer, Token* token)
     while (isdigit(current))
     {
         token->int_literal = token->int_literal * 10 + (current - '0');
-
-        token->range.end = lexer->location;
 
         lexer_advance(lexer);
         current = lexer_current_char(lexer);
@@ -351,8 +337,6 @@ static void lexer_parse_number(Lexer* lexer, Token* token)
         {
             decimal = decimal * 10 + (current - '0');
 
-            token->range.end = lexer->location;
-
             lexer_advance(lexer);
             current = lexer_current_char(lexer);
         }
@@ -371,6 +355,8 @@ static void lexer_parse_number(Lexer* lexer, Token* token)
 
         lexer_advance(lexer);
     }
+
+    token->span.hi = lexer->offset + lexer->pos - lexer->source;
 }
 
 static void lexer_parse_char_literal(Lexer* lexer, Token* token)
@@ -424,9 +410,9 @@ static void lexer_parse_char_literal(Lexer* lexer, Token* token)
         lexer_fail(lexer);
     }
 
-    token->range.end = lexer->location;
-
     lexer_advance(lexer);
+
+    token->span.hi = lexer->offset + lexer->pos - lexer->source;
 }
 
 static void lexer_parse_string_literal(Lexer* lexer, Token* token)
@@ -461,9 +447,9 @@ static void lexer_parse_string_literal(Lexer* lexer, Token* token)
 
     token->identifier = string_table_intern(lexer->identifier_placeholder);
 
-    token->range.end = lexer->location;
-
     lexer_advance(lexer);
+
+    token->span.hi = lexer->offset + lexer->pos - lexer->source;
 }
 
 static void lexer_read_token(Lexer* lexer, Token* token)
@@ -479,7 +465,7 @@ static void lexer_read_token(Lexer* lexer, Token* token)
 
     lexer_skip_whitespaces(lexer);
 
-    token->range.start = lexer->location;
+    token->span.lo = lexer->offset + lexer->pos - lexer->source;
 
     char current = lexer_current_char(lexer);
 
@@ -776,9 +762,9 @@ static void lexer_read_token(Lexer* lexer, Token* token)
 
     token->identifier = token_type_to_str(token->type);
 
-    token->range.end = lexer->location;
-
     lexer_advance(lexer);
+
+    token->span.hi = lexer->offset + lexer->pos - lexer->source;
 }
 
 void lexer_next_token(Lexer* lexer)

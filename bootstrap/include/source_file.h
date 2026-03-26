@@ -2,10 +2,8 @@
 #define FRX_SOURCE_FILE_H
 
 #include "types.h"
-#include "list.h"
 #include "ast.h"
 #include "module.h"
-#include "diagnostics.h"
 #include "scope.h"
 
 typedef usize SourceFileID;
@@ -16,23 +14,28 @@ typedef struct SourceFile
     SourceFileID id;
     char* data;
     usize data_len;
+    SourceOffset offset;
     Module* module;
     AST* ast;
-    List diagnostics;
     Scope* global_scope;
 } SourceFile;
 
-b8 source_file_load_from_disk(SourceFile* source_file, const char* filepath);
-
-void source_file_add_diagnostic(SourceFile* source_file, Diagnostic* d);
+SourceFile* source_file_load_from_disk(const char* filepath, SourceOffset offset);
 
 Symbol* source_file_insert_symbol(SourceFile* source_file, SymbolVisibility visibility,
                                   SymbolType type, const char* name, void* data);
 
 Symbol* source_file_lookup_symbol(SourceFile* source_file, const char* name);
 
+const char* source_file_filepath(const SourceFile* source_file);
+
 const char* source_file_data(const SourceFile* source_file);
 
 usize source_file_data_len(const SourceFile* source_file);
+
+SourceOffset source_file_offset(const SourceFile* source_file);
+
+void source_file_resolve_offset(const SourceFile* source_file, SourceOffset offset,
+                              SourceLine* line, SourceColumn* column);
 
 #endif

@@ -21,7 +21,7 @@ AST* let_stmt_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_LET_STMT);
     ASTLetStmt* let_stmt = &ast->let_stmt;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_LET);
 
@@ -57,11 +57,10 @@ AST* let_stmt_parse(Parser* parser)
         //TODO: Error: cannot have variable declaration without explicit type
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
     let_stmt_init(let_stmt, mutable, name, type, value);
-
-    ast->range.end = parser_current_location(parser);
 
     parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_VAR,
                          name, let_stmt);

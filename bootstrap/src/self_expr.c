@@ -9,6 +9,8 @@ AST* self_expr_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_SELF_EXPR);
     ASTSelfExpr* self_expr = &ast->self_expr;
 
+    ast->span = parser_current_span(parser);
+
     parser_eat(parser, FRX_TOKEN_TYPE_KW_SELF_LOWER);
 
     self_expr->resolved_type = NULL;

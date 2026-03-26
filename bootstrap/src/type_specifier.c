@@ -1,6 +1,6 @@
 #include "assert.h"
 #include "ast.h"
-#include "diagnostics.h"
+#include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
 #include "token.h"
@@ -72,11 +72,14 @@ AST* type_specifier_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_TYPE_SPECIFIER);
     ASTTypeSpecifier* type = &ast->type_specifier;
 
+    ast->span.lo = parser_current_span(parser).lo;
+
     if (token_type_is_primitive(parser_current_type(parser))
         || parser_current_type(parser) == FRX_TOKEN_TYPE_IDENT
         || parser_current_type(parser) == FRX_TOKEN_TYPE_KW_SELF_UPPER)
     {
         AST* path = path_parse(parser, FRX_PATH_STYLE_TYPE);
+        ast->span.hi = path->span.hi;
         type_specifier_init_path(type, path);
     }
     else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_FN)
@@ -112,6 +115,7 @@ AST* type_specifier_parse(Parser* parser)
 
         AST* return_type = type_specifier_parse(parser);
         type->func_return_type = return_type;
+        ast->span.hi = return_type->span.hi;
     }
     else if (parser_current_type(parser) == FRX_TOKEN_TYPE_LBRACKET)
     {
@@ -119,17 +123,20 @@ AST* type_specifier_parse(Parser* parser)
         AST* base = type_specifier_parse(parser);
         parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
         AST* size = expr_parse(parser);
+
+        ast->span.hi = parser_current_span(parser).hi;
+
         parser_eat(parser, FRX_TOKEN_TYPE_RBRACKET);
 
         type_specifier_init_array(type, base, size);
     }
     else
     {
-        SourceRange range = parser_current_token(parser)->range;
+        SourceSpan span = parser_current_span(parser);
         Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_EXPECTED_TYPE_SPECIFIER,
-                                          FRX_DIAGNOSTIC_LVL_ERROR, range,
+                                          FRX_DIAGNOSTIC_LVL_ERROR, span,
                                           token_type_to_str(parser_current_type(parser)));
-        parser_add_diagnostic(parser, d);
+        compiler_add_diagnostic(d);
 
         return ast_create(FRX_AST_TYPE_ERROR);
     }
@@ -143,6 +150,7 @@ AST* type_specifier_parse(Parser* parser)
         ast = pointer_type;
         type = &pointer_type->type_specifier;
 
+        ast->span.hi = parser_current_span(parser).hi;
         parser_eat(parser, parser_current_type(parser));
     }
 

@@ -26,13 +26,14 @@ AST* translation_unit_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_TRANSLATION_UNIT);
     ASTTranslationUnit* unit = &ast->translation_unit;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     translation_unit_init(unit);
 
     if (parser_match(parser, FRX_TOKEN_TYPE_KW_MOD))
     {
         unit->mod_decl = mod_decl_parse(parser);
+        ast->span.hi = unit->mod_decl->span.hi;
     }
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_EOF))
@@ -43,10 +44,10 @@ AST* translation_unit_parse(Parser* parser)
             continue;
         }
 
+        ast->span.hi = item->span.hi;
+
         translation_unit_add_item(unit, item);
     }
-
-    ast->range.end = parser_current_location(parser);
 
     return ast;
 }

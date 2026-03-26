@@ -1,7 +1,7 @@
 #ifndef FRX_TOKEN_H
 #define FRX_TOKEN_H
 
-#include "source_range.h"
+#include "source_span.h"
 
 #define FRX_TOKEN_TYPE_FIRST_KEYWORD FRX_TOKEN_TYPE_KW_U8
 #define FRX_TOKEN_TYPE_LAST_KEYWORD FRX_TOKEN_TYPE_KW_DEFER
@@ -146,7 +146,7 @@ typedef struct Token
 {
     TokenType type;
 
-    SourceRange range;
+    SourceSpan span;
 
     const char* identifier;
     u64 int_literal;

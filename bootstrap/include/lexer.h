@@ -14,7 +14,7 @@ typedef struct Lexer
     const char* source;
     const char* pos;
 
-    SourceLocation location;
+    SourceOffset offset;
 
     Token tokens[FRX_LEXER_TOKEN_CAPACITY];
     usize tokens_count;
@@ -25,7 +25,7 @@ typedef struct Lexer
     b8 failed;
 } Lexer;
 
-void lexer_init(Lexer* lexer, const char* source);
+void lexer_init(Lexer* lexer, const char* source, SourceOffset offset);
 
 void lexer_read(Lexer* lexer);
 

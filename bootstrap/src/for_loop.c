@@ -22,6 +22,8 @@ AST* for_loop_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_FOR_LOOP);
     ASTForLoop* for_loop = &ast->for_loop;
 
+    ast->span.lo = parser_current_span(parser).lo;
+
     parser_eat(parser, FRX_TOKEN_TYPE_KW_FOR);
     parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
 
@@ -58,6 +60,8 @@ AST* for_loop_parse(Parser* parser)
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
     AST* body = block_parse(parser);
+
+    ast->span.hi = body->span.hi;
 
     parser_pop_scope(parser);
 

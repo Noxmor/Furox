@@ -31,7 +31,7 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
     list_init(&func_decl->params);
     func_decl->scope = parser_push_scope(parser);
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     b8 external = FRX_FALSE;
     if (parser_match(parser, FRX_TOKEN_TYPE_KW_EXTERN))
@@ -118,9 +118,11 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
     if (parser_match(parser, FRX_TOKEN_TYPE_LBRACE))
     {
         body = block_parse(parser);
+        ast->span.hi = body->span.hi;
     }
     else
     {
+        ast->span.hi = parser_current_span(parser).hi;
         parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
     }
 
@@ -128,8 +130,6 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
 
     func_decl_init(func_decl, name, external, receiver, is_variadic,
                    generic_params, return_type, body);
-
-    ast->range.end = parser_current_location(parser);
 
     parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_FUNC,
                          name, func_decl);

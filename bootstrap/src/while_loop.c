@@ -22,6 +22,8 @@ AST* while_loop_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_WHILE_LOOP);
     ASTWhileLoop* while_loop = &ast->while_loop;
 
+    ast->span.lo = parser_current_span(parser).lo;
+
     parser_eat(parser, FRX_TOKEN_TYPE_KW_WHILE);
 
     parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
@@ -29,6 +31,8 @@ AST* while_loop_parse(Parser* parser)
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
     AST* body = block_parse(parser);
+
+    ast->span.hi = body->span.hi;
 
     while_loop_init(while_loop, condition, body);
 

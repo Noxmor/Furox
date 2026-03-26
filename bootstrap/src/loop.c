@@ -19,9 +19,13 @@ AST* loop_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_LOOP);
     ASTLoop* loop = &ast->loop;
 
+    ast->span.lo = parser_current_span(parser).lo;
+
     parser_eat(parser, FRX_TOKEN_TYPE_KW_LOOP);
 
     AST* body = block_parse(parser);
+
+    ast->span.hi = body->span.hi;
 
     loop_init(loop, body);
 

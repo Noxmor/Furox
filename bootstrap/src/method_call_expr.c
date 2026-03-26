@@ -27,6 +27,8 @@ AST* method_call_expr_parse(Parser* parser, const char* name, AST* callee)
     AST* ast = method_call_expr_create(name, callee);
     ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
 
+    ast->span.lo = parser_current_span(parser).lo;
+
     parser_eat(parser, FRX_TOKEN_TYPE_LPAREN);
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
@@ -40,6 +42,7 @@ AST* method_call_expr_parse(Parser* parser, const char* name, AST* callee)
         }
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
     return ast;

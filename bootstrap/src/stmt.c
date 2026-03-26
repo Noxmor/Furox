@@ -1,5 +1,5 @@
 #include "ast.h"
-#include "diagnostics.h"
+#include "compiler.h"
 #include "parser.h"
 
 AST* stmt_parse(Parser* parser)
@@ -31,9 +31,9 @@ AST* stmt_parse(Parser* parser)
         {
             Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_EXPECTED_STMT,
                                               FRX_DIAGNOSTIC_LVL_ERROR,
-                                              parser_current_token(parser)->range,
+                                              parser_current_span(parser),
                                               token_type_to_str(parser_current_type(parser)));
-            parser_add_diagnostic(parser, d);
+            compiler_add_diagnostic(d);
 
             parser_recover(parser);
 

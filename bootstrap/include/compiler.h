@@ -4,7 +4,7 @@
 #include "types.h"
 #include "list.h"
 #include "module.h"
-#include "ast.h"
+#include "diagnostics.h"
 
 int compiler_run(int argc, char** argv);
 
@@ -21,5 +21,7 @@ Module* compiler_find_module_by_path_segments(const List* path_segments);
 void compiler_register_type(const Type* type);
 
 List* compiler_get_types(void);
+
+void compiler_add_diagnostic(Diagnostic* d);
 
 #endif

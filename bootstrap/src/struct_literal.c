@@ -21,12 +21,16 @@ AST* struct_literal_field_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_STRUCT_LIT_FIELD);
     ASTStructLiteralField* field = &ast->struct_literal_field;
 
+    ast->span.lo = parser_current_span(parser).lo;
 
     const char* name = parser_current_token(parser)->identifier;
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
     parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
     AST* value = expr_parse(parser);
+
+    ast->span.hi = parser_current_span(parser).hi;
+
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
     struct_literal_field_init(field, name, value);
@@ -80,6 +84,8 @@ AST* struct_literal_parse(Parser* parser, AST* path)
     AST* ast = ast_create(FRX_AST_TYPE_STRUCT_LIT);
     ASTStructLiteral* literal = &ast->struct_literal;
 
+    ast->span.lo = parser_current_span(parser).lo;
+
     struct_literal_init(literal, path);
 
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
@@ -89,6 +95,7 @@ AST* struct_literal_parse(Parser* parser, AST* path)
         list_add(&literal->fields, struct_literal_field_parse(parser));
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
     return ast;

@@ -15,6 +15,8 @@ AST* bool_expr_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_BOOL_EXPR);
     ASTBoolExpr* bool_expr = &ast->bool_expr;
 
+    ast->span = parser_current_span(parser);
+
     b8 value;
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_TRUE)
     {

@@ -27,6 +27,8 @@ static AST* path_segment_parse(Parser* parser, PathStyle style)
     AST* ast = ast_create(FRX_AST_TYPE_PATH_SEGMENT);
     ASTPathSegment* path_segment = &ast->path_segment;
 
+    ast->span.lo = parser_current_span(parser).lo;
+
     PathSegmentType type = FRX_PATH_SEGMENT_TYPE_COUNT;
     const char* name = NULL;
     TokenType primitive = FRX_TOKEN_TYPE_EOF;
@@ -35,17 +37,20 @@ static AST* path_segment_parse(Parser* parser, PathStyle style)
     {
         type = FRX_PATH_SEGMENT_TYPE_IDENT;
         name = parser_current_token(parser)->identifier;
+        ast->span.hi = parser_current_span(parser).hi;
         parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
     }
     else if (token_type_is_primitive(parser_current_type(parser)))
     {
         type = FRX_PATH_SEGMENT_TYPE_PRIMITIVE;
         primitive = parser_current_type(parser);
+        ast->span.hi = parser_current_span(parser).hi;
         parser_eat(parser, primitive);
     }
     else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_SELF_UPPER)
     {
         type = FRX_PATH_SEGMENT_TYPE_SELF_UPPER;
+        ast->span.hi = parser_current_span(parser).hi;
         parser_eat(parser, FRX_TOKEN_TYPE_KW_SELF_UPPER);
     }
 
@@ -73,6 +78,7 @@ static AST* path_segment_parse(Parser* parser, PathStyle style)
             list_add(&path_segment->generic_args, type_specifier_parse(parser));
         }
 
+        ast->span.hi = parser_current_span(parser).hi;
         parser_eat(parser, FRX_TOKEN_TYPE_GT);
     }
 
@@ -118,7 +124,7 @@ AST* path_parse(Parser* parser, PathStyle style)
     AST* ast = ast_create(FRX_AST_TYPE_PATH);
     ASTPath* path = &ast->path;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     ASTPathType path_type = FRX_PATH_TYPE_ABSOLUTE;
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_EXTERN)
@@ -147,7 +153,7 @@ AST* path_parse(Parser* parser, PathStyle style)
         list_add(&path->path_segments, path_segment_parse(parser, style));
     }
 
-    ast->range.end = parser_current_location(parser);
+    ast->span.hi = ((AST*)list_get(&path->path_segments, list_size(&path->path_segments) - 1))->span.hi;
 
     return ast;
 }

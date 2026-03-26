@@ -7,12 +7,12 @@
 AST* expr_stmt_parse(Parser* parser)
 {
     AST* ast = ast_create(FRX_AST_TYPE_EXPR_STMT);
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
     ASTExprStmt* expr_stmt = &ast->expr_stmt;
 
     expr_stmt->expr = expr_parse(parser);
 
-    ast->range.end = parser_current_location(parser);
+    ast->span.hi = parser_current_span(parser).hi;
 
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 

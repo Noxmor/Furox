@@ -4,7 +4,6 @@
 #include "types.h"
 #include "token.h"
 #include "list.h"
-#include "source_range.h"
 #include "operator.h"
 #include "type_system.h"
 #include "scope.h"
@@ -442,7 +441,7 @@ typedef u8 ASTType;
 
 typedef struct AST
 {
-    SourceRange range;
+    SourceSpan span;
     ASTType type;
     union
     {

@@ -14,7 +14,7 @@ AST* return_stmt_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_RETURN_STMT);
     ASTReturnStmt* return_stmt = &ast->return_stmt;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_RETURN);
 
@@ -25,11 +25,10 @@ AST* return_stmt_parse(Parser* parser)
         value = expr_parse(parser);
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
     return_stmt_init(return_stmt, value);
-
-    ast->range.end = parser_current_location(parser);
 
     return ast;
 }

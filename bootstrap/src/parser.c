@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "diagnostics.h"
+#include "compiler.h"
 #include "lexer.h"
 #include "assert.h"
 #include "log.h"
@@ -20,7 +20,7 @@ void parser_init(Parser* parser, SourceFile* src_file)
     FRX_LOG_INFO("Initializing parser for file: %s...", src_file->path);
 
     parser->src_file = src_file;
-    lexer_init(&parser->lexer, source_file_data(src_file));
+    lexer_init(&parser->lexer, source_file_data(src_file), source_file_offset(src_file));
     parser->global_scope = src_file->global_scope;
     parser->current_scope = parser->global_scope;
     parser->failed = FRX_FALSE;
@@ -37,16 +37,9 @@ AST* parser_parse(Parser* parser)
     return ast;
 }
 
-void parser_add_diagnostic(Parser* parser, Diagnostic* d)
+SourceSpan parser_current_span(Parser* parser)
 {
-    FRX_ASSERT(parser != NULL);
-
-    source_file_add_diagnostic(parser->src_file, d);
-}
-
-SourceLocation parser_current_location(const Parser* parser)
-{
-    return parser->lexer.location;
+    return parser_current_token(parser)->span;
 }
 
 const SourceFile* parser_source_file(const Parser* parser)
@@ -101,10 +94,10 @@ b8 parser_eat(Parser* parser, TokenType type)
     {
         Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_UNEXPECTED_TOKEN,
                                           FRX_DIAGNOSTIC_LVL_ERROR,
-                                          parser_current_token(parser)->range,
+                                          parser_current_span(parser),
                                           token_type_to_str(type),
                                           token_type_to_str(parser_current_type(parser)));
-        parser_add_diagnostic(parser, d);
+        compiler_add_diagnostic(d);
     }
 
     parser_recover(parser);

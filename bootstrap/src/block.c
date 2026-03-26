@@ -40,7 +40,7 @@ AST* block_parse(Parser* parser)
     ASTBlock* block = &ast->block;
     block->scope = parser_push_scope(parser);
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);
 
@@ -51,9 +51,8 @@ AST* block_parse(Parser* parser)
         block_add_stmt(block, stmt);
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
-
-    ast->range.end = parser_current_location(parser);
 
     parser_pop_scope(parser);
 

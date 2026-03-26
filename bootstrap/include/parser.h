@@ -22,9 +22,7 @@ void parser_init(Parser* parser, SourceFile* src_file);
 
 AST* parser_parse(Parser* parser);
 
-void parser_add_diagnostic(Parser* parser, Diagnostic* d);
-
-SourceLocation parser_current_location(const Parser* parser);
+SourceSpan parser_current_span(Parser* parser);
 
 const SourceFile* parser_source_file(const Parser* parser);
 

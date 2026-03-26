@@ -5,33 +5,39 @@
 #include "sema.h"
 #include "symbol.h"
 
-static AST* enum_variant_create(const char* name, AST* value)
+static void enum_variant_init(ASTEnumVariant* variant, const char* name)
 {
+    FRX_ASSERT(variant != NULL);
+
     FRX_ASSERT(name != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_ENUM_VARIANT);
-    ASTEnumVariant* variant = &ast->enum_variant;
-
     variant->name = name;
-    variant->value = value;
+    variant->value = NULL;
     variant->symbol = NULL;
-
-    return ast;
 }
 
 static AST* enum_variant_parse(Parser* parser)
 {
+    AST* ast = ast_create(FRX_AST_TYPE_ENUM_VARIANT);
+    ASTEnumVariant* variant = &ast->enum_variant;
+
+    ast->span.lo = parser_current_span(parser).lo;
+
     const char* name = parser_current_token(parser)->identifier;
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
-    AST* value = NULL;
+    enum_variant_init(variant, name);
+
     if (parser_match(parser, FRX_TOKEN_TYPE_EQ))
     {
         parser_eat(parser, FRX_TOKEN_TYPE_EQ);
-        value = expr_parse(parser);
+        variant->value = expr_parse(parser);
     }
 
-    return enum_variant_create(name, value);
+    ast->span.hi = parser_current_span(parser).hi;
+    parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
+
+    return ast;
 }
 
 static void enum_def_init(ASTEnumDef* enum_def, const char* name, AST* type)
@@ -61,7 +67,7 @@ AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
     AST* ast = ast_create(FRX_AST_TYPE_ENUM_DEF);
     ASTEnumDef* enum_def = &ast->enum_def;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_ENUM);
 
@@ -79,13 +85,10 @@ AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
     {
         AST* variant = enum_variant_parse(parser);
         enum_def_add_variant(enum_def, variant);
-
-        parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
-
-    ast->range.end = parser_current_location(parser);
 
     Symbol* symbol = parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_ENUM,
                          name, enum_def);

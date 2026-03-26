@@ -23,7 +23,7 @@ AST* impl_block_parse(Parser* parser)
     ASTImplBlock* impl_block = &ast->impl_block;
     impl_block->scope = parser_push_scope(parser);
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_IMPL);
 
@@ -57,6 +57,7 @@ AST* impl_block_parse(Parser* parser)
         list_add(&impl_block->methods, func_decl);
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
     parser_pop_scope(parser);

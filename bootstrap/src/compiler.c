@@ -13,17 +13,17 @@
 #include "arena.h"
 #include "module.h"
 #include "string_table.h"
-#include "source_file.h"
+#include "source_map.h"
 #include "temp_dir.h"
 
 static Arena* arena;
 static Arena* ast_arena;
 
-static List src_files;
-
 static Module* root_module;
 
 static List type_list;
+
+static List diagnostics;
 
 static void compiler_init(void)
 {
@@ -32,10 +32,10 @@ static void compiler_init(void)
     temp_dir_init();
 
     lexer_init_keyword_table();
+    source_map_init();
 
     arena = arena_create();
     ast_arena = arena_create();
-    list_init(&src_files);
 
     root_module = module_create_root();
 
@@ -46,6 +46,8 @@ static void compiler_init(void)
     type_system_init();
 
     list_init(&type_list);
+
+    list_init(&diagnostics);
 }
 
 static void compiler_shutdown(void)
@@ -60,15 +62,10 @@ static void compiler_shutdown(void)
 
 static void compiler_emit_diagnostics(void)
 {
-    for (usize i = 0; i < list_size(&src_files); ++i)
+    for (usize i = 0; i < list_size(&diagnostics); ++i)
     {
-        const SourceFile* src_file = list_get(&src_files, i);
-
-        for (usize j = 0; j < list_size(&src_file->diagnostics); ++j)
-        {
-            const Diagnostic* d = list_get(&src_file->diagnostics, j);
-            diagnostic_emit(d, src_file->path);
-        }
+        const Diagnostic* d = list_get(&diagnostics, i);
+        diagnostic_emit(d);
     }
 }
 
@@ -89,20 +86,15 @@ int compiler_run(int argc, char** argv)
     for (int i = 1; i < argc; ++i)
     {
         const char* filepath = argv[i];
-
-        SourceFile* src_file = compiler_alloc(sizeof(SourceFile));
-        if (source_file_load_from_disk(src_file, filepath))
-        {
-            return EXIT_FAILURE;
-        }
-
-        list_add(&src_files, src_file);
+        source_map_add_source_file(filepath);
     }
 
+    List* src_files = source_map_get_source_files();
+
     u8 parsing_failed = FRX_FALSE;
-    for (usize i = 0; i < list_size(&src_files); ++i)
+    for (usize i = 0; i < list_size(src_files); ++i)
     {
-        SourceFile* src_file = list_get(&src_files, i);
+        SourceFile* src_file = list_get(src_files, i);
         Parser parser;
         parser_init(&parser, src_file);
         src_file->ast = parser_parse(&parser);
@@ -116,18 +108,18 @@ int compiler_run(int argc, char** argv)
     }
 
     b8 resolution_failed = FRX_FALSE;
-    for (usize i = 0; i < list_size(&src_files); ++i)
+    for (usize i = 0; i < list_size(src_files); ++i)
     {
-        SourceFile* src_file = list_get(&src_files, i);
+        SourceFile* src_file = list_get(src_files, i);
         ResolutionContext ctx;
         resolution_context_init(&ctx, src_file, root_module);
         translation_unit_resolve_early(src_file->ast, &ctx);
         resolution_failed |= resolution_context_failed(&ctx);
     }
 
-    for (usize i = 0; i < list_size(&src_files); ++i)
+    for (usize i = 0; i < list_size(src_files); ++i)
     {
-        SourceFile* src_file = list_get(&src_files, i);
+        SourceFile* src_file = list_get(src_files, i);
         ResolutionContext ctx;
         resolution_context_init(&ctx, src_file, root_module);
         translation_unit_resolve_late(src_file->ast, &ctx);
@@ -141,9 +133,9 @@ int compiler_run(int argc, char** argv)
     }
 
     b8 sema_failed = FRX_FALSE;
-    for (usize i = 0; i < list_size(&src_files); ++i)
+    for (usize i = 0; i < list_size(src_files); ++i)
     {
-        SourceFile* src_file = list_get(&src_files, i);
+        SourceFile* src_file = list_get(src_files, i);
         SemaContext ctx;
         sema_context_init(&ctx, src_file);
         ast_sema(src_file->ast, &ctx);
@@ -157,7 +149,7 @@ int compiler_run(int argc, char** argv)
     }
 
     CodegenContext ctx;
-    codegen_context_init(&ctx, root_module, &src_files, "frx");
+    codegen_context_init(&ctx, root_module, src_files, "frx");
     codegen_context_transpile(&ctx);
     codegen_context_end(&ctx);
 
@@ -190,4 +182,11 @@ void compiler_register_type(const Type* type)
 List* compiler_get_types(void)
 {
     return &type_list;
+}
+
+void compiler_add_diagnostic(Diagnostic* d)
+{
+    FRX_ASSERT(d != NULL);
+
+    list_add(&diagnostics, d);
 }

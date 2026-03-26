@@ -1,38 +1,31 @@
 #include "ast.h"
-
 #include "compiler.h"
 #include "parser.h"
 
-static AST* mod_decl_create(AST* path)
-{
-    AST* ast = ast_create(FRX_AST_TYPE_MOD_DECL);
-
-    ASTModDecl* mod_decl = &ast->mod_decl;
-    mod_decl->path = path;
-
-    return ast;
-}
-
 AST* mod_decl_parse(Parser* parser)
 {
+    AST* ast = ast_create(FRX_AST_TYPE_MOD_DECL);
+    ASTModDecl* mod_decl = &ast->mod_decl;
+
+    ast->span.lo = parser_current_span(parser).lo;
+
     parser_eat(parser, FRX_TOKEN_TYPE_KW_MOD);
 
-    AST* path = NULL;
+    mod_decl->path = NULL;
     if (parser_current_type(parser) != FRX_TOKEN_TYPE_SEMI)
     {
-        path = path_parse(parser, FRX_PATH_STYLE_TYPE);
+        mod_decl->path = path_parse(parser, FRX_PATH_STYLE_TYPE);
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
-
-    AST* mod_decl = mod_decl_create(path);
 
     Module* root_mod = compiler_root_module();
     Module* current_mod = root_mod;
 
-    for (usize i = 0; path != NULL && i < list_size(&path->path.path_segments); ++i)
+    for (usize i = 0; mod_decl->path != NULL && i < list_size(&mod_decl->path->path.path_segments); ++i)
     {
-        AST* path_segment = list_get(&path->path.path_segments, i);
+        AST* path_segment = list_get(&mod_decl->path->path.path_segments, i);
         Module* submodule = module_find_submodule_by_name(current_mod, path_segment->path_segment.name);
 
         if (submodule == NULL)
@@ -47,5 +40,5 @@ AST* mod_decl_parse(Parser* parser)
 
     parser->src_file->module = current_mod;
 
-    return mod_decl;
+    return ast;
 }

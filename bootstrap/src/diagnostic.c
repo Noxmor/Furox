@@ -5,6 +5,7 @@
 
 #include "assert.h"
 #include "compiler.h"
+#include "source_map.h"
 
 typedef struct DiagnosticInfo
 {
@@ -23,7 +24,7 @@ static const DiagnosticInfo diagnostic_id_to_info[FRX_DIAGNOSTIC_ID_COUNT] = {
 };
 
 Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl,
-                              SourceRange range, ...)
+                              SourceSpan span, ...)
 {
     FRX_ASSERT(id < FRX_DIAGNOSTIC_ID_COUNT);
     FRX_ASSERT(lvl < FRX_DIAGNOSTIC_LVL_COUNT);
@@ -32,7 +33,7 @@ Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl,
 
     d->id = id;
     d->lvl = lvl;
-    d->range = range;
+    d->span = span;
 
     usize args_count = diagnostic_id_to_info[d->id].args_count;
 
@@ -41,7 +42,7 @@ Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl,
     if (args_count > 0)
     {
         va_list args;
-        va_start(args, range);
+        va_start(args, span);
 
         for (usize i = 0; i < args_count; ++i)
         {
@@ -54,11 +55,9 @@ Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl,
     return d;
 }
 
-void diagnostic_emit(const Diagnostic* d, const char* filepath)
+void diagnostic_emit(const Diagnostic* d)
 {
     FRX_ASSERT(d != NULL);
-
-    FRX_ASSERT(filepath != NULL);
 
     const char* lvl_str = NULL;
     const char* color_str = NULL;
@@ -102,10 +101,14 @@ void diagnostic_emit(const Diagnostic* d, const char* filepath)
     }
 
     const char* clear_color_str = "\033[0m";
+    const char* filepath = source_span_filepath(d->span);
 
-    fprintf(output, "[%s%s%s]: %s:%zu:%zu: ", color_str, lvl_str,
-            clear_color_str, filepath, d->range.start.line,
-            d->range.start.column);
+    SourceLine line;
+    SourceColumn column;
+    source_map_resolve_offset(d->span.lo, &line, &column);
+
+    fprintf(output, "[%s%s%s]: %s:%u:%u: ", color_str, lvl_str,
+            clear_color_str, filepath, line, column);
 
     const char* format = diagnostic_id_to_info[d->id].format;
     usize args_count = diagnostic_id_to_info[d->id].args_count;

@@ -20,7 +20,7 @@ AST* call_expr_parse(Parser* parser, AST* callee)
     ASTCallExpr* call_expr = &ast->call_expr;
     list_init(&call_expr->args);
     call_expr->callee = callee;
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     while (!parser_match(parser, FRX_TOKEN_TYPE_RPAREN))
     {
@@ -33,6 +33,7 @@ AST* call_expr_parse(Parser* parser, AST* callee)
         call_expr_add_arg(call_expr, arg);
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
     return ast;

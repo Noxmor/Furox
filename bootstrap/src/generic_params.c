@@ -41,7 +41,7 @@ static AST* generic_param_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_GENERIC_PARAM);
     ASTGenericParam* generic_param = &ast->generic_param;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span = parser_current_span(parser);
 
     const char* name = parser_current_token(parser)->identifier;
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
@@ -62,8 +62,6 @@ static AST* generic_param_parse(Parser* parser)
             generic_param_add_trait_bound(generic_param, trait_bound);
         }
     }
-
-    ast->range.end = parser_current_location(parser);
 
     parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE,
                          FRX_SYMBOL_TYPE_GENERIC_PARAM, name, generic_param);
@@ -91,7 +89,7 @@ AST* generic_params_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_GENERIC_PARAMS);
     ASTGenericParams* generic_params = &ast->generic_params;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     generic_params_init(generic_params);
 
@@ -108,9 +106,8 @@ AST* generic_params_parse(Parser* parser)
         generic_params_add_param(generic_params, param);
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_GT);
-
-    ast->range.end = parser_current_location(parser);
 
     return ast;
 }

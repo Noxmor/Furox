@@ -27,7 +27,7 @@ AST* struct_field_parse(Parser* parser)
     AST* ast = ast_create(FRX_AST_TYPE_STRUCT_FIELD);
     ASTStructField* field = &ast->struct_field;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     SymbolVisibility visibility = FRX_SYMBOL_VISIBILITY_PRIVATE;
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_PUB)
@@ -48,11 +48,10 @@ AST* struct_field_parse(Parser* parser)
 
     AST* type = type_specifier_parse(parser);
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
     struct_field_init(field, name, visibility, type);
-
-    ast->range.end = parser_current_location(parser);
 
     return ast;
 }
@@ -73,7 +72,7 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
     AST* ast = ast_create(FRX_AST_TYPE_STRUCT_DEF);
     ASTStructDef* struct_def = &ast->struct_def;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     StructKind kind = FRX_STRUCT_KIND_COUNT;
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_STRUCT)
@@ -109,11 +108,10 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
         list_add(&struct_def->fields, struct_field);
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
     parser_pop_scope(parser);
-
-    ast->range.end = parser_current_location(parser);
 
     parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_STRUCT,
                          struct_def->name, struct_def);

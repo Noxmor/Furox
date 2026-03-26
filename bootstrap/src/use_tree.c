@@ -18,6 +18,8 @@ AST* use_tree_parse(Parser* parser)
     use_tree->type = FRX_AST_USE_TREE_TYPE_SIMPLE;
     use_tree->path_segment = parser_current_token(parser)->identifier;
 
+    ast->span.lo = parser_current_span(parser).lo;
+
     parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
 
     if (parser_match(parser, FRX_TOKEN_TYPE_RESOLUTION))
@@ -26,6 +28,7 @@ AST* use_tree_parse(Parser* parser)
 
         if (parser_match(parser, FRX_TOKEN_TYPE_STAR))
         {
+            ast->span.hi = parser_current_span(parser).hi;
             parser_eat(parser, FRX_TOKEN_TYPE_STAR);
 
             use_tree->type = FRX_AST_USE_TREE_TYPE_GLOB;
@@ -53,6 +56,7 @@ AST* use_tree_parse(Parser* parser)
                 }
             }
 
+            ast->span.hi = parser_current_span(parser).hi;
             parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
             return ast;
@@ -60,6 +64,7 @@ AST* use_tree_parse(Parser* parser)
 
         use_tree->type = FRX_AST_USE_TREE_TYPE_NESTED;
         AST* child = use_tree_parse(parser);
+        ast->span.hi = child->span.hi;
         list_add(&use_tree->childs, child);
 
         return ast;

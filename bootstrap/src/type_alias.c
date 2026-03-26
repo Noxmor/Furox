@@ -10,6 +10,8 @@ AST* type_alias_parse(Parser* parser, SymbolVisibility visibility)
     AST* ast = ast_create(FRX_AST_TYPE_TYPE_ALIAS);
     ASTTypeAlias* type_alias = &ast->type_alias;
 
+    ast->span.lo = parser_current_span(parser).lo;
+
     parser_eat(parser, FRX_TOKEN_TYPE_KW_TYPE);
 
     type_alias->name = parser_current_token(parser)->identifier;
@@ -19,6 +21,7 @@ AST* type_alias_parse(Parser* parser, SymbolVisibility visibility)
 
     type_alias->type = type_specifier_parse(parser);
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
     parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_TYPE_ALIAS, type_alias->name, type_alias);

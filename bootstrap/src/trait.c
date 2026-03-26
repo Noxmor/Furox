@@ -20,7 +20,7 @@ AST* trait_parse(Parser* parser, SymbolVisibility visibility)
     AST* ast = ast_create(FRX_AST_TYPE_TRAIT);
     ASTTrait* trait = &ast->trait;
 
-    ast->range.start = parser_current_location(parser);
+    ast->span.lo = parser_current_span(parser).lo;
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_TRAIT);
 
@@ -36,9 +36,8 @@ AST* trait_parse(Parser* parser, SymbolVisibility visibility)
         list_add(&trait->methods, func_decl);
     }
 
+    ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
-
-    ast->range.end = parser_current_location(parser);
 
     parser_pop_scope(parser);
 
