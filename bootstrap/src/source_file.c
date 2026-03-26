@@ -102,8 +102,8 @@ void source_file_resolve_offset(const SourceFile* source_file, SourceOffset offs
 
     FRX_ASSERT(column != NULL);
 
-    *line = 0;
-    *column = 0;
+    *line = 1;
+    *column = 1;
 
     SourceOffset pos = source_file->offset;
     const char* data = source_file->data;
@@ -113,7 +113,7 @@ void source_file_resolve_offset(const SourceFile* source_file, SourceOffset offs
         if (*data++ == '\n')
         {
             *line += 1;
-            *column = 0;
+            *column = 1;
         }
         else
         {
