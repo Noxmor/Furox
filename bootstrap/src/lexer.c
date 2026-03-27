@@ -71,20 +71,19 @@ void lexer_init_keyword_table(void)
 
 static void lexer_read_token(Lexer* lexer, Token* token);
 
-void lexer_init(Lexer* lexer, const char* source, SourceOffset offset)
+void lexer_init(Lexer* lexer, const SourceBuffer* buffer)
 {
     FRX_ASSERT(lexer != NULL);
-    FRX_ASSERT(source != NULL);
+
+    FRX_ASSERT(buffer != NULL);
 
     lexer->failed = FRX_FALSE;
 
     lexer->identifier_placeholder = malloc(sizeof(char) *FRX_LEXER_IDENT_INITIAL_SIZE);
     lexer->identifier_placeholder_size = FRX_LEXER_IDENT_INITIAL_SIZE;
 
-    lexer->source = source;
-    lexer->pos = lexer->source;
-
-    lexer->offset = offset;
+    lexer->pos = buffer->src;
+    lexer->buffer = buffer;
 
     lexer_read_token(lexer, &lexer->tokens[0]);
 
@@ -128,7 +127,7 @@ Token* lexer_current_token(Lexer* lexer)
 char lexer_peek_char(Lexer* lexer, usize offset)
 {
     FRX_ASSERT(lexer != NULL);
-    FRX_ASSERT((lexer->pos - lexer->source) + offset <= strlen(lexer->source));
+    FRX_ASSERT((lexer->pos - lexer->buffer->src) + offset <= strlen(lexer->buffer->src));
 
     return lexer->pos[offset];
 }
@@ -236,7 +235,7 @@ static void lexer_parse_identifier(Lexer* lexer, Token* token)
         current = lexer_current_char(lexer);
     }
 
-    token->span.hi = lexer->offset + lexer->pos - lexer->source;
+    token->span.hi = lexer->buffer->offset + lexer->pos - lexer->buffer->src;
 
     lexer->identifier_placeholder[identifier_index] = '\0';
 
@@ -270,7 +269,7 @@ static void lexer_parse_binary_number(Lexer* lexer, Token* token)
         current = lexer_current_char(lexer);
     }
 
-    token->span.hi = lexer->offset + lexer->pos - lexer->source;
+    token->span.hi = lexer->buffer->offset + lexer->pos - lexer->buffer->src;
 }
 
 static void lexer_parse_hex_number(Lexer* lexer, Token* token)
@@ -302,7 +301,7 @@ static void lexer_parse_hex_number(Lexer* lexer, Token* token)
         current = lexer_current_char(lexer);
     }
 
-    token->span.hi = lexer->offset + lexer->pos - lexer->source;
+    token->span.hi = lexer->buffer->offset + lexer->pos - lexer->buffer->src;
 }
 
 static void lexer_parse_number(Lexer* lexer, Token* token)
@@ -356,7 +355,7 @@ static void lexer_parse_number(Lexer* lexer, Token* token)
         lexer_advance(lexer);
     }
 
-    token->span.hi = lexer->offset + lexer->pos - lexer->source;
+    token->span.hi = lexer->buffer->offset + lexer->pos - lexer->buffer->src;
 }
 
 static void lexer_parse_char_literal(Lexer* lexer, Token* token)
@@ -412,7 +411,7 @@ static void lexer_parse_char_literal(Lexer* lexer, Token* token)
 
     lexer_advance(lexer);
 
-    token->span.hi = lexer->offset + lexer->pos - lexer->source;
+    token->span.hi = lexer->buffer->offset + lexer->pos - lexer->buffer->src;
 }
 
 static void lexer_parse_string_literal(Lexer* lexer, Token* token)
@@ -449,7 +448,7 @@ static void lexer_parse_string_literal(Lexer* lexer, Token* token)
 
     lexer_advance(lexer);
 
-    token->span.hi = lexer->offset + lexer->pos - lexer->source;
+    token->span.hi = lexer->buffer->offset + lexer->pos - lexer->buffer->src;
 }
 
 static void lexer_read_token(Lexer* lexer, Token* token)
@@ -465,7 +464,7 @@ static void lexer_read_token(Lexer* lexer, Token* token)
 
     lexer_skip_whitespaces(lexer);
 
-    token->span.lo = lexer->offset + lexer->pos - lexer->source;
+    token->span.lo = lexer->buffer->offset + lexer->pos - lexer->buffer->src;
 
     char current = lexer_current_char(lexer);
 
@@ -764,7 +763,7 @@ static void lexer_read_token(Lexer* lexer, Token* token)
 
     lexer_advance(lexer);
 
-    token->span.hi = lexer->offset + lexer->pos - lexer->source;
+    token->span.hi = lexer->buffer->offset + lexer->pos - lexer->buffer->src;
 }
 
 void lexer_next_token(Lexer* lexer)

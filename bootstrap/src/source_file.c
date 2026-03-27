@@ -31,14 +31,12 @@ SourceFile* source_file_load_from_disk(const char* filepath, SourceOffset offset
         return NULL;
     }
 
+    data[data_len] = '\0';
+
     SourceFile* source_file = compiler_alloc(sizeof(SourceFile));
 
     source_file->path = filepath;
-    source_file->data = data;
-    source_file->data_len = data_len;
-    source_file->offset = offset;
-
-    source_file->data[source_file->data_len] = '\0';
+    source_buffer_init(&source_file->buffer, data, data_len, offset);
 
     source_file->module = compiler_root_module();
     source_file->global_scope = scope_create_global();
@@ -68,56 +66,15 @@ const char* source_file_filepath(const SourceFile* source_file)
     return source_file->path;
 }
 
-const char* source_file_data(const SourceFile* source_file)
+const SourceBuffer* source_file_buffer(const SourceFile* source_file)
 {
     FRX_ASSERT(source_file != NULL);
 
-    return source_file->data;
-}
-
-usize source_file_data_len(const SourceFile* source_file)
-{
-    FRX_ASSERT(source_file != NULL);
-
-    return source_file->data_len;
-}
-
-SourceOffset source_file_offset(const SourceFile* source_file)
-{
-    FRX_ASSERT(source_file != NULL);
-
-    return source_file->offset;
+    return &source_file->buffer;
 }
 
 void source_file_resolve_offset(const SourceFile* source_file, SourceOffset offset,
                               SourceLine* line, SourceColumn* column)
 {
-    FRX_ASSERT(source_file != NULL);
-
-    FRX_ASSERT(offset >= source_file->offset);
-
-    FRX_ASSERT(offset <= source_file->offset + source_file->data_len);
-
-    FRX_ASSERT(line != NULL);
-
-    FRX_ASSERT(column != NULL);
-
-    *line = 1;
-    *column = 1;
-
-    SourceOffset pos = source_file->offset;
-    const char* data = source_file->data;
-
-    while (pos++ != offset)
-    {
-        if (*data++ == '\n')
-        {
-            *line += 1;
-            *column = 1;
-        }
-        else
-        {
-            *column += 1;
-        }
-    }
+    source_buffer_resolve_offset(&source_file->buffer, offset, line, column);
 }

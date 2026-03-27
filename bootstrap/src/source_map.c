@@ -23,7 +23,7 @@ void source_map_add_source_file(const char* filepath)
     SourceFile* source_file = source_file_load_from_disk(filepath, source_map.current_offset);
     if (source_file != NULL)
     {
-        source_map.current_offset += source_file_data_len(source_file) + 1;
+        source_map.current_offset += source_file_buffer(source_file)->offset + 1;
         list_add(&source_map.source_files, source_file);
     }
 }
@@ -33,7 +33,9 @@ SourceFile* source_map_lookup_source_file(SourceOffset offset)
     for (usize i = 0; i < list_size(&source_map.source_files); ++i)
     {
         SourceFile* source_file = list_get(&source_map.source_files, i);
-        if (source_file->offset <= offset && offset <= source_file->offset + source_file_data_len(source_file))
+        const SourceBuffer* buffer = source_file_buffer(source_file);
+
+        if (buffer->offset <= offset && offset <= buffer->offset + buffer->len)
         {
             return source_file;
         }

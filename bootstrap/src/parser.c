@@ -20,7 +20,7 @@ void parser_init(Parser* parser, SourceFile* src_file)
     FRX_LOG_INFO("Initializing parser for file: %s...", src_file->path);
 
     parser->src_file = src_file;
-    lexer_init(&parser->lexer, source_file_data(src_file), source_file_offset(src_file));
+    lexer_init(&parser->lexer, source_file_buffer(src_file));
     parser->global_scope = src_file->global_scope;
     parser->current_scope = parser->global_scope;
     parser->failed = FRX_FALSE;
