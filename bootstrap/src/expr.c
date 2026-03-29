@@ -94,6 +94,7 @@ static AST* expr_parse_primary(Parser* parser)
         case FRX_TOKEN_TYPE_KW_FALSE: return bool_expr_parse(parser);
         case FRX_TOKEN_TYPE_KW_NULLPTR: return nullptr_expr_parse(parser);
         case FRX_TOKEN_TYPE_KW_SELF_LOWER: return self_expr_parse(parser);
+        case FRX_TOKEN_TYPE_KW_SIZEOF: return sizeof_expr_parse(parser);
         case FRX_TOKEN_TYPE_KW_EXTERN:
         case FRX_TOKEN_TYPE_IDENT:
         case FRX_TOKEN_TYPE_KW_SELF_UPPER:

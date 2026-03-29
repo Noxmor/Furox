@@ -256,6 +256,11 @@ typedef struct ASTCastExpr
     AST* type_specifier;
 } ASTCastExpr;
 
+typedef struct ASTSizeofExpr
+{
+    AST* expr;
+} ASTSizeofExpr;
+
 typedef struct ASTModDecl
 {
     AST* path;
@@ -428,6 +433,7 @@ enum
     FRX_AST_TYPE_CALL_EXPR,
     FRX_AST_TYPE_METHOD_CALL_EXPR,
     FRX_AST_TYPE_CAST_EXPR,
+    FRX_AST_TYPE_SIZEOF_EXPR,
     FRX_AST_TYPE_INT_LIT,
     FRX_AST_TYPE_CHAR_LIT,
     FRX_AST_TYPE_STRING_LIT,
@@ -484,6 +490,7 @@ typedef struct AST
         ASTCallExpr call_expr;
         ASTMethodCallExpr method_call_expr;
         ASTCastExpr cast_expr;
+        ASTSizeofExpr sizeof_expr;
         ASTIntLiteral int_literal;
         ASTCharLiteral char_literal;
         ASTStringLiteral string_literal;
