@@ -1,0 +1,13 @@
+struct Foo
+{
+    pub x: i32;
+    pub y: i32;
+    pub z: i32;
+}
+
+fn main() -> i32
+{
+    let foo: Foo;
+
+    return sizeof(foo) - sizeof(foo.x) * 3;
+}
