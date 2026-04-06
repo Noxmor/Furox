@@ -25,6 +25,7 @@ static char* token_type_names[] = {
     [FRX_TOKEN_TYPE_KW_B16] = "b16",
     [FRX_TOKEN_TYPE_KW_B32] = "b32",
     [FRX_TOKEN_TYPE_KW_B64] = "b64",
+    [FRX_TOKEN_TYPE_KW_BOOL] = "bool",
     [FRX_TOKEN_TYPE_KW_CHAR] = "char",
     [FRX_TOKEN_TYPE_KW_F32] = "f32",
     [FRX_TOKEN_TYPE_KW_F64] = "f64",

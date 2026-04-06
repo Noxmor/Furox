@@ -264,6 +264,7 @@ const Type* type_intern_primitive(TokenType primitive)
         case FRX_TOKEN_TYPE_KW_B16: return &b16_type;
         case FRX_TOKEN_TYPE_KW_B32: return &b32_type;
         case FRX_TOKEN_TYPE_KW_B64: return &b64_type;
+        case FRX_TOKEN_TYPE_KW_BOOL: return &b8_type;
         case FRX_TOKEN_TYPE_KW_CHAR: return &char_type;
         case FRX_TOKEN_TYPE_KW_F32: return &f32_type;
         case FRX_TOKEN_TYPE_KW_F64: return &f64_type;
