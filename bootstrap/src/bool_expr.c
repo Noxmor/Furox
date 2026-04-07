@@ -12,7 +12,7 @@ AST* bool_expr_parse(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_BOOL_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_BOOL_EXPR);
     ASTBoolExpr* bool_expr = &ast->bool_expr;
 
     ast->span = parser_current_span(parser);

@@ -5,7 +5,7 @@
 
 AST* func_param_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_FUNC_PARAM);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_FUNC_PARAM);
     ASTFuncParam* param = &ast->func_param;
 
     ast->span.lo = parser_current_span(parser).lo;

@@ -37,7 +37,7 @@ AST* stmt_parse(Parser* parser)
 
             parser_recover(parser);
 
-            return ast_create(FRX_AST_TYPE_ERROR);
+            return parser_create_ast(parser, FRX_AST_TYPE_ERROR);
         }
     }
 }

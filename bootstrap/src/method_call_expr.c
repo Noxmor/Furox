@@ -5,9 +5,9 @@
 #include "sema.h"
 #include "type_system.h"
 
-static AST* method_call_expr_create(const char* name, AST* callee)
+static AST* method_call_expr_create(Parser* parser, const char* name, AST* callee)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_METHOD_CALL_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_METHOD_CALL_EXPR);
 
     ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
 
@@ -24,7 +24,7 @@ AST* method_call_expr_parse(Parser* parser, const char* name, AST* callee)
 {
     FRX_ASSERT(parser != NULL);
 
-    AST* ast = method_call_expr_create(name, callee);
+    AST* ast = method_call_expr_create(parser, name, callee);
     ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
 
     ast->span.lo = parser_current_span(parser).lo;
@@ -81,7 +81,7 @@ void method_call_expr_resolve(AST* ast, ResolutionContext* ctx)
         ast->type = FRX_AST_TYPE_CALL_EXPR;
         ASTCallExpr* call_expr = &ast->call_expr;
 
-        AST* field_expr = ast_create(FRX_AST_TYPE_FIELD_EXPR);
+        AST* field_expr = ast_create(FRX_AST_TYPE_FIELD_EXPR, method_call_expr->callee->id);
         field_expr->field_expr.field_name = name;
         field_expr->field_expr.base = base;
         field_expr->field_expr.resolved_type = type;

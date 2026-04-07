@@ -3,7 +3,7 @@
 
 AST* break_stmt_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_BREAK_STMT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_BREAK_STMT);
     ast->span.lo = parser_current_span(parser).lo;
 
     if (parser_eat(parser, FRX_TOKEN_TYPE_KW_BREAK))

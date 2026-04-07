@@ -10,7 +10,7 @@ AST* use_tree_parse(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_USE_TREE);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_USE_TREE);
     ASTUseTree* use_tree = &ast->use_tree;
     use_tree->path_segment = NULL;
     list_init(&use_tree->childs);

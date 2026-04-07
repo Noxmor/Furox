@@ -24,7 +24,7 @@ static void struct_def_init(ASTStructDef* struct_def, const char* name,
 
 AST* struct_field_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_STRUCT_FIELD);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_STRUCT_FIELD);
     ASTStructField* field = &ast->struct_field;
 
     ast->span.lo = parser_current_span(parser).lo;
@@ -69,7 +69,7 @@ static void struct_field_resolve_early(AST* ast, ResolutionContext* ctx)
 
 AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_STRUCT_DEF);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_STRUCT_DEF);
     ASTStructDef* struct_def = &ast->struct_def;
 
     ast->span.lo = parser_current_span(parser).lo;

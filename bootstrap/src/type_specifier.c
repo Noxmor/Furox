@@ -69,7 +69,7 @@ static void type_specifier_init_array(ASTTypeSpecifier* type, AST* base, AST* si
 
 AST* type_specifier_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_TYPE_SPECIFIER);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_TYPE_SPECIFIER);
     ASTTypeSpecifier* type = &ast->type_specifier;
 
     ast->span.lo = parser_current_span(parser).lo;
@@ -138,14 +138,14 @@ AST* type_specifier_parse(Parser* parser)
                                           token_type_to_str(parser_current_type(parser)));
         compiler_add_diagnostic(d);
 
-        return ast_create(FRX_AST_TYPE_ERROR);
+        return parser_create_ast(parser, FRX_AST_TYPE_ERROR);
     }
 
     while (parser_match(parser, FRX_TOKEN_TYPE_STAR) ||
         parser_match(parser, FRX_TOKEN_TYPE_BIT_AND))
     {
         b8 mutable = parser_match(parser, FRX_TOKEN_TYPE_STAR);
-        AST* pointer_type = ast_create(FRX_AST_TYPE_TYPE_SPECIFIER);
+        AST* pointer_type = parser_create_ast(parser, FRX_AST_TYPE_TYPE_SPECIFIER);
         type_specifier_init_pointer(&pointer_type->type_specifier, ast, mutable);
         ast = pointer_type;
         type = &pointer_type->type_specifier;

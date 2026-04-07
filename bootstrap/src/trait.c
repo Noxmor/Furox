@@ -17,7 +17,7 @@ AST* trait_parse(Parser* parser, SymbolVisibility visibility)
 {
     parser_push_scope(parser);
 
-    AST* ast = ast_create(FRX_AST_TYPE_TRAIT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_TRAIT);
     ASTTrait* trait = &ast->trait;
 
     ast->span.lo = parser_current_span(parser).lo;

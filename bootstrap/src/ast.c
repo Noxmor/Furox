@@ -7,13 +7,14 @@
 #include "symbol.h"
 #include "type_system.h"
 
-AST* ast_create(ASTType type)
+AST* ast_create(ASTType type, ASTNodeID id)
 {
     FRX_ASSERT(type < FRX_AST_TYPE_COUNT);
 
     AST* ast = compiler_alloc_ast(sizeof(AST));
 
     ast->type = type;
+    ast->id = id;
 
     return ast;
 }

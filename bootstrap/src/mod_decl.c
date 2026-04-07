@@ -4,7 +4,7 @@
 
 AST* mod_decl_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_MOD_DECL);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_MOD_DECL);
     ASTModDecl* mod_decl = &ast->mod_decl;
 
     ast->span.lo = parser_current_span(parser).lo;

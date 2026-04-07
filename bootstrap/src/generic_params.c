@@ -3,11 +3,11 @@
 #include "parser.h"
 #include "symbol.h"
 
-static AST* trait_bound_create(AST* type)
+static AST* trait_bound_create(Parser* parser, AST* type)
 {
     FRX_ASSERT(type != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_TRAIT_BOUND);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_TRAIT_BOUND);
     ASTTraitBound* trait_bound = &ast->trait_bound;
 
     trait_bound->type = type;
@@ -17,7 +17,7 @@ static AST* trait_bound_create(AST* type)
 
 static AST* trait_bound_parse(Parser* parser)
 {
-    return trait_bound_create(type_specifier_parse(parser));
+    return trait_bound_create(parser, type_specifier_parse(parser));
 }
 
 static void generic_param_init(ASTGenericParam* generic_param, const char* name)
@@ -38,7 +38,7 @@ static void generic_param_add_trait_bound(ASTGenericParam* generic_param,
 
 static AST* generic_param_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_GENERIC_PARAM);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_GENERIC_PARAM);
     ASTGenericParam* generic_param = &ast->generic_param;
 
     ast->span = parser_current_span(parser);
@@ -86,7 +86,7 @@ static void generic_params_add_param(ASTGenericParams* generic_params,
 
 AST* generic_params_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_GENERIC_PARAMS);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_GENERIC_PARAMS);
     ASTGenericParams* generic_params = &ast->generic_params;
 
     ast->span.lo = parser_current_span(parser).lo;

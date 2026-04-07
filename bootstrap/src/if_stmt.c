@@ -14,7 +14,7 @@ static void if_stmt_init(ASTIfStmt* if_stmt, AST* condition, AST* if_block,
 
 AST* if_stmt_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_IF_STMT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_IF_STMT);
     ASTIfStmt* if_stmt = &ast->if_stmt;
 
     ast->span.lo = parser_current_span(parser).lo;
@@ -38,7 +38,7 @@ AST* if_stmt_parse(Parser* parser)
         if (parser_match(parser, FRX_TOKEN_TYPE_KW_IF))
         {
             parser_push_scope(parser);
-            else_block = block_from_stmt(stmt_parse(parser), parser->current_scope);
+            else_block = parser_block_from_stmt(parser, stmt_parse(parser), parser->current_scope);
             parser_pop_scope(parser);
         }
         else

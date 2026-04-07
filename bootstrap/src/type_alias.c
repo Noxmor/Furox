@@ -7,7 +7,7 @@ AST* type_alias_parse(Parser* parser, SymbolVisibility visibility)
 {
     FRX_ASSERT(parser != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_TYPE_ALIAS);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_TYPE_ALIAS);
     ASTTypeAlias* type_alias = &ast->type_alias;
 
     ast->span.lo = parser_current_span(parser).lo;

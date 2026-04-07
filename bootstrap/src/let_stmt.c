@@ -18,7 +18,7 @@ static void let_stmt_init(ASTLetStmt* let_stmt, b8 mutable, const char* name,
 
 AST* let_stmt_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_LET_STMT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_LET_STMT);
     ASTLetStmt* let_stmt = &ast->let_stmt;
 
     ast->span.lo = parser_current_span(parser).lo;

@@ -23,7 +23,7 @@ static void translation_unit_add_item(ASTTranslationUnit* unit, AST* item)
 
 AST* translation_unit_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_TRANSLATION_UNIT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_TRANSLATION_UNIT);
     ASTTranslationUnit* unit = &ast->translation_unit;
 
     ast->span.lo = parser_current_span(parser).lo;

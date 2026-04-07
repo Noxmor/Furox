@@ -8,8 +8,17 @@
 #include "type_system.h"
 #include "scope.h"
 #include "module.h"
+#include "source_file.h"
 
 typedef struct AST AST;
+
+typedef u32 ASTLocalID;
+
+typedef struct ASTNodeID
+{
+    SourceFileID owner;
+    ASTLocalID local;
+} ASTNodeID;
 
 typedef struct ASTIntLiteral
 {
@@ -447,6 +456,7 @@ typedef u8 ASTType;
 
 typedef struct AST
 {
+    ASTNodeID id;
     SourceSpan span;
     ASTType type;
     union
@@ -499,9 +509,9 @@ typedef struct AST
     };
 } AST;
 
-AST* ast_create(ASTType type);
+AST* ast_create(ASTType type, ASTNodeID id);
 
-AST* block_from_stmt(AST* stmt, Scope* scope);
+AST* parser_block_from_stmt(Parser* parser, AST* stmt, Scope* scope);
 
 const Type* expr_infer_type(AST* expr);
 

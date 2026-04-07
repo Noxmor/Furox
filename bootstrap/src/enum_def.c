@@ -18,7 +18,7 @@ static void enum_variant_init(ASTEnumVariant* variant, const char* name)
 
 static AST* enum_variant_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_ENUM_VARIANT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_ENUM_VARIANT);
     ASTEnumVariant* variant = &ast->enum_variant;
 
     ast->span.lo = parser_current_span(parser).lo;
@@ -64,7 +64,7 @@ static void enum_def_add_variant(ASTEnumDef* enum_def, AST* variant)
 
 AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_ENUM_DEF);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_ENUM_DEF);
     ASTEnumDef* enum_def = &ast->enum_def;
 
     ast->span.lo = parser_current_span(parser).lo;

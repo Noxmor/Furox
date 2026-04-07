@@ -4,13 +4,13 @@
 #include "operator.h"
 #include "parser.h"
 
-static AST* unary_expr_create(TokenType type, Operator operator, AST* operand)
+static AST* unary_expr_create(Parser* parser, TokenType type, Operator operator, AST* operand)
 {
     FRX_ASSERT(token_type_is_prefix_operator(type) || token_type_is_postfix_operator(type));
 
     FRX_ASSERT(operator < FRX_OPERATOR_COUNT);
 
-    AST* ast = ast_create(FRX_AST_TYPE_UNARY_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_UNARY_EXPR);
     ASTUnaryExpr* unary_expr = &ast->unary_expr;
 
     unary_expr->type = type;
@@ -21,14 +21,14 @@ static AST* unary_expr_create(TokenType type, Operator operator, AST* operand)
     return ast;
 }
 
-static AST* binary_expr_create(TokenType type, Operator operator,
+static AST* binary_expr_create(Parser* parser, TokenType type, Operator operator,
                                AST* left, AST* right)
 {
     FRX_ASSERT(token_type_is_infix_operator(type));
 
     FRX_ASSERT(operator < FRX_OPERATOR_COUNT);
 
-    AST* ast = ast_create(FRX_AST_TYPE_BINARY_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_BINARY_EXPR);
     ASTBinaryExpr* binary_expr = &ast->binary_expr;
 
     binary_expr->type = type;
@@ -40,13 +40,13 @@ static AST* binary_expr_create(TokenType type, Operator operator,
     return ast;
 }
 
-static AST* field_expr_create(AST* base, const char* field_name)
+static AST* field_expr_create(Parser* parser, AST* base, const char* field_name)
 {
     FRX_ASSERT(base != NULL);
 
     FRX_ASSERT(field_name != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_FIELD_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_FIELD_EXPR);
     ASTFieldExpr* field_expr = &ast->field_expr;
 
     field_expr->base = base;
@@ -55,11 +55,11 @@ static AST* field_expr_create(AST* base, const char* field_name)
     return ast;
 }
 
-static AST* path_expr_create(AST* path)
+static AST* path_expr_create(Parser* parser, AST* path)
 {
     FRX_ASSERT(path != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_PATH_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_PATH_EXPR);
     ASTPathExpr* path_expr = &ast->path_expr;
 
     path_expr->path = path;
@@ -68,13 +68,13 @@ static AST* path_expr_create(AST* path)
     return ast;
 }
 
-static AST* cast_expr_create(AST* expr, AST* type_specifier)
+static AST* cast_expr_create(Parser* parser, AST* expr, AST* type_specifier)
 {
     FRX_ASSERT(expr != NULL);
 
     FRX_ASSERT(type_specifier != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_CAST_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_CAST_EXPR);
     ASTCastExpr* cast_expr = &ast->cast_expr;
 
     cast_expr->expr = expr;
@@ -105,7 +105,7 @@ static AST* expr_parse_primary(Parser* parser)
                 return struct_literal_parse(parser, path);
             }
 
-            return path_expr_create(path);
+            return path_expr_create(parser, path);
         }
         default:
         {
@@ -117,7 +117,7 @@ static AST* expr_parse_primary(Parser* parser)
 
             parser_recover(parser);
 
-            return ast_create(FRX_AST_TYPE_ERROR);
+            return parser_create_ast(parser, FRX_AST_TYPE_ERROR);
         }
     }
 }
@@ -153,7 +153,7 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
 
         Operator operator = token_type_to_prefix_operator(type);
         Precedence precedence = operator_to_precedence(operator);
-        expr = unary_expr_create(type, operator, expr_parse_with_precedence(parser, precedence));
+        expr = unary_expr_create(parser, type, operator, expr_parse_with_precedence(parser, precedence));
     }
     else
     {
@@ -188,7 +188,7 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
                     return NULL;
                 }
 
-                expr = binary_expr_create(type, operator, expr, index);
+                expr = binary_expr_create(parser, type, operator, expr, index);
             }
             else if (operator == FRX_OPERATOR_MEMBER_ACCESS)
             {
@@ -205,7 +205,7 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
                 }
                 else
                 {
-                    expr = field_expr_create(expr, name);
+                    expr = field_expr_create(parser, expr, name);
                 }
             }
             else if (operator == FRX_OPERATOR_CALL)
@@ -215,11 +215,11 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
             else if (operator == FRX_OPERATOR_CAST)
             {
                 AST* casted_type = type_specifier_parse(parser);
-                expr = cast_expr_create(expr, casted_type);
+                expr = cast_expr_create(parser, expr, casted_type);
             }
             else
             {
-                expr = unary_expr_create(type, operator, expr);
+                expr = unary_expr_create(parser, type, operator, expr);
             }
 
             continue;
@@ -235,7 +235,7 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
 
             parser_eat(parser, type);
 
-            expr = binary_expr_create(type, operator, expr,
+            expr = binary_expr_create(parser, type, operator, expr,
                                       expr_parse_with_precedence(parser, precedence));
 
             continue;

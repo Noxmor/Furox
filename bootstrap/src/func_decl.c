@@ -26,7 +26,7 @@ static void func_decl_init(ASTFuncDecl* func_decl, const char* name, b8 external
 
 AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_FUNC_DECL);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_FUNC_DECL);
     ASTFuncDecl* func_decl = &ast->func_decl;
     list_init(&func_decl->params);
     func_decl->scope = parser_push_scope(parser);

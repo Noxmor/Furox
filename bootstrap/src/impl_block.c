@@ -19,7 +19,7 @@ static void impl_block_init(ASTImplBlock* impl_block, AST* generic_params,
 
 AST* impl_block_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_IMPL_BLOCK);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_IMPL_BLOCK);
     ASTImplBlock* impl_block = &ast->impl_block;
     impl_block->scope = parser_push_scope(parser);
 

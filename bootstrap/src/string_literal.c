@@ -6,7 +6,7 @@ AST* string_literal_parse(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_STRING_LIT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_STRING_LIT);
     ASTStringLiteral* string_literal = &ast->string_literal;
 
     ast->span = parser_current_span(parser);

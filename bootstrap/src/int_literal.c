@@ -12,7 +12,7 @@ static void int_literal_init(ASTIntLiteral* literal, u64 value)
 
 AST* int_literal_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_INT_LIT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_INT_LIT);
     ASTIntLiteral* literal = &ast->int_literal;
 
     ast->span = parser_current_span(parser);

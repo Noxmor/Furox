@@ -6,7 +6,7 @@ AST* self_expr_parse(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_SELF_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_SELF_EXPR);
     ASTSelfExpr* self_expr = &ast->self_expr;
 
     ast->span = parser_current_span(parser);

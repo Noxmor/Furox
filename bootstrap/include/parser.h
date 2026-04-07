@@ -13,6 +13,7 @@ typedef struct Parser
     Lexer lexer;
     Scope* global_scope;
     Scope* current_scope;
+    ASTLocalID next_local_id;
     b8 external;
     b8 failed;
     b8 recovery;
@@ -48,6 +49,10 @@ Symbol* parser_insert_symbol(Parser* parser, SymbolVisibility visibility,
                              SymbolType type, const char* name, void* data);
 
 Symbol* parser_lookup_symbol(Parser* parser, const char* name);
+
+ASTNodeID parser_next_node_id(Parser* parser);
+
+AST* parser_create_ast(Parser* parser, ASTType type);
 
 void parser_fail(Parser* parser);
 

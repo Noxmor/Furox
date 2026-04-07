@@ -17,13 +17,13 @@ static void block_add_stmt(ASTBlock* block, AST* stmt)
     list_add(&block->stmts, stmt);
 }
 
-AST* block_from_stmt(AST* stmt, Scope* scope)
+AST* parser_block_from_stmt(Parser* parser, AST* stmt, Scope* scope)
 {
     FRX_ASSERT(stmt != NULL);
 
     FRX_ASSERT(scope != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_BLOCK);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_BLOCK);
     ASTBlock* block = &ast->block;
 
     block_init(block);
@@ -36,7 +36,7 @@ AST* block_from_stmt(AST* stmt, Scope* scope)
 AST* block_parse(Parser* parser)
 {
 
-    AST* ast = ast_create(FRX_AST_TYPE_BLOCK);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_BLOCK);
     ASTBlock* block = &ast->block;
     block->scope = parser_push_scope(parser);
 

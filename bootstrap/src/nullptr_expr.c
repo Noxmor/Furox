@@ -6,7 +6,7 @@ AST* nullptr_expr_parse(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_NULLPTR_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_NULLPTR_EXPR);
 
     ast->span = parser_current_span(parser);
 

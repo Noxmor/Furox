@@ -16,7 +16,7 @@ static void call_expr_add_arg(ASTCallExpr* call_expr, AST* arg)
 
 AST* call_expr_parse(Parser* parser, AST* callee)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_CALL_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_CALL_EXPR);
     ASTCallExpr* call_expr = &ast->call_expr;
     list_init(&call_expr->args);
     call_expr->callee = callee;

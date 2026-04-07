@@ -18,7 +18,7 @@ AST* struct_literal_field_parse(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_STRUCT_LIT_FIELD);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_STRUCT_LIT_FIELD);
     ASTStructLiteralField* field = &ast->struct_literal_field;
 
     ast->span.lo = parser_current_span(parser).lo;
@@ -81,7 +81,7 @@ AST* struct_literal_parse(Parser* parser, AST* path)
 
     FRX_ASSERT(path != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_STRUCT_LIT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_STRUCT_LIT);
     ASTStructLiteral* literal = &ast->struct_literal;
 
     ast->span.lo = parser_current_span(parser).lo;

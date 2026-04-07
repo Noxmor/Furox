@@ -24,7 +24,7 @@ static AST* path_segment_parse(Parser* parser, PathStyle style)
 
     FRX_ASSERT(style < FRX_PATH_STYLE_COUNT);
 
-    AST* ast = ast_create(FRX_AST_TYPE_PATH_SEGMENT);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_PATH_SEGMENT);
     ASTPathSegment* path_segment = &ast->path_segment;
 
     ast->span.lo = parser_current_span(parser).lo;
@@ -121,7 +121,7 @@ AST* path_parse(Parser* parser, PathStyle style)
 
     FRX_ASSERT(style < FRX_PATH_STYLE_COUNT);
 
-    AST* ast = ast_create(FRX_AST_TYPE_PATH);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_PATH);
     ASTPath* path = &ast->path;
 
     ast->span.lo = parser_current_span(parser).lo;

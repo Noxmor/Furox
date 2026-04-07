@@ -19,7 +19,7 @@ AST* while_loop_parse(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);
 
-    AST* ast = ast_create(FRX_AST_TYPE_WHILE_LOOP);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_WHILE_LOOP);
     ASTWhileLoop* while_loop = &ast->while_loop;
 
     ast->span.lo = parser_current_span(parser).lo;

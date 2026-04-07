@@ -5,7 +5,7 @@
 
 AST* sizeof_expr_parse(Parser* parser)
 {
-    AST* ast = ast_create(FRX_AST_TYPE_SIZEOF_EXPR);
+    AST* ast = parser_create_ast(parser, FRX_AST_TYPE_SIZEOF_EXPR);
     ASTSizeofExpr* sizeof_expr = &ast->sizeof_expr;
 
     ast->span.lo = parser_current_span(parser).lo;

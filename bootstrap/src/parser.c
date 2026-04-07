@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "ast.h"
 #include "compiler.h"
 #include "lexer.h"
 #include "assert.h"
@@ -179,6 +180,25 @@ Symbol* parser_lookup_symbol(Parser* parser, const char* name)
     FRX_ASSERT(parser != NULL);
 
     return scope_lookup_symbol(parser->current_scope, name);
+}
+
+ASTNodeID parser_next_node_id(Parser* parser)
+{
+    FRX_ASSERT(parser != NULL);
+
+    ASTNodeID id = {
+        .owner = parser->src_file->id,
+        .local = parser->next_local_id++
+    };
+
+    return id;
+}
+
+AST* parser_create_ast(Parser* parser, ASTType type)
+{
+    FRX_ASSERT(parser != NULL);
+
+    return ast_create(type, parser_next_node_id(parser));
 }
 
 void parser_fail(Parser* parser)
