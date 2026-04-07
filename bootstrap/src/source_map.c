@@ -20,10 +20,12 @@ void source_map_add_source_file(const char* filepath)
 {
     FRX_ASSERT(filepath != NULL);
 
-    SourceFile* source_file = source_file_load_from_disk(filepath, source_map.current_offset);
+    SourceFile* source_file = source_file_load_from_disk(filepath,
+                                                         list_size(&source_map.source_files),
+                                                         source_map.current_offset);
     if (source_file != NULL)
     {
-        source_map.current_offset += source_file_buffer(source_file)->offset + 1;
+        source_map.current_offset += source_file->buffer.len + 1;
         list_add(&source_map.source_files, source_file);
     }
 }
@@ -35,7 +37,7 @@ SourceFile* source_map_lookup_source_file(SourceOffset offset)
         SourceFile* source_file = list_get(&source_map.source_files, i);
         const SourceBuffer* buffer = source_file_buffer(source_file);
 
-        if (buffer->offset <= offset && offset <= buffer->offset + buffer->len)
+        if (source_file->offset <= offset && offset <= source_file->offset + buffer->len)
         {
             return source_file;
         }
@@ -52,12 +54,30 @@ void source_map_resolve_offset(SourceOffset offset, SourceLine* line, SourceColu
 
     FRX_ASSERT(column != NULL);
 
-    SourceFile* source_file = source_map_lookup_source_file(offset);
+    const SourceFile* source_file = source_map_lookup_source_file(offset);
+    const SourceBuffer* buffer = &source_file->buffer;
 
-    source_file_resolve_offset(source_file, offset, line, column);
+    *line = 1;
+    *column = 1;
+
+    SourceOffset pos = source_file->offset;
+    const char* data = buffer->src;
+
+    while (pos++ != offset)
+    {
+        if (*data++ == '\n')
+        {
+            *line += 1;
+            *column = 1;
+        }
+        else
+        {
+            *column += 1;
+        }
+    }
 }
 
-const char* source_span_filepath(SourceSpan span)
+const char* source_map_filepath_from_source_span(SourceSpan span)
 {
     SourceFile* source_file = source_map_lookup_source_file(span.lo);
 

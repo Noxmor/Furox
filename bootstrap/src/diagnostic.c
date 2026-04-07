@@ -101,7 +101,7 @@ void diagnostic_emit(const Diagnostic* d)
     }
 
     const char* clear_color_str = "\033[0m";
-    const char* filepath = source_span_filepath(d->span);
+    const char* filepath = source_map_filepath_from_source_span(d->span);
 
     SourceLine line;
     SourceColumn column;

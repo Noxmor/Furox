@@ -2,7 +2,7 @@
 #define FRX_LEXER_H
 
 #include "token.h"
-#include "source_buffer.h"
+#include "source_file.h"
 
 #ifndef FRX_LEXER_TOKEN_CAPACITY
 #define FRX_LEXER_TOKEN_CAPACITY 8
@@ -12,7 +12,7 @@ void lexer_init_keyword_table(void);
 
 typedef struct Lexer
 {
-    const SourceBuffer* buffer;
+    const SourceFile* source_file;
     const char* pos;
 
     Token tokens[FRX_LEXER_TOKEN_CAPACITY];
@@ -24,7 +24,7 @@ typedef struct Lexer
     b8 failed;
 } Lexer;
 
-void lexer_init(Lexer* lexer, const SourceBuffer* buffer);
+void lexer_init(Lexer* lexer, const SourceFile* source_file);
 
 void lexer_read(Lexer* lexer);
 

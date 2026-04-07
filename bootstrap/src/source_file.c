@@ -6,7 +6,8 @@
 #include "assert.h"
 #include "compiler.h"
 
-SourceFile* source_file_load_from_disk(const char* filepath, SourceOffset offset)
+SourceFile* source_file_load_from_disk(const char* filepath, SourceFileID id,
+                                       SourceOffset offset)
 {
     FRX_ASSERT(filepath != NULL);
 
@@ -36,7 +37,10 @@ SourceFile* source_file_load_from_disk(const char* filepath, SourceOffset offset
     SourceFile* source_file = compiler_alloc(sizeof(SourceFile));
 
     source_file->path = filepath;
-    source_buffer_init(&source_file->buffer, data, data_len, offset);
+    source_buffer_init(&source_file->buffer, data, data_len);
+
+    source_file->id = id;
+    source_file->offset = offset;
 
     source_file->module = compiler_root_module();
     source_file->global_scope = scope_create_global();
@@ -71,10 +75,4 @@ const SourceBuffer* source_file_buffer(const SourceFile* source_file)
     FRX_ASSERT(source_file != NULL);
 
     return &source_file->buffer;
-}
-
-void source_file_resolve_offset(const SourceFile* source_file, SourceOffset offset,
-                              SourceLine* line, SourceColumn* column)
-{
-    source_buffer_resolve_offset(&source_file->buffer, offset, line, column);
 }
