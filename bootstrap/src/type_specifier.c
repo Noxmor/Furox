@@ -142,16 +142,22 @@ AST* type_specifier_parse(Parser* parser)
     }
 
     while (parser_match(parser, FRX_TOKEN_TYPE_STAR) ||
-        parser_match(parser, FRX_TOKEN_TYPE_BIT_AND))
+        parser_match(parser, FRX_TOKEN_TYPE_KW_MUT))
     {
-        b8 mutable = parser_match(parser, FRX_TOKEN_TYPE_STAR);
+        b8 mutable = FRX_FALSE;
+        if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_MUT)
+        {
+            mutable = FRX_TRUE;
+            parser_eat(parser, FRX_TOKEN_TYPE_KW_MUT);
+        }
+
         AST* pointer_type = parser_create_ast(parser, FRX_AST_TYPE_TYPE_SPECIFIER);
         type_specifier_init_pointer(&pointer_type->type_specifier, ast, mutable);
         ast = pointer_type;
         type = &pointer_type->type_specifier;
 
         ast->span.hi = parser_current_span(parser).hi;
-        parser_eat(parser, parser_current_type(parser));
+        parser_eat(parser, FRX_TOKEN_TYPE_STAR);
     }
 
     return ast;
