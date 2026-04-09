@@ -1,0 +1,14 @@
+fn mut_foo(x: i32 mut*) -> void
+{
+    *x = 0;
+}
+
+fn main() -> i32
+{
+    let x = 1;
+    let ptr: i32 mut* = &x;
+
+    mut_foo(ptr);
+
+    return x;
+}
