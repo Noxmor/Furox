@@ -17,7 +17,7 @@ impl Foo
         return foo;
     }
 
-    fn x(self&) -> i32
+    fn x(self mut*) -> i32
     {
         return self.x;
     }
