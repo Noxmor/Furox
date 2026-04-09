@@ -78,9 +78,10 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
                 parser_eat(parser, FRX_TOKEN_TYPE_STAR);
                 receiver = FRX_FUNC_RECEIVER_SELF_PTR;
             }
-            else if (parser_current_type(parser) == FRX_TOKEN_TYPE_BIT_AND)
+            else if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_MUT)
             {
-                parser_eat(parser, FRX_TOKEN_TYPE_BIT_AND);
+                parser_eat(parser, FRX_TOKEN_TYPE_KW_MUT);
+                parser_eat(parser, FRX_TOKEN_TYPE_STAR);
                 receiver = FRX_FUNC_RECEIVER_SELF_REF;
             }
             else
