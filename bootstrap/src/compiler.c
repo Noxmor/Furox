@@ -156,9 +156,10 @@ int compiler_run(int argc, char** argv)
     codegen_context_transpile(&ctx);
     codegen_context_end(&ctx);
 
+    const Config* config = config_get();
     const char* temp_dir = temp_dir_path();
-    char command[strlen("gcc ") + strlen(temp_dir) + strlen("/frx.c") + 1];
-    sprintf(command, "gcc %s/frx.c", temp_dir);
+    char command[strlen("gcc -o ") + strlen(config->output) + 1 + strlen(temp_dir) + strlen("/frx.c") + 1];
+    sprintf(command, "gcc -o %s %s/frx.c", config->output, temp_dir);
     FRX_LOG_INFO("Executing command: %s\n", command);
     if (system(command) != 0)
     {
