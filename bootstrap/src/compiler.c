@@ -15,6 +15,7 @@
 #include "string_table.h"
 #include "source_map.h"
 #include "temp_dir.h"
+#include "config.h"
 
 static Arena* arena;
 static Arena* ast_arena;
@@ -83,7 +84,9 @@ int compiler_run(int argc, char** argv)
 {
     compiler_init();
 
-    for (int i = 1; i < argc; ++i)
+    config_parse(argc, argv);
+
+    for (int i = config_get_optind(); i < argc; ++i)
     {
         const char* filepath = argv[i];
         source_map_add_source_file(filepath);
