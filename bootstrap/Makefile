@@ -46,8 +46,12 @@ $(DEBUG_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(DEBUG_OBJ_DIR)
 $(RELEASE_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(RELEASE_OBJ_DIR)
 	$(CC) $(CFLAGS) $(RELEASE_CFLAGS) -c $< -o $@
 
+# Ensure the compiler is built and run the test suite
+test: all
+	@python3 tests.py
+
 # Clean up object files and the executable
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
-.PHONY: all debug release clean
+.PHONY: all debug release test clean
