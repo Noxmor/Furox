@@ -175,13 +175,13 @@ def print_tests_summary(tests: list[Test], verbose = False):
     tests_passed = 0
     tests_failed = 0
 
-    summary_len = len(f"{len(tests)} total | {tests_passed} passed | {tests_failed} failed")
-
     for test in tests:
         if test.status == Status.SUCCESS:
             tests_passed += 1
         else:
             tests_failed += 1
+
+    summary_len = len(f"{len(tests)} total | {tests_passed} passed | {tests_failed} failed")
 
     if verbose:
         line = "Failed tests output:"
