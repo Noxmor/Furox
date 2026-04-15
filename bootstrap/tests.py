@@ -87,8 +87,6 @@ def discover_tests(root: Path) -> list[Test]:
             )
         )
 
-        print([entry, files])
-
     tests = sorted(tests, key = lambda t: t.name)
 
     global MAX_TEST_NAME_LEN
