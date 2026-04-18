@@ -81,6 +81,8 @@ void method_call_expr_resolve(AST* ast, ResolutionContext* ctx)
         ast->type = FRX_AST_TYPE_CALL_EXPR;
         ASTCallExpr* call_expr = &ast->call_expr;
 
+        // TODO: This definitely needs a proper refactor, since this just reuses
+        // the id from 'base'
         AST* field_expr = ast_create(FRX_AST_TYPE_FIELD_EXPR, method_call_expr->callee->id);
         field_expr->field_expr.field_name = name;
         field_expr->field_expr.base = base;
