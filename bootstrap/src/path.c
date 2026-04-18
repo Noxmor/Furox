@@ -4,6 +4,7 @@
 #include "resolution.h"
 #include "symbol.h"
 #include "token.h"
+#include "type_system.h"
 
 static void path_segment_init(ASTPathSegment* path_segment, PathSegmentType type,
                               const char* name, TokenType primitive)
@@ -180,7 +181,7 @@ void path_resolve(AST* ast, ResolutionContext* ctx)
 
     switch (path_segment->path_segment.type)
     {
-        case FRX_PATH_SEGMENT_TYPE_PRIMITIVE: symbol = symbol_create(NULL, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_PRIMITIVE, &path_segment->path_segment); break;
+        case FRX_PATH_SEGMENT_TYPE_PRIMITIVE: symbol = symbol_create(NULL, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_PRIMITIVE, path_segment); break;
         case FRX_PATH_SEGMENT_TYPE_IDENT:
         {
             symbol = scope_lookup_symbol(path->scope, path_segment->path_segment.name);
@@ -206,7 +207,7 @@ void path_resolve(AST* ast, ResolutionContext* ctx)
             switch (symbol->type)
             {
                 case FRX_SYMBOL_TYPE_STRUCT: symbol = type_lookup_method(symbol_infer_type(symbol), path_segment->path_segment.name); break;
-                case FRX_SYMBOL_TYPE_ENUM: symbol = symbol_create(path_segment->path_segment.name, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_ENUM_VARIANT, enum_def_lookup_variant(symbol->data, path_segment->path_segment.name)); break;
+                case FRX_SYMBOL_TYPE_ENUM: symbol = symbol_create(path_segment->path_segment.name, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_ENUM_VARIANT, enum_def_lookup_variant(&symbol->data->enum_def, path_segment->path_segment.name)); break;
                 default: break;
             }
         }
@@ -225,10 +226,6 @@ void path_resolve(AST* ast, ResolutionContext* ctx)
     if (symbol != NULL)
     {
         path->symbol = symbol;
-    }
-    else
-    {
-        path->symbol = symbol_create(path_segment->path_segment.name, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_MODULE, mod);
     }
 
     if (path->symbol == NULL)

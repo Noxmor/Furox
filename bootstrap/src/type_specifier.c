@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "compiler.h"
 #include "parser.h"
 #include "resolution.h"
@@ -13,7 +14,6 @@ static void type_specifier_init(ASTTypeSpecifier* type, ASTTypeSpecifierKind kin
     FRX_ASSERT(kind < FRX_TYPE_SPECIFIER_KIND_COUNT);
 
     type->kind = kind;
-    type->resolved_type = NULL;
     type->path = NULL;
     list_init(&type->func_params);
     type->func_return_type = NULL;
@@ -181,10 +181,10 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
             ASTPath* path = &type_specifier->path->path;
             switch (path->symbol->type)
             {
-                case FRX_SYMBOL_TYPE_STRUCT: type_specifier->resolved_type = type_intern_struct(path->symbol, &((AST*)list_get(&path->path_segments, list_size(&path->path_segments) - 1))->path_segment.generic_args); break;
-                case FRX_SYMBOL_TYPE_ENUM: type_specifier->resolved_type = type_intern_enum(path->symbol); break;
+                case FRX_SYMBOL_TYPE_STRUCT: attributes_table_insert_type(ast->id, type_intern_struct(path->symbol, &((AST*)list_get(&path->path_segments, list_size(&path->path_segments) - 1))->path_segment.generic_args)); break;
+                case FRX_SYMBOL_TYPE_ENUM: attributes_table_insert_type(ast->id, type_intern_enum(path->symbol)); break;
 
-                default: type_specifier->resolved_type = symbol_infer_type(path->symbol); break;
+                default: attributes_table_insert_type(ast->id, symbol_infer_type(path->symbol)); break;
             }
 
             break;
@@ -199,7 +199,9 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
 
             type_specifier_resolve(type_specifier->func_return_type, ctx);
 
-            type_specifier->resolved_type = type_intern_func(&type_specifier->func_params, type_specifier->func_return_type->type_specifier.resolved_type, type_specifier->is_variadic);
+            const Type* func_return_type = attributes_table_lookup_type(type_specifier->func_return_type->id);
+            const Type* type = type_intern_func(&type_specifier->func_params, func_return_type, type_specifier->is_variadic);
+            attributes_table_insert_type(ast->id, type);
 
             break;
         }
@@ -207,7 +209,9 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
         {
             AST* base = type_specifier->base;
             type_specifier_resolve(base, ctx);
-            type_specifier->resolved_type = type_intern_ptr(base->type_specifier.resolved_type, base->type_specifier.mutable);
+            const Type* base_type = attributes_table_lookup_type(base->id);
+            const Type* type = type_intern_ptr(base_type, base->type_specifier.mutable);
+            attributes_table_insert_type(ast->id, type);
 
             break;
         }
@@ -216,7 +220,9 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
             AST* base = type_specifier->base;
             type_specifier_resolve(base, ctx);
             ast_resolve(type_specifier->size, ctx);
-            type_specifier->resolved_type = type_intern_array(base->type_specifier.resolved_type, type_specifier->size);
+            const Type* base_type = attributes_table_lookup_type(base->id);
+            const Type* type = type_intern_array(base_type, type_specifier->size);
+            attributes_table_insert_type(ast->id, type);
 
             break;
         }

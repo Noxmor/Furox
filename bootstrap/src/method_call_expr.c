@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -14,7 +15,6 @@ static AST* method_call_expr_create(Parser* parser, const char* name, AST* calle
     method_call_expr->name = name;
     method_call_expr->callee = callee;
     list_init(&method_call_expr->args);
-    method_call_expr->resolved_type = NULL;
     method_call_expr->symbol = NULL;
 
     return ast;
@@ -93,7 +93,8 @@ void method_call_expr_resolve(AST* ast, ResolutionContext* ctx)
     }
     else
     {
-        method_call_expr->resolved_type = ((ASTFuncDecl*)method_call_expr->symbol->data)->return_type->type_specifier.resolved_type;
+        const Type* type = attributes_table_lookup_type(method_call_expr->symbol->data->func_decl.return_type->id);
+        attributes_table_insert_type(ast->id, type);
     }
 }
 

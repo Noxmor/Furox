@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "resolution.h"
 #include "type_system.h"
 
@@ -15,5 +16,6 @@ void path_expr_resolve(AST* ast, ResolutionContext* ctx)
 
     path_resolve(path_expr->path, ctx);
 
-    path_expr->resolved_type = symbol_infer_type(path_expr->path->path.symbol);
+    const Type* type = symbol_infer_type(path_expr->path->path.symbol);
+    attributes_table_insert_type(ast->id, type);
 }

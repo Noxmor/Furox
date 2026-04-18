@@ -42,7 +42,7 @@ AST* trait_parse(Parser* parser, SymbolVisibility visibility)
     parser_pop_scope(parser);
 
     parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_TRAIT,
-                         trait->name, trait);
+                         trait->name, ast);
 
     return ast;
 }

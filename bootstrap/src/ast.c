@@ -6,6 +6,7 @@
 #include "compiler.h"
 #include "symbol.h"
 #include "type_system.h"
+#include "attributes_table.h"
 
 AST* ast_create(ASTType type, ASTNodeID id)
 {
@@ -148,18 +149,18 @@ const Type* expr_infer_type(AST* expr)
 
     switch (expr->type)
     {
-        case FRX_AST_TYPE_UNARY_EXPR: return expr->unary_expr.resolved_type;
-        case FRX_AST_TYPE_BINARY_EXPR: return expr->binary_expr.resolved_type;
+        case FRX_AST_TYPE_UNARY_EXPR: return attributes_table_lookup_type(expr->id);
+        case FRX_AST_TYPE_BINARY_EXPR: return attributes_table_lookup_type(expr->id);
         case FRX_AST_TYPE_FIELD_EXPR: return expr->field_expr.resolved_type;
-        case FRX_AST_TYPE_SELF_EXPR: return expr->self_expr.resolved_type;
+        case FRX_AST_TYPE_SELF_EXPR: return attributes_table_lookup_type(expr->id);
         case FRX_AST_TYPE_BOOL_EXPR: return type_intern_bool();
         case FRX_AST_TYPE_NULLPTR_EXPR: return type_intern_nullptr();
-        case FRX_AST_TYPE_PATH_EXPR: return expr->path_expr.resolved_type;
+        case FRX_AST_TYPE_PATH_EXPR: return attributes_table_lookup_type(expr->id);
         case FRX_AST_TYPE_CALL_EXPR: return expr_infer_type(expr->call_expr.callee);
-        case FRX_AST_TYPE_METHOD_CALL_EXPR: return expr->method_call_expr.resolved_type;
-        case FRX_AST_TYPE_CAST_EXPR: return expr->cast_expr.type_specifier->type_specifier.resolved_type;
+        case FRX_AST_TYPE_METHOD_CALL_EXPR: return attributes_table_lookup_type(expr->id);
+        case FRX_AST_TYPE_CAST_EXPR: return attributes_table_lookup_type(expr->cast_expr.type_specifier->id);
         case FRX_AST_TYPE_SIZEOF_EXPR: return type_intern_primitive(FRX_TOKEN_TYPE_KW_USIZE);
-        case FRX_AST_TYPE_INT_LIT: return expr->int_literal.resolved_type;
+        case FRX_AST_TYPE_INT_LIT: return attributes_table_lookup_type(expr->id);
         case FRX_AST_TYPE_CHAR_LIT: return type_intern_char_lit();
         case FRX_AST_TYPE_STRING_LIT: return type_intern_string_lit();
         case FRX_AST_TYPE_STRUCT_LIT: return symbol_infer_type(expr->struct_literal.path->path.symbol);
@@ -168,7 +169,7 @@ const Type* expr_infer_type(AST* expr)
     }
 }
 
-ASTEnumVariant* enum_def_lookup_variant(ASTEnumDef* enum_def, const char* name)
+AST* enum_def_lookup_variant(ASTEnumDef* enum_def, const char* name)
 {
     FRX_ASSERT(enum_def != NULL);
 
@@ -179,7 +180,7 @@ ASTEnumVariant* enum_def_lookup_variant(ASTEnumDef* enum_def, const char* name)
         AST* variant = list_get(&enum_def->variants, i);
         if (variant->enum_variant.name == name)
         {
-            return &variant->enum_variant;
+            return variant;
         }
     }
 

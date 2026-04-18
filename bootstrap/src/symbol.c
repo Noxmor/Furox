@@ -3,7 +3,7 @@
 #include "symbol.h"
 
 Symbol* symbol_create(const char* name, SymbolVisibility visibility,
-                      SymbolType type, void* data)
+                      SymbolType type, AST* data)
 {
     FRX_ASSERT(name != NULL || type == FRX_SYMBOL_TYPE_PRIMITIVE);
 

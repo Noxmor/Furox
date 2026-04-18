@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "compiler.h"
 #include "symbol.h"
 #include "type_system.h"
@@ -28,7 +29,7 @@ const Type* type_create_struct(const Symbol* symbol, const List* generic_args)
 {
     FRX_ASSERT(symbol != NULL);
 
-    const ASTStructDef* struct_def = symbol->data;
+    const ASTStructDef* struct_def = &symbol->data->struct_def;
 
     Type* type = type_create(struct_def->kind == FRX_STRUCT_KIND_NAMED ? FRX_TYPE_KIND_STRUCT : FRX_TYPE_KIND_UNION);
     type->strct.symbol = symbol;
@@ -68,8 +69,8 @@ const Type* type_create_func(const List* params, const Type* return_type, b8 is_
 
         switch (param->type)
         {
-            case FRX_AST_TYPE_TYPE_SPECIFIER: list_add(&type->func.params, (Type*)param->type_specifier.resolved_type); break;
-            case FRX_AST_TYPE_FUNC_PARAM: list_add(&type->func.params, (Type*)param->func_param.type->type_specifier.resolved_type); break;
+            case FRX_AST_TYPE_TYPE_SPECIFIER: list_add(&type->func.params, (Type*)attributes_table_lookup_type(param->id)); break;
+            case FRX_AST_TYPE_FUNC_PARAM: list_add(&type->func.params, (Type*)attributes_table_lookup_type(param->func_param.type->id)); break;
 
             default: FRX_ASSERT(FRX_FALSE); break;
         }
@@ -342,8 +343,8 @@ const Type* type_intern_func(const List* params, const Type* return_type, b8 is_
 
                 switch (param->type)
                 {
-                    case FRX_AST_TYPE_TYPE_SPECIFIER: equal = param_type == param->type_specifier.resolved_type; break;
-                    case FRX_AST_TYPE_FUNC_PARAM: equal = param_type == param->func_param.type->type_specifier.resolved_type; break;
+                    case FRX_AST_TYPE_TYPE_SPECIFIER: equal = param_type == attributes_table_lookup_type(param->id); break;
+                    case FRX_AST_TYPE_FUNC_PARAM: equal = param_type == attributes_table_lookup_type(param->func_param.type->id); break;
 
                     default: FRX_ASSERT(FRX_FALSE); break;
                 }
@@ -459,14 +460,14 @@ const Type* symbol_infer_type(const Symbol* symbol)
 
     switch (symbol->type)
     {
-        case FRX_SYMBOL_TYPE_PRIMITIVE: return type_intern_primitive(((ASTPathSegment*)symbol->data)->primitive);
-        case FRX_SYMBOL_TYPE_FUNC: return ((ASTFuncDecl*)symbol->data)->resolved_type;
+        case FRX_SYMBOL_TYPE_PRIMITIVE: return type_intern_primitive((symbol->data)->path_segment.primitive);
+        case FRX_SYMBOL_TYPE_FUNC: return attributes_table_lookup_type((symbol->data)->id);
         case FRX_SYMBOL_TYPE_STRUCT: return type_intern_struct(symbol, NULL);
         case FRX_SYMBOL_TYPE_ENUM: return type_intern_enum(symbol);
-        case FRX_SYMBOL_TYPE_ENUM_VARIANT: return symbol_infer_type(((ASTEnumVariant*)symbol->data)->symbol);
-        case FRX_SYMBOL_TYPE_TYPE_ALIAS: return ((ASTTypeAlias*)symbol->data)->type->type_specifier.resolved_type;
-        case FRX_SYMBOL_TYPE_PARAM: return ((ASTFuncParam*)symbol->data)->type->type_specifier.resolved_type;
-        case FRX_SYMBOL_TYPE_VAR: return ((ASTLetStmt*)symbol->data)->resolved_type;
+        case FRX_SYMBOL_TYPE_ENUM_VARIANT: return symbol_infer_type((symbol->data)->enum_variant.symbol);
+        case FRX_SYMBOL_TYPE_TYPE_ALIAS: return attributes_table_lookup_type((symbol->data)->type_alias.type->id);
+        case FRX_SYMBOL_TYPE_PARAM: return attributes_table_lookup_type((symbol->data)->func_param.type->id);
+        case FRX_SYMBOL_TYPE_VAR: return attributes_table_lookup_type(symbol->data->id);
         case FRX_SYMBOL_TYPE_GENERIC_PARAM: return type_intern_generic(symbol);
 
         default: FRX_ASSERT(FRX_FALSE); return NULL;

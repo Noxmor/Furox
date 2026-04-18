@@ -8,6 +8,7 @@
 #include "early_resolution.h"
 #include "late_resolution.h"
 #include "sema.h"
+#include "type_system.h"
 #include "codegen.h"
 #include "log.h"
 #include "arena.h"

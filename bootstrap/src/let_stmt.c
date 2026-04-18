@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -63,7 +64,7 @@ AST* let_stmt_parse(Parser* parser)
     let_stmt_init(let_stmt, mutable, name, type, value);
 
     parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_VAR,
-                         name, let_stmt);
+                         name, ast);
 
     return ast;
 }
@@ -84,11 +85,13 @@ void let_stmt_resolve(AST* ast, ResolutionContext* ctx)
     if (let_stmt->type != NULL)
     {
         type_specifier_resolve(let_stmt->type, ctx);
-        let_stmt->resolved_type = let_stmt->type->type_specifier.resolved_type;
+        const Type* type = attributes_table_lookup_type(let_stmt->type->id);
+        attributes_table_insert_type(ast->id, type);
     }
     else if (let_stmt->value != NULL)
     {
-        let_stmt->resolved_type = expr_infer_type(let_stmt->value);
+        const Type* type = expr_infer_type(let_stmt->value);
+        attributes_table_insert_type(ast->id, type);
     }
 }
 

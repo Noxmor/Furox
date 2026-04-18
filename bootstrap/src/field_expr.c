@@ -3,6 +3,7 @@
 #include "resolution.h"
 #include "sema.h"
 #include "symbol.h"
+#include "type_system.h"
 
 void field_expr_resolve(AST* ast, ResolutionContext* ctx)
 {
@@ -36,7 +37,7 @@ void field_expr_sema(AST* ast, SemaContext* ctx)
         struct_type = struct_type->ptr.base;
     }
 
-    ASTStructDef* struct_def = struct_type->strct.symbol->data;
+    ASTStructDef* struct_def = &struct_type->strct.symbol->data->struct_def;
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* field = list_get(&struct_def->fields, i);

@@ -5,12 +5,13 @@
 #include "token.h"
 #include "list.h"
 #include "operator.h"
-#include "type_system.h"
 #include "scope.h"
 #include "module.h"
 #include "source_file.h"
 
 typedef struct AST AST;
+
+typedef struct Type Type;
 
 typedef u32 ASTLocalID;
 
@@ -23,7 +24,6 @@ typedef struct ASTNodeID
 typedef struct ASTIntLiteral
 {
     u64 value;
-    const Type* resolved_type;
 } ASTIntLiteral;
 
 typedef struct ASTCharLiteral
@@ -73,7 +73,6 @@ typedef struct ASTTypeSpecifier
     AST* base;
     AST* size;
     b8 mutable;
-    const Type* resolved_type;
 } ASTTypeSpecifier;
 
 enum
@@ -213,11 +212,9 @@ typedef struct ASTFuncDecl
     AST* generic_params;
     List params;
     FuncReceiver receiver;
-    const Type* receiver_type;
     b8 is_variadic;
     AST* return_type;
     AST* body;
-    const Type* resolved_type;
 } ASTFuncDecl;
 
 typedef struct ASTUnaryExpr
@@ -225,7 +222,6 @@ typedef struct ASTUnaryExpr
     TokenType type;
     Operator operator;
     AST* operand;
-    const Type* resolved_type;
 } ASTUnaryExpr;
 
 typedef struct ASTBinaryExpr
@@ -234,7 +230,6 @@ typedef struct ASTBinaryExpr
     Operator operator;
     AST* left;
     AST* right;
-    const Type* resolved_type;
 } ASTBinaryExpr;
 
 typedef struct ASTFieldExpr
@@ -246,7 +241,7 @@ typedef struct ASTFieldExpr
 
 typedef struct ASTSelfExpr
 {
-    const Type* resolved_type;
+    b8 unused;
 } ASTSelfExpr;
 
 typedef struct ASTBoolExpr
@@ -327,7 +322,6 @@ typedef struct ASTPath
 typedef struct ASTPathExpr
 {
     AST* path;
-    const Type* resolved_type;
 } ASTPathExpr;
 
 typedef struct ASTCallExpr
@@ -341,7 +335,6 @@ typedef struct ASTMethodCallExpr
     AST* callee;
     const char* name;
     List args;
-    const Type* resolved_type;
     const Symbol* symbol;
 } ASTMethodCallExpr;
 
@@ -397,7 +390,6 @@ typedef struct ASTLetStmt
     const char* name;
     AST* type;
     AST* value;
-    const Type* resolved_type;
 } ASTLetStmt;
 
 enum
@@ -515,6 +507,6 @@ AST* parser_block_from_stmt(Parser* parser, AST* stmt, Scope* scope);
 
 const Type* expr_infer_type(AST* expr);
 
-ASTEnumVariant* enum_def_lookup_variant(ASTEnumDef* enum_def, const char* name);
+AST* enum_def_lookup_variant(ASTEnumDef* enum_def, const char* name);
 
 #endif

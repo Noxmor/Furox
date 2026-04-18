@@ -2,6 +2,7 @@
 
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "compiler.h"
 #include "log.h"
 #include "module.h"
@@ -146,7 +147,8 @@ static void emit_type(const Type* type, const char* name, FILE* f, CodegenContex
                 const AST* generic_arg = list_get(ctx->generic_args, i);
                 if (type->generic.symbol->name == generic_param->generic_param.name)
                 {
-                    emit_type(generic_arg->type_specifier.resolved_type, type->generic.symbol->name, f, ctx);
+                    const Type* generic_arg_type = attributes_table_lookup_type(generic_arg->id);
+                    emit_type(generic_arg_type, type->generic.symbol->name, f, ctx);
                 }
             }
 
@@ -157,20 +159,22 @@ static void emit_type(const Type* type, const char* name, FILE* f, CodegenContex
     }
 }
 
-static void emit_enum_definition(ASTEnumDef* enum_def, FILE* f, CodegenContext* ctx)
+static void emit_enum_definition(AST* ast, FILE* f, CodegenContext* ctx)
 {
-    FRX_ASSERT(enum_def != NULL);
+    FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(f != NULL);
+
+    ASTEnumDef* enum_def = &ast->enum_def;
 
     fprintf(f, "enum\n{\n");
 
     for (usize i = 0; i < list_size(&enum_def->variants); ++i)
     {
-        AST* ast = list_get(&enum_def->variants, i);
-        ASTEnumVariant* variant = &ast->enum_variant;
+        AST* variant_node = list_get(&enum_def->variants, i);
+        ASTEnumVariant* variant = &variant_node->enum_variant;
 
-        fprintf(f, "%s%p", variant->name, variant);
+        fprintf(f, "%s%p", variant->name, variant_node);
 
         if (variant->value != NULL)
         {
@@ -182,20 +186,23 @@ static void emit_enum_definition(ASTEnumDef* enum_def, FILE* f, CodegenContext* 
     }
 
     fprintf(f, "};\ntypedef ");
-    emit_type(enum_def->type->type_specifier.resolved_type, NULL, f, ctx);
-    fprintf(f, " %s%p;\n", enum_def->name, enum_def);
+    const Type* enum_def_type = attributes_table_lookup_type(enum_def->type->id);
+    emit_type(enum_def_type, NULL, f, ctx);
+    fprintf(f, " %s%p;\n", enum_def->name, ast);
 }
 
-static void emit_struct_declaration(ASTStructDef* struct_def, FILE* f)
+static void emit_struct_declaration(AST* ast, FILE* f)
 {
-    FRX_ASSERT(struct_def != NULL);
+    FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(f != NULL);
+
+    ASTStructDef* struct_def = &ast->struct_def;
 
     for (usize i = 0; i < list_size(&struct_def->instantiated_types); ++i)
     {
         const Type* type = list_get(&struct_def->instantiated_types, i);
-        fprintf(f, "typedef struct %s%p%p %s%p%p;\n", struct_def->name, struct_def, type, struct_def->name, struct_def, type);
+        fprintf(f, "typedef struct %s%p%p %s%p%p;\n", struct_def->name, ast, type, struct_def->name, ast, type);
     }
 }
 
@@ -205,7 +212,7 @@ static void emit_struct_field(ASTStructField* struct_field, FILE* f, CodegenCont
 
     FRX_ASSERT(f != NULL);
 
-    const Type* type = struct_field->type->type_specifier.resolved_type;
+    const Type* type = attributes_table_lookup_type(struct_field->type->id);
 
     emit_type(type, struct_field->name, f, ctx);
 
@@ -231,12 +238,12 @@ static void emit_struct_definition(const Type* type, FILE* f, CodegenContext* ct
         return;
     }
 
-    ASTStructDef* struct_def = type->strct.symbol->data;
+    ASTStructDef* struct_def = &type->strct.symbol->data->struct_def;
 
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* field = list_get(&struct_def->fields, i);
-        const Type* field_type = field->struct_field.type->type_specifier.resolved_type;
+        const Type* field_type = attributes_table_lookup_type(field->struct_field.type->id);
 
         if (field_type->kind == FRX_TYPE_KIND_STRUCT || field_type->kind == FRX_TYPE_KIND_UNION)
         {
@@ -249,7 +256,7 @@ static void emit_struct_definition(const Type* type, FILE* f, CodegenContext* ct
         }
     }
 
-    fprintf(f, "struct %s%p%p\n{\n", struct_def->name, struct_def, type);
+    fprintf(f, "struct %s%p%p\n{\n", struct_def->name, type->strct.symbol->data, type);
 
     const AST* prev_generic_params = ctx->generic_params;
     const List* prev_generic_args = ctx->generic_args;
@@ -272,23 +279,28 @@ static void emit_struct_definition(const Type* type, FILE* f, CodegenContext* ct
     list_add(&ctx->symbol_list, (Type*)type);
 }
 
-static void emit_func_param(ASTFuncParam* func_param, FILE* f, CodegenContext* ctx)
+static void emit_func_param(AST* ast, FILE* f, CodegenContext* ctx)
 {
-    FRX_ASSERT(func_param != NULL);
+    FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(f != NULL);
+
+    ASTFuncParam* func_param = &ast->func_param;
 
     char mangled_name[strlen(func_param->name) + 2 + 16 + 1];
-    sprintf(mangled_name, "%s%p", func_param->name, func_param);
-    emit_type(func_param->type->type_specifier.resolved_type, mangled_name, f, ctx);
-    fprintf(f, " %s%p", func_param->name, func_param);
+    sprintf(mangled_name, "%s%p", func_param->name, ast);
+    const Type* func_param_type = attributes_table_lookup_type(func_param->type->id);
+    emit_type(func_param_type, mangled_name, f, ctx);
+    fprintf(f, " %s%p", func_param->name, ast);
 }
 
-static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f, CodegenContext* ctx)
+static void emit_func_sig(AST* ast, FILE* f, CodegenContext* ctx)
 {
-    FRX_ASSERT(func_decl != NULL);
+    FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(f != NULL);
+
+    ASTFuncDecl* func_decl = &ast->func_decl;
 
     if (func_decl->external)
     {
@@ -302,20 +314,22 @@ static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f, CodegenContext* ctx)
     ctx->generic_args = NULL;
 
     char mangled_name[strlen(func_decl->name) + 2 + 16 + 1];
-    sprintf(mangled_name, "%s%p", func_decl->name, func_decl);
-    emit_type(func_decl->return_type->type_specifier.resolved_type, mangled_name, f, ctx);
+    sprintf(mangled_name, "%s%p", func_decl->name, ast);
+    const Type* return_type = attributes_table_lookup_type(func_decl->return_type->id);
+    emit_type(return_type, mangled_name, f, ctx);
     fprintf(f, " %s", func_decl->name);
 
     if (strcmp(func_decl->name, "main") != 0 && !func_decl->external)
     {
-        fprintf(f, "%p", func_decl);
+        fprintf(f, "%p", ast);
     }
 
     fprintf(f, "(");
 
     if (func_decl->receiver != FRX_FUNC_RECEIVER_NONE)
     {
-        emit_type(func_decl->receiver_type, NULL, f, ctx);
+        const Type* receiver_type = attributes_table_lookup_func_receiver_type(ast->id);
+        emit_type(receiver_type, NULL, f, ctx);
         fprintf(f, " self");
 
         if (!list_empty(&func_decl->params))
@@ -332,7 +346,7 @@ static void emit_func_sig(ASTFuncDecl* func_decl, FILE* f, CodegenContext* ctx)
         }
 
         AST* func_param = list_get(&func_decl->params, i);
-        emit_func_param(&func_param->func_param, f, ctx);
+        emit_func_param(func_param, f, ctx);
     }
 
     if (func_decl->is_variadic)
@@ -394,7 +408,7 @@ static void emit_path(AST* ast, FILE* f)
     fprintf(f, "%s", last_path);
 
     if ((list_size(&path->path_segments) > 1 || strcmp(last_path, "main") != 0)
-        && (path->symbol->type != FRX_SYMBOL_TYPE_FUNC || (path->symbol->type == FRX_SYMBOL_TYPE_FUNC && !((ASTFuncDecl*)path->symbol->data)->external)))
+        && (path->symbol->type != FRX_SYMBOL_TYPE_FUNC || (path->symbol->type == FRX_SYMBOL_TYPE_FUNC && !path->symbol->data->func_decl.external)))
     {
         FRX_ASSERT(path->symbol != NULL);
 
@@ -454,15 +468,15 @@ static void emit_let_stmt(AST* ast, FILE* f, CodegenContext* ctx)
     FRX_ASSERT(f != NULL);
 
     ASTLetStmt* let_stmt = &ast->let_stmt;
+    const Type* type = attributes_table_lookup_type(ast->id);
 
     char mangled_name[strlen(let_stmt->name) + 2 + 16 + 1];
-    sprintf(mangled_name, "%s%p", let_stmt->name, let_stmt);
-    emit_type(let_stmt->resolved_type, mangled_name, f, ctx);
+    sprintf(mangled_name, "%s%p", let_stmt->name, ast);
+    emit_type(type, mangled_name, f, ctx);
 
-    if (let_stmt->resolved_type->kind != FRX_TYPE_KIND_FUNC
-        && let_stmt->resolved_type->kind != FRX_TYPE_KIND_ARRAY)
+    if (type->kind != FRX_TYPE_KIND_FUNC && type->kind != FRX_TYPE_KIND_ARRAY)
     {
-        fprintf(f, " %s%p", let_stmt->name, let_stmt);
+        fprintf(f, " %s%p", let_stmt->name, ast);
     }
 
     if (let_stmt->value)
@@ -754,7 +768,8 @@ static void emit_cast_expr(AST* ast, FILE* f, CodegenContext* ctx)
     ASTCastExpr* cast_expr = &ast->cast_expr;
 
     fprintf(f, "((");
-    emit_type(cast_expr->type_specifier->type_specifier.resolved_type, NULL, f, ctx);
+    const Type* type = attributes_table_lookup_type(cast_expr->type_specifier->id);
+    emit_type(type, NULL, f, ctx);
     fprintf(f, ") ");
     emit_ast(cast_expr->expr, f, ctx);
     fprintf(f, ")");
@@ -996,11 +1011,11 @@ void codegen_context_transpile(CodegenContext* ctx)
         {
             case FRX_SYMBOL_TYPE_FUNC:
             {
-                if (!((ASTFuncDecl*)symbol->data)->external)
+                if (!symbol->data->func_decl.external)
                 {
                     emit_func_sig(symbol->data, ctx->source, ctx);
                     fprintf(ctx->source, "\n");
-                    emit_func_body(symbol->data, ctx->source, ctx);
+                    emit_func_body(&symbol->data->func_decl, ctx->source, ctx);
                 }
 
                 break;
@@ -1018,7 +1033,7 @@ void codegen_context_transpile(CodegenContext* ctx)
             Symbol* method = list_get(methods, j);
             emit_func_sig(method->data, ctx->source, ctx);
             fprintf(ctx->source, "\n");
-            emit_func_body(method->data, ctx->source, ctx);
+            emit_func_body(&method->data->func_decl, ctx->source, ctx);
         }
     }
 }

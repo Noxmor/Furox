@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "resolution.h"
 #include "sema.h"
 
@@ -14,6 +15,9 @@ void unary_expr_resolve(AST* ast, ResolutionContext* ctx)
     ASTUnaryExpr* unary_expr = &ast->unary_expr;
 
     ast_resolve(unary_expr->operand, ctx);
+
+    const Type* type = expr_infer_type(unary_expr->operand);
+    attributes_table_insert_type(ast->id, type);
 }
 
 void unary_expr_sema(AST* ast, SemaContext* ctx)
@@ -27,7 +31,4 @@ void unary_expr_sema(AST* ast, SemaContext* ctx)
     ASTUnaryExpr* unary_expr = &ast->unary_expr;
 
     ast_sema(unary_expr->operand, ctx);
-
-    // TODO: Type checking
-    unary_expr->resolved_type = expr_infer_type(unary_expr->operand);
 }

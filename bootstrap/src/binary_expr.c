@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "resolution.h"
 #include "sema.h"
 
@@ -13,6 +14,9 @@ void binary_expr_resolve(AST* ast, ResolutionContext* ctx)
 
     ast_resolve(binary_expr->left, ctx);
     ast_resolve(binary_expr->right, ctx);
+
+    const Type* type = expr_infer_type(binary_expr->left);
+    attributes_table_insert_type(ast->id, type);
 }
 
 void binary_expr_sema(AST* ast, SemaContext* ctx)
@@ -25,7 +29,4 @@ void binary_expr_sema(AST* ast, SemaContext* ctx)
 
     ast_sema(binary_expr->left, ctx);
     ast_sema(binary_expr->right, ctx);
-
-    // TODO: Type checking
-    binary_expr->resolved_type = expr_infer_type(binary_expr->left);
 }

@@ -16,8 +16,7 @@ typedef u8 SymbolVisibility;
 
 enum
 {
-    FRX_SYMBOL_TYPE_MODULE = 0,
-    FRX_SYMBOL_TYPE_PRIMITIVE,
+    FRX_SYMBOL_TYPE_PRIMITIVE = 0,
     FRX_SYMBOL_TYPE_TRAIT,
     FRX_SYMBOL_TYPE_FUNC,
     FRX_SYMBOL_TYPE_STRUCT,
@@ -35,16 +34,18 @@ typedef u8 SymbolType;
 
 typedef struct Type Type;
 
+typedef struct AST AST;
+
 typedef struct Symbol
 {
     const char* name;
     SymbolVisibility visibility;
     SymbolType type;
-    void* data;
+    AST* data;
     const Type* associated_type;
 } Symbol;
 
 Symbol* symbol_create(const char* name, SymbolVisibility visibility,
-                      SymbolType type, void* data);
+                      SymbolType type, AST* data);
 
 #endif

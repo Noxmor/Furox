@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "parser.h"
 #include "early_resolution.h"
 #include "late_resolution.h"
@@ -21,7 +22,6 @@ static void func_decl_init(ASTFuncDecl* func_decl, const char* name, b8 external
     func_decl->is_variadic = is_variadic;
     func_decl->return_type = return_type;
     func_decl->body = body;
-    func_decl->resolved_type = NULL;
 }
 
 AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
@@ -133,7 +133,7 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
                    generic_params, return_type, body);
 
     parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_FUNC,
-                         name, func_decl);
+                         name, ast);
 
     return ast;
 }
@@ -152,8 +152,8 @@ void func_decl_resolve_early(AST* ast, ResolutionContext* ctx)
     switch (func_decl->receiver)
     {
         case FRX_FUNC_RECEIVER_NONE: break;
-        case FRX_FUNC_RECEIVER_SELF_PTR: func_decl->receiver_type = type_intern_ptr(symbol_infer_type(ctx->current_impl_block->impl_block.type_path->path.symbol), FRX_TRUE); break;
-        case FRX_FUNC_RECEIVER_SELF_REF: func_decl->receiver_type = type_intern_ptr(symbol_infer_type(ctx->current_impl_block->impl_block.type_path->path.symbol), FRX_FALSE); break;
+        case FRX_FUNC_RECEIVER_SELF_PTR: attributes_table_insert_func_receiver_type(ast->id, type_intern_ptr(symbol_infer_type(ctx->current_impl_block->impl_block.type_path->path.symbol), FRX_TRUE)); break;
+        case FRX_FUNC_RECEIVER_SELF_REF: attributes_table_insert_func_receiver_type(ast->id, type_intern_ptr(symbol_infer_type(ctx->current_impl_block->impl_block.type_path->path.symbol), FRX_FALSE)); break;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 
@@ -168,7 +168,9 @@ void func_decl_resolve_early(AST* ast, ResolutionContext* ctx)
         type_specifier_resolve(func_decl->return_type, ctx);
     }
 
-    func_decl->resolved_type = type_intern_func(&func_decl->params, func_decl->return_type->type_specifier.resolved_type, func_decl->is_variadic);
+    const Type* return_type = attributes_table_lookup_type(func_decl->return_type->id);
+    const Type* type = type_intern_func(&func_decl->params, return_type, func_decl->is_variadic);
+    attributes_table_insert_type(ast->id, type);
 
     resolution_context_pop_scope(ctx);
     ctx->current_func_decl = NULL;

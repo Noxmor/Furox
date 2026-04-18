@@ -20,7 +20,7 @@ AST* func_param_parse(Parser* parser)
     ast->span.hi = param->type->span.hi;
 
     parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE,
-                         FRX_SYMBOL_TYPE_PARAM, param->name, &ast->func_param);
+                         FRX_SYMBOL_TYPE_PARAM, param->name, ast);
 
     return ast;
 }

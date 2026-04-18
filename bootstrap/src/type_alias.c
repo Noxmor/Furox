@@ -24,7 +24,7 @@ AST* type_alias_parse(Parser* parser, SymbolVisibility visibility)
     ast->span.hi = parser_current_span(parser).hi;
     parser_eat(parser, FRX_TOKEN_TYPE_SEMI);
 
-    parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_TYPE_ALIAS, type_alias->name, type_alias);
+    parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_TYPE_ALIAS, type_alias->name, ast);
 
     return ast;
 }

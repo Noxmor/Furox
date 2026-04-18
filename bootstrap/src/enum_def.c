@@ -91,7 +91,7 @@ AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
     parser_eat(parser, FRX_TOKEN_TYPE_RBRACE);
 
     Symbol* symbol = parser_insert_symbol(parser, visibility, FRX_SYMBOL_TYPE_ENUM,
-                         name, enum_def);
+                         name, ast);
 
     for (usize i = 0; i < list_size(&enum_def->variants); ++i)
     {

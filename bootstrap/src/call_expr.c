@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -69,7 +70,9 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
         method_call_expr->symbol = symbol;
         method_call_expr->name = path_segment->path_segment.name;
         method_call_expr->args = args;
-        method_call_expr->resolved_type = ((ASTFuncDecl*)method_call_expr->symbol->data)->return_type->type_specifier.resolved_type;
+
+        const Type* type = attributes_table_lookup_type(method_call_expr->symbol->data->func_decl.return_type->id);
+        attributes_table_insert_type(ast->id, type);
     }
 }
 

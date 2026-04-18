@@ -16,7 +16,6 @@ static AST* unary_expr_create(Parser* parser, TokenType type, Operator operator,
     unary_expr->type = type;
     unary_expr->operator = operator;
     unary_expr->operand = operand;
-    unary_expr->resolved_type = NULL;
 
     return ast;
 }
@@ -35,7 +34,6 @@ static AST* binary_expr_create(Parser* parser, TokenType type, Operator operator
     binary_expr->operator = operator;
     binary_expr->left = left;
     binary_expr->right = right;
-    binary_expr->resolved_type = NULL;
 
     return ast;
 }
@@ -63,7 +61,6 @@ static AST* path_expr_create(Parser* parser, AST* path)
     ASTPathExpr* path_expr = &ast->path_expr;
 
     path_expr->path = path;
-    path_expr->resolved_type = NULL;
 
     return ast;
 }

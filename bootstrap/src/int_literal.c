@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "parser.h"
 #include "resolution.h"
 #include "type_system.h"
@@ -7,7 +8,6 @@
 static void int_literal_init(ASTIntLiteral* literal, u64 value)
 {
     literal->value = value;
-    literal->resolved_type = NULL;
 }
 
 AST* int_literal_parse(Parser* parser)
@@ -34,7 +34,7 @@ void int_literal_resolve(AST* ast, ResolutionContext* ctx)
     FRX_ASSERT(ctx != NULL);
 
     // TODO: Resolve type to i32 by default or smallest type to fit the value
-    ASTIntLiteral* literal = &ast->int_literal;
 
-    literal->resolved_type = type_intern_primitive(FRX_TOKEN_TYPE_KW_I32);
+    const Type* type = type_intern_primitive(FRX_TOKEN_TYPE_KW_I32);
+    attributes_table_insert_type(ast->id, type);
 }

@@ -64,7 +64,7 @@ static AST* generic_param_parse(Parser* parser)
     }
 
     parser_insert_symbol(parser, FRX_SYMBOL_VISIBILITY_PRIVATE,
-                         FRX_SYMBOL_TYPE_GENERIC_PARAM, name, generic_param);
+                         FRX_SYMBOL_TYPE_GENERIC_PARAM, name, ast);
 
     return ast;
 }
