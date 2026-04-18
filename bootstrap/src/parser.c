@@ -24,6 +24,7 @@ void parser_init(Parser* parser, SourceFile* src_file)
     lexer_init(&parser->lexer, src_file);
     parser->global_scope = src_file->global_scope;
     parser->current_scope = parser->global_scope;
+    parser->next_local_id = 0;
     parser->failed = FRX_FALSE;
     parser->recovery = FRX_FALSE;
 }
