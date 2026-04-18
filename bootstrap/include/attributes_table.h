@@ -8,4 +8,8 @@ void attributes_table_insert_type(ASTNodeID id, const Type* type);
 
 const Type* attributes_table_lookup_type(ASTNodeID id);
 
+void attributes_table_insert_func_receiver_type(ASTNodeID id, const Type* receiver_type);
+
+const Type* attributes_table_lookup_func_receiver_type(ASTNodeID id);
+
 #endif
