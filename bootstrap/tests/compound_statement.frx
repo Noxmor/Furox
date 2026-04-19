@@ -1,0 +1,19 @@
+fn main() -> i32
+{
+    let x1 = 0;
+    let x2 = 0;
+
+    {
+        let y = 2;
+        let z = 1;
+        x1 = y + z;
+    }
+
+    {
+        let y = 3;
+        let z = 5;
+        x2 = y + z;
+    }
+
+    return x2 - x1 - 5;
+}
