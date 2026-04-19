@@ -27,6 +27,7 @@ AST* stmt_parse(Parser* parser)
         case FRX_TOKEN_TYPE_KW_FOR: return for_loop_parse(parser);
         case FRX_TOKEN_TYPE_KW_WHILE: return while_loop_parse(parser);
         case FRX_TOKEN_TYPE_KW_LOOP: return loop_parse(parser);
+        case FRX_TOKEN_TYPE_LBRACE: return block_parse(parser);
         default:
         {
             Diagnostic* d = diagnostic_create(FRX_DIAGNOSTIC_ID_EXPECTED_STMT,

@@ -877,6 +877,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_BREAK_STMT: emit_break_stmt(ast, f); break;
         case FRX_AST_TYPE_CONTINUE_STMT: emit_continue_stmt(ast, f); break;
         case FRX_AST_TYPE_RETURN_STMT: emit_return_stmt(ast, f, ctx); break;
+        case FRX_AST_TYPE_BLOCK: emit_block(ast, f, ctx); break;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
 }
