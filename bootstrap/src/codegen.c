@@ -502,7 +502,7 @@ static void emit_if_stmt(AST* ast, FILE* f, CodegenContext* ctx)
     emit_ast(if_stmt->condition, f, ctx);
     fprintf(f, ")\n");
 
-    emit_block(if_stmt->if_block, f, ctx);
+    emit_block(if_stmt->then_block, f, ctx);
 
     if (if_stmt->else_block != NULL)
     {

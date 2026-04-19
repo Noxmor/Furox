@@ -357,7 +357,7 @@ typedef struct ASTReturnStmt
 typedef struct ASTIfStmt
 {
     AST* condition;
-    AST* if_block;
+    AST* then_block;
     AST* else_block;
 } ASTIfStmt;
 

@@ -4,11 +4,11 @@
 #include "resolution.h"
 #include "sema.h"
 
-static void if_stmt_init(ASTIfStmt* if_stmt, AST* condition, AST* if_block,
+static void if_stmt_init(ASTIfStmt* if_stmt, AST* condition, AST* then_block,
                          AST* else_block)
 {
     if_stmt->condition = condition;
-    if_stmt->if_block = if_block;
+    if_stmt->then_block = then_block;
     if_stmt->else_block = else_block;
 }
 
@@ -65,9 +65,9 @@ void if_stmt_resolve(AST* ast, ResolutionContext* ctx)
         ast_resolve(if_stmt->condition, ctx);
     }
 
-    if (if_stmt->if_block != NULL)
+    if (if_stmt->then_block != NULL)
     {
-        block_resolve(if_stmt->if_block, ctx);
+        block_resolve(if_stmt->then_block, ctx);
     }
 
     if (if_stmt->else_block != NULL)
@@ -91,9 +91,9 @@ void if_stmt_sema(AST* ast, SemaContext* ctx)
         ast_sema(if_stmt->condition, ctx);
     }
 
-    if (if_stmt->if_block != NULL)
+    if (if_stmt->then_block != NULL)
     {
-        block_sema(if_stmt->if_block, ctx);
+        block_sema(if_stmt->then_block, ctx);
     }
 
     if (if_stmt->else_block != NULL)
