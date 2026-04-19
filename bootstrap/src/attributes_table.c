@@ -24,6 +24,12 @@ typedef struct TypeAttributes
     usize capacity;
 } TypeAttributes;
 
+typedef struct ScopeAttributes
+{
+    Scope** scopes;
+    usize capacity;
+} ScopeAttributes;
+
 typedef struct FuncData
 {
     const Type* receiver_type;
@@ -44,6 +50,7 @@ typedef struct NameBindingAttributes
 typedef struct SourceFileAttributesTable
 {
     TypeAttributes type_attributes;
+    ScopeAttributes scope_attributes;
     FuncAttributes func_attributes;
     NameBindingAttributes name_binding_attributes;
 } SourceFileAttributesTable;
@@ -91,6 +98,24 @@ const Type* attributes_table_lookup_type(ASTNodeID id)
     SourceFileAttributesTable* table = &attributes_table.source_file_attributes[id.owner];
 
     return table->type_attributes.types[id.local];
+}
+
+void attributes_table_insert_scope(ASTNodeID id, Scope* scope)
+{
+    attributes_table_ensure_capacity(id);
+
+    SourceFileAttributesTable* table = &attributes_table.source_file_attributes[id.owner];
+    ScopeAttributes* attributes = &table->scope_attributes;
+    ATTRIBUTES_ENSURE_CAPACITY(attributes, scopes, id);
+
+    attributes->scopes[id.local] = scope;
+}
+
+Scope* attributes_table_lookup_scope(ASTNodeID id)
+{
+    SourceFileAttributesTable* table = &attributes_table.source_file_attributes[id.owner];
+
+    return table->scope_attributes.scopes[id.local];
 }
 
 void attributes_table_insert_func_receiver_type(ASTNodeID id, const Type* receiver_type)
