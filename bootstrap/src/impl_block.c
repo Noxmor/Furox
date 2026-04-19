@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "parser.h"
 #include "early_resolution.h"
 #include "late_resolution.h"
@@ -21,7 +22,8 @@ AST* impl_block_parse(Parser* parser)
 {
     AST* ast = parser_create_ast(parser, FRX_AST_TYPE_IMPL_BLOCK);
     ASTImplBlock* impl_block = &ast->impl_block;
-    impl_block->scope = parser_push_scope(parser);
+
+    attributes_table_insert_scope(ast->id, parser_push_scope(parser));
 
     ast->span.lo = parser_current_span(parser).lo;
 
@@ -73,7 +75,7 @@ void impl_block_resolve_early(AST* ast, ResolutionContext* ctx)
 
     ASTImplBlock* impl_block = &ast->impl_block;
 
-    resolution_context_push_scope(ctx, impl_block->scope);
+    resolution_context_push_scope(ctx, attributes_table_lookup_scope(ast->id));
     ctx->current_impl_block = ast;
 
     if (impl_block->trait_path != NULL)
@@ -119,7 +121,7 @@ void impl_block_resolve_late(AST* ast, ResolutionContext* ctx)
 
     ASTImplBlock* impl_block = &ast->impl_block;
 
-    resolution_context_push_scope(ctx, impl_block->scope);
+    resolution_context_push_scope(ctx, attributes_table_lookup_scope(ast->id));
     ctx->current_impl_block = ast;
 
     for (usize i = 0; i < list_size(&impl_block->methods); ++i)

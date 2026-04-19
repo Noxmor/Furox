@@ -29,7 +29,8 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
     AST* ast = parser_create_ast(parser, FRX_AST_TYPE_FUNC_DECL);
     ASTFuncDecl* func_decl = &ast->func_decl;
     list_init(&func_decl->params);
-    func_decl->scope = parser_push_scope(parser);
+
+    attributes_table_insert_scope(ast->id, parser_push_scope(parser));
 
     ast->span.lo = parser_current_span(parser).lo;
 
@@ -147,7 +148,7 @@ void func_decl_resolve_early(AST* ast, ResolutionContext* ctx)
     ASTFuncDecl* func_decl = &ast->func_decl;
 
     ctx->current_func_decl = ast;
-    resolution_context_push_scope(ctx, func_decl->scope);
+    resolution_context_push_scope(ctx, attributes_table_lookup_scope(ast->id));
 
     switch (func_decl->receiver)
     {
@@ -185,7 +186,7 @@ void func_decl_resolve_late(AST* ast, ResolutionContext* ctx)
     ASTFuncDecl* func_decl = &ast->func_decl;
 
     ctx->current_func_decl = ast;
-    resolution_context_push_scope(ctx, func_decl->scope);
+    resolution_context_push_scope(ctx, attributes_table_lookup_scope(ast->id));
 
     if (func_decl->body != NULL)
     {

@@ -168,7 +168,6 @@ typedef struct ASTTrait
 
 typedef struct ASTImplBlock
 {
-    Scope* scope;
     AST* generic_params;
     AST* trait_path;
     AST* type_path;
@@ -183,7 +182,6 @@ typedef struct ASTTranslationUnit
 
 typedef struct ASTBlock
 {
-    Scope* scope;
     List stmts;
 } ASTBlock;
 
@@ -206,7 +204,6 @@ typedef struct ASTFuncParam
 
 typedef struct ASTFuncDecl
 {
-    Scope* scope;
     const char* name;
     b8 external;
     AST* generic_params;
@@ -314,7 +311,6 @@ typedef struct ASTPath
 {
     ASTPathType type;
     List path_segments;
-    Scope* scope;
     Module* mod;
     const Symbol* symbol;
 } ASTPath;

@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "parser.h"
 #include "resolution.h"
 #include "sema.h"
@@ -27,8 +28,9 @@ AST* parser_block_from_stmt(Parser* parser, AST* stmt, Scope* scope)
     ASTBlock* block = &ast->block;
 
     block_init(block);
-    block->scope = scope;
     block_add_stmt(block, stmt);
+
+    attributes_table_insert_scope(ast->id, scope);
 
     return ast;
 }
@@ -38,7 +40,8 @@ AST* block_parse(Parser* parser)
 
     AST* ast = parser_create_ast(parser, FRX_AST_TYPE_BLOCK);
     ASTBlock* block = &ast->block;
-    block->scope = parser_push_scope(parser);
+
+    attributes_table_insert_scope(ast->id, parser_push_scope(parser));
 
     ast->span.lo = parser_current_span(parser).lo;
 
@@ -67,7 +70,7 @@ void block_resolve(AST* ast, ResolutionContext* ctx)
 
     ASTBlock* block = &ast->block;
 
-    resolution_context_push_scope(ctx, block->scope);
+    resolution_context_push_scope(ctx, attributes_table_lookup_scope(ast->id));
 
     for (usize i = 0; i < list_size(&block->stmts); ++i)
     {

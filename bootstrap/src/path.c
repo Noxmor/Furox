@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "ast.h"
+#include "attributes_table.h"
 #include "parser.h"
 #include "resolution.h"
 #include "symbol.h"
@@ -111,7 +112,6 @@ static void path_init(ASTPath* path, ASTPathType path_type)
 
     path->type = path_type;
     list_init(&path->path_segments);
-    path->scope = NULL;
     path->mod = NULL;
     path->symbol = NULL;
 }
@@ -143,7 +143,7 @@ AST* path_parse(Parser* parser, PathStyle style)
 
     path_init(path, path_type);
 
-    path->scope = parser->current_scope;
+    attributes_table_insert_scope(ast->id, parser->current_scope);
     path->mod = parser->src_file->module;
 
     list_add(&path->path_segments, path_segment_parse(parser, style));
@@ -184,7 +184,7 @@ void path_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_PATH_SEGMENT_TYPE_PRIMITIVE: symbol = symbol_create(NULL, FRX_SYMBOL_VISIBILITY_PRIVATE, FRX_SYMBOL_TYPE_PRIMITIVE, path_segment); break;
         case FRX_PATH_SEGMENT_TYPE_IDENT:
         {
-            symbol = scope_lookup_symbol(path->scope, path_segment->path_segment.name);
+            symbol = scope_lookup_symbol(attributes_table_lookup_scope(ast->id), path_segment->path_segment.name);
             mod = module_find_submodule_by_name(path->mod, path_segment->path_segment.name);
             if (mod == NULL)
             {
