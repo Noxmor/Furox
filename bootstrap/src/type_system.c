@@ -469,6 +469,7 @@ const Type* symbol_infer_type(const Symbol* symbol)
         case FRX_SYMBOL_TYPE_PARAM: return attributes_table_lookup_type((symbol->data)->func_param.type->id);
         case FRX_SYMBOL_TYPE_VAR: return attributes_table_lookup_type(symbol->data->id);
         case FRX_SYMBOL_TYPE_GENERIC_PARAM: return type_intern_generic(symbol);
+        case FRX_SYMBOL_TYPE_STATIC: return attributes_table_lookup_type(symbol->data->id);
 
         default: FRX_ASSERT(FRX_FALSE); return NULL;
     }

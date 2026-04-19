@@ -13,6 +13,8 @@ void use_stmt_resolve_early(AST* ast, ResolutionContext* ctx);
 
 void type_alias_resolve_early(AST* ast, ResolutionContext* ctx);
 
+void static_resolve_early(AST* ast, ResolutionContext* ctx);
+
 void enum_def_resolve_early(AST* ast, ResolutionContext* ctx);
 
 void struct_def_resolve_early(AST* ast, ResolutionContext* ctx);

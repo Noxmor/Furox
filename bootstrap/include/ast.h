@@ -104,6 +104,14 @@ typedef struct ASTTypeAlias
     AST* type;
 } ASTTypeAlias;
 
+typedef struct ASTStatic
+{
+    b8 mutable;
+    const char* name;
+    AST* type;
+    AST* value;
+} ASTStatic;
+
 typedef struct ASTTraitBound
 {
     AST* type;
@@ -397,6 +405,7 @@ enum
     FRX_AST_TYPE_USE_STMT,
     FRX_AST_TYPE_TYPE_SPECIFIER,
     FRX_AST_TYPE_TYPE_ALIAS,
+    FRX_AST_TYPE_STATIC,
     FRX_AST_TYPE_STRUCT_FIELD,
     FRX_AST_TYPE_STRUCT_DEF,
     FRX_AST_TYPE_ENUM_VARIANT,
@@ -455,6 +464,7 @@ typedef struct AST
         ASTUseStmt use_stmt;
         ASTTypeSpecifier type_specifier;
         ASTTypeAlias type_alias;
+        ASTStatic static_node;
         ASTStructField struct_field;
         ASTStructDef struct_def;
         ASTEnumVariant enum_variant;

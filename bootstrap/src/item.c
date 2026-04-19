@@ -11,6 +11,7 @@ AST* item_parse(Parser* parser)
     switch (parser_current_type(parser))
     {
         case FRX_TOKEN_TYPE_KW_USE: return use_stmt_parse(parser);
+        case FRX_TOKEN_TYPE_KW_STATIC: return static_parse(parser, visibility);
         case FRX_TOKEN_TYPE_KW_EXTERN:
         case FRX_TOKEN_TYPE_KW_FN: return func_decl_parse(parser, visibility);
         case FRX_TOKEN_TYPE_KW_UNION:

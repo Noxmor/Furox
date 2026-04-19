@@ -74,6 +74,8 @@ AST* use_stmt_parse(Parser* parser);
 
 AST* type_alias_parse(Parser* parser, SymbolVisibility visibility);
 
+AST* static_parse(Parser* parser, SymbolVisibility visibility);
+
 AST* type_specifier_parse(Parser* parser);
 
 AST* struct_def_parse(Parser* parser, SymbolVisibility visibility);

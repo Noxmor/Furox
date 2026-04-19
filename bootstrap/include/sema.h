@@ -21,6 +21,8 @@ void ast_sema(AST* ast, SemaContext* ctx);
 
 void translation_unit_sema(AST* ast, SemaContext* ctx);
 
+void static_sema(AST* ast, SemaContext* ctx);
+
 void enum_def_sema(AST* ast, SemaContext* ctx);
 
 void trait_sema(AST* ast, SemaContext* ctx);

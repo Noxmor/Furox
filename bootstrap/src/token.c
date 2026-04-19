@@ -37,6 +37,7 @@ static char* token_type_names[] = {
     [FRX_TOKEN_TYPE_KW_MOD] = "mod",
     [FRX_TOKEN_TYPE_KW_USE] = "use",
     [FRX_TOKEN_TYPE_KW_AS] = "as",
+    [FRX_TOKEN_TYPE_KW_STATIC] = "static",
     [FRX_TOKEN_TYPE_KW_PUB] = "pub",
     [FRX_TOKEN_TYPE_KW_MUT] = "mut",
     [FRX_TOKEN_TYPE_KW_RETURN] = "return",

@@ -159,6 +159,34 @@ static void emit_type(const Type* type, const char* name, FILE* f, CodegenContex
     }
 }
 
+static void emit_static(AST* ast, FILE* f, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(f != NULL);
+
+    FRX_ASSERT(ctx != NULL);
+
+    ASTStatic* static_node = &ast->static_node;
+    const Type* type = attributes_table_lookup_type(ast->id);
+
+    char mangled_name[strlen(static_node->name) + 2 + 16 + 1];
+    sprintf(mangled_name, "%s%p", static_node->name, ast);
+    emit_type(type, mangled_name, f, ctx);
+
+    if (type->kind != FRX_TYPE_KIND_FUNC && type->kind != FRX_TYPE_KIND_ARRAY)
+    {
+        fprintf(f, " %s%p", static_node->name, ast);
+    }
+
+    if (static_node->value)
+    {
+        fprintf(f, " = ");
+        emit_ast(static_node->value, f, ctx);
+    }
+
+    fprintf(f, ";\n");}
+
 static void emit_enum_definition(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
@@ -1003,7 +1031,19 @@ void codegen_context_transpile(CodegenContext* ctx)
         }
     }
 
-    // 5. Emit all function definitions
+    // 5. Emit all global variables
+    for (usize i = 0; i < list_size(&symbols); ++i)
+    {
+        Symbol* symbol = list_get(&symbols, i);
+
+        if (symbol->type == FRX_SYMBOL_TYPE_STATIC)
+        {
+            emit_static(symbol->data, ctx->source, ctx);
+        }
+    }
+
+
+    // 6. Emit all function definitions
     for (usize i = 0; i < list_size(&symbols); ++i)
     {
         Symbol* symbol = list_get(&symbols, i);
