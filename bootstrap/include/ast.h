@@ -366,7 +366,7 @@ typedef struct ASTIfStmt
 {
     AST* condition;
     AST* then_block;
-    AST* else_block;
+    AST* else_stmt;
 } ASTIfStmt;
 
 typedef struct ASTForLoop
@@ -508,8 +508,6 @@ typedef struct AST
 } AST;
 
 AST* ast_create(ASTType type, ASTNodeID id);
-
-AST* parser_block_from_stmt(Parser* parser, AST* stmt, Scope* scope);
 
 const Type* expr_infer_type(AST* expr);
 

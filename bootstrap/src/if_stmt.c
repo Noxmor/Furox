@@ -5,11 +5,11 @@
 #include "sema.h"
 
 static void if_stmt_init(ASTIfStmt* if_stmt, AST* condition, AST* then_block,
-                         AST* else_block)
+                         AST* else_stmt)
 {
     if_stmt->condition = condition;
     if_stmt->then_block = then_block;
-    if_stmt->else_block = else_block;
+    if_stmt->else_stmt = else_stmt;
 }
 
 AST* if_stmt_parse(Parser* parser)
@@ -29,25 +29,21 @@ AST* if_stmt_parse(Parser* parser)
     parser_eat(parser, FRX_TOKEN_TYPE_RPAREN);
 
     AST* if_block = block_parse(parser);
-    AST* else_block = NULL;
+    AST* else_stmt = NULL;
 
     if (parser_match(parser, FRX_TOKEN_TYPE_KW_ELSE))
     {
         parser_eat(parser, FRX_TOKEN_TYPE_KW_ELSE);
 
-        if (parser_match(parser, FRX_TOKEN_TYPE_KW_IF))
+        if (parser_current_type(parser) == FRX_TOKEN_TYPE_KW_IF
+            || parser_current_type(parser) == FRX_TOKEN_TYPE_LBRACE)
         {
-            parser_push_scope(parser);
-            else_block = parser_block_from_stmt(parser, stmt_parse(parser), parser->current_scope);
-            parser_pop_scope(parser);
+            else_stmt = stmt_parse(parser);
         }
-        else
-        {
-            else_block = block_parse(parser);
-        }
+
     }
 
-    if_stmt_init(if_stmt, condition, if_block, else_block);
+    if_stmt_init(if_stmt, condition, if_block, else_stmt);
 
     return ast;
 }
@@ -70,9 +66,9 @@ void if_stmt_resolve(AST* ast, ResolutionContext* ctx)
         block_resolve(if_stmt->then_block, ctx);
     }
 
-    if (if_stmt->else_block != NULL)
+    if (if_stmt->else_stmt != NULL)
     {
-        block_resolve(if_stmt->else_block, ctx);
+        ast_resolve(if_stmt->else_stmt, ctx);
     }
 }
 
@@ -96,8 +92,8 @@ void if_stmt_sema(AST* ast, SemaContext* ctx)
         block_sema(if_stmt->then_block, ctx);
     }
 
-    if (if_stmt->else_block != NULL)
+    if (if_stmt->else_stmt != NULL)
     {
-        block_sema(if_stmt->else_block, ctx);
+        ast_sema(if_stmt->else_stmt, ctx);
     }
 }
