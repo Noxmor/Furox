@@ -6,15 +6,20 @@
 
 #define FRX_DIAGNOSTICS_MAX_ARGS 8
 
+#define FRX_DIAGNOSTICS(X) \
+    X(UNEXPECTED_TOKEN, "Expected '%s', but found '%s'") \
+    X(EXPECTED_TYPE_SPECIFIER, "Expected type specifier, but found '%s'") \
+    X(EXPECTED_ITEM, "Expected item, but found '%s'") \
+    X(EXPECTED_STMT, "Expected statement, but found '%s'") \
+    X(EXPECTED_EXPR, "Expected expression, but found '%s'") \
+    X(UNRESOLVED_SYMBOL, "Failed to resolve symbol '%s'") \
+    X(INVALID_MODULE_PATH, "Invalid module path '%s'")
+
+#define FRX_DIAGNOSTICS_EMIT_NAME(name, format) FRX_DIAGNOSTIC_ID_ ## name,
+
 enum
 {
-    FRX_DIAGNOSTIC_ID_UNEXPECTED_TOKEN,
-    FRX_DIAGNOSTIC_ID_EXPECTED_TYPE_SPECIFIER,
-    FRX_DIAGNOSTIC_ID_EXPECTED_ITEM,
-    FRX_DIAGNOSTIC_ID_EXPECTED_STMT,
-    FRX_DIAGNOSTIC_ID_EXPECTED_EXPR,
-    FRX_DIAGNOSTIC_ID_UNRESOLVED_SYMBOL,
-    FRX_DIAGNOSTIC_ID_INVALID_MODULE_PATH,
+    FRX_DIAGNOSTICS(FRX_DIAGNOSTICS_EMIT_NAME)
 
     FRX_DIAGNOSTIC_ID_COUNT
 };

@@ -7,21 +7,34 @@
 #include "compiler.h"
 #include "source_map.h"
 
-typedef struct DiagnosticInfo
-{
-    const char* format;
-    usize args_count;
-} DiagnosticInfo;
+#define FRX_DIAGNOSTICS_EMIT_FORMAT(name, format) format,
 
-static const DiagnosticInfo diagnostic_id_to_info[FRX_DIAGNOSTIC_ID_COUNT] = {
-    [FRX_DIAGNOSTIC_ID_UNEXPECTED_TOKEN] = { "Expected '%s', but found '%s'", 2 },
-    [FRX_DIAGNOSTIC_ID_EXPECTED_TYPE_SPECIFIER] = { "Expected type specifier, but found '%s'", 1 },
-    [FRX_DIAGNOSTIC_ID_EXPECTED_ITEM] = { "Expected item, but found '%s'", 1 },
-    [FRX_DIAGNOSTIC_ID_EXPECTED_STMT] = { "Expected statement, but found '%s'", 1 },
-    [FRX_DIAGNOSTIC_ID_EXPECTED_EXPR] = { "Expected expression, but found '%s'", 1 },
-    [FRX_DIAGNOSTIC_ID_UNRESOLVED_SYMBOL] = { "Failed to resolve symbol '%s'", 1 },
-    [FRX_DIAGNOSTIC_ID_INVALID_MODULE_PATH] = { "Invalid module path '%s'", 1 }
+static const char* diagnostic_id_to_format[] = {
+    FRX_DIAGNOSTICS(FRX_DIAGNOSTICS_EMIT_FORMAT)
 };
+
+static usize format_args_count(const char* format)
+{
+    FRX_ASSERT(format != NULL);
+
+    usize count = 0;
+
+    while (*format)
+    {
+        if (*format++ == '%')
+        {
+            if (*format == '%')
+            {
+                ++format;
+                continue;
+            }
+
+            ++count;
+        }
+    }
+
+    return count;
+}
 
 Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl,
                               SourceSpan span, ...)
@@ -35,7 +48,7 @@ Diagnostic* diagnostic_create(DiagnosticID id, DiagnosticLevel lvl,
     d->lvl = lvl;
     d->span = span;
 
-    usize args_count = diagnostic_id_to_info[d->id].args_count;
+    usize args_count = format_args_count(diagnostic_id_to_format[d->id]);
 
     FRX_ASSERT(args_count <= FRX_DIAGNOSTICS_MAX_ARGS);
 
@@ -110,8 +123,8 @@ void diagnostic_emit(const Diagnostic* d)
     fprintf(output, "[%s%s%s]: %s:%u:%u: ", color_str, lvl_str,
             clear_color_str, filepath, line, column);
 
-    const char* format = diagnostic_id_to_info[d->id].format;
-    usize args_count = diagnostic_id_to_info[d->id].args_count;
+    const char* format = diagnostic_id_to_format[d->id];
+    usize args_count = format_args_count(format);
 
     switch (args_count)
     {
