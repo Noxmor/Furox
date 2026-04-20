@@ -1,4 +1,4 @@
-#include "assert.h"func_de
+#include "assert.h"
 #include "ast.h"
 #include "attributes_table.h"
 #include "parser.h"
