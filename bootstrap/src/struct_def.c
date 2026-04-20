@@ -41,9 +41,8 @@ AST* struct_field_parse(Parser* parser)
         parser_eat(parser, FRX_TOKEN_TYPE_KW_MOD);
     }
 
-    const char* name = parser_current_token(parser)->identifier;
+    const char* name = parse_ident(parser);
 
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
     parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
     AST* type = type_specifier_parse(parser);
@@ -86,9 +85,7 @@ AST* struct_def_parse(Parser* parser, SymbolVisibility visibility)
         parser_eat(parser, FRX_TOKEN_TYPE_KW_UNION);
     }
 
-    const char* name = parser_current_token(parser)->identifier;
-
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    const char* name = parse_ident(parser);
 
     parser_push_scope(parser);
 

@@ -24,8 +24,7 @@ AST* trait_parse(Parser* parser, SymbolVisibility visibility)
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_TRAIT);
 
-    const char* name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    const char* name = parse_ident(parser);
 
     trait_init(trait, name);
     parser_eat(parser, FRX_TOKEN_TYPE_LBRACE);

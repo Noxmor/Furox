@@ -1,4 +1,4 @@
-#include "assert.h"
+#include "assert.h"func_de
 #include "ast.h"
 #include "attributes_table.h"
 #include "parser.h"
@@ -46,8 +46,8 @@ AST* func_decl_parse(Parser* parser, SymbolVisibility visibility)
         ast->type = FRX_AST_TYPE_ERROR;
     }
 
-    const char* name = parser_current_token(parser)->identifier;
-    if (parser_eat(parser, FRX_TOKEN_TYPE_IDENT))
+    const char* name = parse_ident(parser);
+    if (name == NULL)
     {
         ast->type = FRX_AST_TYPE_ERROR;
     }

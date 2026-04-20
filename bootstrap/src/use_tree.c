@@ -15,12 +15,10 @@ AST* use_tree_parse(Parser* parser)
     use_tree->path_segment = NULL;
     list_init(&use_tree->childs);
 
-    use_tree->type = FRX_AST_USE_TREE_TYPE_SIMPLE;
-    use_tree->path_segment = parser_current_token(parser)->identifier;
-
     ast->span.lo = parser_current_span(parser).lo;
 
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    use_tree->type = FRX_AST_USE_TREE_TYPE_SIMPLE;
+    use_tree->path_segment = parse_ident(parser);
 
     if (parser_match(parser, FRX_TOKEN_TYPE_RESOLUTION))
     {

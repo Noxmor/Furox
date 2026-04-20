@@ -10,9 +10,8 @@ AST* func_param_parse(Parser* parser)
 
     ast->span.lo = parser_current_span(parser).lo;
 
-    param->name = parser_current_token(parser)->identifier;
+    param->name = parse_ident(parser);
 
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
     parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
     param->type = type_specifier_parse(parser);

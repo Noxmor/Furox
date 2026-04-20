@@ -43,8 +43,7 @@ static AST* generic_param_parse(Parser* parser)
 
     ast->span = parser_current_span(parser);
 
-    const char* name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    const char* name = parse_ident(parser);
 
     generic_param_init(generic_param, name);
 

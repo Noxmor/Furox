@@ -13,8 +13,7 @@ AST* static_parse(Parser* parser, SymbolVisibility visibility)
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_STATIC);
 
-    static_node->name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    static_node->name = parse_ident(parser);
 
     AST* type = NULL;
 

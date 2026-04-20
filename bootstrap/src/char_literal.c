@@ -11,8 +11,7 @@ AST* char_literal_parse(Parser* parser)
 
     ast->span = parser_current_span(parser);
 
-    char_literal->value = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_CHAR_LIT);
+    char_literal->value = parse_char_literal(parser);
 
     return ast;
 }

@@ -33,8 +33,7 @@ AST* let_stmt_parse(Parser* parser)
         mutable = FRX_TRUE;
     }
 
-    const char* name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    const char* name = parse_ident(parser);
 
     AST* type = NULL;
 

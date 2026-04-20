@@ -23,8 +23,7 @@ AST* struct_literal_field_parse(Parser* parser)
 
     ast->span.lo = parser_current_span(parser).lo;
 
-    const char* name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    const char* name = parse_ident(parser);
     parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
     AST* value = expr_parse(parser);

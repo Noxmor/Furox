@@ -189,8 +189,8 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
             }
             else if (operator == FRX_OPERATOR_MEMBER_ACCESS)
             {
-                const char* name = parser_current_token(parser)->identifier;
-                if (parser_eat(parser, FRX_TOKEN_TYPE_IDENT))
+                const char* name = parse_ident(parser);
+                if (name == NULL)
                 {
                     return NULL;
                 }

@@ -23,8 +23,7 @@ static AST* enum_variant_parse(Parser* parser)
 
     ast->span.lo = parser_current_span(parser).lo;
 
-    const char* name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    const char* name = parse_ident(parser);
 
     enum_variant_init(variant, name);
 
@@ -71,8 +70,7 @@ AST* enum_def_parse(Parser* parser, SymbolVisibility visibility)
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_ENUM);
 
-    const char* name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    const char* name = parse_ident(parser);
 
     parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 

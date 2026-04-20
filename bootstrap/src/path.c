@@ -38,9 +38,8 @@ static AST* path_segment_parse(Parser* parser, PathStyle style)
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_IDENT)
     {
         type = FRX_PATH_SEGMENT_TYPE_IDENT;
-        name = parser_current_token(parser)->identifier;
         ast->span.hi = parser_current_span(parser).hi;
-        parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+        name = parse_ident(parser);
     }
     else if (token_type_is_primitive(parser_current_type(parser)))
     {

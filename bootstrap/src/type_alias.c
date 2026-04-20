@@ -14,8 +14,7 @@ AST* type_alias_parse(Parser* parser, SymbolVisibility visibility)
 
     parser_eat(parser, FRX_TOKEN_TYPE_KW_TYPE);
 
-    type_alias->name = parser_current_token(parser)->identifier;
-    parser_eat(parser, FRX_TOKEN_TYPE_IDENT);
+    type_alias->name = parse_ident(parser);
 
     parser_eat(parser, FRX_TOKEN_TYPE_EQ);
 
