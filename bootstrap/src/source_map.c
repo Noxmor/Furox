@@ -48,7 +48,7 @@ SourceFile* source_map_lookup_source_file(SourceOffset offset)
     return NULL;
 }
 
-void source_map_resolve_offset(SourceOffset offset, SourceLine* line, SourceColumn* column)
+const char* source_map_resolve_offset(SourceOffset offset, SourceLine* line, SourceColumn* column)
 {
     FRX_ASSERT(line != NULL);
 
@@ -75,6 +75,8 @@ void source_map_resolve_offset(SourceOffset offset, SourceLine* line, SourceColu
             *column += 1;
         }
     }
+
+    return data;
 }
 
 const char* source_map_filepath_from_source_span(SourceSpan span)
