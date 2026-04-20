@@ -15,13 +15,11 @@ AST* static_parse(Parser* parser, SymbolVisibility visibility)
 
     static_node->name = parse_ident(parser);
 
-    AST* type = NULL;
-
     if (parser_current_type(parser) == FRX_TOKEN_TYPE_COLON)
     {
         parser_eat(parser, FRX_TOKEN_TYPE_COLON);
 
-        type = type_specifier_parse(parser);
+        static_node->type = type_specifier_parse(parser);
     }
 
     static_node->value = NULL;
