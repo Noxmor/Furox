@@ -118,7 +118,7 @@ void diagnostic_emit(const Diagnostic* d)
 
     SourceLine line;
     SourceColumn column;
-    source_map_resolve_offset(d->span.lo, &line, &column);
+    const char* src = source_map_resolve_offset(d->span.lo, &line, &column);
 
     fprintf(output, "[%s%s%s]: %s:%u:%u: ", color_str, lvl_str,
             clear_color_str, filepath, line, column);
@@ -141,4 +141,26 @@ void diagnostic_emit(const Diagnostic* d)
     }
 
     fprintf(output, "\n");
+
+    const char* line_start = src - column + 1;
+    usize line_len = 1;
+    while (*line_start != '\n' && *line_start != '\0')
+    {
+        ++line_start;
+        ++line_len;
+    }
+
+    line_start = src - column + 1;
+
+    static const int line_format_width = 5;
+
+    fprintf(output, "%*d | %.*s\n", line_format_width, line, (int)(line_len - 1), line_start);
+    fprintf(output, "%*s | %*s^", line_format_width, "", (int)(column - 1), "");
+
+    for (usize i = 1; i < d->span.hi - d->span.lo; ++i)
+    {
+        printf("~");
+    }
+
+    printf("\n");
 }
