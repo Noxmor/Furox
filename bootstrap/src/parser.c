@@ -107,6 +107,34 @@ b8 parser_eat(Parser* parser, TokenType type)
     return FRX_TRUE;
 }
 
+const char* parse_ident(Parser* parser)
+{
+    const char* ident = parser_current_token(parser)->identifier;
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_IDENT) ? NULL : ident;
+}
+
+u64 parse_int_literal(Parser* parser)
+{
+    u64 int_literal = parser_current_token(parser)->int_literal;
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_INT_LIT) ? 0 : int_literal;
+}
+
+const char* parse_char_literal(Parser* parser)
+{
+    const char* char_literal = parser_current_token(parser)->identifier;
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_CHAR_LIT) ? NULL : char_literal;
+}
+
+const char* parse_string_literal(Parser* parser)
+{
+    const char* string_literal = parser_current_token(parser)->identifier;
+
+    return parser_eat(parser, FRX_TOKEN_TYPE_STR_LIT) ? NULL : string_literal;
+}
+
 SymbolVisibility parse_visibility(Parser* parser)
 {
     FRX_ASSERT(parser != NULL);

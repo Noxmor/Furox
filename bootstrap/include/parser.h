@@ -37,6 +37,14 @@ b8 parser_match(Parser* parser, TokenType type);
 
 b8 parser_eat(Parser* parser, TokenType type);
 
+const char* parse_ident(Parser* parser);
+
+u64 parse_int_literal(Parser* parser);
+
+const char* parse_char_literal(Parser* parser);
+
+const char* parse_string_literal(Parser* parser);
+
 SymbolVisibility parse_visibility(Parser* parser);
 
 void parser_recover(Parser* parser);
