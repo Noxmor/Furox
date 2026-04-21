@@ -74,6 +74,16 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
         const Type* type = attributes_table_lookup_type(method_call_expr->symbol->data->func_decl.return_type->id);
         attributes_table_insert_type(ast->id, type);
     }
+    else
+    {
+        const Type* type = expr_infer_type(call_expr->callee);
+        if (type->kind == FRX_TYPE_KIND_FUNC)
+        {
+            type = type->func.return_type;
+        }
+
+        attributes_table_insert_type(ast->id, type);
+    }
 }
 
 void call_expr_sema(AST* ast, SemaContext* ctx)
