@@ -5,7 +5,6 @@
 #include "token.h"
 #include "list.h"
 #include "operator.h"
-#include "scope.h"
 #include "module.h"
 #include "source_file.h"
 
