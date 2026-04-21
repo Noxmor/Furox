@@ -33,6 +33,8 @@ void path_resolve(AST* ast, ResolutionContext* ctx);
 
 void type_specifier_resolve(AST* ast, ResolutionContext* ctx);
 
+void defer_stmt_resolve(AST* ast, ResolutionContext* ctx);
+
 void block_resolve(AST* ast, ResolutionContext* ctx);
 
 void expr_stmt_resolve(AST* ast, ResolutionContext* ctx);

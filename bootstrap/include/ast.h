@@ -187,6 +187,11 @@ typedef struct ASTTranslationUnit
     List items;
 } ASTTranslationUnit;
 
+typedef struct ASTDeferStmt
+{
+    AST* stmt;
+} ASTDeferStmt;
+
 typedef struct ASTBlock
 {
     List stmts;
@@ -416,6 +421,7 @@ enum
     FRX_AST_TYPE_GENERIC_PARAM,
     FRX_AST_TYPE_GENERIC_PARAMS,
     FRX_AST_TYPE_FUNC_DECL,
+    FRX_AST_TYPE_DEFER_STMT,
     FRX_AST_TYPE_BLOCK,
     FRX_AST_TYPE_EXPR_STMT,
     FRX_AST_TYPE_BREAK_STMT,
@@ -475,6 +481,7 @@ typedef struct AST
         ASTGenericParam generic_param;
         ASTGenericParams generic_params;
         ASTFuncDecl func_decl;
+        ASTDeferStmt defer_stmt;
         ASTBlock block;
         ASTExprStmt expr_stmt;
         ASTBreakStmt break_stmt;

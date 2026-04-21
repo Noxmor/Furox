@@ -19,6 +19,7 @@ AST* stmt_parse(Parser* parser)
         case FRX_TOKEN_TYPE_BIT_NOT:
         case FRX_TOKEN_TYPE_PLUS_PLUS:
         case FRX_TOKEN_TYPE_MINUS_MINUS: return expr_stmt_parse(parser);
+        case FRX_TOKEN_TYPE_KW_DEFER: return defer_stmt_parse(parser);
         case FRX_TOKEN_TYPE_KW_BREAK: return break_stmt_parse(parser);
         case FRX_TOKEN_TYPE_KW_CONTINUE: return continue_stmt_parse(parser);
         case FRX_TOKEN_TYPE_KW_RETURN: return return_stmt_parse(parser);
