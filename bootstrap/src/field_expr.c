@@ -1,5 +1,6 @@
 #include "ast.h"
 #include "assert.h"
+#include "attributes_table.h"
 #include "resolution.h"
 #include "sema.h"
 #include "symbol.h"
@@ -16,6 +17,24 @@ void field_expr_resolve(AST* ast, ResolutionContext* ctx)
     ASTFieldExpr* field_expr = &ast->field_expr;
 
     ast_resolve(field_expr->base, ctx);
+
+    const Type* struct_type = expr_infer_type(field_expr->base);
+    while (struct_type->kind == FRX_TYPE_KIND_PTR)
+    {
+        struct_type = struct_type->ptr.base;
+    }
+
+    List* fields = &struct_type->strct.symbol->data->struct_def.fields;
+
+    for (usize i = 0; i < list_size(fields); ++i)
+    {
+        AST* field = list_get(fields, i);
+        if (field->struct_field.name == field_expr->field_name)
+        {
+            field_expr->resolved_type = attributes_table_lookup_type(field->struct_field.type->id);
+            break;
+        }
+    }
 }
 
 void field_expr_sema(AST* ast, SemaContext* ctx)
