@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "attributes_table.h"
 #include "compiler.h"
+#include "list.h"
 #include "log.h"
 #include "module.h"
 #include "operator.h"
@@ -14,7 +15,41 @@
 
 #include <string.h>
 
+static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx);
+
 static void emit_block(AST* ast, FILE* f, CodegenContext* ctx);
+
+static void defer_stack_push(AST* ast, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_DEFER_STMT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    list_add(&ctx->defer_stack, ast);
+}
+
+static void defer_stack_pop(const Scope* scope, CodegenContext* ctx)
+{
+    FRX_ASSERT(ctx != NULL);
+
+    while (!list_empty(&ctx->defer_stack) && attributes_table_lookup_scope(((AST*)list_get(&ctx->defer_stack, list_size(&ctx->defer_stack) - 1))->id) == scope)
+    {
+        list_pop(&ctx->defer_stack);
+    }
+}
+
+static void emit_defer_stack(CodegenContext* ctx)
+{
+    FRX_ASSERT(ctx != NULL);
+
+    for (usize i = 0; i < list_size(&ctx->defer_stack); ++i)
+    {
+        AST* defer_stmt = list_get(&ctx->defer_stack, list_size(&ctx->defer_stack) - 1 - i);
+        emit_ast(defer_stmt->defer_stmt.stmt, ctx->source, ctx);
+    }
+}
 
 b8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
                         List* src_files, const char* filename)
@@ -32,6 +67,7 @@ b8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
     ctx->root_mod = root_mod;
     ctx->src_files = src_files;
     list_init(&ctx->symbol_list);
+    list_init(&ctx->defer_stack);
     ctx->generic_params = NULL;
     ctx->generic_args = NULL;
 
@@ -87,8 +123,6 @@ b8 codegen_context_init(CodegenContext* ctx, const Module* root_mod,
 
     return FRX_FALSE;
 }
-
-static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx);
 
 static void emit_type(const Type* type, const char* name, FILE* f, CodegenContext* ctx)
 {
@@ -840,7 +874,7 @@ static void emit_expr_stmt(AST* ast, FILE* f, CodegenContext* ctx)
     fprintf(f, ";\n");
 }
 
-static void emit_break_stmt(AST* ast, FILE* f)
+static void emit_break_stmt(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
@@ -848,16 +882,20 @@ static void emit_break_stmt(AST* ast, FILE* f)
 
     FRX_ASSERT(f != NULL);
 
+    emit_defer_stack(ctx);
+
     fprintf(f, "break;\n");
 }
 
-static void emit_continue_stmt(AST* ast, FILE* f)
+static void emit_continue_stmt(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_CONTINUE_STMT);
 
     FRX_ASSERT(f != NULL);
+
+    emit_defer_stack(ctx);
 
     fprintf(f, "continue;\n");
 }
@@ -873,14 +911,30 @@ static void emit_return_stmt(AST* ast, FILE* f, CodegenContext* ctx)
     ASTReturnStmt* return_stmt = &ast->return_stmt;
     if (return_stmt->value)
     {
-        fprintf(f, "return ");
+        const Type* type = expr_infer_type(return_stmt->value);
+        emit_type(type, NULL, f, ctx);
+        fprintf(f, " ret = ");
         emit_ast(return_stmt->value, f, ctx);
         fprintf(f, ";\n");
+        emit_defer_stack(ctx);
+        fprintf(f, "return ret;\n");
     }
     else
     {
+        emit_defer_stack(ctx);
         fprintf(f, "return;\n");
     }
+}
+
+static void emit_defer_stmt(AST* ast, CodegenContext* ctx)
+{
+    FRX_ASSERT(ast != NULL);
+
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_DEFER_STMT);
+
+    FRX_ASSERT(ctx != NULL);
+
+    defer_stack_push(ast, ctx);
 }
 
 static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
@@ -912,9 +966,10 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_CAST_EXPR: emit_cast_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_SIZEOF_EXPR: emit_sizeof_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: emit_expr_stmt(ast, f, ctx); break;
-        case FRX_AST_TYPE_BREAK_STMT: emit_break_stmt(ast, f); break;
-        case FRX_AST_TYPE_CONTINUE_STMT: emit_continue_stmt(ast, f); break;
+        case FRX_AST_TYPE_BREAK_STMT: emit_break_stmt(ast, f, ctx); break;
+        case FRX_AST_TYPE_CONTINUE_STMT: emit_continue_stmt(ast, f, ctx); break;
         case FRX_AST_TYPE_RETURN_STMT: emit_return_stmt(ast, f, ctx); break;
+        case FRX_AST_TYPE_DEFER_STMT: emit_defer_stmt(ast, ctx); break;
         case FRX_AST_TYPE_BLOCK: emit_block(ast, f, ctx); break;
         default: FRX_ASSERT(FRX_FALSE); break;
     }
@@ -937,6 +992,9 @@ static void emit_block(AST* ast, FILE* f, CodegenContext* ctx)
         AST* stmt = list_get(&block->stmts, i);
         emit_ast(stmt, f, ctx);
     }
+
+    emit_defer_stack(ctx);
+    defer_stack_pop(attributes_table_lookup_scope(ast->id), ctx);
 
     fprintf(f, "}\n");
 }
