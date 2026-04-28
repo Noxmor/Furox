@@ -26,6 +26,15 @@ void list_add(List* list, void* item)
     list->items[list->size++] = item;
 }
 
+void* list_pop(List* list)
+{
+    FRX_ASSERT(list != NULL);
+
+    FRX_ASSERT(!list_empty(list));
+
+    return list->items[--list->size];
+}
+
 usize list_size(const List* list)
 {
     FRX_ASSERT(list != NULL);
