@@ -46,8 +46,6 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
 
     FRX_ASSERT(ast->type == FRX_AST_TYPE_CALL_EXPR);
 
-    (void)ctx;
-
     ASTCallExpr* call_expr = &ast->call_expr;
 
     path_expr_resolve(call_expr->callee, ctx);
