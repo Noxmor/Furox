@@ -24,9 +24,9 @@ impl Foo
         return self.x;
     }
 
-    fn get_bar(foo: Foo*) -> Bar*
+    fn get_bar(self*) -> Bar*
     {
-        return &foo.bar;
+        return &self.bar;
     }
 }
 
