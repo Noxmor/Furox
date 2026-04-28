@@ -245,7 +245,6 @@ typedef struct ASTFieldExpr
 {
     AST* base;
     const char* field_name;
-    const Type* resolved_type; // TODO: Move this into an attributes table
 } ASTFieldExpr;
 
 typedef struct ASTSelfExpr

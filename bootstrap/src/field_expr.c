@@ -31,7 +31,9 @@ void field_expr_resolve(AST* ast, ResolutionContext* ctx)
         AST* field = list_get(fields, i);
         if (field->struct_field.name == field_expr->field_name)
         {
-            field_expr->resolved_type = attributes_table_lookup_type(field->struct_field.type->id);
+            const Type* type = attributes_table_lookup_type(field->struct_field.type->id);
+            attributes_table_insert_type(ast->id, type);
+
             break;
         }
     }

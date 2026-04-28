@@ -156,7 +156,7 @@ const Type* expr_infer_type(AST* expr)
     {
         case FRX_AST_TYPE_UNARY_EXPR: return attributes_table_lookup_type(expr->id);
         case FRX_AST_TYPE_BINARY_EXPR: return attributes_table_lookup_type(expr->id);
-        case FRX_AST_TYPE_FIELD_EXPR: return expr->field_expr.resolved_type;
+        case FRX_AST_TYPE_FIELD_EXPR: return attributes_table_lookup_type(expr->id);
         case FRX_AST_TYPE_SELF_EXPR: return attributes_table_lookup_type(expr->id);
         case FRX_AST_TYPE_BOOL_EXPR: return type_intern_bool();
         case FRX_AST_TYPE_NULLPTR_EXPR: return type_intern_nullptr();
