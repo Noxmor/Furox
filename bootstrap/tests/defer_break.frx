@@ -1,0 +1,15 @@
+fn main() -> i32
+{
+    let mut x = 1;
+
+    loop
+    {
+        defer x = 0;
+
+        x = 1;
+
+        break;
+    }
+
+    return x;
+}

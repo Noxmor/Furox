@@ -1,0 +1,19 @@
+fn main() -> i32
+{
+    let mut x = 1;
+
+    let mut first = true;
+
+    while (first)
+    {
+        first = false;
+
+        x = 1;
+
+        defer x = 0;
+
+        continue;
+    }
+
+    return x;
+}
