@@ -57,7 +57,7 @@ void field_expr_sema(AST* ast, SemaContext* ctx);
 
 void call_expr_sema(AST* ast, SemaContext* ctx);
 
-void method_call_expr_sema(AST* ast, SemaContext* ctx);
+void member_call_expr_sema(AST* ast, SemaContext* ctx);
 
 void cast_expr_sema(AST* ast, SemaContext* ctx);
 

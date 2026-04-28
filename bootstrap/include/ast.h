@@ -337,13 +337,13 @@ typedef struct ASTCallExpr
     List args;
 } ASTCallExpr;
 
-typedef struct ASTMethodCallExpr
+typedef struct ASTMemberCallExpr
 {
     AST* callee;
     const char* name;
     List args;
     const Symbol* symbol;
-} ASTMethodCallExpr;
+} ASTMemberCallExpr;
 
 typedef struct ASTExprStmt
 {
@@ -441,7 +441,7 @@ enum
     FRX_AST_TYPE_PATH,
     FRX_AST_TYPE_PATH_EXPR,
     FRX_AST_TYPE_CALL_EXPR,
-    FRX_AST_TYPE_METHOD_CALL_EXPR,
+    FRX_AST_TYPE_MEMBER_CALL_EXPR,
     FRX_AST_TYPE_CAST_EXPR,
     FRX_AST_TYPE_SIZEOF_EXPR,
     FRX_AST_TYPE_INT_LIT,
@@ -501,7 +501,7 @@ typedef struct AST
         ASTPath path;
         ASTPathExpr path_expr;
         ASTCallExpr call_expr;
-        ASTMethodCallExpr method_call_expr;
+        ASTMemberCallExpr member_call_expr;
         ASTCastExpr cast_expr;
         ASTSizeofExpr sizeof_expr;
         ASTIntLiteral int_literal;

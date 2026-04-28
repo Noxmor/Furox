@@ -197,8 +197,8 @@ static AST* expr_parse_with_precedence(Parser* parser, Precedence min_precedence
 
                 if (parser_current_type(parser) == FRX_TOKEN_TYPE_LPAREN)
                 {
-                    AST* method_call_expr = method_call_expr_parse(parser, name, expr);
-                    expr = method_call_expr;
+                    AST* member_call_expr = member_call_expr_parse(parser, name, expr);
+                    expr = member_call_expr;
                 }
                 else
                 {

@@ -88,7 +88,7 @@ void ast_resolve(AST* ast, ResolutionContext* ctx)
         case FRX_AST_TYPE_NULLPTR_EXPR: break;
         case FRX_AST_TYPE_PATH_EXPR: path_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_CALL_EXPR: call_expr_resolve(ast, ctx); break;
-        case FRX_AST_TYPE_METHOD_CALL_EXPR: method_call_expr_resolve(ast, ctx); break;
+        case FRX_AST_TYPE_MEMBER_CALL_EXPR: member_call_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_CAST_EXPR: cast_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_SIZEOF_EXPR: sizeof_expr_resolve(ast, ctx); break;
         case FRX_AST_TYPE_INT_LIT: int_literal_resolve(ast, ctx); break;
@@ -136,7 +136,7 @@ void ast_sema(AST* ast, SemaContext* ctx)
         case FRX_AST_TYPE_BOOL_EXPR: break;
         case FRX_AST_TYPE_PATH_EXPR: break;
         case FRX_AST_TYPE_CALL_EXPR: call_expr_sema(ast, ctx); break;
-        case FRX_AST_TYPE_METHOD_CALL_EXPR: method_call_expr_sema(ast, ctx); break;
+        case FRX_AST_TYPE_MEMBER_CALL_EXPR: member_call_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_CAST_EXPR: cast_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_SIZEOF_EXPR: sizeof_expr_sema(ast, ctx); break;
         case FRX_AST_TYPE_INT_LIT: break;
@@ -162,7 +162,7 @@ const Type* expr_infer_type(AST* expr)
         case FRX_AST_TYPE_NULLPTR_EXPR: return type_intern_nullptr();
         case FRX_AST_TYPE_PATH_EXPR: return attributes_table_lookup_type(expr->id);
         case FRX_AST_TYPE_CALL_EXPR: return attributes_table_lookup_type(expr->id);
-        case FRX_AST_TYPE_METHOD_CALL_EXPR: return attributes_table_lookup_type(expr->id);
+        case FRX_AST_TYPE_MEMBER_CALL_EXPR: return attributes_table_lookup_type(expr->id);
         case FRX_AST_TYPE_CAST_EXPR: return attributes_table_lookup_type(expr->cast_expr.type_specifier->id);
         case FRX_AST_TYPE_SIZEOF_EXPR: return type_intern_primitive(FRX_TOKEN_TYPE_KW_USIZE);
         case FRX_AST_TYPE_INT_LIT: return attributes_table_lookup_type(expr->id);

@@ -57,31 +57,15 @@ void call_expr_resolve(AST* ast, ResolutionContext* ctx)
     }
 
     const Symbol* symbol = call_expr->callee->path_expr.path->path.symbol;
-    if (symbol->associated_type != NULL)
+    const Type* type = symbol->associated_type != NULL ?
+        symbol_infer_type(symbol) : expr_infer_type(call_expr->callee);
+
+    if (type->kind == FRX_TYPE_KIND_FUNC)
     {
-        AST* path_segment = list_get(&call_expr->callee->path_expr.path->path.path_segments, list_size(&call_expr->callee->path_expr.path->path.path_segments) - 1);
-        List args = call_expr->args;
-
-        ast->type = FRX_AST_TYPE_METHOD_CALL_EXPR;
-        ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
-        method_call_expr->callee = NULL;
-        method_call_expr->symbol = symbol;
-        method_call_expr->name = path_segment->path_segment.name;
-        method_call_expr->args = args;
-
-        const Type* type = attributes_table_lookup_type(method_call_expr->symbol->data->func_decl.return_type->id);
-        attributes_table_insert_type(ast->id, type);
+        type = type->func.return_type;
     }
-    else
-    {
-        const Type* type = expr_infer_type(call_expr->callee);
-        if (type->kind == FRX_TYPE_KIND_FUNC)
-        {
-            type = type->func.return_type;
-        }
 
-        attributes_table_insert_type(ast->id, type);
-    }
+    attributes_table_insert_type(ast->id, type);
 }
 
 void call_expr_sema(AST* ast, SemaContext* ctx)

@@ -749,36 +749,46 @@ static void emit_call_expr(AST* ast, FILE* f, CodegenContext* ctx)
     fprintf(f, ")");
 }
 
-static void emit_method_call_expr(AST* ast, FILE* f, CodegenContext* ctx)
+static void emit_member_call_expr(AST* ast, FILE* f, CodegenContext* ctx)
 {
     FRX_ASSERT(ast != NULL);
 
-    FRX_ASSERT(ast->type == FRX_AST_TYPE_METHOD_CALL_EXPR);
+    FRX_ASSERT(ast->type == FRX_AST_TYPE_MEMBER_CALL_EXPR);
 
     FRX_ASSERT(f != NULL);
 
-    ASTMethodCallExpr* method_call_expr = &ast->method_call_expr;
+    ASTMemberCallExpr* member_call_expr = &ast->member_call_expr;
 
-    fprintf(f, "%s%p(", method_call_expr->name, method_call_expr->symbol->data);
+    const Type* callee_type = expr_infer_type(member_call_expr->callee);
+    const Type* receiver_type = member_call_expr->symbol == NULL ? NULL :
+                                attributes_table_lookup_func_receiver_type(member_call_expr->symbol->data->id);
 
-    if (method_call_expr->callee != NULL)
+    if (receiver_type != NULL)
     {
-        if (expr_infer_type(method_call_expr->callee)->kind != FRX_TYPE_KIND_PTR)
+        fprintf(f, "%s%p(", member_call_expr->name, member_call_expr->symbol->data);
+
+        if (callee_type->kind != FRX_TYPE_KIND_PTR)
         {
             fprintf(f, "&");
         }
 
-        emit_ast(method_call_expr->callee, f, ctx);
+        emit_ast(member_call_expr->callee, f, ctx);
+    }
+    else
+    {
+        emit_ast(member_call_expr->callee, f, ctx);
+        fprintf(f, "%s%s(", callee_type->kind == FRX_TYPE_KIND_PTR ? "->" : ".",
+                member_call_expr->name);
     }
 
-    for (usize i = 0; i < list_size(&method_call_expr->args); ++i)
+    for (usize i = 0; i < list_size(&member_call_expr->args); ++i)
     {
-        if (i > 0 || method_call_expr->callee != NULL)
+        if (i > 0 || receiver_type != NULL)
         {
             fprintf(f, ", ");
         }
 
-        AST* arg = list_get(&method_call_expr->args, i);
+        AST* arg = list_get(&member_call_expr->args, i);
         emit_ast(arg, f, ctx);
     }
 
@@ -898,7 +908,7 @@ static void emit_ast(AST* ast, FILE* f, CodegenContext* ctx)
         case FRX_AST_TYPE_BOOL_EXPR: emit_bool_expr(ast, f); break;
         case FRX_AST_TYPE_NULLPTR_EXPR: emit_nullptr_expr(ast, f); break;
         case FRX_AST_TYPE_CALL_EXPR: emit_call_expr(ast, f, ctx); break;
-        case FRX_AST_TYPE_METHOD_CALL_EXPR: emit_method_call_expr(ast, f, ctx); break;
+        case FRX_AST_TYPE_MEMBER_CALL_EXPR: emit_member_call_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_CAST_EXPR: emit_cast_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_SIZEOF_EXPR: emit_sizeof_expr(ast, f, ctx); break;
         case FRX_AST_TYPE_EXPR_STMT: emit_expr_stmt(ast, f, ctx); break;

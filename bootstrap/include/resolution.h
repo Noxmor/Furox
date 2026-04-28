@@ -63,7 +63,7 @@ void path_expr_resolve(AST* ast, ResolutionContext* ctx);
 
 void call_expr_resolve(AST* ast, ResolutionContext* ctx);
 
-void method_call_expr_resolve(AST* ast, ResolutionContext* ctx);
+void member_call_expr_resolve(AST* ast, ResolutionContext* ctx);
 
 void cast_expr_resolve(AST* ast, ResolutionContext* ctx);
 
