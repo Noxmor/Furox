@@ -278,7 +278,7 @@ static void emit_struct_field(ASTStructField* struct_field, FILE* f, CodegenCont
 
     emit_type(type, struct_field->name, f, ctx);
 
-    if (type->kind != FRX_TYPE_KIND_FUNC)
+    if (type->kind != FRX_TYPE_KIND_FUNC && type->kind != FRX_TYPE_KIND_ARRAY)
     {
         fprintf(f, " %s", struct_field->name);
     }
