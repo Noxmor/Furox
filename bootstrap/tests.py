@@ -54,20 +54,21 @@ class Test:
     exec_stdout: str = ""
     exec_stderr: str = ""
 
-def discover_tests(root: Path) -> list[Test]:
+def discover_tests(root: Path, selected: list[str] | None = None) -> list[Test]:
     tests = []
 
     for file in root.glob("*.frx"):
-        tests.append(
-            Test(
-                status = Status.READY,
-                name = file.stem,
-                files = [file]
+        if selected is None or file.stem in selected:
+            tests.append(
+                Test(
+                    status = Status.READY,
+                    name = file.stem,
+                    files = [file]
+                )
             )
-        )
 
     for dirpath in root.iterdir():
-        if not dirpath.is_dir():
+        if not dirpath.is_dir() or (selected is not None and not dirpath.stem in selected):
             continue
 
         entry = dirpath / "main.frx"
@@ -226,6 +227,13 @@ def parse_args():
         help = "enable showing compiler and execution output for failed tests"
     )
 
+    parser.add_argument(
+        "-t",
+        "--test",
+        action = "append",
+        help = "run only specified test"
+    )
+
     return parser.parse_args()
 
 def main():
@@ -234,7 +242,7 @@ def main():
     args = parse_args()
 
     status = 0
-    tests = discover_tests(Path(TESTS_DIR))
+    tests = discover_tests(Path(TESTS_DIR), args.test)
     if not run_tests(tests):
         status = 1
     print_tests_summary(tests, verbose = args.verbose)
