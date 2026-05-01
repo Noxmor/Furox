@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <dirent.h>
+#include <sys/stat.h>
+
 #include "assert.h"
 #include "parser.h"
 #include "early_resolution.h"
@@ -17,6 +20,8 @@
 #include "source_map.h"
 #include "temp_dir.h"
 #include "config.h"
+
+#define FRX_STDLIB_SRC_DIR "/usr/local/lib/furox/stdlib/src"
 
 static Arena* arena;
 static Arena* ast_arena;
@@ -40,10 +45,6 @@ static void compiler_init(void)
     ast_arena = arena_create();
 
     root_module = module_create_root();
-
-    // TODO: Add every source file from std to the source files.
-    // Project* stdlib = project_create(spec, "/usr/local/lib/furox/std");
-    // list_add(&projects, stdlib);
 
     type_system_init();
 
@@ -71,6 +72,59 @@ static void compiler_emit_diagnostics(void)
     }
 }
 
+static b8 is_source_file(const char* filepath)
+{
+    FRX_ASSERT(filepath != NULL);
+
+    const char* ext = strrchr(filepath, '.');
+
+    return ext && strcmp(ext, ".frx") == 0;
+}
+
+static void walk_directory(const char* path)
+{
+    DIR* dir = opendir(path);
+    if (!dir)
+    {
+        return;
+    }
+
+    struct dirent* entry;
+    char full_path[PATH_MAX];
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
+
+        struct stat st;
+        if (stat(full_path, &st) != 0)
+        {
+            continue;
+        }
+
+        if (S_ISDIR(st.st_mode))
+        {
+            walk_directory(full_path);
+        }
+        else if (S_ISREG(st.st_mode) && is_source_file(full_path))
+        {
+            source_map_add_source_file(full_path);
+        }
+    }
+
+    closedir(dir);
+}
+
+static void compiler_compile_stdlib(void)
+{
+    walk_directory(FRX_STDLIB_SRC_DIR);
+}
+
 void* compiler_alloc(usize size)
 {
     return arena_alloc(arena, size);
@@ -87,10 +141,19 @@ int compiler_run(int argc, char** argv)
 
     config_parse(argc, argv);
 
+    if (config_get()->use_stdlib == FRX_TRUE)
+    {
+        compiler_compile_stdlib();
+    }
+
     for (int i = config_get_optind(); i < argc; ++i)
     {
         const char* filepath = argv[i];
-        source_map_add_source_file(filepath);
+
+        if (is_source_file(filepath))
+        {
+            source_map_add_source_file(filepath);
+        }
     }
 
     List* src_files = source_map_get_source_files();
