@@ -1,10 +1,10 @@
 #include "assert.h"
 #include "config.h"
-#include "types.h"
 #include "version.h"
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <getopt.h>
 
 #define FRX_HELP_MESSAGE_WIDTH 80
@@ -12,7 +12,8 @@
 #define FRX_OPTIONS(X) \
     X("help", 'h', no_argument, "Show this help message.") \
     X("version", 'v', no_argument, "Show compiler version.") \
-    X("output", 'o', required_argument, "Set output name to <file>.")
+    X("output", 'o', required_argument, "Set output name to <file>.") \
+    X("no-stdlib", '\0', no_argument, "Disable automatic parsing and compilation of the standard library.")
 
 #define FRX_GENERATE_LONG_OPTIONS(long_name, short_name, arg, desc) \
     { long_name, arg, 0, short_name },
@@ -32,7 +33,8 @@
 static usize column_width = 0;
 
 static Config config = {
-    .output = "a.out"
+    .output = "a.out",
+    .use_stdlib = FRX_TRUE
 };
 
 static const char* compute_desc_arg_and_len(const char* desc, usize* len)
@@ -151,6 +153,16 @@ void config_parse(int argc, char** argv)
             case 'h': print_help(argv[0]); exit(0);
             case 'v': printf("version %s\n", FRX_VERSION_STR); exit(0);
             case 'o': config.output = optarg; break;
+
+            case '\0':
+            {
+                if (strcmp(long_options[option_index].name, "no-stdlib") == 0)
+                {
+                    config.use_stdlib = FRX_FALSE;
+                }
+
+                break;
+            }
 
             case '?': exit(EXIT_FAILURE);
 
