@@ -283,10 +283,35 @@ const Type* type_intern_struct(const AST* ast, const List* generic_args)
     while (entry != NULL)
     {
         const Type* type = entry->type;
-        if ((type->kind == FRX_TYPE_KIND_STRUCT || type->kind == FRX_TYPE_KIND_UNION)
-            && type->strct.ast == ast && type->strct.generic_args == generic_args)
+        if ((type->kind == FRX_TYPE_KIND_STRUCT || type->kind == FRX_TYPE_KIND_UNION) && type->strct.ast == ast)
         {
-            return type;
+            if (type->strct.generic_args == NULL && generic_args == NULL)
+            {
+                return type;
+            }
+
+            if (type->strct.generic_args != NULL && generic_args != NULL
+                && list_size(type->strct.generic_args) == list_size(generic_args))
+            {
+                b8 equal = FRX_TRUE;
+                for (usize i = 0; i < list_size(generic_args); ++i)
+                {
+                    AST* type_specifier0 = list_get(type->strct.generic_args, i);
+                    AST* type_specifier1 = list_get(generic_args, i);
+
+                    if (attributes_table_lookup_type(type_specifier0->id) !=
+                        attributes_table_lookup_type(type_specifier1->id))
+                    {
+                        equal = FRX_FALSE;
+                        break;
+                    }
+                }
+
+                if (equal)
+                {
+                    return type;
+                }
+            }
         }
 
         entry = entry->next;
