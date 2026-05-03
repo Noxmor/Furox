@@ -105,13 +105,11 @@ const Type* type_create_array(const Type* base, AST* size)
     return type;
 }
 
-static const Type* type_create_generic(const Symbol* symbol)
+static const Type* type_create_generic(usize index)
 {
-    FRX_ASSERT(symbol != NULL);
-
     Type* type = type_create(FRX_TYPE_KIND_GENERIC);
 
-    type->generic.symbol = symbol;
+    type->generic.index = index;
 
     return type;
 }
@@ -412,14 +410,14 @@ const Type* type_intern_array(const Type* base, AST* size)
     return type;
 }
 
-const Type* type_intern_generic(const Symbol* symbol)
+const Type* type_intern_generic(usize idx)
 {
-    u64 index =  (usize)symbol % FRX_TYPE_TABLE_CAPACITY;
+    u64 index = idx % FRX_TYPE_TABLE_CAPACITY;
     TypeTableEntry* entry = type_table.entries[index];
     while (entry != NULL)
     {
         const Type* type = entry->type;
-        if (type->kind == FRX_TYPE_KIND_GENERIC && type->generic.symbol == symbol)
+        if (type->kind == FRX_TYPE_KIND_GENERIC && type->generic.index == idx)
         {
             return type;
         }
@@ -427,7 +425,7 @@ const Type* type_intern_generic(const Symbol* symbol)
         entry = entry->next;
     }
 
-    const Type* type = type_create_generic(symbol);
+    const Type* type = type_create_generic(idx);
     type_table.entries[index] = type_table_entry_create(type, type_table.entries[index]);
 
     return type;
@@ -467,7 +465,7 @@ const Type* symbol_infer_type(const Symbol* symbol)
         case FRX_SYMBOL_TYPE_TYPE_ALIAS: return attributes_table_lookup_type((symbol->data)->type_alias.type->id);
         case FRX_SYMBOL_TYPE_PARAM: return attributes_table_lookup_type((symbol->data)->func_param.type->id);
         case FRX_SYMBOL_TYPE_VAR: return attributes_table_lookup_type(symbol->data->id);
-        case FRX_SYMBOL_TYPE_GENERIC_PARAM: return type_intern_generic(symbol);
+        case FRX_SYMBOL_TYPE_GENERIC_PARAM: return type_intern_generic(symbol->data->generic_param.index);
         case FRX_SYMBOL_TYPE_STATIC: return attributes_table_lookup_type(symbol->data->id);
 
         default: FRX_ASSERT(FRX_FALSE); return NULL;

@@ -119,6 +119,7 @@ typedef struct ASTTraitBound
 typedef struct ASTGenericParam
 {
     const char* name;
+    usize index;
     List trait_bounds;
 } ASTGenericParam;
 

@@ -102,6 +102,7 @@ AST* generic_params_parse(Parser* parser)
         }
 
         AST* param = generic_param_parse(parser);
+        param->generic_param.index = list_size(&generic_params->params);
         generic_params_add_param(generic_params, param);
     }
 

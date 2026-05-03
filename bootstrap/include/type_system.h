@@ -66,7 +66,7 @@ typedef struct Type
 
         struct
         {
-            const Symbol* symbol;
+            usize index;
         } generic;
     };
 } Type;
@@ -91,7 +91,7 @@ const Type* type_intern_ptr(const Type* base, b8 mutable);
 
 const Type* type_intern_array(const Type* base, AST* size);
 
-const Type* type_intern_generic(const Symbol* symbol);
+const Type* type_intern_generic(usize index);
 
 const Type* type_intern_char_lit(void);
 

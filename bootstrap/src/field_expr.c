@@ -32,6 +32,13 @@ void field_expr_resolve(AST* ast, ResolutionContext* ctx)
         if (field->struct_field.name == field_expr->field_name)
         {
             const Type* type = attributes_table_lookup_type(field->struct_field.type->id);
+
+            if (type->kind == FRX_TYPE_KIND_GENERIC)
+            {
+                AST* type_specifier = list_get(struct_type->strct.generic_args, type->generic.index);
+                type = attributes_table_lookup_type(type_specifier->id);
+            }
+
             attributes_table_insert_type(ast->id, type);
 
             break;

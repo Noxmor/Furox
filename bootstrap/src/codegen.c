@@ -172,19 +172,9 @@ static void emit_type(const Type* type, const char* name, FILE* f, CodegenContex
         }
         case FRX_TYPE_KIND_GENERIC:
         {
-            const ASTGenericParams* generic_params = &ctx->generic_params->generic_params;
-
-            FRX_ASSERT(list_size(&generic_params->params) == list_size(ctx->generic_args));
-            for (usize i = 0; i < list_size(ctx->generic_args); ++i)
-            {
-                const AST* generic_param = list_get(&generic_params->params, i);
-                const AST* generic_arg = list_get(ctx->generic_args, i);
-                if (type->generic.symbol->name == generic_param->generic_param.name)
-                {
-                    const Type* generic_arg_type = attributes_table_lookup_type(generic_arg->id);
-                    emit_type(generic_arg_type, type->generic.symbol->name, f, ctx);
-                }
-            }
+            AST* type_specifier = list_get(ctx->generic_args, type->generic.index);
+            const Type* generic_arg_type = attributes_table_lookup_type(type_specifier->id);
+            emit_type(generic_arg_type, NULL, f, ctx);
 
             break;
         }
