@@ -8,6 +8,10 @@ void attributes_table_insert_type(ASTNodeID id, const Type* type);
 
 const Type* attributes_table_lookup_type(ASTNodeID id);
 
+void attributes_table_insert_name_binding(ASTNodeID id, ASTNodeID name_binding);
+
+ASTNodeID attributes_table_lookup_name_binding(ASTNodeID id);
+
 void attributes_table_insert_scope(ASTNodeID id, Scope* scope);
 
 Scope* attributes_table_lookup_scope(ASTNodeID id);

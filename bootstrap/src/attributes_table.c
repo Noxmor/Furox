@@ -43,7 +43,7 @@ typedef struct FuncAttributes
 
 typedef struct NameBindingAttributes
 {
-    ASTNodeID id;
+    ASTNodeID* name_bindings;
     usize capacity;
 } NameBindingAttributes;
 
@@ -98,6 +98,24 @@ const Type* attributes_table_lookup_type(ASTNodeID id)
     SourceFileAttributesTable* table = &attributes_table.source_file_attributes[id.owner];
 
     return table->type_attributes.types[id.local];
+}
+
+void attributes_table_insert_name_binding(ASTNodeID id, ASTNodeID name_binding)
+{
+    attributes_table_ensure_capacity(id);
+
+    SourceFileAttributesTable* table = &attributes_table.source_file_attributes[id.owner];
+    NameBindingAttributes* attributes = &table->name_binding_attributes;
+    ATTRIBUTES_ENSURE_CAPACITY(attributes, name_bindings, id);
+
+    attributes->name_bindings[id.local] = name_binding;
+}
+
+ASTNodeID attributes_table_lookup_name_binding(ASTNodeID id)
+{
+    SourceFileAttributesTable* table = &attributes_table.source_file_attributes[id.owner];
+
+    return table->name_binding_attributes.name_bindings[id.local];
 }
 
 void attributes_table_insert_scope(ASTNodeID id, Scope* scope)
