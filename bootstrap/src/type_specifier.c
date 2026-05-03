@@ -181,8 +181,8 @@ void type_specifier_resolve(AST* ast, ResolutionContext* ctx)
             ASTPath* path = &type_specifier->path->path;
             switch (path->symbol->type)
             {
-                case FRX_SYMBOL_TYPE_STRUCT: attributes_table_insert_type(ast->id, type_intern_struct(path->symbol, &((AST*)list_get(&path->path_segments, list_size(&path->path_segments) - 1))->path_segment.generic_args)); break;
-                case FRX_SYMBOL_TYPE_ENUM: attributes_table_insert_type(ast->id, type_intern_enum(path->symbol)); break;
+                case FRX_SYMBOL_TYPE_STRUCT: attributes_table_insert_type(ast->id, type_intern_struct(path->symbol->data, &((AST*)list_get(&path->path_segments, list_size(&path->path_segments) - 1))->path_segment.generic_args)); break;
+                case FRX_SYMBOL_TYPE_ENUM: attributes_table_insert_type(ast->id, type_intern_enum(path->symbol->data)); break;
 
                 default: attributes_table_insert_type(ast->id, symbol_infer_type(path->symbol)); break;
             }

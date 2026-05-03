@@ -134,8 +134,8 @@ static void emit_type(const Type* type, const char* name, FILE* f, CodegenContex
     {
         case FRX_TYPE_KIND_PRIMITIVE: fprintf(f, "%s", token_type_to_str(type->primitive.type)); break;
         case FRX_TYPE_KIND_STRUCT:
-        case FRX_TYPE_KIND_UNION: fprintf(f, "%s%p%p", type->strct.symbol->name, type->strct.symbol->data, type); break;
-        case FRX_TYPE_KIND_ENUM: fprintf(f, "%s%p", type->enumeration.symbol->name, type->enumeration.symbol->data); break;
+        case FRX_TYPE_KIND_UNION: fprintf(f, "%s%p%p", type->strct.ast->struct_def.name, type->strct.ast, type); break;
+        case FRX_TYPE_KIND_ENUM: fprintf(f, "%s%p", type->enumeration.ast->enum_def.name, type->enumeration.ast); break;
         case FRX_TYPE_KIND_FUNC:
         {
             emit_type(type->func.return_type, NULL, f, ctx);
@@ -253,13 +253,13 @@ static void emit_enum_definition(AST* ast, FILE* f, CodegenContext* ctx)
     fprintf(f, " %s%p;\n", enum_def->name, ast);
 }
 
-static void emit_struct_declaration(AST* ast, FILE* f)
+static void emit_struct_declaration(const AST* ast, FILE* f)
 {
     FRX_ASSERT(ast != NULL);
 
     FRX_ASSERT(f != NULL);
 
-    ASTStructDef* struct_def = &ast->struct_def;
+    const ASTStructDef* struct_def = &ast->struct_def;
 
     for (usize i = 0; i < list_size(&struct_def->instantiated_types); ++i)
     {
@@ -300,7 +300,7 @@ static void emit_struct_definition(const Type* type, FILE* f, CodegenContext* ct
         return;
     }
 
-    ASTStructDef* struct_def = &type->strct.symbol->data->struct_def;
+    const ASTStructDef* struct_def = &type->strct.ast->struct_def;
 
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
@@ -318,7 +318,7 @@ static void emit_struct_definition(const Type* type, FILE* f, CodegenContext* ct
         }
     }
 
-    fprintf(f, "struct %s%p%p\n{\n", struct_def->name, type->strct.symbol->data, type);
+    fprintf(f, "struct %s%p%p\n{\n", struct_def->name, type->strct.ast, type);
 
     const AST* prev_generic_params = ctx->generic_params;
     const List* prev_generic_args = ctx->generic_args;
@@ -1056,7 +1056,7 @@ void codegen_context_transpile(CodegenContext* ctx)
         switch (type->kind)
         {
             case FRX_TYPE_KIND_STRUCT:
-            case FRX_TYPE_KIND_UNION: emit_struct_declaration(type->strct.symbol->data, ctx->header); break;
+            case FRX_TYPE_KIND_UNION: emit_struct_declaration(type->strct.ast, ctx->header); break;
             default: break;
         }
     }

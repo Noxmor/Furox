@@ -1,12 +1,11 @@
 #ifndef FRX_TYPE_SYSTEM_H
 #define FRX_TYPE_SYSTEM_H
 
+#include "ast.h"
 #include "types.h"
 #include "token.h"
 #include "symbol.h"
 #include "list.h"
-
-typedef struct AST AST;
 
 enum
 {
@@ -37,13 +36,13 @@ typedef struct Type
 
         struct
         {
-            const Symbol* symbol;
+            const AST* ast;
             const List* generic_args;
         } strct;
 
         struct
         {
-            const Symbol* symbol;
+            const AST* ast;
         } enumeration;
 
         struct
@@ -82,9 +81,9 @@ void type_system_init(void);
 
 const Type* type_intern_primitive(TokenType primitive);
 
-const Type* type_intern_struct(const Symbol* symbol, const List* generic_args);
+const Type* type_intern_struct(const AST* ast, const List* generic_args);
 
-const Type* type_intern_enum(const Symbol* symbol);
+const Type* type_intern_enum(const AST* ast);
 
 const Type* type_intern_func(const List* params, const Type* return_type, b8 is_variadic);
 

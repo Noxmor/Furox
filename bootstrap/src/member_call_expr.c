@@ -79,7 +79,7 @@ void member_call_expr_resolve(AST* ast, ResolutionContext* ctx)
 
     if (member_call_expr->symbol == NULL)
     {
-        List* fields = &type->strct.symbol->data->struct_def.fields;
+        const List* fields = &type->strct.ast->struct_def.fields;
         type = NULL;
 
         for (usize i = 0; i < list_size(fields); ++i)

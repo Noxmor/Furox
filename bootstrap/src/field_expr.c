@@ -24,7 +24,7 @@ void field_expr_resolve(AST* ast, ResolutionContext* ctx)
         struct_type = struct_type->ptr.base;
     }
 
-    List* fields = &struct_type->strct.symbol->data->struct_def.fields;
+    const List* fields = &struct_type->strct.ast->struct_def.fields;
 
     for (usize i = 0; i < list_size(fields); ++i)
     {
@@ -58,7 +58,7 @@ void field_expr_sema(AST* ast, SemaContext* ctx)
         struct_type = struct_type->ptr.base;
     }
 
-    ASTStructDef* struct_def = &struct_type->strct.symbol->data->struct_def;
+    const ASTStructDef* struct_def = &struct_type->strct.ast->struct_def;
     for (usize i = 0; i < list_size(&struct_def->fields); ++i)
     {
         AST* field = list_get(&struct_def->fields, i);

@@ -1,5 +1,4 @@
 #include "assert.h"
-#include "ast.h"
 #include "attributes_table.h"
 #include "compiler.h"
 #include "symbol.h"
@@ -25,14 +24,14 @@ const Type* type_create_primitive(TokenType primitive_type)
     return type;
 }
 
-const Type* type_create_struct(const Symbol* symbol, const List* generic_args)
+const Type* type_create_struct(const AST* ast, const List* generic_args)
 {
-    FRX_ASSERT(symbol != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    const ASTStructDef* struct_def = &symbol->data->struct_def;
+    const ASTStructDef* struct_def = &ast->struct_def;
 
     Type* type = type_create(struct_def->kind == FRX_STRUCT_KIND_NAMED ? FRX_TYPE_KIND_STRUCT : FRX_TYPE_KIND_UNION);
-    type->strct.symbol = symbol;
+    type->strct.ast = ast;
     type->strct.generic_args = generic_args;
 
     list_add((List*)&struct_def->instantiated_types, type);
@@ -42,13 +41,13 @@ const Type* type_create_struct(const Symbol* symbol, const List* generic_args)
     return type;
 }
 
-static const Type* type_create_enum(const Symbol* symbol)
+static const Type* type_create_enum(const AST* ast)
 {
-    FRX_ASSERT(symbol != NULL);
+    FRX_ASSERT(ast != NULL);
 
     Type* type = type_create(FRX_TYPE_KIND_ENUM);
 
-    type->enumeration.symbol = symbol;
+    type->enumeration.ast = ast;
 
     return type;
 }
@@ -277,16 +276,16 @@ const Type* type_intern_primitive(TokenType primitive)
     return NULL;
 }
 
-const Type* type_intern_struct(const Symbol* symbol, const List* generic_args)
+const Type* type_intern_struct(const AST* ast, const List* generic_args)
 {
-    FRX_ASSERT(symbol != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    u64 index =  (usize)symbol % FRX_TYPE_TABLE_CAPACITY;
+    u64 index =  (usize)ast % FRX_TYPE_TABLE_CAPACITY;
     TypeTableEntry* entry = type_table.entries[index];
     while (entry != NULL)
     {
         const Type* type = entry->type;
-        if ((type->kind == FRX_TYPE_KIND_STRUCT || type->kind == FRX_TYPE_KIND_UNION) && type->strct.symbol == symbol)
+        if ((type->kind == FRX_TYPE_KIND_STRUCT || type->kind == FRX_TYPE_KIND_UNION) && type->strct.ast == ast)
         {
             return type;
         }
@@ -294,22 +293,22 @@ const Type* type_intern_struct(const Symbol* symbol, const List* generic_args)
         entry = entry->next;
     }
 
-    const Type* type = type_create_struct(symbol, generic_args);
+    const Type* type = type_create_struct(ast, generic_args);
     type_table.entries[index] = type_table_entry_create(type, type_table.entries[index]);
 
     return type;
 }
 
-const Type* type_intern_enum(const Symbol* symbol)
+const Type* type_intern_enum(const AST* ast)
 {
-    FRX_ASSERT(symbol != NULL);
+    FRX_ASSERT(ast != NULL);
 
-    u64 index =  (usize)symbol % FRX_TYPE_TABLE_CAPACITY;
+    u64 index =  (usize)ast % FRX_TYPE_TABLE_CAPACITY;
     TypeTableEntry* entry = type_table.entries[index];
     while (entry != NULL)
     {
         const Type* type = entry->type;
-        if (type->kind == FRX_TYPE_KIND_ENUM && type->enumeration.symbol == symbol)
+        if (type->kind == FRX_TYPE_KIND_ENUM && type->enumeration.ast == ast)
         {
             return type;
         }
@@ -317,7 +316,7 @@ const Type* type_intern_enum(const Symbol* symbol)
         entry = entry->next;
     }
 
-    const Type* type = type_create_enum(symbol);
+    const Type* type = type_create_enum(ast);
     type_table.entries[index] = type_table_entry_create(type, type_table.entries[index]);
 
     return type;
@@ -462,8 +461,8 @@ const Type* symbol_infer_type(const Symbol* symbol)
     {
         case FRX_SYMBOL_TYPE_PRIMITIVE: return type_intern_primitive((symbol->data)->path_segment.primitive);
         case FRX_SYMBOL_TYPE_FUNC: return attributes_table_lookup_type((symbol->data)->id);
-        case FRX_SYMBOL_TYPE_STRUCT: return type_intern_struct(symbol, NULL);
-        case FRX_SYMBOL_TYPE_ENUM: return type_intern_enum(symbol);
+        case FRX_SYMBOL_TYPE_STRUCT: return type_intern_struct(symbol->data, NULL);
+        case FRX_SYMBOL_TYPE_ENUM: return type_intern_enum(symbol->data);
         case FRX_SYMBOL_TYPE_ENUM_VARIANT: return symbol_infer_type((symbol->data)->enum_variant.symbol);
         case FRX_SYMBOL_TYPE_TYPE_ALIAS: return attributes_table_lookup_type((symbol->data)->type_alias.type->id);
         case FRX_SYMBOL_TYPE_PARAM: return attributes_table_lookup_type((symbol->data)->func_param.type->id);
