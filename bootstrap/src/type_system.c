@@ -283,7 +283,8 @@ const Type* type_intern_struct(const AST* ast, const List* generic_args)
     while (entry != NULL)
     {
         const Type* type = entry->type;
-        if ((type->kind == FRX_TYPE_KIND_STRUCT || type->kind == FRX_TYPE_KIND_UNION) && type->strct.ast == ast)
+        if ((type->kind == FRX_TYPE_KIND_STRUCT || type->kind == FRX_TYPE_KIND_UNION)
+            && type->strct.ast == ast && type->strct.generic_args == generic_args)
         {
             return type;
         }
