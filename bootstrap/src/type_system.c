@@ -278,6 +278,11 @@ const Type* type_intern_struct(const AST* ast, const List* generic_args)
 {
     FRX_ASSERT(ast != NULL);
 
+    if (generic_args != NULL && list_empty(generic_args))
+    {
+        generic_args = NULL;
+    }
+
     u64 index =  (usize)ast % FRX_TYPE_TABLE_CAPACITY;
     TypeTableEntry* entry = type_table.entries[index];
     while (entry != NULL)
